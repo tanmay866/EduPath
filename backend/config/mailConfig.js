@@ -1,13 +1,30 @@
-import nodemailer from "nodemailer";
+import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: process.env.MAIL_PORT,
-    secure: false,
+// Create reusable transporter object using SMTP transport
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
     auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS
-    }
-});
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+};
 
-export default transporter;
+// Verify email configuration
+export const verifyEmailConfig = async () => {
+  try {
+    const transporter = createTransporter();
+    await transporter.verify();
+    console.log('Email Server is ready to send messages');
+    return true;
+  } catch (error) {
+    console.error('Email Configuration Error:', error.message);
+    console.error('Please check your email credentials in .env file');
+    return false;
+  }
+};
+
+export default createTransporter;
