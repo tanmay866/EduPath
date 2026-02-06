@@ -1,0 +1,37 @@
+# Python Requirements for AI Service
+# Location: ai_service/requirements.txt
+
+# FastAPI and Web Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Surya OCR - Main OCR Engine (97.7% accuracy)
+surya-ocr==0.4.14
+
+# PDF Processing
+PyMuPDF>=1.24.13
+pdf2image==1.17.0
+# Note: Requires system package 'poppler-utils'
+# Ubuntu/Debian: sudo apt-get install poppler-utils
+# macOS: brew install poppler
+
+# Image Processing
+Pillow>=10.2.0
+
+# Document Processing
+python-docx==1.1.0
+
+# NLP
+spacy>=3.7.2
+# After installing, run: python3 -m spacy download en_core_web_sm
+
+# Date Extraction
+datefinder==0.7.3
+
+# Data Processing
+numpy==1.26.3
+
+# Utilities
+python-dateutil==2.8.2
+regex==2023.12.25
