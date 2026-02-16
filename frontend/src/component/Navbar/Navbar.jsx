@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HiHome, HiUser, HiCode, HiMail, HiX, HiMenu } from 'react-icons/hi';
+import { useNavigate } from 'react-router-dom';
 
 const ArcNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef(null);
+  const navigate = useNavigate();
 
   // COORDINATE CONFIGURATION (Adjust these to tweak the curve)
   // P0 = Start (Button), P1 = Control Point (Bends the curve), P2 = End
   const P0 = { x: 64, y: 64 };
-  const P1 = { x: 220, y: 400 }; // Increase X to "bow" the curve more to the right
-  const P2 = { x: 20, y: 850 };  // Y is 850 for an ~85vh height
+  const P1 = { x: 200, y: 350 }; // Increase X to "bow" the curve more to the right
+  const P2 = { x: 20, y: 650 };  // Y is 850 for an ~85vh height
 
   // Function to calculate a point on a Quadratic Bezier Curve at time 't' (0 to 1)
   const getBezierPoint = (t) => {
@@ -19,10 +21,10 @@ const ArcNavbar = () => {
   };
 
   const navItems = [
-    { icon: <HiHome />, label: 'Home', t: 0.2 },
-    { icon: <HiUser />, label: 'About', t: 0.45 },
-    { icon: <HiCode />, label: 'Work', t: 0.7 },
-    { icon: <HiMail />, label: 'Contact', t: 0.95 },
+    { icon: <HiHome />, label: 'Home', path: '/', t: 0.2 },
+    { icon: <HiUser />, label: 'About', path: '/about', t: 0.45 },
+    { icon: <HiCode />, label: 'Work', path: '/work', t: 0.7 },
+    { icon: <HiMail />, label: 'Contact', path: '/contact', t: 0.95 },
   ];
 
   useEffect(() => {
@@ -76,7 +78,10 @@ const ArcNavbar = () => {
           >
             <div className="group relative pointer-events-auto -translate-x-1/2 -translate-y-1/2">
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  navigate(item.path);
+                  setIsOpen(false);
+                }}
                 className="w-14 h-14 flex items-center justify-center bg-indigo-600 text-white rounded-full border-4 border-white shadow-lg hover:scale-110 transition-transform"
               >
                 {item.icon}
@@ -89,6 +94,23 @@ const ArcNavbar = () => {
           </div>
         );
       })}
+     
+      {/* sign up/sign in buttons */}
+      <div className="absolute top-10 right-8 flex space-x-4 pointer-events-auto">
+        <button 
+          onClick={() => navigate('/signin')}
+          className="px-4 py-2 bg-slate-800 text-gray-200 font-bold rounded-full border border-slate-600 hover:bg-slate-700 transition-colors"
+        >
+          Sign In
+        </button>
+        <button 
+          onClick={() => navigate('/signup')}
+          className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-full border border-indigo-600 hover:bg-indigo-700 transition-colors"
+        >
+          Sign Up
+        </button>
+      </div>
+
     </div>
   );
 };
