@@ -40,7 +40,7 @@ const ArcNavbar = () => {
       {/* 1. Main Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-8 left-8 z-[70] w-16 h-16 flex items-center justify-center bg-indigo-600 text-white rounded-full border-4 border-white shadow-2xl pointer-events-auto active:scale-95 transition-all"
+        className="fixed top-8 left-8 z-[70] w-14 h-14 flex items-center justify-center bg-indigo-600 text-white rounded-full border-2 border-white shadow-2xl pointer-events-auto active:scale-95 transition-all"
       >
         {isOpen ? <HiX size={32} /> : <HiMenu size={32} />}
       </button>
@@ -107,7 +107,7 @@ const ArcNavbar = () => {
           onClick={() => navigate('/signup')}
           className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-full border border-indigo-600 hover:bg-indigo-700 transition-colors"
         >
-          Sign Up
+          Get Started
         </button>
       </div>
 

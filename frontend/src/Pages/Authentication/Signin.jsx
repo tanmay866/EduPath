@@ -1,28 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { HiArrowLeft } from 'react-icons/hi';
+import { useFormik } from 'formik';
+import axios from 'axios';
 
 const Signin = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+  const formik  = useFormik({
+    initialValues: {
+      email: "",
+      password: ""
+    },
+    onSubmit: async (values,{resetForm}) => {
+      
+      // Simulate API call
+      try{
+        const res = await axios.post('http://localhost:4000/api/auth/login', values);
+        console.log(values);
+        alert('Signin successful!');
+        resetForm();
+        navigate('/');
+      } catch (error) {
+        console.error('Signin error:', error);
+        alert('Signin failed. Please try again.');
+      }
+    }
   });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Add your signin logic here
-    console.log('Signin data:', formData);
-    // After successful signin, navigate to home or dashboard
-    // navigate('/');
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -42,21 +46,21 @@ const Signin = () => {
             Sign in to your EduPath account
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                Email Address
+                Email Address / Login ID
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                value={formData.email}
-                onChange={handleChange}
+                value={formik.values.email}
+                onChange={formik.handleChange}
                 className="appearance-none relative block w-full px-3 py-3 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="john@example.com"
+                placeholder="john@example.com / MEPA2026002"
               />
             </div>
             <div>
@@ -68,8 +72,8 @@ const Signin = () => {
                 name="password"
                 type="password"
                 required
-                value={formData.password}
-                onChange={handleChange}
+                value={formik.values.password}
+                onChange={formik.handleChange}
                 className="appearance-none relative block w-full px-3 py-3 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="••••••••"
               />

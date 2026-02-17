@@ -1,30 +1,35 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { HiArrowLeft } from 'react-icons/hi';
+import { useFormik } from 'formik';
+import axios from 'axios';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+  const formik  = useFormik({
+    initialValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      role: "student",
+    },
+    onSubmit: async (values,{resetForm}) => {
+      console.log(values);
+      try {
+        const response = await axios.post('http://localhost:4000/api/auth/signup', values);
+        console.log("user created");
+        
+        console.log('Signup response:', response.data);
+        alert('Signup successful! Please sign in.');
+        resetForm();
+        navigate('/signin');
+      } catch (error) {
+        console.error('Signup error:', error);
+        alert('Signup failed. Please try again.');
+      }
+    }
   });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Add your signup logic here
-    console.log('Signup data:', formData);
-    // After successful signup, navigate to signin or home
-    // navigate('/signin');
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -44,21 +49,36 @@ const Signup = () => {
             Join EduPath today
           </p>
         </div>
-        <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
+        <form className="mt-4 space-y-3" onSubmit={formik.handleSubmit}>
           <div className="space-y-3">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-                Full Name
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-1">
+                First Name
               </label>
               <input
-                id="name"
-                name="name"
+                id="firstName"
+                name="firstName"
                 type="text"
                 required
-                value={formData.name}
-                onChange={handleChange}
+                value={formik.values.firstName}
+                onChange={formik.handleChange}
                 className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="John Doe"
+              />
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-1">
+                Last Name
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                required
+                value={formik.values.lastName}
+                onChange={formik.handleChange}
+                className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Doe"
               />
             </div>
             <div>
@@ -70,13 +90,13 @@ const Signup = () => {
                 name="email"
                 type="email"
                 required
-                value={formData.email}
-                onChange={handleChange}
+                value={formik.values.email}
+                onChange={formik.handleChange}
                 className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="john@example.com"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            {/* <div className="grid grid-cols-2 gap-3"> */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                   Password
@@ -86,13 +106,13 @@ const Signup = () => {
                   name="password"
                   type="password"
                   required
-                  value={formData.password}
-                  onChange={handleChange}
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
                   className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="••••••••"
                 />
               </div>
-              <div>
+              {/* <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
                   Confirm
                 </label>
@@ -101,21 +121,22 @@ const Signup = () => {
                   name="confirmPassword"
                   type="password"
                   required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
+                  value={formik.values.confirmPassword}
+                  onChange={formik.handleChange}
                   className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   placeholder="••••••••"
                 />
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </div>
 
           <div className="pt-2">
             <button
               type="submit"
+              disabled={formik.isSubmitting}
               className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
             >
-              Sign Up
+              {formik.isSubmitting ? 'Signing Up...' : 'Sign Up'}
             </button>
           </div>
 
