@@ -1,11 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HiHome, HiUser, HiCode, HiMail, HiX, HiMenu } from 'react-icons/hi';
+import { FaUser, FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 
 const ArcNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navRef = useRef(null);
   const navigate = useNavigate();
+
+  const isEmail = sessionStorage.getItem("email");
+  const firstName = sessionStorage.getItem("firstName");
+
+
+  const [open,setOpen] = useState(false); 
+
+  const firstLetter = firstName ? firstName.charAt(0).toUpperCase() : 'U';
+
+  
+
+  const handleLogout = () => {
+      const confirmLogout = window.confirm("Are you sure you want to logout?");
+      if (confirmLogout) {
+        sessionStorage.clear();
+        navigate('/');
+        window.location.reload();
+      }
+    }
 
   // COORDINATE CONFIGURATION (Adjust these to tweak the curve)
   // P0 = Start (Button), P1 = Control Point (Bends the curve), P2 = End
@@ -97,18 +117,57 @@ const ArcNavbar = () => {
      
       {/* sign up/sign in buttons */}
       <div className="absolute top-10 right-8 flex space-x-4 pointer-events-auto">
-        <button 
-          onClick={() => navigate('/signin')}
-          className="px-4 py-2 bg-slate-800 text-gray-200 font-bold rounded-full border border-slate-600 hover:bg-slate-700 transition-colors"
-        >
-          Sign In
-        </button>
-        <button 
+        {isEmail ? (
+           <div className="relative">
+      
+      {/* Profile Circle */}
+      <div
+        onClick={() => setOpen(!open)}
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-800 text-white font-bold cursor-pointer"
+      >
+        {firstLetter}
+      </div>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-2">
+
+          <div
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+          >
+            <FaUser />
+            Profile
+          </div>
+
+          <div
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+          >
+            <FaSignOutAlt />
+            Logout
+          </div>
+
+        </div>
+      )}
+    </div>
+        ) : (
+         <div>
+           <button
+            onClick={() => navigate('/signin')}
+            className="px-4 py-2 bg-slate-800 text-gray-200 font-bold rounded-full border border-slate-600 hover:bg-slate-700 transition-colors"
+          >
+            Sign In
+          </button>
+          <button
           onClick={() => navigate('/signup')}
           className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-full border border-indigo-600 hover:bg-indigo-700 transition-colors"
         >
           Get Started
         </button>
+         </div>
+        )}
+        
       </div>
 
     </div>

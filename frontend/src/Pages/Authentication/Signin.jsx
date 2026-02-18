@@ -16,7 +16,13 @@ const Signin = () => {
       // Simulate API call
       try{
         const res = await axios.post('http://localhost:4000/api/auth/login', values);
-        console.log(values);
+        console.log(res);
+        sessionStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("email", res.data.user.email);
+        sessionStorage.setItem("loginId", res.data.user.loginId);
+        sessionStorage.setItem("role", res.data.user.role);
+        sessionStorage.setItem("firstName", res.data.user.firstName);
+        sessionStorage.setItem("lastName", res.data.user.lastName);
         alert('Signin successful!');
         resetForm();
         navigate('/');
