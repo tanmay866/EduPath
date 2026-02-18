@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HiHome, HiUser, HiCode, HiMail, HiX, HiMenu } from 'react-icons/hi';
-import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import { FaUser, FaSignOutAlt, FaCog, FaBell } from "react-icons/fa";
+import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ArcNavbar = () => {
@@ -10,11 +11,13 @@ const ArcNavbar = () => {
 
   const isEmail = sessionStorage.getItem("email");
   const firstName = sessionStorage.getItem("firstName");
+  const lastName = sessionStorage.getItem("lastName");
+  const profilePicture = sessionStorage.getItem("profilePicture");
 
-
-  const [open,setOpen] = useState(false); 
+  const [open,setOpen] = useState(false);
 
   const firstLetter = firstName ? firstName.charAt(0).toUpperCase() : 'U';
+  const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName || 'User';
 
   
 
@@ -60,9 +63,9 @@ const ArcNavbar = () => {
       {/* 1. Main Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-8 left-8 z-[70] w-14 h-14 flex items-center justify-center bg-indigo-600 text-white rounded-full border-2 border-white shadow-2xl pointer-events-auto active:scale-95 transition-all"
+        className="fixed top-8 left-8 z-[70] w-10 h-10 flex items-center justify-center bg-indigo-600 text-white rounded-full border-2 border-white shadow-2xl pointer-events-auto active:scale-95 transition-all"
       >
-        {isOpen ? <HiX size={32} /> : <HiMenu size={32} />}
+        {isOpen ? <HiX size={26} /> : <HiMenu size={26} />}
       </button>
 
       {/* 2. The Curved Rail (SVG) */}
@@ -70,8 +73,8 @@ const ArcNavbar = () => {
         <path
           d={`M ${P0.x} ${P0.y} Q ${P1.x} ${P1.y}, ${P2.x} ${P2.y}`}
           fill="none"
-          stroke="#BAE6FD"
-          strokeWidth="32"
+          stroke="#ffffff"
+          strokeWidth="18"
           strokeLinecap="round"
           className={`transition-all duration-1000 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
           style={{
@@ -102,7 +105,7 @@ const ArcNavbar = () => {
                   navigate(item.path);
                   setIsOpen(false);
                 }}
-                className="w-14 h-14 flex items-center justify-center bg-indigo-600 text-white rounded-full border-4 border-white shadow-lg hover:scale-110 transition-transform"
+                className="w-10 h-10 flex items-center justify-center bg-indigo-600 text-white rounded-full border-2 border-white shadow-lg hover:scale-110 transition-transform"
               >
                 {item.icon}
               </button>
@@ -123,31 +126,71 @@ const ArcNavbar = () => {
       {/* Profile Circle */}
       <div
         onClick={() => setOpen(!open)}
-        className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-800 text-white font-bold cursor-pointer"
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-indigo-600 border-2 border-white text-white font-bold cursor-pointer overflow-hidden"
       >
-        {firstLetter}
+        {profilePicture ? (
+          <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+        ) : (
+          firstLetter
+        )}
       </div>
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-2">
-
-          <div
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-          >
-            <FaUser />
-            Profile
+        <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl py-2 border border-gray-100 overflow-hidden animate-slideDown">
+          {/* Profile Header */}
+          <div className="px-4 py-3 bg-gray-50 flex gap-3 items-center border-b border-gray-100">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
+              {profilePicture ? (
+                <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                firstLetter
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-base font-semibold text-gray-900 truncate">{fullName}</h4>
+              <p className="text-xs text-gray-600 truncate">{isEmail}</p>
+            </div>
           </div>
 
-          <div
+          {/* Menu Items */}
+          <div className="py-1">
+            <button
+              onClick={() => {
+                navigate('/profile');
+                setOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <FaUser className="text-gray-500" />
+              <span className="flex-1 text-left text-sm font-medium">My Profile</span>
+              <ChevronRight size={16} className="text-gray-400" />
+            </button>
+
+            <button
+              onClick={() => {
+                navigate('/settings');
+                setOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <FaCog className="text-gray-500" />
+              <span className="flex-1 text-left text-sm font-medium">Settings</span>
+              <ChevronRight size={16} className="text-gray-400" />
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100 my-1"></div>
+
+          {/* Logout */}
+          <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors"
           >
             <FaSignOutAlt />
-            Logout
-          </div>
-
+            <span className="text-sm font-medium">Log Out</span>
+          </button>
         </div>
       )}
     </div>

@@ -12,6 +12,8 @@ import AssessmentDashboard from './Pages/Assessment/AssessmentDashboard'
 import AssessmentInstructions from './Pages/Assessment/AssessmentInstructions'
 import QuizPage from './Pages/Assessment/QuizPage'
 import ResultPage from './Pages/Assessment/ResultPage'
+import ProfilePage from './Pages/Profile/ProfilePage'
+import SettingsPage from './Pages/Settings/SettingsPage'
 
 const App = () => {
   return (
@@ -24,6 +26,8 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<Signin />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/assessment" element={<AssessmentDashboard />} />
         <Route path="/assessment/instructions" element={<AssessmentInstructions />} />
         <Route path="/assessment/quiz" element={<QuizPage />} />

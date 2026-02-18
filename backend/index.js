@@ -4,6 +4,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import { verifyEmailConfig } from './config/mailConfig.js';
 import authRoutes from './routes/authRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
 // Load environment variables
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

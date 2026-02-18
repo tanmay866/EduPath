@@ -43,10 +43,37 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: {
-        values: ['student', 'admin'],
+        values: ['student', 'admin', 'developer', 'designer', 'teacher', 'manager', 'entrepreneur', 'other'],
         message: '{VALUE} is not a valid role',
       },
       default: 'student',
+    },
+    phone: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    skills: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    profilePicture: {
+      type: String,
+      default: '',
+    },
+    theme: {
+      type: String,
+      enum: ['light', 'dark'],
+      default: 'light',
+    },
+    language: {
+      type: String,
+      default: 'Eng',
+    },
+    notificationEnabled: {
+      type: Boolean,
+      default: true,
     },
     isActive: {
       type: Boolean,
