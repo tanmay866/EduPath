@@ -6,9 +6,33 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-slate-900 font-sans">
+    <div className="bg-slate-900 font-sans relative">
+      {/* Live Moving Background Animations */}
+      <div className="animated-bg">
+        {/* Moving Shapes */}
+        <div className="moving-shape shape-1"></div>
+        <div className="moving-shape shape-2"></div>
+        <div className="moving-shape shape-3"></div>
+        <div className="moving-shape shape-4"></div>
+        <div className="moving-shape shape-5"></div>
+        <div className="moving-shape shape-6"></div>
+        
+        {/* Rotating Center Gradient */}
+        <div className="rotating-gradient"></div>
+        
+        {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
+        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
+        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
+        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
+        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+      </div>
+
         {/* SECTION 1: HERO (The first code I gave you) */}
-      <section className="min-h-svh flex flex-col justify-center items-center px-4 text-center">
+      <section className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative z-10">
         <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight">
           Learn with EduPath <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
@@ -29,7 +53,7 @@ const Home = () => {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <button className="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 transition cursor-pointer"
+          <button className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
             onClick={() => navigate('/assessment')}
           >
             Skill Assessment →
@@ -50,27 +74,36 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             {/* Card 1 */}
-            <div className="relative bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-left">
-              <div className="absolute -top-3 -left-3 w-8 h-8 bg-[#1e2342] text-white rounded-full flex items-center justify-center font-bold">1</div>
-              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-6 text-blue-500 font-bold text-xl">◎</div>
-              <h3 className="text-xl font-bold mb-2 text-slate-900">Quick Assessment</h3>
-              <p className="text-slate-500 text-sm">2-5 min career assessment to identify your current skills and goals</p>
+            <div className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-blue-500/50 shadow-2xl hover:shadow-blue-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+              <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">1</div>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 text-blue-400 font-bold text-xl border border-blue-500/30 group-hover:border-blue-500/60 transition-all">◎</div>
+                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors">Quick Assessment</h3>
+                <p className="text-slate-300 text-sm leading-relaxed">2-5 min career assessment to identify your current skills and goals</p>
+              </div>
             </div>
 
             {/* Card 2 */}
-            <div className="relative bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-left">
-              <div className="absolute -top-3 -left-3 w-8 h-8 bg-[#1e2342] text-white rounded-full flex items-center justify-center font-bold">2</div>
-              <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center mb-6 text-emerald-500 font-bold text-xl">↗</div>
-              <h3 className="text-xl font-bold mb-2 text-slate-900">Personalized Path</h3>
-              <p className="text-slate-500 text-sm">Get a custom learning roadmap with skills timeline and milestones</p>
+            <div className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-emerald-500/50 shadow-2xl hover:shadow-emerald-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+              <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">2</div>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 text-emerald-400 font-bold text-xl border border-emerald-500/30 group-hover:border-emerald-500/60 transition-all">↗</div>
+                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-emerald-400 transition-colors">Personalized Path</h3>
+                <p className="text-slate-300 text-sm leading-relaxed">Get a custom learning roadmap with skills timeline and milestones</p>
+              </div>
             </div>
 
             {/* Card 3 */}
-            <div className="relative bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-left">
-              <div className="absolute -top-3 -left-3 w-8 h-8 bg-[#1e2342] text-white rounded-full flex items-center justify-center font-bold">3</div>
-              <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center mb-6 text-indigo-500 font-bold text-xl">🛡</div>
-              <h3 className="text-xl font-bold mb-2 text-slate-900">Verified Providers</h3>
-              <p className="text-slate-500 text-sm">Access courses from trusted platforms with transparent policies</p>
+            <div className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+              <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">3</div>
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-indigo-600/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 text-indigo-400 font-bold text-xl border border-indigo-500/30 group-hover:border-indigo-500/60 transition-all">🛡</div>
+                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-indigo-400 transition-colors">Verified Providers</h3>
+                <p className="text-slate-300 text-sm leading-relaxed">Access courses from trusted platforms with transparent policies</p>
+              </div>
             </div>
 
           </div>
@@ -86,17 +119,27 @@ const Home = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {[
-              { title: "Skills Assessment", desc: "Take our comprehensive assessment to understand your level.", icon: "◎" },
-              { title: "Personalized Path", desc: "Get a custom roadmap with courses, projects, and milestones.", icon: "📊" },
-              { title: "Learn & Build", desc: "Complete verified courses and build portfolio projects.", icon: "⟨⟩" },
-              { title: "Get Hired", desc: "Connect with hiring partners and showcase your skills.", icon: "👥" }
+              { title: "Skills Assessment", desc: "Take our comprehensive assessment to understand your level.", icon: "◎", color: "blue" },
+              { title: "Personalized Path", desc: "Get a custom roadmap with courses, projects, and milestones.", icon: "📊", color: "emerald" },
+              { title: "Learn & Build", desc: "Complete verified courses and build portfolio projects.", icon: "⟨⟩", color: "purple" },
+              { title: "Get Hired", desc: "Connect with hiring partners and showcase your skills.", icon: "👥", color: "pink" }
             ].map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-[#1a2144] text-white rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-lg">
+              <div key={idx} className="flex flex-col items-center group">
+                <div className={`w-16 h-16 backdrop-blur-lg rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-xl transition-all duration-300 hover:scale-110
+                  ${item.color === 'blue' ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-300 border border-blue-500/30 hover:border-blue-500/60 hover:shadow-blue-500/50 hover:from-blue-500/30 hover:to-blue-600/30' : ''}
+                  ${item.color === 'emerald' ? 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-emerald-500/50 hover:from-emerald-500/30 hover:to-emerald-600/30' : ''}
+                  ${item.color === 'purple' ? 'bg-gradient-to-br from-purple-500/20 to-purple-600/20 text-purple-300 border border-purple-500/30 hover:border-purple-500/60 hover:shadow-purple-500/50 hover:from-purple-500/30 hover:to-purple-600/30' : ''}
+                  ${item.color === 'pink' ? 'bg-gradient-to-br from-pink-500/20 to-pink-600/20 text-pink-300 border border-pink-500/30 hover:border-pink-500/60 hover:shadow-pink-500/50 hover:from-pink-500/30 hover:to-pink-600/30' : ''}
+                `}>
                   {item.icon}
                 </div>
-                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
+                <h3 className={`font-bold text-lg mb-2 text-white transition-all duration-300
+                  ${item.color === 'blue' ? 'group-hover:text-blue-400' : ''}
+                  ${item.color === 'emerald' ? 'group-hover:text-emerald-400' : ''}
+                  ${item.color === 'purple' ? 'group-hover:text-purple-400' : ''}
+                  ${item.color === 'pink' ? 'group-hover:text-pink-400' : ''}
+                `}>{item.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -107,17 +150,20 @@ const Home = () => {
       <section className="py-20 px-6 bg-slate-900">
         <div className="max-w-6xl mx-auto">
           {/* Newsletter Box */}
-          <div className="bg-slate-400 rounded-3xl p-8 md:p-16 text-center mb-20">
-            <h2 className="text-3xl font-bold mb-4 text-slate-900">Stay Updated</h2>
-            <p className="text-slate-900 mb-8">Get weekly insights on emerging skills, industry trends, and curated learning opportunities</p>
-            <div className="flex flex-col sm:flex-row max-w-md mx-auto items-center justify-center">
-              <button className="bg-[#1a2144] text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition"
-                onClick={() => navigate('/signup')}
-              >
-                Get Started
-              </button>
+          <div className="relative backdrop-blur-lg bg-white/5 rounded-3xl p-8 md:p-16 text-center mb-20 border border-white/10 shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300 overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl font-bold mb-4 text-white">Stay Updated</h2>
+              <p className="text-slate-300 mb-8">Get weekly insights on emerging skills, industry trends, and curated learning opportunities</p>
+              <div className="flex flex-col sm:flex-row max-w-md mx-auto items-center justify-center">
+                <button className="backdrop-blur-lg bg-gradient-to-r from-indigo-500/40 to-purple-500/40 text-white px-6 py-3 rounded-xl font-bold border border-indigo-400/50 hover:from-indigo-500/50 hover:to-purple-500/50 hover:border-indigo-400/70 hover:scale-105 transition-all shadow-xl hover:shadow-indigo-500/50"
+                  onClick={() => navigate('/signup')}
+                >
+                  Get Started
+                </button>
+              </div>
+              <p className="text-xs text-slate-400 mt-4 italic">No spam. Unsubscribe anytime. 25,000+ professionals already subscribed.</p>
             </div>
-            <p className="text-xs text-slate-800 mt-4 italic">No spam. Unsubscribe anytime. 25,000+ professionals already subscribed.</p>
           </div>
 
           {/* Stats Bar */}

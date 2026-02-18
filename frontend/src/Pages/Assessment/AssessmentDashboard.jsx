@@ -115,10 +115,10 @@ const AssessmentDashboard = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold text-sm">
+              <span className="px-4 py-2 backdrop-blur-lg bg-green-500/20 text-green-400 rounded-full font-semibold text-sm border border-green-500/30">
                 Active
               </span>
-              <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-semibold text-sm">
+              <span className="px-4 py-2 backdrop-blur-lg bg-blue-500/20 text-blue-400 rounded-full font-semibold text-sm border border-blue-500/30">
                 {performanceStats.totalAttempts} Completed
               </span>
             </div>
@@ -129,18 +129,18 @@ const AssessmentDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           
           {/* Total Attempts */}
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-blue-500 hover:border-blue-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium mb-1">
+                <p className="text-gray-400 text-sm font-medium mb-1">
                   Total Attempts
                 </p>
-                <p className="text-3xl font-bold text-gray-800">
+                <p className="text-3xl font-bold text-white">
                   {performanceStats.totalAttempts}
                 </p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="backdrop-blur-lg bg-blue-500/20 p-3 rounded-full border border-blue-500/30">
+                <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
@@ -148,18 +148,18 @@ const AssessmentDashboard = () => {
           </div>
 
           {/* Average Score */}
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-purple-500 hover:border-purple-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium mb-1">
+                <p className="text-gray-400 text-sm font-medium mb-1">
                   Average Score
                 </p>
-                <p className="text-3xl font-bold text-gray-800">
+                <p className="text-3xl font-bold text-white">
                   {performanceStats.averageScore}%
                 </p>
               </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="backdrop-blur-lg bg-purple-500/20 p-3 rounded-full border border-purple-500/30">
+                <svg className="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
@@ -167,18 +167,18 @@ const AssessmentDashboard = () => {
           </div>
 
           {/* Highest Score */}
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-yellow-500 hover:border-yellow-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium mb-1">
+                <p className="text-gray-400 text-sm font-medium mb-1">
                   Highest Score
                 </p>
-                <p className="text-3xl font-bold text-gray-800">
+                <p className="text-3xl font-bold text-white">
                   {performanceStats.highestScore}%
                 </p>
               </div>
-              <div className="bg-yellow-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="backdrop-blur-lg bg-yellow-500/20 p-3 rounded-full border border-yellow-500/30">
+                <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
@@ -186,18 +186,18 @@ const AssessmentDashboard = () => {
           </div>
 
           {/* Last Attempt Status */}
-          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-green-500 hover:border-green-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium mb-1">
+                <p className="text-gray-400 text-sm font-medium mb-1">
                   Last Attempt
                 </p>
-                <p className="text-3xl font-bold text-gray-800">
+                <p className="text-3xl font-bold text-white">
                   {performanceStats.lastAttemptStatus}
                 </p>
               </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="backdrop-blur-lg bg-green-500/20 p-3 rounded-full border border-green-500/30">
+                <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                 </svg>
               </div>
@@ -213,7 +213,7 @@ const AssessmentDashboard = () => {
           </h2>
 
           {availableAssessment.isAvailable ? (
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg p-8 text-white">
+            <div className="backdrop-blur-lg bg-gradient-to-r from-indigo-500/40 to-purple-600/40 rounded-xl shadow-2xl p-8 text-white border border-indigo-400/30">
               <div className="grid md:grid-cols-2 gap-6">
                 
                 {/* Left Section */}
@@ -259,7 +259,7 @@ const AssessmentDashboard = () => {
 
                   <button
                     onClick={handleStartAssessment}
-                    className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    className="backdrop-blur-lg bg-white/20 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-white/30 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 border border-white/30 hover:border-white/50"
                   >
                     Start Assessment →
                   </button>
@@ -278,14 +278,14 @@ const AssessmentDashboard = () => {
             </div>
           ) : (
             // Empty State
-            <div className="bg-white rounded-xl shadow-md p-12 text-center">
-              <svg className="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-12 text-center border border-white/10">
+              <svg className="w-24 h-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              <h3 className="text-xl font-semibold text-white mb-2">
                 No Active Assessments Available
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-400">
                 Check back later for new assessment opportunities
               </p>
             </div>
@@ -298,40 +298,40 @@ const AssessmentDashboard = () => {
             Previous Attempts
           </h2>
 
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl overflow-hidden border border-white/10">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b-2 border-gray-200">
+                <thead className="backdrop-blur-sm bg-white/5 border-b-2 border-white/10">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Attempt Date
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Score
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Percentage
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Action
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-white/10">
                   {previousAttempts.map((attempt) => (
-                    <tr key={attempt.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                    <tr key={attempt.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         {attempt.date}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                         {attempt.score}/{attempt.totalQuestions}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                          <div className="w-16 backdrop-blur-lg bg-white/10 rounded-full h-2">
                             <div
                               className={`h-2 rounded-full ${
                                 attempt.percentage >= 70 ? "bg-green-500" : "bg-red-500"
@@ -344,10 +344,10 @@ const AssessmentDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full backdrop-blur-lg ${
                             attempt.status === "Pass"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                              ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                              : "bg-red-500/20 text-red-400 border border-red-500/30"
                           }`}
                         >
                           {attempt.status}
@@ -367,7 +367,7 @@ const AssessmentDashboard = () => {
                               },
                             })
                           }
-                          className="text-indigo-600 hover:text-indigo-900 font-medium hover:underline"
+                          className="text-indigo-400 hover:text-indigo-300 font-medium hover:underline"
                         >
                           View Result →
                         </button>
@@ -379,7 +379,7 @@ const AssessmentDashboard = () => {
             </div>
 
             {previousAttempts.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-gray-400">
                 <p>No previous attempts found</p>
               </div>
             )}

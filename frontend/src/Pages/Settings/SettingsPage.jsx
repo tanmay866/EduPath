@@ -120,7 +120,7 @@ const SettingsPage = () => {
         <div className="mb-8 flex items-center gap-4">
           <button
             onClick={() => navigate('/profile')}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-white/20"
           >
             <ArrowLeft size={24} className="text-gray-400" />
           </button>
@@ -132,12 +132,12 @@ const SettingsPage = () => {
 
         {/* Success/Error Messages */}
         {message && (
-          <div className="mb-6 bg-green-500 bg-opacity-20 border border-green-500 text-green-400 px-6 py-4 rounded-xl">
+          <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl">
             {message}
           </div>
         )}
         {error && (
-          <div className="mb-6 bg-red-500 bg-opacity-20 border border-red-500 text-red-400 px-6 py-4 rounded-xl">
+          <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl">
             {error}
           </div>
         )}
@@ -145,9 +145,9 @@ const SettingsPage = () => {
         {/* Main Settings Grid - Preferences and Password Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Preferences Card */}
-          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 h-full">
+          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 backdrop-blur-lg bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
               <SettingsIcon size={24} className="text-white" />
             </div>
             <div>
@@ -158,7 +158,7 @@ const SettingsPage = () => {
 
           <div className="space-y-6">
             {/* Theme Setting */}
-            <div className="flex items-center justify-between py-4 border-b border-slate-700">
+            <div className="flex items-center justify-between py-4 border-b border-white/10">
               <div>
                 <label className="text-base font-medium text-white">Theme</label>
                 <p className="text-sm text-gray-400 mt-1">Choose your preferred theme</p>
@@ -167,17 +167,18 @@ const SettingsPage = () => {
                 <select
                   value={settings.theme}
                   onChange={(e) => handleSettingsChange('theme', e.target.value)}
-                  className="w-full appearance-none px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                  className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                  style={{ colorScheme: 'dark' }}
                 >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
+                  <option value="light" className="bg-slate-800 text-white">Light</option>
+                  <option value="dark" className="bg-slate-800 text-white">Dark</option>
                 </select>
                 <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
             </div>
 
             {/* Language Setting */}
-            <div className="flex items-center justify-between py-4 border-b border-slate-700">
+            <div className="flex items-center justify-between py-4 border-b border-white/10">
               <div>
                 <label className="text-base font-medium text-white">Language</label>
                 <p className="text-sm text-gray-400 mt-1">Select your language</p>
@@ -186,12 +187,13 @@ const SettingsPage = () => {
                 <select
                   value={settings.language}
                   onChange={(e) => handleSettingsChange('language', e.target.value)}
-                  className="w-full appearance-none px-4 py-3 bg-slate-900 border border-slate-600 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                  className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                  style={{ colorScheme: 'dark' }}
                 >
-                  <option value="Eng">English</option>
-                  <option value="Esp">Spanish</option>
-                  <option value="Fra">French</option>
-                  <option value="Ger">German</option>
+                  <option value="Eng" className="bg-slate-800 text-white">English</option>
+                  <option value="Esp" className="bg-slate-800 text-white">Spanish</option>
+                  <option value="Fra" className="bg-slate-800 text-white">French</option>
+                  <option value="Ger" className="bg-slate-800 text-white">German</option>
                 </select>
                 <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
@@ -210,7 +212,7 @@ const SettingsPage = () => {
                   onChange={(e) => handleSettingsChange('notificationEnabled', e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-14 h-7 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+                <div className="w-14 h-7 backdrop-blur-lg bg-white/10 border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500/40 peer-checked:border-purple-400/50"></div>
               </label>
             </div>
 
@@ -219,7 +221,7 @@ const SettingsPage = () => {
               <button
                 onClick={handleSaveSettings}
                 disabled={loading}
-                className="w-full md:w-auto px-8 py-3.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-purple-500/30 hover:bg-purple-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-purple-400/50 hover:border-purple-400/70 hover:shadow-xl hover:shadow-purple-500/50"
               >
                 <Save size={20} />
                 {loading ? 'Saving...' : 'Save Changes'}
@@ -229,9 +231,9 @@ const SettingsPage = () => {
         </div>
 
           {/* Change Password Card */}
-          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 h-full">
+          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 backdrop-blur-lg bg-indigo-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
               <Lock size={24} className="text-white" />
             </div>
             <div>
@@ -242,12 +244,12 @@ const SettingsPage = () => {
 
           {/* Password Messages */}
           {passwordMessage && (
-            <div className="mb-6 bg-green-500 border border-green-600 text-white px-6 py-4 rounded-xl font-medium">
+            <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl font-medium">
               {passwordMessage}
             </div>
           )}
           {passwordError && (
-            <div className="mb-6 bg-red-500 border border-red-600 text-white px-6 py-4 rounded-xl font-medium">
+            <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl font-medium">
               {passwordError}
             </div>
           )}
@@ -263,7 +265,7 @@ const SettingsPage = () => {
                 name="currentPassword"
                 value={passwordData.currentPassword}
                 onChange={handlePasswordChange}
-                className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                 placeholder="Enter current password"
               />
             </div>
@@ -278,7 +280,7 @@ const SettingsPage = () => {
                 name="newPassword"
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
-                className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                 placeholder="Enter new password"
               />
             </div>
@@ -293,7 +295,7 @@ const SettingsPage = () => {
                 name="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
-                className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                 placeholder="Confirm new password"
               />
             </div>
@@ -303,7 +305,7 @@ const SettingsPage = () => {
               <button
                 type="submit"
                 disabled={passwordLoading}
-                className="w-full md:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
               >
                 <Lock size={20} />
                 {passwordLoading ? 'Changing...' : 'Change Password'}
@@ -316,7 +318,7 @@ const SettingsPage = () => {
         {/* Additional Settings Sections */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Account Settings */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 hover:border-slate-600 transition-colors">
+          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Account</h4>
             <p className="text-gray-400 text-sm mb-4">Manage your account settings</p>
             <button
@@ -328,7 +330,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Privacy Settings */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 hover:border-slate-600 transition-colors">
+          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Privacy</h4>
             <p className="text-gray-400 text-sm mb-4">Control your privacy settings</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
@@ -337,7 +339,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Security Settings */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 hover:border-slate-600 transition-colors">
+          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Security</h4>
             <p className="text-gray-400 text-sm mb-4">Password changed successfully</p>
             <button className="text-green-400 text-sm font-medium">
@@ -346,7 +348,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Help & Support */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 hover:border-slate-600 transition-colors">
+          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Help & Support</h4>
             <p className="text-gray-400 text-sm mb-4">Get help and contact support</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">

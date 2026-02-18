@@ -253,7 +253,7 @@ const QuizPage = () => {
       <div className="flex-1 flex flex-col">
         
         {/* 🎯 TOP HEADER BAR */}
-        <div className="bg-gray-900 border-b border-gray-700 px-6 py-4 sticky top-0 z-10">
+        <div className="backdrop-blur-lg bg-white/5 border-b border-white/10 px-6 py-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
             
             {/* Left: Assessment Info */}
@@ -290,12 +290,12 @@ const QuizPage = () => {
           <div className="grid grid-cols-10 gap-6 max-w-7xl mx-auto">
 
             {/* LEFT PANEL - Question Section (70%) */}
-            <div className="col-span-7 bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-700">
+            <div className="col-span-7 backdrop-blur-lg bg-white/5 p-8 rounded-lg shadow-lg border border-white/10">
 
               {/* Question Number & Text */}
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                  <span className="backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/50 text-white px-4 py-2 rounded-lg font-bold text-lg">
                     Q{currentQuestionIndex + 1}
                   </span>
                   {isMarked && (
@@ -327,12 +327,12 @@ const QuizPage = () => {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex items-center justify-between pt-6 border-t border-gray-700">
+              <div className="flex items-center justify-between pt-6 border-t border-white/10">
 
                 <button
                   disabled={currentQuestionIndex === 0}
                   onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
-                  className="flex items-center gap-2 px-6 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
+                  className="flex items-center gap-2 px-6 py-3 backdrop-blur-lg bg-white/10 text-gray-300 border border-white/20 rounded-lg hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -345,7 +345,7 @@ const QuizPage = () => {
                   className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
                     isMarked 
                       ? 'bg-yellow-500 text-gray-900 hover:bg-yellow-400' 
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'backdrop-blur-lg bg-white/10 text-gray-300 border border-white/20 hover:bg-white/20'
                   }`}
                 >
                   <svg className="w-5 h-5" fill={isMarked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -357,7 +357,7 @@ const QuizPage = () => {
                 <button
                   disabled={currentQuestionIndex === questions.length - 1}
                   onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
-                  className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
+                  className="flex items-center gap-2 px-6 py-3 backdrop-blur-lg bg-indigo-500/40 border-2 border-indigo-400/50 text-white rounded-lg hover:bg-indigo-500/50 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
                 >
                   Next
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,7 +380,7 @@ const QuizPage = () => {
               />
 
               {/* QUESTION NAVIGATOR */}
-              <div className="bg-gray-800 p-5 rounded-lg shadow-lg border border-gray-700">
+              <div className="backdrop-blur-lg bg-white/5 p-5 rounded-lg shadow-lg border border-white/10">
 
                 <h3 className="font-bold mb-4 text-white text-sm uppercase tracking-wide">Question Navigator</h3>
 
@@ -391,17 +391,17 @@ const QuizPage = () => {
                     const visited = visitedQuestions && visitedQuestions.includes(q._id);
                     const marked = markedForReview && markedForReview.includes(q._id);
 
-                    let bgColor = 'bg-gray-700 text-gray-400'; // Not visited
+                    let bgColor = 'backdrop-blur-lg bg-white/10 border border-white/20 text-gray-400'; // Not visited
                     if (marked) bgColor = 'bg-yellow-500 text-gray-900'; // Marked for review
-                    else if (answered) bgColor = 'bg-green-500 text-white'; // Answered
-                    else if (visited) bgColor = 'bg-blue-500 text-white'; // Visited
+                    else if (answered) bgColor = 'backdrop-blur-lg bg-green-500/30 border border-green-500/50 text-green-400'; // Answered
+                    else if (visited) bgColor = 'backdrop-blur-lg bg-blue-500/30 border border-blue-500/50 text-blue-400'; // Visited
 
                     return (
                       <button
                         key={index}
                         onClick={() => setCurrentQuestionIndex(index)}
                         className={`p-2 rounded text-sm font-bold transition-all hover:scale-110 ${bgColor}
-                        ${index === currentQuestionIndex ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-800' : ''}`}
+                        ${index === currentQuestionIndex ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
                       >
                         {index + 1}
                       </button>
@@ -413,15 +413,15 @@ const QuizPage = () => {
                 {/* Legend */}
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-gray-700 rounded"></div>
+                    <div className="w-4 h-4 backdrop-blur-lg bg-white/10 border border-white/20 rounded"></div>
                     <span className="text-gray-400">Not Visited</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                    <div className="w-4 h-4 backdrop-blur-lg bg-blue-500/30 border border-blue-500/50 rounded"></div>
                     <span className="text-gray-300">Visited</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                    <div className="w-4 h-4 backdrop-blur-lg bg-green-500/30 border border-green-500/50 rounded"></div>
                     <span className="text-gray-300">Answered</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -438,8 +438,8 @@ const QuizPage = () => {
                 onClick={handleSubmitQuiz}
                 className={`w-full py-4 rounded-lg font-bold text-white text-lg transition-all ${
                   allAnswered
-                    ? "bg-green-600 hover:bg-green-700 hover:shadow-lg transform hover:scale-105"
-                    : "bg-gray-700 cursor-not-allowed opacity-50"
+                    ? "backdrop-blur-lg bg-green-500/40 border-2 border-green-400/50 hover:bg-green-500/50 hover:shadow-xl transform hover:scale-105"
+                    : "backdrop-blur-lg bg-white/10 border border-white/20 cursor-not-allowed opacity-50"
                 }`}
               >
                 {allAnswered ? '✓ Submit Assessment' : `Answer All Questions (${answers?.length || 0}/${questions?.length || 0})`}

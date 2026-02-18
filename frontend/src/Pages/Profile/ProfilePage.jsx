@@ -269,7 +269,7 @@ const ProfilePage = () => {
         <div className="mb-8 flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-white/20"
           >
             <ArrowLeft size={24} className="text-gray-400" />
           </button>
@@ -281,12 +281,12 @@ const ProfilePage = () => {
 
         {/* Success/Error Messages */}
         {message && (
-          <div className="mb-6 bg-green-500 border border-green-600 text-white px-6 py-4 rounded-xl font-medium">
+          <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl font-medium shadow-xl">
             {message}
           </div>
         )}
         {error && (
-          <div className="mb-6 bg-red-500 border border-red-600 text-white px-6 py-4 rounded-xl font-medium">
+          <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl font-medium shadow-xl">
             {error}
           </div>
         )}
@@ -294,7 +294,7 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column - Profile Card */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+            <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
                   <input
@@ -318,7 +318,7 @@ const ProfilePage = () => {
                   <button
                     type="button"
                     onClick={handleImageClick}
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-700 transition-colors border-2 border-slate-800"
+                    className="absolute bottom-0 right-0 w-8 h-8 backdrop-blur-lg bg-indigo-500/40 rounded-full flex items-center justify-center hover:bg-indigo-500/50 transition-all border-2 border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-500/50"
                   >
                     ✏️
                   </button>
@@ -326,7 +326,7 @@ const ProfilePage = () => {
                 <h2 className="text-xl font-semibold text-white mb-1">{fullName}</h2>
                 <p className="text-gray-400 text-sm mb-4">{profileData.email}</p>
                 
-                <div className="border-t border-slate-700 pt-4 mt-4">
+                <div className="border-t border-white/10 pt-4 mt-4">
                   <div className="flex items-center justify-between py-3">
                     <span className="text-gray-400 text-sm">Role</span>
                     <span className="text-white font-medium capitalize">{profileData.role || 'Student'}</span>
@@ -337,17 +337,17 @@ const ProfilePage = () => {
                   </div>
                   <div className="flex items-center justify-between py-3">
                     <span className="text-gray-400 text-sm">Status</span>
-                    <span className="px-3 py-1 bg-green-700 bg-opacity-20 text-white-500 rounded-full text-xs font-semibold">Active</span>
+                    <span className="px-3 py-1 backdrop-blur-lg bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30">Active</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Settings Card - Navigate to Settings Page */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 hover:border-indigo-600 transition-all cursor-pointer group" onClick={() => navigate('/settings')}>
+            <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-500/40 group-hover:border-purple-400/50 transition-all">
                     <SettingsIcon size={20} className="text-white" />
                   </div>
                   <div>
@@ -367,9 +367,9 @@ const ProfilePage = () => {
           {/* Right Column - Forms */}
           <div className="lg:col-span-2">
             {/* Profile Information Card */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 h-full">
+            <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 h-full shadow-xl">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/30 rounded-xl flex items-center justify-center">
                   <User size={20} className="text-white" />
                 </div>
                 <div>
@@ -389,7 +389,7 @@ const ProfilePage = () => {
                       name="firstName"
                       value={profileData.firstName}
                       onChange={handleProfileChange}
-                      className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                       placeholder="Enter first name"
                     />
                   </div>
@@ -402,7 +402,7 @@ const ProfilePage = () => {
                       name="lastName"
                       value={profileData.lastName}
                       onChange={handleProfileChange}
-                      className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                       placeholder="Enter last name"
                     />
                   </div>
@@ -417,7 +417,7 @@ const ProfilePage = () => {
                       type="email"
                       value={profileData.email}
                       disabled
-                      className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-gray-500 cursor-not-allowed"
+                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-gray-400 cursor-not-allowed"
                     />
                     <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                   </div>
@@ -430,7 +430,7 @@ const ProfilePage = () => {
                       name="phone"
                       value={profileData.phone}
                       onChange={handleProfileChange}
-                      className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                       placeholder="Add phone number"
                     />
                   </div>
@@ -445,15 +445,16 @@ const ProfilePage = () => {
                       name="role"
                       value={profileData.role}
                       onChange={handleProfileChange}
-                      className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                      className="w-full px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
+                      style={{ colorScheme: 'dark' }}
                     >
-                      <option value="student">Student</option>
-                      <option value="developer">Developer</option>
-                      <option value="designer">Designer</option>
-                      <option value="teacher">Teacher</option>
-                      <option value="manager">Manager</option>
-                      <option value="entrepreneur">Entrepreneur</option>
-                      <option value="other">Other</option>
+                      <option value="student" className="bg-slate-800 text-white">Student</option>
+                      <option value="developer" className="bg-slate-800 text-white">Developer</option>
+                      <option value="designer" className="bg-slate-800 text-white">Designer</option>
+                      <option value="teacher" className="bg-slate-800 text-white">Teacher</option>
+                      <option value="manager" className="bg-slate-800 text-white">Manager</option>
+                      <option value="entrepreneur" className="bg-slate-800 text-white">Entrepreneur</option>
+                      <option value="other" className="bg-slate-800 text-white">Other</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
                   </div>
@@ -468,7 +469,7 @@ const ProfilePage = () => {
                     name="skills"
                     value={profileData.skills}
                     onChange={handleProfileChange}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                     placeholder="e.g., JavaScript, React, Node.js"
                   />
                 </div>
@@ -476,7 +477,7 @@ const ProfilePage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full md:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full md:w-auto px-6 py-3 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
                 >
                   <Save size={18} />
                   {loading ? 'Saving...' : 'Save Changes'}
@@ -490,12 +491,12 @@ const ProfilePage = () => {
       {/* Image Editor Modal */}
       {showImageEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-slate-700">
+          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">Adjust Profile Picture</h3>
               <button
                 onClick={handleCancelImageEdit}
-                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10"
               >
                 <X size={20} className="text-gray-400" />
               </button>
@@ -528,7 +529,7 @@ const ProfilePage = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setImageScale(prev => Math.max(0.2, prev - 0.1))}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                  className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10"
                 >
                   <ZoomOut size={18} className="text-white" />
                 </button>
@@ -539,11 +540,11 @@ const ProfilePage = () => {
                   step="0.1"
                   value={imageScale}
                   onChange={(e) => setImageScale(parseFloat(e.target.value))}
-                  className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                  className="flex-1 h-2 backdrop-blur-lg bg-white/10 rounded-lg appearance-none cursor-pointer border border-white/20"
                 />
                 <button
                   onClick={() => setImageScale(prev => Math.min(5, prev + 0.1))}
-                  className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                  className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10"
                 >
                   <ZoomIn size={18} className="text-white" />
                 </button>
@@ -554,13 +555,13 @@ const ProfilePage = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleCancelImageEdit}
-                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition-colors"
+                className="flex-1 px-4 py-3 backdrop-blur-lg bg-slate-600/30 hover:bg-slate-600/40 text-white font-semibold rounded-xl transition-all border border-slate-400/30"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEditedImage}
-                className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors"
+                className="flex-1 px-4 py-3 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
               >
                 Save Photo
               </button>
