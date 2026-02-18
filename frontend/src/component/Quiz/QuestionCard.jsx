@@ -8,11 +8,11 @@ const QuestionCard = ({
 }) => {
   return (
     <>
-      <h2 className="text-xl font-bold mb-4">
+      <h2 className="text-xl font-bold mb-4 text-white">
         Question {index + 1}
       </h2>
 
-      <p className="mb-6">{question.questionText}</p>
+      <p className="mb-6 text-gray-300">{question.questionText}</p>
 
       <div className="space-y-3">
         {question.options.map((opt, i) => (

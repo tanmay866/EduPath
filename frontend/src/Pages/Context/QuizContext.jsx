@@ -7,6 +7,8 @@ export const QuizProvider = ({ children }) => {
   const [answers, setAnswers] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timer, setTimer] = useState(0);
+  const [markedForReview, setMarkedForReview] = useState([]);
+  const [visitedQuestions, setVisitedQuestions] = useState([]);
 
   const submitQuiz = () => {
     console.log("Submit quiz");
@@ -23,6 +25,10 @@ export const QuizProvider = ({ children }) => {
         setCurrentQuestionIndex,
         timer,
         setTimer,
+        markedForReview,
+        setMarkedForReview,
+        visitedQuestions,
+        setVisitedQuestions,
         submitQuiz,
       }}
     >

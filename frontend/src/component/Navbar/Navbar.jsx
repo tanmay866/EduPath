@@ -46,7 +46,7 @@ const ArcNavbar = () => {
   const navItems = [
     { icon: <HiHome />, label: 'Home', path: '/', t: 0.2 },
     { icon: <HiUser />, label: 'About', path: '/about', t: 0.45 },
-    { icon: <HiCode />, label: 'Work', path: '/work', t: 0.7 },
+    { icon: <HiCode />, label: 'Assessment', path: '/assessment', t: 0.7 },
     { icon: <HiMail />, label: 'Contact', path: '/contact', t: 0.95 },
   ];
 
@@ -63,7 +63,7 @@ const ArcNavbar = () => {
       {/* 1. Main Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-8 left-8 z-[70] w-10 h-10 flex items-center justify-center bg-indigo-600 text-white rounded-full border-2 border-white shadow-2xl pointer-events-auto active:scale-95 transition-all"
+        className="fixed top-8 left-8 z-[70] w-10 h-10 cursor-pointer flex items-center justify-center bg-indigo-600 text-white rounded-full border-2 border-white shadow-2xl pointer-events-auto active:scale-95 transition-all"
       >
         {isOpen ? <HiX size={26} /> : <HiMenu size={26} />}
       </button>
@@ -195,16 +195,16 @@ const ArcNavbar = () => {
       )}
     </div>
         ) : (
-         <div>
+         <div className="flex items-center gap-4">
            <button
             onClick={() => navigate('/signin')}
-            className="px-4 py-2 bg-slate-800 text-gray-200 font-bold rounded-full border border-slate-600 hover:bg-slate-700 transition-colors"
+            className="px-4 py-2 bg-slate-800 text-gray-200 font-bold rounded-full border border-slate-600 hover:bg-slate-700 transition-colors cursor-pointer"
           >
             Sign In
           </button>
           <button
           onClick={() => navigate('/signup')}
-          className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-full border border-indigo-600 hover:bg-indigo-700 transition-colors"
+          className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-full border border-indigo-600 hover:bg-indigo-700 transition-colors cursor-pointer"
         >
           Get Started
         </button>

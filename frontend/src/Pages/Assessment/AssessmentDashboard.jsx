@@ -2,27 +2,391 @@ import { useEffect } from "react";
 import API from "../services/assessmentService";
 import { useQuiz } from "../context/QuizContext";
 import { useNavigate } from "react-router-dom";
+import AssessmentSidebar from "../../component/Assessment/AssessmentSidebar";
 
 const AssessmentDashboard = () => {
   const { setAssessment } = useQuiz();
   const navigate = useNavigate();
 
+  // 📊 Static Performance Data (will be replaced with API later)
+  const performanceStats = {
+    totalAttempts: 5,
+    averageScore: 75,
+    highestScore: 90,
+    lastAttemptStatus: "Pass",
+  };
+
+  // 🎯 Static Available Assessment (will be replaced with API later)
+  const availableAssessment = {
+    title: "Frontend Development Assessment",
+    skill: "React.js",
+    duration: 30,
+    totalQuestions: 10,
+    difficultyLevel: "Intermediate",
+    isAvailable: true,
+  };
+
+  // 📜 Static Previous Attempts (will be replaced with API later)
+  const previousAttempts = [
+    {
+      id: 1,
+      date: "18 Feb 2026",
+      score: 8,
+      totalQuestions: 10,
+      percentage: 80,
+      status: "Pass",
+    },
+    {
+      id: 2,
+      date: "15 Feb 2026",
+      score: 9,
+      totalQuestions: 10,
+      percentage: 90,
+      status: "Pass",
+    },
+    {
+      id: 3,
+      date: "12 Feb 2026",
+      score: 6,
+      totalQuestions: 10,
+      percentage: 60,
+      status: "Fail",
+    },
+    {
+      id: 4,
+      date: "10 Feb 2026",
+      score: 7,
+      totalQuestions: 10,
+      percentage: 70,
+      status: "Pass",
+    },
+    {
+      id: 5,
+      date: "08 Feb 2026",
+      score: 7,
+      totalQuestions: 10,
+      percentage: 70,
+      status: "Pass",
+    },
+  ];
+
   const fetchAssessment = async () => {
-    const res = await API.get("/assessment/quiz");
-    setAssessment(res.data);
+    try {
+      const res = await API.get("/assessment/quiz");
+      setAssessment(res.data);
+    } catch (error) {
+      console.error("Failed to fetch assessment:", error);
+    }
   };
 
   useEffect(() => {
     fetchAssessment();
   }, []);
 
-  return (
-    <div>
-      <h1>Skill Assessment</h1>
+  const handleStartAssessment = () => {
+    // Set assessment data before navigating
+    setAssessment({
+      title: availableAssessment.title,
+      skill: availableAssessment.skill,
+      duration: availableAssessment.duration,
+      totalQuestions: availableAssessment.totalQuestions,
+      assessmentId: "static-001",
+      questions: [], // Will be loaded in instructions
+    });
+    navigate("/assessment/instructions");
+  };
 
-      <button onClick={() => navigate("/assessment/instructions")}>
-        Start Assessment
-      </button>
+  return (
+    <div className="min-h-screen bg-slate-900 p-6 mt-28 flex">
+      <div>
+        <AssessmentSidebar />
+      </div>
+      <div className="max-w-7xl mx-auto ">
+
+        {/* 1️⃣ PAGE HEADER SECTION */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">
+                Skill Assessment
+              </h1>
+              <p className="text-gray-500">
+                Test your skills and track your performance
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full font-semibold text-sm">
+                Active
+              </span>
+              <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-semibold text-sm">
+                {performanceStats.totalAttempts} Completed
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2️⃣ PERFORMANCE SUMMARY CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          
+          {/* Total Attempts */}
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium mb-1">
+                  Total Attempts
+                </p>
+                <p className="text-3xl font-bold text-gray-800">
+                  {performanceStats.totalAttempts}
+                </p>
+              </div>
+              <div className="bg-blue-100 p-3 rounded-full">
+                <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Average Score */}
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium mb-1">
+                  Average Score
+                </p>
+                <p className="text-3xl font-bold text-gray-800">
+                  {performanceStats.averageScore}%
+                </p>
+              </div>
+              <div className="bg-purple-100 p-3 rounded-full">
+                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Highest Score */}
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium mb-1">
+                  Highest Score
+                </p>
+                <p className="text-3xl font-bold text-gray-800">
+                  {performanceStats.highestScore}%
+                </p>
+              </div>
+              <div className="bg-yellow-100 p-3 rounded-full">
+                <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Last Attempt Status */}
+          <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-500 text-sm font-medium mb-1">
+                  Last Attempt
+                </p>
+                <p className="text-3xl font-bold text-gray-800">
+                  {performanceStats.lastAttemptStatus}
+                </p>
+              </div>
+              <div className="bg-green-100 p-3 rounded-full">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 3️⃣ AVAILABLE ASSESSMENT CARD */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Available Assessment
+          </h2>
+
+          {availableAssessment.isAvailable ? (
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg p-8 text-white">
+              <div className="grid md:grid-cols-2 gap-6">
+                
+                {/* Left Section */}
+                <div>
+                  <h3 className="text-3xl font-bold mb-3">
+                    {availableAssessment.title}
+                  </h3>
+                  <p className="text-indigo-100 mb-6">
+                    Evaluate your knowledge and earn certification
+                  </p>
+
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Skill: {availableAssessment.skill}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Duration: {availableAssessment.duration} minutes</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-medium">Questions: {availableAssessment.totalQuestions}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                      </svg>
+                      <span className="font-medium">Level: {availableAssessment.difficultyLevel}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleStartAssessment}
+                    className="bg-white text-indigo-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  >
+                    Start Assessment →
+                  </button>
+                </div>
+
+                {/* Right Section - Illustration */}
+                <div className="hidden md:flex items-center justify-center">
+                  <div className="text-center">
+                    <svg className="w-48 h-48 text-white opacity-20" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          ) : (
+            // Empty State
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <svg className="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                No Active Assessments Available
+              </h3>
+              <p className="text-gray-500">
+                Check back later for new assessment opportunities
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* 4️⃣ PREVIOUS ATTEMPTS TABLE */}
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Previous Attempts
+          </h2>
+
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b-2 border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Attempt Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Score
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Percentage
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {previousAttempts.map((attempt) => (
+                    <tr key={attempt.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {attempt.date}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        {attempt.score}/{attempt.totalQuestions}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full ${
+                                attempt.percentage >= 70 ? "bg-green-500" : "bg-red-500"
+                              }`}
+                              style={{ width: `${attempt.percentage}%` }}
+                            />
+                          </div>
+                          <span className="font-medium">{attempt.percentage}%</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            attempt.status === "Pass"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {attempt.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() =>
+                            navigate("/assessment/result", {
+                              state: {
+                                score: attempt.score,
+                                totalQuestions: attempt.totalQuestions,
+                                percentage: attempt.percentage,
+                                passed: attempt.status === "Pass",
+                                correctAnswers: attempt.score,
+                                wrongAnswers: attempt.totalQuestions - attempt.score,
+                              },
+                            })
+                          }
+                          className="text-indigo-600 hover:text-indigo-900 font-medium hover:underline"
+                        >
+                          View Result →
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {previousAttempts.length === 0 && (
+              <div className="text-center py-12 text-gray-500">
+                <p>No previous attempts found</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };
