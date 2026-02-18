@@ -8,6 +8,10 @@ import Contact from './Pages/Contact/Contact'
 import Signup from './Pages/Authentication/Signup'
 import Signin from './Pages/Authentication/Signin'
 import Footer from './component/Footer/Footer'
+import AssessmentDashboard from './Pages/Assessment/AssessmentDashboard'
+import AssessmentInstructions from './Pages/Assessment/AssessmentInstructions'
+import QuizPage from './Pages/Assessment/QuizPage'
+import ResultPage from './Pages/Assessment/ResultPage'
 
 const App = () => {
   return (
@@ -20,6 +24,10 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<Signin />} />
+        <Route path="/assessment" element={<AssessmentDashboard />} />
+        <Route path="/assessment/instructions" element={<AssessmentInstructions />} />
+        <Route path="/assessment/quiz" element={<QuizPage />} />
+        <Route path="/assessment/result" element={<ResultPage />} />
       </Routes>
       <Footer />
     </div>
