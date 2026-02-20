@@ -114,8 +114,37 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 py-20 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-slate-900 pt-32 pb-20 px-4 relative">
+      {/* Live Moving Background Animations */}
+      <div className="animated-bg">
+        {/* Moving Shapes */}
+        <div className="moving-shape shape-1"></div>
+        <div className="moving-shape shape-2"></div>
+        <div className="moving-shape shape-3"></div>
+        <div className="moving-shape shape-4"></div>
+        <div className="moving-shape shape-5"></div>
+        <div className="moving-shape shape-6"></div>
+        <div className="moving-shape shape-7"></div>
+        <div className="moving-shape shape-8"></div>
+        
+        {/* Rotating Center Gradient */}
+        <div className="rotating-gradient"></div>
+        
+        {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
+        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
+        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
+        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
+        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-8 flex items-center gap-4">
           <button
@@ -145,7 +174,7 @@ const SettingsPage = () => {
         {/* Main Settings Grid - Preferences and Password Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Preferences Card */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
+          <div className="bg-slate-800 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 backdrop-blur-lg bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
               <SettingsIcon size={24} className="text-white" />
@@ -231,7 +260,7 @@ const SettingsPage = () => {
         </div>
 
           {/* Change Password Card */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
+          <div className="bg-slate-800 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 backdrop-blur-lg bg-indigo-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
               <Lock size={24} className="text-white" />
@@ -318,7 +347,7 @@ const SettingsPage = () => {
         {/* Additional Settings Sections */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Account Settings */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Account</h4>
             <p className="text-gray-400 text-sm mb-4">Manage your account settings</p>
             <button
@@ -330,7 +359,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Privacy Settings */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Privacy</h4>
             <p className="text-gray-400 text-sm mb-4">Control your privacy settings</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
@@ -339,7 +368,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Security Settings */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg">
+          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Security</h4>
             <p className="text-gray-400 text-sm mb-4">Password changed successfully</p>
             <button className="text-green-400 text-sm font-medium">
@@ -348,7 +377,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Help & Support */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Help & Support</h4>
             <p className="text-gray-400 text-sm mb-4">Get help and contact support</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">

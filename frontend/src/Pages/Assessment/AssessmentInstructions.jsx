@@ -53,9 +53,38 @@ const AssessmentInstructions = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
+    <div className="flex min-h-screen bg-slate-900 relative">
+      {/* Live Moving Background Animations */}
+      <div className="animated-bg">
+        {/* Moving Shapes */}
+        <div className="moving-shape shape-1"></div>
+        <div className="moving-shape shape-2"></div>
+        <div className="moving-shape shape-3"></div>
+        <div className="moving-shape shape-4"></div>
+        <div className="moving-shape shape-5"></div>
+        <div className="moving-shape shape-6"></div>
+        <div className="moving-shape shape-7"></div>
+        <div className="moving-shape shape-8"></div>
+        
+        {/* Rotating Center Gradient */}
+        <div className="rotating-gradient"></div>
+        
+        {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
+        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
+        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
+        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
+        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+      </div>
+
       <AssessmentSidebar />
-      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
+      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
         <div className="max-w-4xl mx-auto">
 
           {/* 1️⃣ PAGE HEADER SECTION */}
@@ -66,26 +95,26 @@ const AssessmentInstructions = () => {
                   {assessment.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 backdrop-blur-lg bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                       <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
                     </svg>
                     {assessment.skill}
                   </span>
-                  <span className="inline-flex items-center gap-2 px-3 py-1 backdrop-blur-lg bg-yellow-500/20 text-yellow-300 rounded-full border border-yellow-500/30">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full border border-yellow-500/30">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                     </svg>
                     {assessment.difficulty}
                   </span>
-                  <span className="inline-flex items-center gap-2 px-3 py-1 backdrop-blur-lg bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                     </svg>
                     {assessment.duration} Minutes
                   </span>
-                  <span className="inline-flex items-center gap-2 px-3 py-1 backdrop-blur-lg bg-green-500/20 text-green-300 rounded-full border border-green-500/30">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/20 text-green-300 rounded-full border border-green-500/30">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                       <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -98,7 +127,7 @@ const AssessmentInstructions = () => {
           </div>
 
           {/* 2️⃣ ASSESSMENT OVERVIEW CARD */}
-          <div className="backdrop-blur-lg bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-l-4 border-indigo-500 rounded-xl p-6 mb-6 shadow-xl border border-indigo-400/30">
+          <div className="bg-slate-800 border-l-4 border-indigo-500 rounded-xl p-6 mb-6 shadow-xl border border-indigo-400/30">
             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <svg className="w-6 h-6 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -133,7 +162,7 @@ const AssessmentInstructions = () => {
 
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             {/* 3️⃣ RULES & GUIDELINES SECTION */}
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 shadow-xl">
+            <div className="bg-slate-800 border border-white/10 rounded-xl p-6 shadow-xl">
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <svg className="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -165,7 +194,7 @@ const AssessmentInstructions = () => {
             </div>
 
             {/* 4️⃣ ASSESSMENT DETAILS SUMMARY BOX */}
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 shadow-xl">
+            <div className="bg-slate-800 border border-white/10 rounded-xl p-6 shadow-xl">
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
@@ -202,14 +231,14 @@ const AssessmentInstructions = () => {
           </div>
 
           {/* 5️⃣ AGREEMENT CHECKBOX */}
-          <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-6 mb-6 shadow-xl">
+          <div className="bg-slate-800 border border-white/10 rounded-xl p-6 mb-6 shadow-xl">
             <label className="flex items-start gap-3 cursor-pointer group">
               <div className="flex items-center h-6">
                 <input
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="w-5 h-5 text-indigo-600 backdrop-blur-lg bg-white/10 border-white/20 rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
+                  className="w-5 h-5 text-indigo-600 bg-white rounded focus:ring-indigo-500 focus:ring-2 cursor-pointer"
                 />
               </div>
               <div className="flex-1">
@@ -227,8 +256,8 @@ const AssessmentInstructions = () => {
               disabled={!agreedToTerms}
               className={`px-12 py-4 rounded-xl font-bold text-lg transition-all shadow-xl ${
                 agreedToTerms
-                  ? "backdrop-blur-lg bg-gradient-to-r from-indigo-500/40 to-purple-600/40 text-white hover:from-indigo-500/50 hover:to-purple-600/50 hover:shadow-2xl border-2 border-indigo-400/50 transform hover:scale-105 active:scale-100"
-                  : "backdrop-blur-lg bg-white/5 text-gray-500 cursor-not-allowed border border-white/10"
+                  ? "bg-gradient-to-r from-indigo-500/40 to-purple-600/40 text-white hover:from-indigo-500/50 hover:to-purple-600/50 hover:shadow-2xl border-2 border-indigo-400/50 transform hover:scale-105 active:scale-100"
+                  : "bg-slate-700 text-gray-500 cursor-not-allowed border border-white/10"
               }`}
             >
               {agreedToTerms ? "Start Assessment →" : "Accept Terms to Continue"}
@@ -251,9 +280,9 @@ const AssessmentInstructions = () => {
       {/* CONFIRMATION MODAL */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="backdrop-blur-lg bg-slate-800/60 border border-white/20 rounded-2xl p-8 max-w-md w-full shadow-2xl transform transition-all">
+          <div className="bg-slate-800 border border-white/20 rounded-2xl p-8 max-w-md w-full shadow-2xl transform transition-all">
             <div className="text-center mb-6">
-              <div className="mx-auto w-16 h-16 backdrop-blur-lg bg-yellow-500/20 rounded-full flex items-center justify-center mb-4 border-2 border-yellow-500/50">
+              <div className="mx-auto w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mb-4 border-2 border-yellow-500/50">
                 <svg className="w-8 h-8 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
@@ -272,13 +301,13 @@ const AssessmentInstructions = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="flex-1 px-6 py-3 backdrop-blur-lg bg-white/10 text-gray-300 rounded-xl font-semibold hover:bg-white/20 transition-all border border-white/20"
+                className="flex-1 px-6 py-3 bg-slate-700 text-gray-300 rounded-xl font-semibold hover:bg-slate-600 transition-all border border-white/20"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmStart}
-                className="flex-1 px-6 py-3 backdrop-blur-lg bg-gradient-to-r from-indigo-500/40 to-purple-600/40 text-white rounded-xl font-semibold hover:from-indigo-500/50 hover:to-purple-600/50 transition-all shadow-xl border border-indigo-400/50"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-500/40 to-purple-600/40 text-white rounded-xl font-semibold hover:from-indigo-500/50 hover:to-purple-600/50 transition-all shadow-xl border border-indigo-400/50"
               >
                 Yes, Start Now
               </button>

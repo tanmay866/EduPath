@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Menu, X } from 'lucide-react';
+import { ChevronRight, Menu, X, Info, Mail } from 'lucide-react';
 import { FaUser, FaSignOutAlt, FaCog } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 
@@ -60,9 +60,10 @@ const ArcNavbar = () => {
             <div className="flex-shrink-0">
               <button
                 onClick={() => navigate('/')}
-                className="text-2xl font-bold text-white hover:text-gray-300 transition-colors"
+                className="text-2xl font-bold transition-colors"
               >
-                EduPath
+                <span className="text-white hover:text-gray-300">Edu</span>
+                <span className="text-cyan-400 hover:text-cyan-300">Path</span>
               </button>
             </div>
 
@@ -74,7 +75,10 @@ const ArcNavbar = () => {
                   onClick={() => navigate(item.path)}
                   className="flex items-center gap-2 text-white hover:text-gray-300 font-medium text-sm tracking-wide transition-colors group"
                 >
-                  <span>{item.label}</span>
+                  <span className="relative pb-1">
+                    {item.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                  </span>
                   <ChevronRight size={16} className="text-gray-400 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               ))}
@@ -88,25 +92,42 @@ const ArcNavbar = () => {
                 <button
                   className="flex items-center gap-2 text-white hover:text-gray-300 font-medium text-sm tracking-wide transition-colors group"
                 >
-                  <span>CONTACT</span>
+                  <span className="relative pb-1">
+                    CONTACT
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                  </span>
                   <ChevronRight size={16} className={`text-gray-400 transition-transform ${contactDropdownOpen ? 'rotate-90' : ''}`} />
                 </button>
                 
                 {contactDropdownOpen && (
-                  <div className="absolute top-full left-0 pt-2 w-48">
-                    <div className="backdrop-blur-2xl bg-slate-900/80 rounded-lg shadow-2xl py-2 border border-white/30">
-                      {contactSubmenu.map((item, idx) => (
+                  <div className="absolute top-full left-0 pt-2 w-56">
+                    <div className="backdrop-blur-lg bg-white/10 rounded-xl shadow-2xl py-2 border border-white/20 overflow-hidden">
+                      {/* Menu Items */}
+                      <div className="py-1">
                         <button
-                          key={idx}
                           onClick={() => {
-                            navigate(item.path);
+                            navigate('/about');
                             setContactDropdownOpen(false);
                           }}
-                          className="w-full text-left px-4 py-2.5 text-white hover:bg-white/20 text-sm font-medium transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
                         >
-                          {item.label}
+                          <Info size={18} className="text-gray-400" />
+                          <span className="flex-1 text-left text-sm font-medium">About Us</span>
+                          <ChevronRight size={16} className="text-gray-500" />
                         </button>
-                      ))}
+
+                        <button
+                          onClick={() => {
+                            navigate('/contact');
+                            setContactDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
+                        >
+                          <Mail size={18} className="text-gray-400" />
+                          <span className="flex-1 text-left text-sm font-medium">Contact Us</span>
+                          <ChevronRight size={16} className="text-gray-500" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -319,9 +340,6 @@ const ArcNavbar = () => {
           </div>
         )}
       </nav>
-      
-      {/* Spacer to prevent content from going under fixed navbar */}
-      <div className="h-28"></div>
     </>
   );
 };

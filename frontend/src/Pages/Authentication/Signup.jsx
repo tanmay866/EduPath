@@ -32,7 +32,7 @@ const Signup = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 pt-32 pb-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-4 bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 relative">
         <button
           onClick={() => navigate('/')}

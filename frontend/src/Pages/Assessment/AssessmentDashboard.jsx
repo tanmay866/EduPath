@@ -118,9 +118,38 @@ const AssessmentDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
+    <div className="flex min-h-screen bg-slate-900 relative">
+      {/* Live Moving Background Animations */}
+      <div className="animated-bg">
+        {/* Moving Shapes */}
+        <div className="moving-shape shape-1"></div>
+        <div className="moving-shape shape-2"></div>
+        <div className="moving-shape shape-3"></div>
+        <div className="moving-shape shape-4"></div>
+        <div className="moving-shape shape-5"></div>
+        <div className="moving-shape shape-6"></div>
+        <div className="moving-shape shape-7"></div>
+        <div className="moving-shape shape-8"></div>
+        
+        {/* Rotating Center Gradient */}
+        <div className="rotating-gradient"></div>
+        
+        {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
+        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
+        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
+        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
+        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+      </div>
+
       <AssessmentSidebar />
-      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
+      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
         <div className="max-w-7xl mx-auto">
 
         {/* 1️⃣ PAGE HEADER SECTION */}
@@ -149,7 +178,7 @@ const AssessmentDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           
           {/* Total Attempts */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-blue-500 hover:border-blue-400 transition-all">
+          <div className="bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 border-blue-500 hover:border-blue-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm font-medium mb-1">
@@ -168,7 +197,7 @@ const AssessmentDashboard = () => {
           </div>
 
           {/* Average Score */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-purple-500 hover:border-purple-400 transition-all">
+          <div className="bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 border-purple-500 hover:border-purple-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm font-medium mb-1">
@@ -187,7 +216,7 @@ const AssessmentDashboard = () => {
           </div>
 
           {/* Highest Score */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-yellow-500 hover:border-yellow-400 transition-all">
+          <div className="bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 border-yellow-500 hover:border-yellow-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm font-medium mb-1">
@@ -206,7 +235,7 @@ const AssessmentDashboard = () => {
           </div>
 
           {/* Last Attempt Status */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-6 border-l-4 border-green-500 hover:border-green-400 transition-all">
+          <div className="bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 border-green-500 hover:border-green-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm font-medium mb-1">
@@ -289,7 +318,7 @@ const AssessmentDashboard = () => {
 
           {availableAssessment.length === 0 && (
             // Empty State
-            <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-12 text-center border border-white/10">
+            <div className="bg-slate-800 rounded-xl shadow-xl p-12 text-center border border-white/10">
               <svg className="w-24 h-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -309,10 +338,10 @@ const AssessmentDashboard = () => {
             Previous Attempts
           </h2>
 
-          <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl overflow-hidden border border-white/10">
+          <div className="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-white/10">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="backdrop-blur-sm bg-white/5 border-b-2 border-white/10">
+                <thead className="bg-slate-700/50 border-b-2 border-white/10">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Attempt Date
