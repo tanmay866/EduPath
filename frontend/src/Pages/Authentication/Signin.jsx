@@ -15,7 +15,22 @@ const Signin = () => {
       
       // Simulate API call
       try{
-        const res = await axios.post('http://localhost:4000/api/auth/login', values);
+
+        let payload = {
+          password: values.password
+        }
+
+        // detect email or loginId
+        if(values.identifier.includes('@')){
+          payload.email = values.identifier;
+        } else {
+          payload.loginId = values.identifier;
+        }
+
+        console.log("Payload", payload);
+        
+
+        const res = await axios.post('http://localhost:4000/api/auth/login', payload);
         console.log(res);
         sessionStorage.setItem("token", res.data.token);
         sessionStorage.setItem("email", res.data.user.email);
@@ -109,9 +124,10 @@ const Signin = () => {
           <div>
             <button
               type="submit"
+              disabled={formik.isSubmitting}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
             >
-              Sign In
+              {formik.isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
           </div>
 
