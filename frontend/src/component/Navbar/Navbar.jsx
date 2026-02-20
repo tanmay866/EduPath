@@ -101,7 +101,7 @@ const ArcNavbar = () => {
                 
                 {contactDropdownOpen && (
                   <div className="absolute top-full left-0 pt-2 w-56">
-                    <div className="backdrop-blur-lg bg-white/10 rounded-xl shadow-2xl py-2 border border-white/20 overflow-hidden">
+                    <div className="backdrop-blur-xl bg-slate-900/95 rounded-xl shadow-2xl py-2 border border-white/30 overflow-hidden">
                       {/* Menu Items */}
                       <div className="py-1">
                         <button
@@ -109,7 +109,7 @@ const ArcNavbar = () => {
                             navigate('/about');
                             setContactDropdownOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
                         >
                           <Info size={18} className="text-gray-400" />
                           <span className="flex-1 text-left text-sm font-medium">About Us</span>
@@ -121,7 +121,7 @@ const ArcNavbar = () => {
                             navigate('/contact');
                             setContactDropdownOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
                         >
                           <Mail size={18} className="text-gray-400" />
                           <span className="flex-1 text-left text-sm font-medium">Contact Us</span>
@@ -152,9 +152,9 @@ const ArcNavbar = () => {
 
                   {/* Dropdown */}
                   {open && (
-                    <div className="absolute right-0 mt-2 w-72 backdrop-blur-lg bg-white/10 rounded-xl shadow-2xl py-2 border border-white/20 overflow-hidden animate-slideDown">
+                    <div className="absolute right-0 mt-2 w-72 backdrop-blur-xl bg-slate-900/95 rounded-xl shadow-2xl py-2 border border-white/30 overflow-hidden animate-slideDown">
                       {/* Profile Header */}
-                      <div className="px-4 py-3 bg-white/5 flex gap-3 items-center border-b border-white/10">
+                      <div className="px-4 py-3 bg-slate-800/80 flex gap-3 items-center border-b border-white/20">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
                           {profilePicture ? (
                             <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
@@ -175,7 +175,7 @@ const ArcNavbar = () => {
                             navigate('/profile');
                             setOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
                         >
                           <FaUser className="text-gray-400" />
                           <span className="flex-1 text-left text-sm font-medium">My Profile</span>
@@ -187,7 +187,7 @@ const ArcNavbar = () => {
                             navigate('/settings');
                             setOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
                         >
                           <FaCog className="text-gray-400" />
                           <span className="flex-1 text-left text-sm font-medium">Settings</span>
@@ -196,7 +196,7 @@ const ArcNavbar = () => {
                       </div>
 
                       {/* Divider */}
-                      <div className="border-t border-white/10 my-1"></div>
+                      <div className="border-t border-white/20 my-1"></div>
 
                       {/* Logout */}
                       <button
@@ -240,7 +240,7 @@ const ArcNavbar = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden backdrop-blur-lg bg-white/10 rounded-3xl mt-4 mx-4 shadow-lg border border-white/20">
+          <div className="md:hidden backdrop-blur-xl bg-slate-900/95 rounded-3xl mt-4 mx-4 shadow-2xl border border-white/30">
             <div className="px-6 py-4 space-y-3">
               {navItems.map((item, idx) => (
                 <button
@@ -249,7 +249,7 @@ const ArcNavbar = () => {
                     navigate(item.path);
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between text-white hover:bg-white/10 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
+                  className="w-full flex items-center justify-between text-white hover:bg-white/20 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
                 >
                   <span>{item.label}</span>
                   <ChevronRight size={16} className="text-gray-400" />
@@ -260,13 +260,13 @@ const ArcNavbar = () => {
               <div className="space-y-1">
                 <button
                   onClick={() => setContactDropdownOpen(!contactDropdownOpen)}
-                  className="w-full flex items-center justify-between text-white hover:bg-white/10 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
+                  className="w-full flex items-center justify-between text-white hover:bg-white/20 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
                 >
                   <span>CONTACT</span>
                   <ChevronRight size={16} className={`text-gray-400 transition-transform ${contactDropdownOpen ? 'rotate-90' : ''}`} />
                 </button>
                 {contactDropdownOpen && (
-                  <div className="pl-4 space-y-1 backdrop-blur-xl bg-slate-900/60 rounded-lg p-2 border border-white/20">
+                  <div className="pl-4 space-y-1 backdrop-blur-xl bg-slate-800/90 rounded-lg p-2 border border-white/30">
                     {contactSubmenu.map((item, idx) => (
                       <button
                         key={idx}
@@ -285,13 +285,13 @@ const ArcNavbar = () => {
               </div>
               
               {isEmail ? (
-                <div className="pt-3 border-t border-white/10 space-y-3">
+                <div className="pt-3 border-t border-white/20 space-y-3">
                   <button
                     onClick={() => {
                       navigate('/profile');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-lg"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/20 rounded-lg"
                   >
                     <FaUser className="text-gray-400" />
                     <span className="text-sm font-medium">My Profile</span>
@@ -301,7 +301,7 @@ const ArcNavbar = () => {
                       navigate('/settings');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-lg"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/20 rounded-lg"
                   >
                     <FaCog className="text-gray-400" />
                     <span className="text-sm font-medium">Settings</span>
@@ -315,7 +315,7 @@ const ArcNavbar = () => {
                   </button>
                 </div>
               ) : (
-                <div className="pt-3 border-t border-white/10 space-y-3">
+                <div className="pt-3 border-t border-white/20 space-y-3">
                   <button
                     onClick={() => {
                       navigate('/signin');
