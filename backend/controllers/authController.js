@@ -68,18 +68,20 @@ export const signup = asyncHandler(async (req, res, next) => {
  * @access  Public
  */
 export const login = asyncHandler(async (req, res, next) => {
-    const { loginId, email, password } = req.body;
+    const { identifier, password } = req.body;
 
     // Build query based on provided credentials
-    let query = {};
-    if (loginId) {
-        query.loginId = loginId.toUpperCase();
-    } else if (email) {
-        query.email = email.toLowerCase();
-    }
+    // let query = {};
+    // if (loginId) {
+    //     query.loginId = loginId.toUpperCase();
+    // } else if (email) {
+    //     query.email = email.toLowerCase();
+    // }
 
     // Find user and include password field
-    const user = await User.findOne(query).select('+password');
+    const user = await User.findOne({
+        $or: [{email: identifier.toLowerCase()}, {loginId: identifier.toUpperCase()}]
+    }).select('+password');
 
     if (!user) {
         return next(new AppError('Invalid credentials', 401));

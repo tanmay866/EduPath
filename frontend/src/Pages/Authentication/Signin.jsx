@@ -8,7 +8,7 @@ const Signin = () => {
   const navigate = useNavigate();
   const formik  = useFormik({
     initialValues: {
-      email: "",
+      identifier: "",
       password: ""
     },
     onSubmit: async (values,{resetForm}) => {
@@ -59,11 +59,11 @@ const Signin = () => {
                 Email Address / Login ID
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="identifier"
+                name="identifier"
+                type="text"
                 required
-                value={formik.values.email}
+                value={formik.values.identifier}
                 onChange={formik.handleChange}
                 className="appearance-none relative block w-full px-3 py-3 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="john@example.com / MEPA2026002"

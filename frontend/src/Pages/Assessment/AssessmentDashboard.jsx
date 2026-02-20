@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import API from "../services/assessmentService";
+import API from "../Services/assessmentService";
 import { useQuiz } from "../context/QuizContext";
 import { useNavigate } from "react-router-dom";
 import AssessmentSidebar from "../../component/Assessment/AssessmentSidebar";
