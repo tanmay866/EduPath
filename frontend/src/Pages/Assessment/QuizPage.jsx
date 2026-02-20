@@ -247,7 +247,7 @@ const QuizPage = () => {
   const seconds = timer % 60;
 
   return (
-    <div className="flex min-h-screen bg-slate-900 mt-26">
+    <div className="flex min-h-screen bg-slate-900">
       <AssessmentSidebar />
       
       <div className="flex-1 flex flex-col">

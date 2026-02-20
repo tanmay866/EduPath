@@ -154,7 +154,7 @@ const ResultPage = () => {
   const insight = getPerformanceInsight();
 
   return (
-    <div className="flex min-h-screen bg-slate-900 mt-26">
+    <div className="flex min-h-screen bg-slate-900">
       <AssessmentSidebar />
       
       <div className="flex-1 p-6 overflow-auto">

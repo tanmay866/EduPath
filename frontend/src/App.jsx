@@ -18,22 +18,21 @@ import SettingsPage from './Pages/Settings/SettingsPage'
 const App = () => {
   return (
     <div className="bg-slate-950 min-h-screen">
-      <Navbar />
+      
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/work" element={<Work />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/signin" element={<Signin />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/assessment" element={<AssessmentDashboard />} />
-        <Route path="/assessment/instructions" element={<AssessmentInstructions />} />
-        <Route path="/assessment/quiz" element={<QuizPage />} />
-        <Route path="/assessment/result" element={<ResultPage />} />
+        <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
+        <Route path="/about" element={<><Navbar /><About /><Footer /></>} />
+        <Route path="/work" element={<><Navbar /><Work /><Footer /></>} />
+        <Route path="/contact" element={<><Navbar /><Contact /><Footer /></>} />
+        <Route path="/signup" element={<><Navbar /><Signup /></>} />
+        <Route path="/signin" element={<><Navbar /><Signin /></>} />
+        <Route path="/profile" element={<><Navbar /><ProfilePage /><Footer /></>} />
+        <Route path="/settings" element={<><Navbar /><SettingsPage /><Footer /></>} />
+        <Route path="/assessment" element={<><Navbar /><AssessmentDashboard /><Footer /></>} />
+        <Route path="/assessment/instructions" element={<><Navbar /><AssessmentInstructions /><Footer /></>} />
+        <Route path="/assessment/quiz" element={<><Navbar /><QuizPage /><Footer /></>} />
+        <Route path="/assessment/result" element={<><Navbar /><ResultPage /><Footer /></>} />
       </Routes>
-      <Footer />
     </div>
   )
 }
