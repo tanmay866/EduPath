@@ -53,7 +53,7 @@ const AssessmentInstructions = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-900 mt-28">
+    <div className="flex min-h-screen bg-slate-900">
       <AssessmentSidebar />
       <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
         <div className="max-w-4xl mx-auto">

@@ -28,10 +28,10 @@ const App = () => {
         <Route path="/signin" element={<><Navbar /><Signin /></>} />
         <Route path="/profile" element={<><Navbar /><ProfilePage /><Footer /></>} />
         <Route path="/settings" element={<><Navbar /><SettingsPage /><Footer /></>} />
-        <Route path="/assessment" element={<><Navbar /><AssessmentDashboard /><Footer /></>} />
-        <Route path="/assessment/instructions" element={<><Navbar /><AssessmentInstructions /><Footer /></>} />
-        <Route path="/assessment/quiz" element={<><Navbar /><QuizPage /><Footer /></>} />
-        <Route path="/assessment/result" element={<><Navbar /><ResultPage /><Footer /></>} />
+        <Route path="/assessment" element={<><AssessmentDashboard /><Footer /></>} />
+        <Route path="/assessment/instructions" element={<><AssessmentInstructions /><Footer /></>} />
+        <Route path="/assessment/quiz" element={<><QuizPage /><Footer /></>} />
+        <Route path="/assessment/result" element={<><ResultPage /><Footer /></>} />
       </Routes>
     </div>
   )

@@ -51,7 +51,7 @@ const AssessmentSidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-gray-900 min-h-screen p-6 flex flex-col sticky top-0 h-screen overflow-y-auto">
+    <div className="w-64 bg-gray-900 max-h-[70%] p-6 flex flex-col sticky top-0 h-screen overflow-y-auto">
       {/* Logo/Header */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-white mb-1">EduPath</h2>

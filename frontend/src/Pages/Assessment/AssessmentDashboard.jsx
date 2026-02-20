@@ -16,15 +16,36 @@ const AssessmentDashboard = () => {
     lastAttemptStatus: "Pass",
   };
 
-  // 🎯 Static Available Assessment (will be replaced with API later)
-  const availableAssessment = {
-    title: "Frontend Development Assessment",
-    skill: "React.js",
-    duration: 30,
-    totalQuestions: 10,
-    difficultyLevel: "Intermediate",
-    isAvailable: true,
-  };
+  // 🎯 Static Available Assessments (will be replaced with API later)
+  const availableAssessment = [
+    {
+      id: "assessment-1",
+      title: "Frontend Development Assessment",
+      skill: "React.js",
+      duration: 30,
+      totalQuestions: 10,
+      difficultyLevel: "Intermediate",
+      isAvailable: true,
+    },
+    {
+      id: "assessment-2",
+      title: "Backend Development Assessment",
+      skill: "Node.js & Express",
+      duration: 45,
+      totalQuestions: 15,
+      difficultyLevel: "Advanced",
+      isAvailable: true,
+    },
+    {
+      id: "assessment-3",
+      title: "Database Design Assessment",
+      skill: "SQL & MongoDB",
+      duration: 35,
+      totalQuestions: 12,
+      difficultyLevel: "Intermediate",
+      isAvailable: true,
+    },
+  ];
 
   // 📜 Static Previous Attempts (will be replaced with API later)
   const previousAttempts = [
@@ -83,25 +104,24 @@ const AssessmentDashboard = () => {
     fetchAssessment();
   }, []);
 
-  const handleStartAssessment = () => {
+  const handleStartAssessment = (assessment) => {
     // Set assessment data before navigating
     setAssessment({
-      title: availableAssessment.title,
-      skill: availableAssessment.skill,
-      duration: availableAssessment.duration,
-      totalQuestions: availableAssessment.totalQuestions,
-      assessmentId: "static-001",
+      title: assessment.title,
+      skill: assessment.skill,
+      duration: assessment.duration,
+      totalQuestions: assessment.totalQuestions,
+      assessmentId: assessment.id,
       questions: [], // Will be loaded in instructions
     });
     navigate("/assessment/instructions");
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 p-6 mt-28 flex">
-      <div>
-        <AssessmentSidebar />
-      </div>
-      <div className="max-w-7xl mx-auto ">
+    <div className="flex min-h-screen bg-slate-900">
+      <AssessmentSidebar />
+      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto">
+        <div className="max-w-7xl mx-auto">
 
         {/* 1️⃣ PAGE HEADER SECTION */}
         <div className="mb-8">
@@ -206,77 +226,68 @@ const AssessmentDashboard = () => {
 
         </div>
 
-        {/* 3️⃣ AVAILABLE ASSESSMENT CARD */}
+        {/* 3️⃣ AVAILABLE ASSESSMENTS CARDS */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Available Assessment
+            Available Assessments
           </h2>
 
-          {availableAssessment.isAvailable ? (
-            <div className="backdrop-blur-lg bg-gradient-to-r from-indigo-500/40 to-purple-600/40 rounded-xl shadow-2xl p-8 text-white border border-indigo-400/30">
-              <div className="grid md:grid-cols-2 gap-6">
-                
-                {/* Left Section */}
-                <div>
-                  <h3 className="text-3xl font-bold mb-3">
-                    {availableAssessment.title}
-                  </h3>
-                  <p className="text-indigo-100 mb-6">
-                    Evaluate your knowledge and earn certification
-                  </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {availableAssessment.map((assessment) => (
+              <div
+                key={assessment.id}
+                className="backdrop-blur-lg bg-gradient-to-br from-indigo-500/40 to-purple-600/40 rounded-xl shadow-2xl p-6 text-white border border-indigo-400/30 hover:border-indigo-300/50 transition-all hover:scale-105 flex flex-col"
+              >
+                <h3 className="text-2xl font-bold mb-3">
+                  {assessment.title}
+                </h3>
+                <p className="text-indigo-100 mb-4 text-sm">
+                  Evaluate your knowledge and earn certification
+                </p>
 
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                      </svg>
-                      <span className="font-medium">Skill: {availableAssessment.skill}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                      </svg>
-                      <span className="font-medium">Duration: {availableAssessment.duration} minutes</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                        <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="font-medium">Questions: {availableAssessment.totalQuestions}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                      </svg>
-                      <span className="font-medium">Level: {availableAssessment.difficultyLevel}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleStartAssessment}
-                    className="backdrop-blur-lg bg-white/20 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-white/30 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 border border-white/30 hover:border-white/50"
-                  >
-                    Start Assessment →
-                  </button>
-                </div>
-
-                {/* Right Section - Illustration */}
-                <div className="hidden md:flex items-center justify-center">
-                  <div className="text-center">
-                    <svg className="w-48 h-48 text-white opacity-20" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                <div className="space-y-2 mb-6 flex-grow">
+                  <div className="flex items-center gap-2 text-sm">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                      <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
                     </svg>
+                    <span className="font-medium">Skill: {assessment.skill}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Duration: {assessment.duration} minutes</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                      <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Questions: {assessment.totalQuestions}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                    <span className="font-medium">Level: {assessment.difficultyLevel}</span>
                   </div>
                 </div>
 
+                <button
+                  onClick={() => handleStartAssessment(assessment)}
+                  className="w-full backdrop-blur-lg bg-white/20 text-white px-6 py-3 rounded-xl font-bold hover:bg-white/30 transition-all shadow-xl hover:shadow-2xl border border-white/30 hover:border-white/50 "
+                >
+                  Start Assessment →
+                </button>
               </div>
-            </div>
-          ) : (
+            ))}
+          </div>
+
+          {availableAssessment.length === 0 && (
             // Empty State
             <div className="backdrop-blur-lg bg-white/5 rounded-xl shadow-xl p-12 text-center border border-white/10">
               <svg className="w-24 h-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,6 +397,7 @@ const AssessmentDashboard = () => {
           </div>
         </div>
 
+        </div>
       </div>
     </div>
   );
