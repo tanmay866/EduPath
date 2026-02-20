@@ -54,18 +54,17 @@ const App = () => {
       
       <Routes>
         <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
-        <Route path="/about" element={<><Navbar /><About /><Footer /></>} />
-        <Route path="/work" element={<><Navbar /><Work /><Footer /></>} />
-        <Route path="/contact" element={<><Navbar /><Contact /><Footer /></>} />
+        <Route path="/about" element={<><Navbar /><About /></>} />
+        <Route path="/work" element={<><Navbar /><Work /></>} />
+        <Route path="/contact" element={<><Navbar /><Contact /></>} />
         <Route path="/signup" element={<><Navbar /><Signup /></>} />
         <Route path="/signin" element={<><Navbar /><Signin /></>} />
-        <Route path="/profile" element={<><Navbar /><ProfilePage /><Footer /></>} />
-        <Route path="/settings" element={<><Navbar /><SettingsPage /><Footer /></>} />
-        <Route path="/assessment" element={<><AssessmentDashboard /><Footer /></>} />
-        <Route path="/assessment/instructions" element={<><AssessmentInstructions /><Footer /></>} />
-        <Route path="/assessment/quiz" element={<><QuizPage /><Footer /></>} />
-        <Route path="/assessment/result" element={<><ResultPage /><Footer /></>} />
-
+        <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
+        <Route path="/settings" element={<><Navbar /><SettingsPage /></>} />
+        <Route path="/assessment" element={<><AssessmentDashboard /></>} />
+        <Route path="/assessment/instructions" element={<><AssessmentInstructions /></>} />
+        <Route path="/assessment/quiz" element={<><QuizPage /></>} />
+        <Route path="/assessment/result" element={<><ResultPage /></>} />
       </Routes>
     </div>
   )

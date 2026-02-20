@@ -154,39 +154,68 @@ const ResultPage = () => {
   const insight = getPerformanceInsight();
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
+    <div className="flex min-h-screen bg-slate-900 relative">
+      {/* Live Moving Background Animations */}
+      <div className="animated-bg">
+        {/* Moving Shapes */}
+        <div className="moving-shape shape-1"></div>
+        <div className="moving-shape shape-2"></div>
+        <div className="moving-shape shape-3"></div>
+        <div className="moving-shape shape-4"></div>
+        <div className="moving-shape shape-5"></div>
+        <div className="moving-shape shape-6"></div>
+        <div className="moving-shape shape-7"></div>
+        <div className="moving-shape shape-8"></div>
+        
+        {/* Rotating Center Gradient */}
+        <div className="rotating-gradient"></div>
+        
+        {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
+        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
+        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
+        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
+        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+      </div>
+
       <AssessmentSidebar />
       
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex-1 p-4 overflow-auto relative z-10">
+        <div className="max-w-6xl mx-auto space-y-4">
 
           {/* 1️⃣ SCORE SUMMARY CARD - Main Focus */}
-          <div className="backdrop-blur-lg bg-gradient-to-br from-white/10 to-white/5 shadow-2xl rounded-2xl p-8 border-2 border-white/20">
+          <div className="bg-slate-800 shadow-2xl rounded-xl p-5 border-2 border-white/20">
             
-            <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold text-white mb-2">Assessment Results</h1>
-              <p className="text-gray-400">{assessmentTitle}</p>
+            <div className="text-center mb-4">
+              <h1 className="text-2xl font-bold text-white mb-1">Assessment Results</h1>
+              <p className="text-gray-400 text-sm">{assessmentTitle}</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-5">
               
               {/* Left: Score Display */}
-              <div className="flex flex-col items-center justify-center backdrop-blur-lg bg-white/5 rounded-xl p-6 border border-white/10">
+              <div className="flex flex-col items-center justify-center bg-slate-800 rounded-xl p-4 border border-white/10">
                 
                 {/* Big Score Badge */}
-                <div className="relative mb-4">
-                  <div className={`w-40 h-40 rounded-full flex items-center justify-center border-8 ${
+                <div className="relative mb-3">
+                  <div className={`w-32 h-32 rounded-full flex items-center justify-center border-6 ${
                     passed ? 'border-green-500 bg-green-900/30' : 'border-red-500 bg-red-900/30'
                   }`}>
                     <div className="text-center">
-                      <div className={`text-5xl font-bold ${passed ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className={`text-4xl font-bold ${passed ? 'text-green-400' : 'text-red-400'}`}>
                         {percentage}%
                       </div>
                     </div>
                   </div>
                   {passed && (
-                    <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-3">
-                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                     </div>
@@ -194,12 +223,12 @@ const ResultPage = () => {
                 </div>
 
                 {/* Score Fraction */}
-                <div className="text-4xl font-bold text-white mb-3">
+                <div className="text-3xl font-bold text-white mb-2">
                   {score} <span className="text-gray-500">/</span> {totalQuestions}
                 </div>
 
                 {/* Status Badge */}
-                <div className={`px-6 py-2 rounded-full font-bold text-lg ${
+                <div className={`px-4 py-1.5 rounded-full font-bold text-base ${
                   passed 
                     ? 'bg-green-600 text-white' 
                     : 'bg-red-600 text-white'
@@ -210,46 +239,46 @@ const ResultPage = () => {
               </div>
 
               {/* Right: Details */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 
-                <div className="backdrop-blur-lg bg-white/5 rounded-lg p-4 border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <div className="backdrop-blur-lg bg-indigo-500/20 p-3 rounded-lg border border-indigo-500/30">
-                      <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-slate-700 rounded-lg p-3 border border-white/10">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-500/30">
+                      <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Skill Assessed</p>
-                      <p className="text-white font-semibold text-lg">{skill}</p>
+                      <p className="text-gray-400 text-xs">Skill Assessed</p>
+                      <p className="text-white font-semibold text-base">{skill}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="backdrop-blur-lg bg-white/5 rounded-lg p-4 border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <div className="backdrop-blur-lg bg-blue-500/20 p-3 rounded-lg border border-blue-500/30">
-                      <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-slate-700 rounded-lg p-3 border border-white/10">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-500/20 p-2 rounded-lg border border-blue-500/30">
+                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Attempt Date</p>
-                      <p className="text-white font-semibold">{attemptDate}</p>
+                      <p className="text-gray-400 text-xs">Attempt Date</p>
+                      <p className="text-white font-semibold text-sm">{attemptDate}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="backdrop-blur-lg bg-white/5 rounded-lg p-4 border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <div className="backdrop-blur-lg bg-purple-500/20 p-3 rounded-lg border border-purple-500/30">
-                      <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-slate-700 rounded-lg p-3 border border-white/10">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-purple-500/20 p-2 rounded-lg border border-purple-500/30">
+                      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <p className="text-gray-400 text-sm">Time Taken</p>
-                      <p className="text-white font-semibold">{timeTaken}</p>
+                      <p className="text-gray-400 text-xs">Time Taken</p>
+                      <p className="text-white font-semibold text-sm">{timeTaken}</p>
                     </div>
                   </div>
                 </div>
@@ -260,60 +289,60 @@ const ResultPage = () => {
 
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
 
             {/* 2️⃣ PERFORMANCE BREAKDOWN */}
-            <div className="backdrop-blur-lg bg-white/5 rounded-xl p-6 border border-white/10">
+            <div className="bg-slate-800 rounded-xl p-4 border border-white/10">
               
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h2 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 Performance Breakdown
               </h2>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 
-                <div className="flex justify-between items-center p-3 backdrop-blur-lg bg-white/5 rounded-lg border border-white/10">
-                  <span className="text-gray-300 font-medium">Total Questions</span>
-                  <span className="text-white font-bold text-lg">{totalQuestions}</span>
+                <div className="flex justify-between items-center p-2.5 bg-slate-700 rounded-lg border border-white/10">
+                  <span className="text-gray-300 font-medium text-sm">Total Questions</span>
+                  <span className="text-white font-bold text-base">{totalQuestions}</span>
                 </div>
 
-                <div className="flex justify-between items-center p-3 backdrop-blur-lg bg-green-500/20 rounded-lg border border-green-500/30">
-                  <span className="text-green-300 font-medium flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex justify-between items-center p-2.5 bg-green-500/20 rounded-lg border border-green-500/30">
+                  <span className="text-green-300 font-medium text-sm flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                     Correct Answers
                   </span>
-                  <span className="text-green-400 font-bold text-lg">{correctAnswers}</span>
+                  <span className="text-green-400 font-bold text-base">{correctAnswers}</span>
                 </div>
 
-                <div className="flex justify-between items-center p-3 backdrop-blur-lg bg-red-500/20 rounded-lg border border-red-500/30">
-                  <span className="text-red-300 font-medium flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex justify-between items-center p-2.5 bg-red-500/20 rounded-lg border border-red-500/30">
+                  <span className="text-red-300 font-medium text-sm flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
                     Incorrect Answers
                   </span>
-                  <span className="text-red-400 font-bold text-lg">{wrongAnswers}</span>
+                  <span className="text-red-400 font-bold text-base">{wrongAnswers}</span>
                 </div>
 
                 {unanswered > 0 && (
-                  <div className="flex justify-between items-center p-3 backdrop-blur-lg bg-yellow-500/20 rounded-lg border border-yellow-500/30">
-                    <span className="text-yellow-300 font-medium flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex justify-between items-center p-2.5 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
+                    <span className="text-yellow-300 font-medium text-sm flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                       </svg>
                       Unanswered
                     </span>
-                    <span className="text-yellow-400 font-bold text-lg">{unanswered}</span>
+                    <span className="text-yellow-400 font-bold text-base">{unanswered}</span>
                   </div>
                 )}
 
-                <div className="flex justify-between items-center p-3 backdrop-blur-lg bg-indigo-500/20 rounded-lg border border-indigo-500/30">
-                  <span className="text-indigo-300 font-medium">Passing Score Required</span>
-                  <span className="text-indigo-400 font-bold text-lg">{passingScore}%</span>
+                <div className="flex justify-between items-center p-2.5 bg-indigo-500/20 rounded-lg border border-indigo-500/30">
+                  <span className="text-indigo-300 font-medium text-sm">Passing Score Required</span>
+                  <span className="text-indigo-400 font-bold text-base">{passingScore}%</span>
                 </div>
 
               </div>
@@ -321,7 +350,7 @@ const ResultPage = () => {
             </div>
 
             {/* 3️⃣ PERFORMANCE INSIGHT */}
-            <div className="backdrop-blur-lg bg-white/5 rounded-xl p-6 border border-white/10">
+            <div className="bg-slate-800 rounded-xl p-6 border border-white/10">
               
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,7 +360,7 @@ const ResultPage = () => {
               </h2>
 
               <div className={`p-4 rounded-lg border ${
-                passed ? 'backdrop-blur-lg bg-green-500/20 border-green-500/30' : 'backdrop-blur-lg bg-red-500/20 border-red-500/30'
+                passed ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'
               }`}>
                 <p className={`text-lg font-semibold ${insight.color} mb-4`}>
                   {insight.message}
@@ -339,13 +368,13 @@ const ResultPage = () => {
               </div>
 
               {/* Progress Visualization */}
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3">
                 <div>
-                  <div className="flex justify-between text-sm text-gray-400 mb-2">
+                  <div className="flex justify-between text-xs text-gray-400 mb-1.5">
                     <span>Accuracy Rate</span>
                     <span className="font-semibold text-white">{percentage}%</span>
                   </div>
-                  <div className="w-full backdrop-blur-lg bg-white/10 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all ${
                         passed ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gradient-to-r from-red-500 to-red-400'
@@ -355,22 +384,22 @@ const ResultPage = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-green-400">{correctAnswers}</div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="bg-slate-700 border border-white/10 rounded-lg p-2.5 text-center">
+                    <div className="text-xl font-bold text-green-400">{correctAnswers}</div>
                     <div className="text-xs text-gray-400">Correct</div>
                   </div>
-                  <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold text-red-400">{wrongAnswers}</div>
+                  <div className="bg-slate-700 border border-white/10 rounded-lg p-2.5 text-center">
+                    <div className="text-xl font-bold text-red-400">{wrongAnswers}</div>
                     <div className="text-xs text-gray-400">Incorrect</div>
                   </div>
                 </div>
               </div>
 
               {/* Recommendations */}
-              <div className="mt-6 p-4 backdrop-blur-lg bg-indigo-500/20 border border-indigo-500/30 rounded-lg">
-                <h3 className="text-sm font-bold text-indigo-300 mb-2">💡 Recommendation</h3>
-                <p className="text-gray-300 text-sm">
+              <div className="mt-4 p-3 bg-indigo-500/20 border border-indigo-500/30 rounded-lg">
+                <h3 className="text-xs font-bold text-indigo-300 mb-1.5">💡 Recommendation</h3>
+                <p className="text-gray-300 text-xs">
                   {passed 
                     ? "Continue practicing to maintain your skills. Try more advanced assessments to challenge yourself."
                     : "Review the incorrect answers below and strengthen your understanding of those concepts before retaking."}
@@ -382,11 +411,11 @@ const ResultPage = () => {
           </div>
 
           {/* 4️⃣ QUESTION REVIEW SECTION */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-xl p-6 border border-white/10">
+          <div className="bg-slate-800 rounded-xl p-4 border border-white/10">
             
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 Question Review
@@ -394,21 +423,21 @@ const ResultPage = () => {
               
               <button
                 onClick={() => setShowReview(!showReview)}
-                className="flex items-center gap-2 px-4 py-2 backdrop-blur-lg bg-indigo-500/40 border-2 border-indigo-400/50 text-white rounded-lg hover:bg-indigo-500/50 hover:scale-105 transition-all font-semibold"
+                className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/40 border-2 border-indigo-400/50 text-white rounded-lg hover:bg-indigo-500/50 hover:scale-105 transition-all font-semibold text-sm"
               >
                 {showReview ? 'Hide' : 'Show'} Review
-                <svg className={`w-4 h-4 transition-transform ${showReview ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-3.5 h-3.5 transition-transform ${showReview ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
             </div>
 
             {showReview && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {questionReview.map((q, index) => (
                   <div 
                     key={q.id}
-                    className={`p-5 rounded-lg border-2 ${
+                    className={`p-4 rounded-lg border-2 ${
                       q.isCorrect 
                         ? 'bg-green-900/10 border-green-700' 
                         : q.selectedAnswer 
@@ -418,8 +447,8 @@ const ResultPage = () => {
                   >
                     
                     {/* Question Header */}
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                    <div className="flex items-start gap-2.5 mb-2.5">
+                      <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm ${
                         q.isCorrect 
                           ? 'bg-green-600 text-white' 
                           : q.selectedAnswer 
@@ -429,34 +458,34 @@ const ResultPage = () => {
                         {q.isCorrect ? '✓' : q.selectedAnswer ? '✗' : '?'}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-white font-semibold text-lg mb-1">
+                        <h3 className="text-white font-semibold text-base mb-0.5">
                           Q{index + 1}. {q.question}
                         </h3>
                       </div>
                     </div>
 
                     {/* Answers */}
-                    <div className="ml-11 space-y-2">
+                    <div className="ml-9 space-y-1.5">
                       
                       {q.selectedAnswer && (
-                        <div className={`p-3 rounded-lg ${
+                        <div className={`p-2.5 rounded-lg ${
                           q.isCorrect ? 'bg-green-900/30' : 'bg-red-900/30'
                         }`}>
-                          <span className={`text-sm font-semibold ${
+                          <span className={`text-xs font-semibold ${
                             q.isCorrect ? 'text-green-300' : 'text-red-300'
                           }`}>
                             Your Answer:
                           </span>
-                          <p className="text-white mt-1">{q.selectedAnswer}</p>
+                          <p className="text-white text-sm mt-0.5">{q.selectedAnswer}</p>
                         </div>
                       )}
 
                       {!q.isCorrect && (
-                        <div className="p-3 rounded-lg bg-green-900/30">
-                          <span className="text-sm font-semibold text-green-300">
+                        <div className="p-2.5 rounded-lg bg-green-900/30">
+                          <span className="text-xs font-semibold text-green-300">
                             Correct Answer:
                           </span>
-                          <p className="text-white mt-1">{q.correctAnswer}</p>
+                          <p className="text-white text-sm mt-0.5">{q.correctAnswer}</p>
                         </div>
                       )}
 
@@ -470,15 +499,15 @@ const ResultPage = () => {
           </div>
 
           {/* 5️⃣ ACTION BUTTONS */}
-          <div className="backdrop-blur-lg bg-white/5 rounded-xl p-6 border border-white/10">
+          <div className="bg-slate-800 rounded-xl p-4 border border-white/10">
             
-            <div className="grid md:grid-cols-4 gap-4">
+            <div className="grid md:grid-cols-4 gap-3">
               
               <button
                 onClick={() => navigate("/assessment/instructions")}
-                className="flex items-center justify-center gap-2 px-6 py-4 backdrop-blur-lg bg-green-500/40 border-2 border-green-400/50 text-white rounded-lg font-bold hover:bg-green-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500/40 border-2 border-green-400/50 text-white text-sm rounded-lg font-bold hover:bg-green-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Retake Assessment
@@ -486,9 +515,9 @@ const ResultPage = () => {
 
               <button
                 onClick={() => navigate("/assessment")}
-                className="flex items-center justify-center gap-2 px-6 py-4 backdrop-blur-lg bg-indigo-500/40 border-2 border-indigo-400/50 text-white rounded-lg font-bold hover:bg-indigo-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-500/40 border-2 border-indigo-400/50 text-white text-sm rounded-lg font-bold hover:bg-indigo-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
                 Back to Dashboard
@@ -496,9 +525,9 @@ const ResultPage = () => {
 
               <button
                 disabled
-                className="flex items-center justify-center gap-2 px-6 py-4 backdrop-blur-lg bg-white/10 border border-white/20 text-gray-400 rounded-lg font-bold cursor-not-allowed opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 border border-white/20 text-gray-400 text-sm rounded-lg font-bold cursor-not-allowed opacity-50"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Download Certificate
@@ -507,9 +536,9 @@ const ResultPage = () => {
 
               <button
                 disabled
-                className="flex items-center justify-center gap-2 px-6 py-4 backdrop-blur-lg bg-white/10 border border-white/20 text-gray-400 rounded-lg font-bold cursor-not-allowed opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 border border-white/20 text-gray-400 text-sm rounded-lg font-bold cursor-not-allowed opacity-50"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 Detailed Analytics

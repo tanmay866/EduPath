@@ -263,8 +263,37 @@ const ProfilePage = () => {
   const initials = `${profileData.firstName?.charAt(0) || ''}${profileData.lastName?.charAt(0) || ''}`.toUpperCase() || 'YN';
 
   return (
-    <div className="min-h-screen bg-slate-900 py-20 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-slate-900 pt-32 pb-20 px-4 relative">
+      {/* Live Moving Background Animations */}
+      <div className="animated-bg">
+        {/* Moving Shapes */}
+        <div className="moving-shape shape-1"></div>
+        <div className="moving-shape shape-2"></div>
+        <div className="moving-shape shape-3"></div>
+        <div className="moving-shape shape-4"></div>
+        <div className="moving-shape shape-5"></div>
+        <div className="moving-shape shape-6"></div>
+        <div className="moving-shape shape-7"></div>
+        <div className="moving-shape shape-8"></div>
+        
+        {/* Rotating Center Gradient */}
+        <div className="rotating-gradient"></div>
+        
+        {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
+        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
+        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
+        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
+        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-8 flex items-center gap-4">
           <button
@@ -294,7 +323,7 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column - Profile Card */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl">
+            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
                   <input
@@ -344,7 +373,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Settings Card - Navigate to Settings Page */}
-            <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
+            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-500/40 group-hover:border-purple-400/50 transition-all">
@@ -367,7 +396,7 @@ const ProfilePage = () => {
           {/* Right Column - Forms */}
           <div className="lg:col-span-2">
             {/* Profile Information Card */}
-            <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 border border-white/10 h-full shadow-xl">
+            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 h-full shadow-xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/30 rounded-xl flex items-center justify-center">
                   <User size={20} className="text-white" />
@@ -491,7 +520,7 @@ const ProfilePage = () => {
       {/* Image Editor Modal */}
       {showImageEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="backdrop-blur-lg bg-white/5 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
+          <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">Adjust Profile Picture</h3>
               <button

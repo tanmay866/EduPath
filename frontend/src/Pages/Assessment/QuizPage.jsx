@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "../context/QuizContext";
-import API from "../services/assessmentService";
+import API from "../Services/assessmentService";
 import AssessmentSidebar from "../../component/Assessment/AssessmentSidebar";
 
 import OptionItem from "../../component/Quiz/OptionItem";
@@ -247,55 +247,78 @@ const QuizPage = () => {
   const seconds = timer % 60;
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
+    <div className="flex min-h-screen bg-slate-900 relative">
+      {/* Live Moving Background Animations */}
+      <div className="animated-bg">
+        {/* Moving Shapes */}
+        <div className="moving-shape shape-1"></div>
+        <div className="moving-shape shape-2"></div>
+        <div className="moving-shape shape-3"></div>
+        <div className="moving-shape shape-4"></div>
+        <div className="moving-shape shape-5"></div>
+        <div className="moving-shape shape-6"></div>
+        <div className="moving-shape shape-7"></div>
+        <div className="moving-shape shape-8"></div>
+        
+        {/* Rotating Center Gradient */}
+        <div className="rotating-gradient"></div>
+        
+        {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
+        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
+        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
+        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
+        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
+        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+      </div>
+
       <AssessmentSidebar />
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative z-10">
         
-        {/* 🎯 TOP HEADER BAR */}
-        <div className="backdrop-blur-lg bg-white/5 border-b border-white/10 px-6 py-4 sticky top-0 z-10">
-          <div className="flex items-center justify-between">
-            
-            {/* Left: Assessment Info */}
-            <div className="flex items-center gap-6">
-              <div>
-                <h1 className="text-xl font-bold text-white">{assessment.title}</h1>
-                <p className="text-sm text-gray-400">
-                  Skill: <span className="text-indigo-400 font-semibold">{assessment.skill}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Center: Progress */}
-            <div className="text-center">
-              <p className="text-sm text-gray-400">Question Progress</p>
-              <p className="text-lg font-bold text-white">
-                {currentQuestionIndex + 1} of {questions.length}
-              </p>
-            </div>
-
-            {/* Right: Live Timer */}
-            <div className="text-right">
-              <p className="text-sm text-gray-400 mb-1">Time Remaining</p>
-              <div className={`text-2xl font-bold ${timer < 300 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
-                ⏱ {minutes}:{seconds.toString().padStart(2, "0")}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
         {/* 📝 MAIN CONTENT AREA */}
-        <div className="flex-1 p-6 overflow-auto">
-          <div className="grid grid-cols-10 gap-6 max-w-7xl mx-auto">
+        <div className="flex-1 p-4 overflow-auto">
+          <div className="max-w-7xl mx-auto space-y-8">
+            
+            {/* 🎯 TOP HEADER BAR */}
+            <div className="bg-slate-800 border border-white/10 px-4 py-3 rounded-lg sticky top-4 z-10">
+              <div className="flex items-center justify-between">
+                
+                {/* Left: Assessment Info */}
+                <div className="flex items-center gap-6">
+                  <div>
+                    <h1 className="text-lg font-bold text-white">{assessment.title}</h1>
+                    <p className="text-xs text-gray-400">
+                      Skill: <span className="text-indigo-400 font-semibold">{assessment.skill}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Center: Progress */}
+                <div className="text-center">
+                  <p className="text-xs text-gray-400">Question Progress</p>
+                  <p className="text-base font-bold text-white">
+                    {currentQuestionIndex + 1} of {questions.length}
+                  </p>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="grid grid-cols-10 gap-4">
 
             {/* LEFT PANEL - Question Section (70%) */}
-            <div className="col-span-7 backdrop-blur-lg bg-white/5 p-8 rounded-lg shadow-lg border border-white/10">
+            <div className="col-span-7 bg-slate-800 p-5 rounded-lg shadow-lg border border-white/10">
 
               {/* Question Number & Text */}
-              <div className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/50 text-white px-4 py-2 rounded-lg font-bold text-lg">
+              <div className="mb-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="bg-indigo-600 border border-indigo-400/50 text-white px-3 py-1.5 rounded-lg font-bold text-base">
                     Q{currentQuestionIndex + 1}
                   </span>
                   {isMarked && (
@@ -304,14 +327,14 @@ const QuizPage = () => {
                     </span>
                   )}
                 </div>
-                <h2 className="text-2xl text-white font-semibold leading-relaxed">
+                <h2 className="text-xl text-white font-semibold leading-relaxed">
                   {currentQuestion.question}
                 </h2>
               </div>
 
               {/* Options */}
-              <div className="mb-8">
-                <h3 className="text-gray-400 text-sm font-semibold mb-4 uppercase tracking-wide">
+              <div className="mb-4">
+                <h3 className="text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">
                   Choose your answer:
                 </h3>
                 <div>
@@ -327,14 +350,14 @@ const QuizPage = () => {
               </div>
 
               {/* Navigation Buttons */}
-              <div className="flex items-center justify-between pt-6 border-t border-white/10">
+              <div className="flex items-center justify-between pt-4 border-t border-white/10">
 
                 <button
                   disabled={currentQuestionIndex === 0}
                   onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
-                  className="flex items-center gap-2 px-6 py-3 backdrop-blur-lg bg-white/10 text-gray-300 border border-white/20 rounded-lg hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-gray-300 border border-white/20 rounded-lg hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold text-sm"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                   Previous
@@ -342,13 +365,13 @@ const QuizPage = () => {
 
                 <button
                   onClick={handleMarkForReview}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
                     isMarked 
                       ? 'bg-yellow-500 text-gray-900 hover:bg-yellow-400' 
-                      : 'backdrop-blur-lg bg-white/10 text-gray-300 border border-white/20 hover:bg-white/20'
+                      : 'bg-slate-800 text-gray-300 border border-white/20 hover:bg-slate-700'
                   }`}
                 >
-                  <svg className="w-5 h-5" fill={isMarked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill={isMarked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                   </svg>
                   {isMarked ? 'Unmark' : 'Mark for Review'}
@@ -357,10 +380,10 @@ const QuizPage = () => {
                 <button
                   disabled={currentQuestionIndex === questions.length - 1}
                   onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
-                  className="flex items-center gap-2 px-6 py-3 backdrop-blur-lg bg-indigo-500/40 border-2 border-indigo-400/50 text-white rounded-lg hover:bg-indigo-500/50 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold"
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 border-2 border-indigo-400/50 text-white rounded-lg hover:bg-indigo-500 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold text-sm"
                 >
                   Next
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -370,7 +393,7 @@ const QuizPage = () => {
             </div>
 
             {/* RIGHT PANEL - Control Panel (30%) */}
-            <div className="col-span-3 space-y-6">
+            <div className="col-span-3 space-y-4">
 
               {/* ⏱ TIMER */}
               <QuizTimer
@@ -380,28 +403,28 @@ const QuizPage = () => {
               />
 
               {/* QUESTION NAVIGATOR */}
-              <div className="backdrop-blur-lg bg-white/5 p-5 rounded-lg shadow-lg border border-white/10">
+              <div className="bg-slate-800 p-4 rounded-lg shadow-lg border border-white/10">
 
-                <h3 className="font-bold mb-4 text-white text-sm uppercase tracking-wide">Question Navigator</h3>
+                <h3 className="font-bold mb-3 text-white text-xs uppercase tracking-wide">Question Navigator</h3>
 
-                <div className="grid grid-cols-5 gap-2 mb-4">
+                <div className="grid grid-cols-5 gap-2 mb-3">
 
                   {questions.map((q, index) => {
                     const answered = answers && answers.find((a) => a.questionId === q._id);
                     const visited = visitedQuestions && visitedQuestions.includes(q._id);
                     const marked = markedForReview && markedForReview.includes(q._id);
 
-                    let bgColor = 'backdrop-blur-lg bg-white/10 border border-white/20 text-gray-400'; // Not visited
+                    let bgColor = 'bg-slate-800 border border-white/20 text-gray-400'; // Not visited
                     if (marked) bgColor = 'bg-yellow-500 text-gray-900'; // Marked for review
-                    else if (answered) bgColor = 'backdrop-blur-lg bg-green-500/30 border border-green-500/50 text-green-400'; // Answered
-                    else if (visited) bgColor = 'backdrop-blur-lg bg-blue-500/30 border border-blue-500/50 text-blue-400'; // Visited
+                    else if (answered) bgColor = 'bg-green-600 border border-green-500/50 text-green-400'; // Answered
+                    else if (visited) bgColor = 'bg-blue-600 border border-blue-500/50 text-blue-400'; // Visited
 
                     return (
                       <button
                         key={index}
                         onClick={() => setCurrentQuestionIndex(index)}
-                        className={`p-2 rounded text-sm font-bold transition-all hover:scale-110 ${bgColor}
-                        ${index === currentQuestionIndex ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
+                        className={`p-1.5 rounded text-xs font-bold transition-all hover:scale-110 ${bgColor}
+                        ${index === currentQuestionIndex ? 'ring-2 ring-white ring-offset-1 ring-offset-slate-900' : ''}`}
                       >
                         {index + 1}
                       </button>
@@ -411,21 +434,21 @@ const QuizPage = () => {
                 </div>
 
                 {/* Legend */}
-                <div className="space-y-2 text-xs">
+                <div className="space-y-1.5 text-xs">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 backdrop-blur-lg bg-white/10 border border-white/20 rounded"></div>
+                    <div className="w-3 h-3 bg-slate-800 border border-white/20 rounded"></div>
                     <span className="text-gray-400">Not Visited</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 backdrop-blur-lg bg-blue-500/30 border border-blue-500/50 rounded"></div>
+                    <div className="w-3 h-3 bg-blue-600 border border-blue-500/50 rounded"></div>
                     <span className="text-gray-300">Visited</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 backdrop-blur-lg bg-green-500/30 border border-green-500/50 rounded"></div>
+                    <div className="w-3 h-3 bg-green-600 border border-green-500/50 rounded"></div>
                     <span className="text-gray-300">Answered</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-yellow-500 rounded"></div>
+                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
                     <span className="text-gray-300">Marked for Review</span>
                   </div>
                 </div>
@@ -436,10 +459,10 @@ const QuizPage = () => {
               <button
                 disabled={!allAnswered}
                 onClick={handleSubmitQuiz}
-                className={`w-full py-4 rounded-lg font-bold text-white text-lg transition-all ${
+                className={`w-full py-3 rounded-lg font-bold text-white text-base transition-all ${
                   allAnswered
-                    ? "backdrop-blur-lg bg-green-500/40 border-2 border-green-400/50 hover:bg-green-500/50 hover:shadow-xl transform hover:scale-105"
-                    : "backdrop-blur-lg bg-white/10 border border-white/20 cursor-not-allowed opacity-50"
+                    ? "bg-green-600 border-2 border-green-400/50 hover:bg-green-500 hover:shadow-xl transform hover:scale-105"
+                    : "bg-slate-800 border border-white/20 cursor-not-allowed opacity-50"
                 }`}
               >
                 {allAnswered ? '✓ Submit Assessment' : `Answer All Questions (${answers?.length || 0}/${questions?.length || 0})`}
@@ -447,6 +470,7 @@ const QuizPage = () => {
 
             </div>
 
+          </div>
           </div>
         </div>
 

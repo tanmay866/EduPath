@@ -16,11 +16,16 @@ const Home = () => {
         <div className="moving-shape shape-4"></div>
         <div className="moving-shape shape-5"></div>
         <div className="moving-shape shape-6"></div>
+        <div className="moving-shape shape-7"></div>
+        <div className="moving-shape shape-8"></div>
         
         {/* Rotating Center Gradient */}
         <div className="rotating-gradient"></div>
         
         {/* Floating Particles */}
+        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
+        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
+        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
         <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
         <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
         <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
@@ -33,26 +38,20 @@ const Home = () => {
 
         {/* SECTION 1: HERO (The first code I gave you) */}
       <section className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative z-10">
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight">
-          Learn with EduPath <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-            Upskill Faster
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
+          Your Personalized Path to Success
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400">
+            with EduPath
           </span>
         </h1>
         
-        <p className="mt-4 text-lg text-gray-300 max-w-2xl">
-          A free platform to build your personalized learning path and grow with verified providers.
+        <p className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl">
+          Learn Smarter, Grow Faster with our AI-powered personalized learning platform
         </p>
 
-        {/* Decorative Wave SVG */}
-        <div className="my-10 w-full max-w-md">
-          <svg viewBox="0 0 500 100" className="w-full h-auto">
-            <path d="M0,50 C150,110 350,-10 500,50" fill="none" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" />
-          </svg>
-        </div>
-
         {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
           <button className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
             onClick={() => navigate('/assessment')}
           >

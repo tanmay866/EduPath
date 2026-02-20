@@ -205,6 +205,22 @@ input[type="range"]::-moz-range-thumb:hover {
   animation: moveDiagonal 28s linear infinite 10s;
 }
 
+.shape-7 {
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.7), transparent);
+  top: 5%;
+  animation: moveAcross 16s linear infinite 2s;
+}
+
+.shape-8 {
+  width: 110px;
+  height: 110px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.6), transparent);
+  top: 10%;
+  animation: moveAcrossReverse 19s linear infinite 8s;
+}
+
 .floating-particle {
   position: absolute;
   width: 4px;
