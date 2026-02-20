@@ -17,8 +17,8 @@ const AdminNavbar = () => {
   const currentTitle = routeTitleMap[location.pathname] || 'Dashboard';
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    sessionStorage.clear();
+    window.location.href = '/';
   };
 
   return (

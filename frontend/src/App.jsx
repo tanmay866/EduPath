@@ -26,7 +26,30 @@ import AIAnalytics from './Admin/pages/AIAnalytics'
 import SystemSettings from './Admin/pages/SystemSettings'
 
 const App = () => {
-  return (
+
+  const selectedRole = sessionStorage.getItem('role');
+  if (selectedRole === 'admin') {
+
+    return (
+
+      <div className="bg-slate-950 min-h-screen">
+        {/* Admin Routes */}
+
+        <Routes>
+          <Route path="/*" element={<> <AdminDashboard/> </>} />
+        <Route path="/admin/*" element={<> <AdminDashboard/> </>} />
+        <Route path="/admin/users" element={<> <ManageUsers/> </>} />
+        <Route path="/admin/quiz-attempts" element={<> <QuizAttempts/> </>} />
+        <Route path="/admin/roadmaps" element={<> <RoadmapHistory/> </>} />
+        <Route path="/admin/analytics" element={<> <AIAnalytics/> </>} />
+        <Route path="/admin/settings" element={<> <SystemSettings/> </>} />
+      </Routes>
+
+      </div>
+    )
+
+  } else {
+    return (
     <div className="bg-slate-950 min-h-screen">
       
       <Routes>
@@ -43,16 +66,11 @@ const App = () => {
         <Route path="/assessment/quiz" element={<><QuizPage /><Footer /></>} />
         <Route path="/assessment/result" element={<><ResultPage /><Footer /></>} />
 
-        // Admin Routes
-        <Route path="/admin/*" element={<> <AdminDashboard/> </>} />
-        <Route path="/admin/users" element={<> <ManageUsers/> </>} />
-        <Route path="/admin/quiz-attempts" element={<> <QuizAttempts/> </>} />
-        <Route path="/admin/roadmaps" element={<> <RoadmapHistory/> </>} />
-        <Route path="/admin/analytics" element={<> <AIAnalytics/> </>} />
-        <Route path="/admin/settings" element={<> <SystemSettings/> </>} />
       </Routes>
     </div>
   )
+  }
+  
 }
 
 export default App
