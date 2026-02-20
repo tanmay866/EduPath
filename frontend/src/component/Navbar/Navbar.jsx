@@ -52,7 +52,7 @@ const ArcNavbar = () => {
 
   return (
     <>
-      <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-6xl z-50 bg-gradient-to-r from-blue-100 via-purple-100 to-orange-100 rounded-full shadow-xl">
+      <nav ref={navRef} className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-6xl z-50 backdrop-blur-lg bg-white/5 rounded-full shadow-xl border border-white/10">
         <div className="px-8 py-4">
           <div className="flex items-center justify-between">
             
@@ -60,7 +60,7 @@ const ArcNavbar = () => {
             <div className="flex-shrink-0">
               <button
                 onClick={() => navigate('/')}
-                className="text-2xl font-bold text-gray-900 hover:text-gray-700 transition-colors"
+                className="text-2xl font-bold text-white hover:text-gray-300 transition-colors"
               >
                 EduPath
               </button>
@@ -72,10 +72,10 @@ const ArcNavbar = () => {
                 <button
                   key={idx}
                   onClick={() => navigate(item.path)}
-                  className="flex items-center gap-2 text-gray-900 hover:text-gray-700 font-medium text-sm tracking-wide transition-colors group"
+                  className="flex items-center gap-2 text-white hover:text-gray-300 font-medium text-sm tracking-wide transition-colors group"
                 >
                   <span>{item.label}</span>
-                  <ChevronRight size={16} className="text-gray-600 group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight size={16} className="text-gray-400 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               ))}
               
@@ -86,26 +86,28 @@ const ArcNavbar = () => {
                 onMouseLeave={() => setContactDropdownOpen(false)}
               >
                 <button
-                  className="flex items-center gap-2 text-gray-900 hover:text-gray-700 font-medium text-sm tracking-wide transition-colors group"
+                  className="flex items-center gap-2 text-white hover:text-gray-300 font-medium text-sm tracking-wide transition-colors group"
                 >
                   <span>CONTACT</span>
-                  <ChevronRight size={16} className={`text-gray-600 transition-transform ${contactDropdownOpen ? 'rotate-90' : ''}`} />
+                  <ChevronRight size={16} className={`text-gray-400 transition-transform ${contactDropdownOpen ? 'rotate-90' : ''}`} />
                 </button>
                 
                 {contactDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 border border-gray-200">
-                    {contactSubmenu.map((item, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          navigate(item.path);
-                          setContactDropdownOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-2.5 text-gray-900 hover:bg-gray-100 text-sm font-medium transition-colors"
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                  <div className="absolute top-full left-0 pt-2 w-48">
+                    <div className="backdrop-blur-2xl bg-slate-900/80 rounded-lg shadow-2xl py-2 border border-white/30">
+                      {contactSubmenu.map((item, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            navigate(item.path);
+                            setContactDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-white hover:bg-white/20 text-sm font-medium transition-colors"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -118,7 +120,7 @@ const ArcNavbar = () => {
                   {/* Profile Circle */}
                   <div
                     onClick={() => setOpen(!open)}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-900 text-white font-bold cursor-pointer overflow-hidden hover:bg-gray-800 transition-colors"
+                    className="w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-lg bg-white/20 text-white font-bold cursor-pointer overflow-hidden hover:bg-white/30 transition-colors border border-white/30"
                   >
                     {profilePicture ? (
                       <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
@@ -129,9 +131,9 @@ const ArcNavbar = () => {
 
                   {/* Dropdown */}
                   {open && (
-                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl py-2 border border-gray-200 overflow-hidden animate-slideDown">
+                    <div className="absolute right-0 mt-2 w-72 backdrop-blur-lg bg-white/10 rounded-xl shadow-2xl py-2 border border-white/20 overflow-hidden animate-slideDown">
                       {/* Profile Header */}
-                      <div className="px-4 py-3 bg-gray-50 flex gap-3 items-center border-b border-gray-200">
+                      <div className="px-4 py-3 bg-white/5 flex gap-3 items-center border-b border-white/10">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
                           {profilePicture ? (
                             <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
@@ -140,8 +142,8 @@ const ArcNavbar = () => {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-base font-semibold text-gray-900 truncate">{fullName}</h4>
-                          <p className="text-xs text-gray-600 truncate">{isEmail}</p>
+                          <h4 className="text-base font-semibold text-white truncate">{fullName}</h4>
+                          <p className="text-xs text-gray-400 truncate">{isEmail}</p>
                         </div>
                       </div>
 
@@ -152,11 +154,11 @@ const ArcNavbar = () => {
                             navigate('/profile');
                             setOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-900 hover:bg-gray-100 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
                         >
-                          <FaUser className="text-gray-600" />
+                          <FaUser className="text-gray-400" />
                           <span className="flex-1 text-left text-sm font-medium">My Profile</span>
-                          <ChevronRight size={16} className="text-gray-400" />
+                          <ChevronRight size={16} className="text-gray-500" />
                         </button>
 
                         <button
@@ -164,21 +166,21 @@ const ArcNavbar = () => {
                             navigate('/settings');
                             setOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-gray-900 hover:bg-gray-100 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/10 transition-colors"
                         >
-                          <FaCog className="text-gray-600" />
+                          <FaCog className="text-gray-400" />
                           <span className="flex-1 text-left text-sm font-medium">Settings</span>
-                          <ChevronRight size={16} className="text-gray-400" />
+                          <ChevronRight size={16} className="text-gray-500" />
                         </button>
                       </div>
 
                       {/* Divider */}
-                      <div className="border-t border-gray-200 my-1"></div>
+                      <div className="border-t border-white/10 my-1"></div>
 
                       {/* Logout */}
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/20 transition-colors"
                       >
                         <FaSignOutAlt />
                         <span className="text-sm font-medium">Log Out</span>
@@ -190,13 +192,13 @@ const ArcNavbar = () => {
                 <>
                   <button
                     onClick={() => navigate('/signin')}
-                    className="px-8 py-3 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-50 transition-all shadow-md hover:shadow-lg"
+                    className="px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/10 to-white/5 text-white font-semibold rounded-full hover:from-white/20 hover:to-white/15 transition-all duration-300 shadow-md hover:shadow-2xl hover:shadow-white/20 border border-white/20 hover:border-white/40 hover:scale-105 hover:-translate-y-0.5"
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => navigate('/signup')}
-                    className="px-8 py-3 bg-gray-900 text-white font-semibold rounded-full hover:bg-gray-800 transition-all shadow-md hover:shadow-lg"
+                    className="px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/20 to-white/10 text-white font-semibold rounded-full hover:from-white/30 hover:to-white/20 transition-all duration-300 shadow-md hover:shadow-2xl hover:shadow-white/30 border border-white/30 hover:border-white/50 hover:scale-105 hover:-translate-y-0.5"
                   >
                     Get Started
                   </button>
@@ -207,7 +209,7 @@ const ArcNavbar = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+              className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -217,7 +219,7 @@ const ArcNavbar = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white rounded-3xl mt-4 mx-4 shadow-lg">
+          <div className="md:hidden backdrop-blur-lg bg-white/10 rounded-3xl mt-4 mx-4 shadow-lg border border-white/20">
             <div className="px-6 py-4 space-y-3">
               {navItems.map((item, idx) => (
                 <button
@@ -226,10 +228,10 @@ const ArcNavbar = () => {
                     navigate(item.path);
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between text-gray-900 hover:bg-gray-100 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
+                  className="w-full flex items-center justify-between text-white hover:bg-white/10 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
                 >
                   <span>{item.label}</span>
-                  <ChevronRight size={16} className="text-gray-600" />
+                  <ChevronRight size={16} className="text-gray-400" />
                 </button>
               ))}
               
@@ -237,13 +239,13 @@ const ArcNavbar = () => {
               <div className="space-y-1">
                 <button
                   onClick={() => setContactDropdownOpen(!contactDropdownOpen)}
-                  className="w-full flex items-center justify-between text-gray-900 hover:bg-gray-100 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
+                  className="w-full flex items-center justify-between text-white hover:bg-white/10 px-4 py-3 rounded-lg font-medium text-sm transition-colors"
                 >
                   <span>CONTACT</span>
-                  <ChevronRight size={16} className={`text-gray-600 transition-transform ${contactDropdownOpen ? 'rotate-90' : ''}`} />
+                  <ChevronRight size={16} className={`text-gray-400 transition-transform ${contactDropdownOpen ? 'rotate-90' : ''}`} />
                 </button>
                 {contactDropdownOpen && (
-                  <div className="pl-4 space-y-1">
+                  <div className="pl-4 space-y-1 backdrop-blur-xl bg-slate-900/60 rounded-lg p-2 border border-white/20">
                     {contactSubmenu.map((item, idx) => (
                       <button
                         key={idx}
@@ -252,7 +254,7 @@ const ArcNavbar = () => {
                           setMobileMenuOpen(false);
                           setContactDropdownOpen(false);
                         }}
-                        className="w-full text-left px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg text-sm transition-colors"
+                        className="w-full text-left px-4 py-2.5 text-white hover:bg-white/20 rounded-lg text-sm transition-colors"
                       >
                         {item.label}
                       </button>
@@ -262,15 +264,15 @@ const ArcNavbar = () => {
               </div>
               
               {isEmail ? (
-                <div className="pt-3 border-t border-gray-200 space-y-3">
+                <div className="pt-3 border-t border-white/10 space-y-3">
                   <button
                     onClick={() => {
                       navigate('/profile');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-900 hover:bg-gray-100 rounded-lg"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-lg"
                   >
-                    <FaUser className="text-gray-600" />
+                    <FaUser className="text-gray-400" />
                     <span className="text-sm font-medium">My Profile</span>
                   </button>
                   <button
@@ -278,27 +280,27 @@ const ArcNavbar = () => {
                       navigate('/settings');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-900 hover:bg-gray-100 rounded-lg"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 rounded-lg"
                   >
-                    <FaCog className="text-gray-600" />
+                    <FaCog className="text-gray-400" />
                     <span className="text-sm font-medium">Settings</span>
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/20 rounded-lg"
                   >
                     <FaSignOutAlt />
                     <span className="text-sm font-medium">Log Out</span>
                   </button>
                 </div>
               ) : (
-                <div className="pt-3 border-t border-gray-200 space-y-3">
+                <div className="pt-3 border-t border-white/10 space-y-3">
                   <button
                     onClick={() => {
                       navigate('/signin');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full px-8 py-3 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-50 transition-all shadow-md"
+                    className="w-full px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/10 to-white/5 text-white font-semibold rounded-full hover:from-white/20 hover:to-white/15 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-white/20 border border-white/20 hover:border-white/40 hover:scale-[1.02]"
                   >
                     Sign In
                   </button>
@@ -307,7 +309,7 @@ const ArcNavbar = () => {
                       navigate('/signup');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full px-8 py-3 bg-gray-900 text-white font-semibold rounded-full hover:bg-gray-800 transition-all shadow-md"
+                    className="w-full px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/20 to-white/10 text-white font-semibold rounded-full hover:from-white/30 hover:to-white/20 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-white/30 border border-white/30 hover:border-white/50 hover:scale-[1.02]"
                   >
                     Get Started
                   </button>
