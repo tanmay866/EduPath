@@ -15,6 +15,16 @@ import ResultPage from './Pages/Assessment/ResultPage'
 import ProfilePage from './Pages/Profile/ProfilePage'
 import SettingsPage from './Pages/Settings/SettingsPage'
 
+// Admin Components
+import AdminNavbar from './Admin/component/AdminNavbar'
+import AdminSidebar from './Admin/component/AdminSidebar'
+import AdminDashboard from './Admin/pages/AdminDashboard'
+import ManageUsers from './Admin/pages/ManageUsers'
+import QuizAttempts from './Admin/pages/QuizAttempts'
+import RoadmapHistory from './Admin/pages/RoadmapHistory'
+import AIAnalytics from './Admin/pages/AIAnalytics'
+import SystemSettings from './Admin/pages/SystemSettings'
+
 const App = () => {
   return (
     <div className="bg-slate-950 min-h-screen">
@@ -32,6 +42,14 @@ const App = () => {
         <Route path="/assessment/instructions" element={<><AssessmentInstructions /><Footer /></>} />
         <Route path="/assessment/quiz" element={<><QuizPage /><Footer /></>} />
         <Route path="/assessment/result" element={<><ResultPage /><Footer /></>} />
+
+        // Admin Routes
+        <Route path="/admin/*" element={<> <AdminDashboard/> </>} />
+        <Route path="/admin/users" element={<> <ManageUsers/> </>} />
+        <Route path="/admin/quiz-attempts" element={<> <QuizAttempts/> </>} />
+        <Route path="/admin/roadmaps" element={<> <RoadmapHistory/> </>} />
+        <Route path="/admin/analytics" element={<> <AIAnalytics/> </>} />
+        <Route path="/admin/settings" element={<> <SystemSettings/> </>} />
       </Routes>
     </div>
   )
