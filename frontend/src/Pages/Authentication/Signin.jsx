@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { HiArrowLeft } from 'react-icons/hi';
 import { useFormik } from 'formik';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Signin = () => {
   const navigate = useNavigate();
@@ -10,6 +11,18 @@ const Signin = () => {
     initialValues: {
       identifier: "",
       password: ""
+    },
+
+    validate: (values) => {
+      const errors = {};
+
+      if (!values.identifier) {
+        errors.identifier = 'Email or Login ID is required';
+      }
+      if (!values.password) {
+        errors.password = 'Password is required';
+      }
+      return errors;
     },
     onSubmit: async (values,{resetForm}) => {
       
@@ -38,16 +51,30 @@ const Signin = () => {
         sessionStorage.setItem("role", res.data.user.role);
         sessionStorage.setItem("firstName", res.data.user.firstName);
         sessionStorage.setItem("lastName", res.data.user.lastName);
-        alert('Signin successful!');
+        toast.success('Signin successful!');
         resetForm();
-        navigate('/');
+
+        const userRole = res.data.user.role;
+        if(userRole === 'admin'){          
+          setTimeout(() => {
+            navigate('/admin');
+            window.location.reload();
+          }, 1000);
+        } else {
+          navigate('/');
+        }
       } catch (error) {
         console.error('Signin error:', error);
-        alert('Signin failed. Please try again.');
+        toast.error(error.response?.data?.message || 'Signin failed. Please try again.');
       }
     }
   });
-
+ 
+  useEffect(() => {
+  if (formik.submitCount > 0 && !formik.isValid) {
+    toast.error("Please fill all required fields correctly");
+  }
+}, [formik.submitCount]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 pt-32 pb-12 px-4 sm:px-6 lg:px-8">
@@ -67,7 +94,7 @@ const Signin = () => {
             Sign in to your EduPath account
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit} noValidate>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
@@ -80,9 +107,15 @@ const Signin = () => {
                 required
                 value={formik.values.identifier}
                 onChange={formik.handleChange}
-                className="appearance-none relative block w-full px-3 py-3 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                onBlur={formik.handleBlur}
+                className={`appearance-none relative block w-full px-3 py-3 border ${formik.errors.identifier ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="john@example.com / MEPA2026002"
               />
+              {formik.touched.identifier && formik.errors.identifier && (
+                <p className="mt-1 text-sm text-red-500">
+                  {formik.errors.identifier}
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
@@ -95,9 +128,15 @@ const Signin = () => {
                 required
                 value={formik.values.password}
                 onChange={formik.handleChange}
-                className="appearance-none relative block w-full px-3 py-3 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                onBlur={formik.handleBlur}
+                className={`appearance-none relative block w-full px-3 py-3 border ${formik.errors.password ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="••••••••"
               />
+              {formik.touched.password && formik.errors.password && (
+                <p className="mt-1 text-sm text-red-500">
+                  {formik.errors.password}
+                </p>
+              )}
             </div>
           </div>
 

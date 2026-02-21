@@ -25,6 +25,10 @@ import RoadmapHistory from './Admin/pages/RoadmapHistory'
 import AIAnalytics from './Admin/pages/AIAnalytics'
 import SystemSettings from './Admin/pages/SystemSettings'
 
+//comman components
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const App = () => {
 
   const selectedRole = sessionStorage.getItem('role');
@@ -35,14 +39,27 @@ const App = () => {
       <div className="bg-slate-950 min-h-screen">
         {/* Admin Routes */}
 
+        <ToastContainer 
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme='colored'
+        />
+
         <Routes>
           <Route path="/*" element={<> <AdminDashboard/> </>} />
-        <Route path="/admin/*" element={<> <AdminDashboard/> </>} />
-        <Route path="/admin/users" element={<> <ManageUsers/> </>} />
-        <Route path="/admin/quiz-attempts" element={<> <QuizAttempts/> </>} />
-        <Route path="/admin/roadmaps" element={<> <RoadmapHistory/> </>} />
-        <Route path="/admin/analytics" element={<> <AIAnalytics/> </>} />
-        <Route path="/admin/settings" element={<> <SystemSettings/> </>} />
+          <Route path="/admin/*" element={<> <AdminDashboard/> </>} />
+          <Route path="/admin/users" element={<> <ManageUsers/> </>} />
+          <Route path="/admin/quiz-attempts" element={<> <QuizAttempts/> </>} />
+          <Route path="/admin/roadmaps" element={<> <RoadmapHistory/> </>} />
+          <Route path="/admin/analytics" element={<> <AIAnalytics/> </>} />
+          <Route path="/admin/settings" element={<> <SystemSettings/> </>} />
       </Routes>
 
       </div>
@@ -51,6 +68,19 @@ const App = () => {
   } else {
     return (
     <div className="bg-slate-950 min-h-screen">
+
+      <ToastContainer 
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme='colored'
+        />
       
       <Routes>
         <Route path="/" element={<><Navbar /><Home /><Footer /></>} />

@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronRight, Menu, X, Info, Mail } from 'lucide-react';
 import { FaUser, FaSignOutAlt, FaCog } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../Comman/ConfirmModal';
 
 const ArcNavbar = () => {
   const navRef = useRef(null);
@@ -19,14 +21,25 @@ const ArcNavbar = () => {
   const firstLetter = firstName ? firstName.charAt(0).toUpperCase() : 'U';
   const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName || 'User';
 
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const handleLogout = () => {
-    const confirmLogout = window.confirm("Are you sure you want to logout?");
-    if (confirmLogout) {
-      sessionStorage.clear();
-      navigate('/');
-      window.location.reload();
-    }
+    setShowLogoutModal(true);
   }
+
+  const confirmLogout = () => {
+  sessionStorage.clear();
+
+  toast.success("Logged out successfully 👋");
+
+  setShowLogoutModal(false);
+
+  navigate("/");
+};
+
+  const cancelLogout = () => {
+  setShowLogoutModal(false);
+};
 
   const navItems = [
     { label: 'HOME', path: '/' },
@@ -57,7 +70,7 @@ const ArcNavbar = () => {
           <div className="flex items-center justify-between">
             
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <button
                 onClick={() => navigate('/')}
                 className="text-2xl font-bold transition-colors"
@@ -155,7 +168,7 @@ const ArcNavbar = () => {
                     <div className="absolute right-0 mt-2 w-72 backdrop-blur-xl bg-slate-900/95 rounded-xl shadow-2xl py-2 border border-white/30 overflow-hidden animate-slideDown">
                       {/* Profile Header */}
                       <div className="px-4 py-3 bg-slate-800/80 flex gap-3 items-center border-b border-white/20">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
+                        <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden">
                           {profilePicture ? (
                             <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
                           ) : (
@@ -213,13 +226,13 @@ const ArcNavbar = () => {
                 <>
                   <button
                     onClick={() => navigate('/signin')}
-                    className="px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/10 to-white/5 text-white font-semibold rounded-full hover:from-white/20 hover:to-white/15 transition-all duration-300 shadow-md hover:shadow-2xl hover:shadow-white/20 border border-white/20 hover:border-white/40 hover:scale-105 hover:-translate-y-0.5"
+                    className="px-8 py-3 backdrop-blur-lg bg-linear-to-r from-white/10 to-white/5 text-white font-semibold rounded-full hover:from-white/20 hover:to-white/15 transition-all duration-300 shadow-md hover:shadow-2xl hover:shadow-white/20 border border-white/20 hover:border-white/40 hover:scale-105 hover:-translate-y-0.5"
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => navigate('/signup')}
-                    className="px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/20 to-white/10 text-white font-semibold rounded-full hover:from-white/30 hover:to-white/20 transition-all duration-300 shadow-md hover:shadow-2xl hover:shadow-white/30 border border-white/30 hover:border-white/50 hover:scale-105 hover:-translate-y-0.5"
+                    className="px-8 py-3 backdrop-blur-lg bg-linear-to-r from-white/20 to-white/10 text-white font-semibold rounded-full hover:from-white/30 hover:to-white/20 transition-all duration-300 shadow-md hover:shadow-2xl hover:shadow-white/30 border border-white/30 hover:border-white/50 hover:scale-105 hover:-translate-y-0.5"
                   >
                     Get Started
                   </button>
@@ -321,7 +334,7 @@ const ArcNavbar = () => {
                       navigate('/signin');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/10 to-white/5 text-white font-semibold rounded-full hover:from-white/20 hover:to-white/15 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-white/20 border border-white/20 hover:border-white/40 hover:scale-[1.02]"
+                    className="w-full px-8 py-3 backdrop-blur-lg bg-linear-to-r from-white/10 to-white/5 text-white font-semibold rounded-full hover:from-white/20 hover:to-white/15 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-white/20 border border-white/20 hover:border-white/40 hover:scale-[1.02]"
                   >
                     Sign In
                   </button>
@@ -330,7 +343,7 @@ const ArcNavbar = () => {
                       navigate('/signup');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full px-8 py-3 backdrop-blur-lg bg-gradient-to-r from-white/20 to-white/10 text-white font-semibold rounded-full hover:from-white/30 hover:to-white/20 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-white/30 border border-white/30 hover:border-white/50 hover:scale-[1.02]"
+                    className="w-full px-8 py-3 backdrop-blur-lg bg-linear-to-r from-white/20 to-white/10 text-white font-semibold rounded-full hover:from-white/30 hover:to-white/20 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-white/30 border border-white/30 hover:border-white/50 hover:scale-[1.02]"
                   >
                     Get Started
                   </button>
@@ -340,6 +353,13 @@ const ArcNavbar = () => {
           </div>
         )}
       </nav>
+
+          <ConfirmModal
+            isOpen={showLogoutModal}
+            message="Are you sure you want to logout?"
+            onConfirm={confirmLogout}
+            onCancel={cancelLogout}
+          />
     </>
   );
 };

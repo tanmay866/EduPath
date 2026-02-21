@@ -133,7 +133,7 @@ const SystemSettings = () => {
               <textarea
                 value={settings.basePrompt}
                 onChange={(e) => handleInputChange('basePrompt', e.target.value)}
-                className="bg-gray-800 border border-gray-700 text-gray-200 rounded-lg px-4 py-2 w-full min-h-[120px] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="bg-gray-800 border border-gray-700 text-gray-200 rounded-lg px-4 py-2 w-full min-h-30 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>

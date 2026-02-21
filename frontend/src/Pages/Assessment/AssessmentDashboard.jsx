@@ -265,7 +265,7 @@ const AssessmentDashboard = () => {
             {availableAssessment.map((assessment) => (
               <div
                 key={assessment.id}
-                className="backdrop-blur-lg bg-gradient-to-br from-indigo-500/40 to-purple-600/40 rounded-xl shadow-2xl p-6 text-white border border-indigo-400/30 hover:border-indigo-300/50 transition-all hover:scale-105 flex flex-col"
+                className="backdrop-blur-lg bg-linear-to-br from-indigo-500/40 to-purple-600/40 rounded-xl shadow-2xl p-6 text-white border border-indigo-400/30 hover:border-indigo-300/50 transition-all hover:scale-105 flex flex-col"
               >
                 <h3 className="text-2xl font-bold mb-3">
                   {assessment.title}
@@ -274,7 +274,7 @@ const AssessmentDashboard = () => {
                   Evaluate your knowledge and earn certification
                 </p>
 
-                <div className="space-y-2 mb-6 flex-grow">
+                <div className="space-y-2 mb-6 grow">
                   <div className="flex items-center gap-2 text-sm">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />

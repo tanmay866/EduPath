@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { HiArrowLeft } from 'react-icons/hi';
 import { useFormik } from 'formik';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -14,22 +15,54 @@ const Signup = () => {
       password: "",
       role: "student",
     },
-    onSubmit: async (values,{resetForm}) => {
+
+    validate: (values) => {
+      const errors = {};
+
+      if (!values.firstName) {
+        errors.firstName = 'First name is required';
+      }
+      if (!values.lastName) {
+        errors.lastName = 'Last name is required';
+      }
+      if (!values.email) {
+        errors.email = 'Email is required';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+        errors.email = 'Invalid email address';
+      }
+      if (!values.password) {
+        errors.password = 'Password is required';
+      } else if (values.password.length < 6) {
+        errors.password = 'Password must be at least 6 characters';
+      }
+      return errors;
+    },
+    onSubmit: async (values,{resetForm, setSubmitting}) => {
       console.log(values);
       try {
         const response = await axios.post('http://localhost:4000/api/auth/signup', values);
         console.log("user created");
         
         console.log('Signup response:', response.data);
-        alert('Signup successful! Please sign in.');
+        toast.success('Signup successful! Please sign in.');
         resetForm();
         navigate('/signin');
       } catch (error) {
         console.error('Signup error:', error);
-        alert('Signup failed. Please try again.');
+        toast.error(error.response?.data?.message || 'Signup failed. Please try again.');
+      } finally {
+        setSubmitting(false);
       }
     }
+
+    
   });
+
+  useEffect(() => {
+    if (formik.submitCount > 0 && !formik.isValid) {
+      toast.error("Please fill all required fields correctly");
+    }
+  }, [formik.submitCount]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 pt-32 pb-8 px-4 sm:px-6 lg:px-8">
@@ -49,7 +82,7 @@ const Signup = () => {
             Join EduPath today
           </p>
         </div>
-        <form className="mt-4 space-y-3" onSubmit={formik.handleSubmit}>
+        <form className="mt-4 space-y-3" onSubmit={formik.handleSubmit} noValidate>
           <div className="space-y-3">
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-1">
@@ -62,9 +95,15 @@ const Signup = () => {
                 required
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                onBlur={formik.handleBlur}
+                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.firstName ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="John Doe"
               />
+              {formik.touched.firstName && formik.errors.firstName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {formik.errors.firstName}
+                </p>
+               )}
             </div>
             <div>
               <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-1">
@@ -77,9 +116,15 @@ const Signup = () => {
                 required
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                onBlur={formik.handleBlur}
+                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.lastName ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="Doe"
               />
+              {formik.touched.lastName && formik.errors.lastName && (
+                <p className="mt-1 text-sm text-red-500">
+                  {formik.errors.lastName}
+                </p>
+              )}
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
@@ -92,9 +137,15 @@ const Signup = () => {
                 required
                 value={formik.values.email}
                 onChange={formik.handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                onBlur={formik.handleBlur}
+                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.email ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="john@example.com"
               />
+              {formik.touched.email && formik.errors.email && (
+                <p className="mt-1 text-sm text-red-500">
+                  {formik.errors.email}
+                </p>
+              )}
             </div>
             {/* <div className="grid grid-cols-2 gap-3"> */}
               <div>
@@ -108,9 +159,15 @@ const Signup = () => {
                   required
                   value={formik.values.password}
                   onChange={formik.handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  onBlur={formik.handleBlur}
+                  className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.password ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                   placeholder="••••••••"
                 />
+                {formik.touched.password && formik.errors.password && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {formik.errors.password}
+                  </p>
+                )}
               </div>
               {/* <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
