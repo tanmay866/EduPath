@@ -200,12 +200,12 @@ quizResultSchema.index({ status: 1, percentage: -1 });
 quizResultSchema.methods.calculateMetrics = function () {
   // Accuracy
   this.metrics.accuracy = this.percentage;
-  
+
   // Speed (questions per minute)
   if (this.timeTaken > 0) {
     this.metrics.speed = (this.totalQuestions / (this.timeTaken / 60)).toFixed(2);
   }
-  
+
   // Consistency (standard deviation of time per question)
   if (this.answers.length > 0) {
     const times = this.answers.map((a) => a.timeSpent);
@@ -213,28 +213,28 @@ quizResultSchema.methods.calculateMetrics = function () {
     const variance = times.reduce((sum, t) => sum + Math.pow(t - mean, 2), 0) / times.length;
     this.metrics.consistency = Math.sqrt(variance).toFixed(2);
   }
-  
+
   return this;
 };
 
 // Method to check for achievements
 quizResultSchema.methods.checkAchievements = function () {
   const achievements = [];
-  
+
   // Perfect score
   if (this.percentage === 100) {
     achievements.push('perfect_score');
   }
-  
+
   // Speed demon (completed in less than half the allotted time)
   const expectedTime = this.totalQuestions * 30; // 30 seconds per question
   if (this.timeTaken < expectedTime / 2) {
     achievements.push('speed_demon');
   }
-  
+
   // First attempt (check if this is user's first quiz)
   // This would need to check QuizResult count for user
-  
+
   this.achievements = achievements;
   return this;
 };
@@ -259,7 +259,7 @@ quizResultSchema.statics.getUserStats = async function (userId) {
       },
     },
   ]);
-  
+
   return stats.length > 0 ? stats[0] : null;
 };
 
@@ -292,7 +292,7 @@ quizResultSchema.statics.getTopicWisePerformance = async function (userId) {
 // Static method to get leaderboard
 quizResultSchema.statics.getLeaderboard = async function (topicId = null, limit = 10) {
   const matchStage = topicId ? { topicId: new mongoose.Types.ObjectId(topicId) } : {};
-  
+
   return this.aggregate([
     { $match: matchStage },
     { $sort: { percentage: -1, timeTaken: 1 } },

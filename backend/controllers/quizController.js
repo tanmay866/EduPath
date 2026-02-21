@@ -17,17 +17,17 @@ export const getQuizSession = async (req, res) => {
       .populate('topicId', 'name icon description');
 
     if (!session) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Quiz session not found' 
+        error: 'Quiz session not found'
       });
     }
 
     // Verify ownership
     if (session.userId.toString() !== userId.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        error: 'Unauthorized access to quiz session' 
+        error: 'Unauthorized access to quiz session'
       });
     }
 
@@ -49,7 +49,7 @@ export const getQuizSession = async (req, res) => {
         status: session.status,
         questions: sanitizedQuestions,
         startedAt: session.startedAt,
-        timeElapsed: session.completedAt 
+        timeElapsed: session.completedAt
           ? Math.floor((new Date(session.completedAt) - new Date(session.startedAt)) / 1000)
           : Math.floor((Date.now() - new Date(session.startedAt)) / 1000),
       },
@@ -57,7 +57,7 @@ export const getQuizSession = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error fetching quiz session:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to fetch quiz session',
       message: error.message,
@@ -79,17 +79,17 @@ export const getQuizResult = async (req, res) => {
       .populate('quizSessionId');
 
     if (!result) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Quiz result not found' 
+        error: 'Quiz result not found'
       });
     }
 
     // Verify ownership
     if (result.userId.toString() !== userId.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        error: 'Unauthorized access to quiz result' 
+        error: 'Unauthorized access to quiz result'
       });
     }
 
@@ -112,7 +112,7 @@ export const getQuizResult = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error fetching quiz result:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to fetch quiz result',
       message: error.message,
@@ -132,25 +132,25 @@ export const abandonQuiz = async (req, res) => {
     const session = await QuizSession.findById(sessionId);
 
     if (!session) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Quiz session not found' 
+        error: 'Quiz session not found'
       });
     }
 
     // Verify ownership
     if (session.userId.toString() !== userId.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        error: 'Unauthorized access to quiz session' 
+        error: 'Unauthorized access to quiz session'
       });
     }
 
     // Check if already completed or abandoned
     if (session.status !== 'ongoing') {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: `Quiz already ${session.status}` 
+        error: `Quiz already ${session.status}`
       });
     }
 
@@ -172,7 +172,7 @@ export const abandonQuiz = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error abandoning quiz:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to abandon quiz session',
       message: error.message,
@@ -193,26 +193,26 @@ export const retryQuiz = async (req, res) => {
     const originalResult = await QuizResult.findById(resultId);
 
     if (!originalResult) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Quiz result not found' 
+        error: 'Quiz result not found'
       });
     }
 
     // Verify ownership
     if (originalResult.userId.toString() !== userId.toString()) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        error: 'Unauthorized access' 
+        error: 'Unauthorized access'
       });
     }
 
     // Get topic details
     const topic = await Topic.findById(originalResult.topicId);
     if (!topic) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Topic not found' 
+        error: 'Topic not found'
       });
     }
 
@@ -280,7 +280,7 @@ export const retryQuiz = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error retrying quiz:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to retry quiz',
       message: error.message,
@@ -299,8 +299,8 @@ export const startQuiz = async (req, res) => {
 
     // Validate input
     if (!topicId || !difficulty || !experienceLevel) {
-      return res.status(400).json({ 
-        error: 'topicId, difficulty, and experienceLevel are required' 
+      return res.status(400).json({
+        error: 'topicId, difficulty, and experienceLevel are required'
       });
     }
 
@@ -309,14 +309,14 @@ export const startQuiz = async (req, res) => {
     const validLevels = ['beginner', 'intermediate', 'advanced'];
 
     if (!validDifficulties.includes(difficulty)) {
-      return res.status(400).json({ 
-        error: `Invalid difficulty. Must be: ${validDifficulties.join(', ')}` 
+      return res.status(400).json({
+        error: `Invalid difficulty. Must be: ${validDifficulties.join(', ')}`
       });
     }
 
     if (!validLevels.includes(experienceLevel)) {
-      return res.status(400).json({ 
-        error: `Invalid experienceLevel. Must be: ${validLevels.join(', ')}` 
+      return res.status(400).json({
+        error: `Invalid experienceLevel. Must be: ${validLevels.join(', ')}`
       });
     }
 
@@ -395,7 +395,7 @@ export const startQuiz = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error starting quiz:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to start quiz',
       message: error.message,
     });
@@ -413,8 +413,8 @@ export const submitQuiz = async (req, res) => {
 
     // Validate input
     if (!sessionId || !answers || !Array.isArray(answers)) {
-      return res.status(400).json({ 
-        error: 'sessionId and answers array are required' 
+      return res.status(400).json({
+        error: 'sessionId and answers array are required'
       });
     }
 
@@ -528,7 +528,7 @@ export const submitQuiz = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error submitting quiz:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to submit quiz',
       message: error.message,
     });
