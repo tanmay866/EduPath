@@ -4,16 +4,7 @@ const PreviousAttemptsTable = ({ attempts }) => {
   const navigate = useNavigate();
 
   const handleViewResult = (attempt) => {
-    navigate("/assessment/result", {
-      state: {
-        score: attempt.score,
-        totalQuestions: attempt.totalQuestions,
-        percentage: attempt.percentage,
-        passed: attempt.status === "Pass",
-        correctAnswers: attempt.score,
-        wrongAnswers: attempt.totalQuestions - attempt.score,
-      },
-    });
+    navigate(`/assessment/result/${attempt.resultId || attempt.id}`);
   };
 
   return (

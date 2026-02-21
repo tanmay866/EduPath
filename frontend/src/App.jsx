@@ -94,7 +94,7 @@ const App = () => {
         <Route path="/assessment" element={<><AssessmentDashboard /></>} />
         <Route path="/assessment/instructions" element={<><AssessmentInstructions /></>} />
         <Route path="/assessment/quiz" element={<><QuizPage /></>} />
-        <Route path="/assessment/result" element={<><ResultPage /></>} />
+        <Route path="/assessment/result/:resultId" element={<><ResultPage /></>} />
       </Routes>
     </div>
   )
