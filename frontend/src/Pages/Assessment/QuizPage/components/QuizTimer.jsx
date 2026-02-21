@@ -2,7 +2,6 @@ import { useEffect } from "react";
 
 const QuizTimer = ({ timer, setTimer, onTimeUp }) => {
   useEffect(() => {
-    // Don't start countdown if timer is 0 or less
     if (timer <= 0) return;
 
     const interval = setInterval(() => {
@@ -10,7 +9,7 @@ const QuizTimer = ({ timer, setTimer, onTimeUp }) => {
         const newTime = prev - 1;
         if (newTime <= 0) {
           clearInterval(interval);
-          setTimeout(() => onTimeUp(), 100); // Small delay to ensure state updates
+          setTimeout(() => onTimeUp(), 100);
           return 0;
         }
         return newTime;
@@ -18,11 +17,11 @@ const QuizTimer = ({ timer, setTimer, onTimeUp }) => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timer > 0]); // Only react to timer becoming > 0
+  }, [timer > 0]);
 
   const minutes = Math.floor(timer / 60);
   const seconds = timer % 60;
-  const isLowTime = timer < 300 && timer > 0; // Less than 5 minutes and timer is running
+  const isLowTime = timer < 300 && timer > 0;
 
   return (
     <div className={`p-4 rounded-lg shadow-lg text-center border transition-all ${
