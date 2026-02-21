@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import { submitQuiz } from "../../../Services/assessmentService";
 
 export const useQuizLogic = ({
   assessment,
@@ -6,6 +7,7 @@ export const useQuizLogic = ({
   answers,
   setAnswers,
   currentQuestion,
+  currentQuestionIndex,
   markedForReview,
   setMarkedForReview,
   quizStarted,
@@ -14,34 +16,33 @@ export const useQuizLogic = ({
   setShowSubmitModal,
   navigate,
 }) => {
-  const handleSelectOption = (questionId, optionIndex) => {
+  const handleSelectOption = (questionIndex, optionIndex) => {
     if (!setAnswers) return;
     const updatedAnswers = [...(answers || [])];
 
-    const existing = updatedAnswers.find((a) => a.questionId === questionId);
+    const existingIndex = updatedAnswers.findIndex((a) => a.questionIndex === questionIndex);
 
-    if (existing) {
-      existing.selectedOptionIndex = optionIndex;
+    if (existingIndex !== -1) {
+      updatedAnswers[existingIndex] = { questionIndex, selectedOptionIndex: optionIndex };
     } else {
-      updatedAnswers.push({ questionId, selectedOptionIndex: optionIndex });
+      updatedAnswers.push({ questionIndex, selectedOptionIndex: optionIndex });
     }
 
     setAnswers(updatedAnswers);
   };
 
-  const selectedAnswer = answers && answers.find((a) => a.questionId === currentQuestion._id);
+  const selectedAnswer = answers && answers.find((a) => a.questionIndex === currentQuestionIndex);
 
   const handleMarkForReview = () => {
-    if (!setMarkedForReview) return;
-    const questionId = currentQuestion._id;
-    if (markedForReview && markedForReview.includes(questionId)) {
-      setMarkedForReview(markedForReview.filter((id) => id !== questionId));
+    if (!setMarkedForReview || currentQuestionIndex === undefined) return;
+    if (markedForReview && markedForReview.includes(currentQuestionIndex)) {
+      setMarkedForReview(markedForReview.filter((idx) => idx !== currentQuestionIndex));
     } else {
-      setMarkedForReview([...(markedForReview || []), questionId]);
+      setMarkedForReview([...(markedForReview || []), currentQuestionIndex]);
     }
   };
 
-  const isMarked = markedForReview && markedForReview.includes(currentQuestion._id);
+  const isMarked = currentQuestionIndex !== undefined && markedForReview && markedForReview.includes(currentQuestionIndex);
 
   const handleStartQuizClick = () => {
     setShowStartModal(true);
@@ -62,7 +63,45 @@ export const useQuizLogic = ({
     setShowSubmitModal(true);
   };
 
-  const handleConfirmSubmit = () => {
+  const submitQuizToAPI = async () => {
+    try {
+      const sessionId = assessment.sessionId || localStorage.getItem('sessionId');
+      const startTime = localStorage.getItem('startTime');
+      const timeTaken = startTime ? Math.floor((Date.now() - parseInt(startTime)) / 1000) : 0;
+
+      // Convert answers to array of option indices
+      const answersArray = questions.map((question, index) => {
+        const userAnswer = answers.find((a) => a.questionIndex === index);
+        return userAnswer ? userAnswer.selectedOptionIndex : null;
+      });
+
+      const payload = {
+        sessionId: sessionId,
+        answers: answersArray,
+        timeTaken: timeTaken
+      };
+
+      const response = await submitQuiz(payload);
+      const resultData = response.data?.data;
+
+      if (resultData && resultData.resultId) {
+        // Clear localStorage
+        localStorage.removeItem('sessionId');
+        localStorage.removeItem('startTime');
+
+        toast.success("Assessment submitted successfully!");
+        
+        // Navigate to result page
+        navigate(`/assessment/result/${resultData.resultId}`);
+      }
+    } catch (error) {
+      console.error('Failed to submit quiz:', error);
+      toast.error(error.response?.data?.message || 'Failed to submit quiz');
+      throw error;
+    }
+  };
+
+  const handleConfirmSubmit = async () => {
     setShowSubmitModal(false);
 
     if (!quizStarted) {
@@ -70,71 +109,15 @@ export const useQuizLogic = ({
       return;
     }
 
-    let correctCount = 0;
-    let wrongCount = 0;
-
-    questions.forEach((question) => {
-      const userAnswer = answers.find((a) => a.questionId === question._id);
-      if (userAnswer && userAnswer.selectedOptionIndex === question.correctAnswer) {
-        correctCount++;
-      } else if (userAnswer) {
-        wrongCount++;
-      }
-    });
-
-    const totalQuestions = questions.length;
-    const percentage = Math.round((correctCount / totalQuestions) * 100);
-    const passed = percentage >= 70;
-
-    toast.success("Assessment submitted successfully!");
-
-    navigate("/assessment/result", {
-      state: {
-        score: correctCount,
-        totalQuestions: totalQuestions,
-        percentage: percentage,
-        passed: passed,
-        correctAnswers: correctCount,
-        wrongAnswers: wrongCount,
-        unanswered: totalQuestions - answers.length,
-      },
-    });
+    await submitQuizToAPI();
   };
 
-  const handleTimeUp = () => {
+  const handleTimeUp = async () => {
     if (!quizStarted) return;
 
     toast.warning("Time's up! Submitting your assessment...");
-
-    let correctCount = 0;
-    let wrongCount = 0;
-
-    questions.forEach((question) => {
-      const userAnswer = answers.find((a) => a.questionId === question._id);
-      if (userAnswer && userAnswer.selectedOptionIndex === question.correctAnswer) {
-        correctCount++;
-      } else if (userAnswer) {
-        wrongCount++;
-      }
-    });
-
-    const totalQuestions = questions.length;
-    const percentage = Math.round((correctCount / totalQuestions) * 100);
-    const passed = percentage >= 70;
-
-    toast.success("Assessment submitted successfully!");
-
-    navigate("/assessment/result", {
-      state: {
-        score: correctCount,
-        totalQuestions: totalQuestions,
-        percentage: percentage,
-        passed: passed,
-        correctAnswers: correctCount,
-        wrongAnswers: wrongCount,
-        unanswered: totalQuestions - answers.length,
-      },
-    });
+    
+    await submitQuizToAPI();
   };
 
   const handleCancelSubmit = () => {

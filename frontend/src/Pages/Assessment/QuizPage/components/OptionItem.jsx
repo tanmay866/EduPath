@@ -17,7 +17,7 @@ const OptionItem = ({ option, isSelected, onSelect }) => {
             <div className="w-2.5 h-2.5 rounded-full bg-indigo-600"></div>
           )}
         </div>
-        <span className="text-sm leading-relaxed">{option}</span>
+        <span className="text-sm leading-relaxed">{option?.text || option}</span>
       </div>
     </div>
   );

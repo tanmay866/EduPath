@@ -1,9 +1,19 @@
-export const performanceStats = {
-  totalAttempts: 5,
-  averageScore: 75,
-  highestScore: 90,
-  lastAttemptStatus: "Pass",
-};
+/**
+ * @deprecated This file is no longer used.
+ * 
+ * The application now fetches dynamic data from the API:
+ * - Topics: GET /api/quiz/topics
+ * - Quiz Stats: GET /api/quiz/stats  
+ * - Quiz History: GET /api/quiz/history
+ * 
+ * All data is fetched in AssessmentDashboard.jsx
+ * 
+ * This file can be safely deleted.
+ */
+
+// This file is deprecated and no longer used
+export default {};
+
 
 export const performanceCardsConfig = [
   {

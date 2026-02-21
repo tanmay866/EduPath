@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuiz } from "../context/QuizContext";
 import { useNavigate } from "react-router-dom";
+import { startQuiz } from "../Services/assessmentService";
 import AssessmentSidebar from "../../component/Assessment/AssessmentSidebar";
 
 const AssessmentInstructions = () => {
@@ -8,28 +9,32 @@ const AssessmentInstructions = () => {
   const navigate = useNavigate();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Static assessment data for demonstration (will be replaced with API data)
-  const staticAssessment = {
-    title: "Frontend Development Assessment",
-    skill: "React.js",
-    duration: 30,
-    totalQuestions: 10,
-    difficulty: "Intermediate",
-    assessmentId: "static-001",
-  };
+  // Quiz configuration state
+  const [quizConfig, setQuizConfig] = useState({
+    difficulty: 'beginner',
+    experienceLevel: 'beginner',
+    questionCount: 10
+  });
 
-  // Use context assessment if available, otherwise use static data
-  const assessment = contextAssessment || staticAssessment;
+  // Use context assessment or redirect to dashboard
+  const assessment = contextAssessment;
+
+  if (!assessment || !assessment.topicId) {
+    navigate("/assessment");
+    return null;
+  }
 
   // Assessment details
   const assessmentDetails = {
-    description: "This test evaluates your understanding of core React.js concepts including hooks, state management, component lifecycle, and modern React patterns.",
-    passingCriteria: "You must score at least 70% to pass this assessment.",
-    attemptLimit: "You can attempt this assessment only once.",
-    difficulty: assessment.difficulty || "Intermediate",
-    passingScore: "70%",
-    attemptsAllowed: 1,
+    description: `This test evaluates your understanding of ${assessment.topicName} concepts including fundamentals, advanced topics, and practical applications.`,
+    passingCriteria: "You must score at least 60% to pass this assessment.",
+    attemptLimit: "You can retry this assessment multiple times to improve your score.",
+    difficulty: quizConfig.difficulty,
+    passingScore: "60%",
+    attemptsAllowed: "Unlimited",
   };
 
   const handleStartClick = () => {
@@ -37,19 +42,50 @@ const AssessmentInstructions = () => {
     setShowConfirmModal(true);
   };
 
-  const handleConfirmStart = () => {
-    // If using static data, set it in context first
-    if (!contextAssessment) {
-      setAssessment({
-        ...assessment,
-        questions: [], // Will be loaded in quiz
-      });
+  const handleConfirmStart = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Call start quiz API
+      const payload = {
+        topicId: assessment.topicId,
+        difficulty: quizConfig.difficulty,
+        experienceLevel: quizConfig.experienceLevel,
+        questionCount: quizConfig.questionCount
+      };
+
+      const response = await startQuiz(payload);
+      const sessionData = response.data?.data;
+
+      if (sessionData && sessionData.sessionId) {
+        // Store session ID and quiz data
+        localStorage.setItem('sessionId', sessionData.sessionId);
+        localStorage.setItem('startTime', Date.now());
+
+        // Update context with session data
+        setAssessment({
+          ...assessment,
+          sessionId: sessionData.sessionId,
+          questions: sessionData.questions,
+          totalQuestions: sessionData.totalQuestions,
+          difficulty: sessionData.difficulty,
+          startedAt: sessionData.startedAt
+        });
+
+        // Set timer (convert minutes to seconds)
+        setTimer(quizConfig.questionCount * 60); // 1 minute per question
+
+        setShowConfirmModal(false);
+        navigate("/assessment/quiz");
+      }
+    } catch (err) {
+      console.error('Failed to start quiz:', err);
+      setError(err.response?.data?.message || 'Failed to start quiz. Please try again.');
+      setShowConfirmModal(false);
+    } finally {
+      setLoading(false);
     }
-    
-    // ⏱ convert minutes → seconds
-    setTimer(assessment.duration * 60);
-    setShowConfirmModal(false);
-    navigate("/assessment/quiz");
   };
 
   return (
@@ -91,8 +127,9 @@ const AssessmentInstructions = () => {
           <div className="mb-8">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                  {assessment.title}
+                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 flex items-center gap-3">
+                  <span className="text-4xl">{assessment.topicIcon}</span>
+                  {assessment.title || `${assessment.topicName} Assessment`}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   <span className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">
@@ -100,26 +137,34 @@ const AssessmentInstructions = () => {
                       <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                       <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
                     </svg>
-                    {assessment.skill}
+                    {assessment.topicName}
                   </span>
+                  {assessment.category && (
+                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                      </svg>
+                      {assessment.category}
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full border border-yellow-500/30">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                     </svg>
-                    {assessment.difficulty}
+                    <span className="capitalize">{quizConfig.difficulty}</span>
                   </span>
                   <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                     </svg>
-                    {assessment.duration} Minutes
+                    ~{quizConfig.questionCount} Minutes
                   </span>
                   <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/20 text-green-300 rounded-full border border-green-500/30">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
                       <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    {assessment.totalQuestions} Questions
+                    {quizConfig.questionCount} Questions
                   </span>
                 </div>
               </div>
@@ -158,6 +203,79 @@ const AssessmentInstructions = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* ⚙️ QUIZ CONFIGURATION SECTION */}
+          <div className="bg-slate-800 border border-white/10 rounded-xl p-6 mb-6 shadow-xl">
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+              </svg>
+              Configure Your Quiz
+            </h2>
+            
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* Difficulty Level */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Difficulty Level
+                </label>
+                <select
+                  value={quizConfig.difficulty}
+                  onChange={(e) => setQuizConfig({ ...quizConfig, difficulty: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/20 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                >
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Choose the question difficulty</p>
+              </div>
+
+              {/* Experience Level */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Experience Level
+                </label>
+                <select
+                  value={quizConfig.experienceLevel}
+                  onChange={(e) => setQuizConfig({ ...quizConfig, experienceLevel: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/20 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                >
+                  <option value="beginner">Beginner (0-1 years)</option>
+                  <option value="intermediate">Intermediate (1-3 years)</option>
+                  <option value="advanced">Advanced (3+ years)</option>
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Your practical experience</p>
+              </div>
+
+              {/* Number of Questions */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Number of Questions
+                </label>
+                <select
+                  value={quizConfig.questionCount}
+                  onChange={(e) => setQuizConfig({ ...quizConfig, questionCount: parseInt(e.target.value) })}
+                  className="w-full px-4 py-3 bg-slate-700 text-white rounded-lg border border-white/20 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                >
+                  <option value="5">5 Questions (~5 mins)</option>
+                  <option value="10">10 Questions (~10 mins)</option>
+                  <option value="15">15 Questions (~15 mins)</option>
+                  <option value="20">20 Questions (~20 mins)</option>
+                </select>
+                <p className="text-xs text-gray-400 mt-1">Estimated time</p>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-300">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </div>
+            )}
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 mb-6">
@@ -203,16 +321,19 @@ const AssessmentInstructions = () => {
               </h2>
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
-                  <span className="text-gray-400 font-medium">Skill</span>
-                  <span className="text-white font-semibold">{assessment.skill}</span>
+                  <span className="text-gray-400 font-medium">Topic</span>
+                  <span className="text-white font-semibold flex items-center gap-2">
+                    <span>{assessment.topicIcon}</span>
+                    {assessment.topicName}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 font-medium">Questions</span>
-                  <span className="text-white font-semibold">{assessment.totalQuestions}</span>
+                  <span className="text-white font-semibold">{quizConfig.questionCount}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
-                  <span className="text-gray-400 font-medium">Duration</span>
-                  <span className="text-white font-semibold">{assessment.duration} Minutes</span>
+                  <span className="text-gray-400 font-medium">Est. Duration</span>
+                  <span className="text-white font-semibold">{quizConfig.questionCount} Minutes</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 font-medium">Passing Score</span>
@@ -220,7 +341,7 @@ const AssessmentInstructions = () => {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-white/10">
                   <span className="text-gray-400 font-medium">Difficulty</span>
-                  <span className="text-yellow-400 font-semibold">{assessmentDetails.difficulty}</span>
+                  <span className="text-yellow-400 font-semibold capitalize">{quizConfig.difficulty}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-400 font-medium">Attempts Allowed</span>
@@ -253,14 +374,22 @@ const AssessmentInstructions = () => {
           <div className="flex justify-center">
             <button
               onClick={handleStartClick}
-              disabled={!agreedToTerms}
+              disabled={!agreedToTerms || loading}
               className={`px-12 py-4 rounded-xl font-bold text-lg transition-all shadow-xl ${
-                agreedToTerms
+                agreedToTerms && !loading
                   ? "bg-gradient-to-r from-indigo-500/40 to-purple-600/40 text-white hover:from-indigo-500/50 hover:to-purple-600/50 hover:shadow-2xl border-2 border-indigo-400/50 transform hover:scale-105 active:scale-100"
                   : "bg-slate-700 text-gray-500 cursor-not-allowed border border-white/10"
               }`}
             >
-              {agreedToTerms ? "Start Assessment →" : "Accept Terms to Continue"}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Starting Quiz...
+                </span>
+              ) : agreedToTerms ? "Start Assessment →" : "Accept Terms to Continue"}
             </button>
           </div>
 
@@ -307,9 +436,18 @@ const AssessmentInstructions = () => {
               </button>
               <button
                 onClick={handleConfirmStart}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-500/40 to-purple-600/40 text-white rounded-xl font-semibold hover:from-indigo-500/50 hover:to-purple-600/50 transition-all shadow-xl border border-indigo-400/50"
+                disabled={loading}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-500/40 to-purple-600/40 text-white rounded-xl font-semibold hover:from-indigo-500/50 hover:to-purple-600/50 transition-all shadow-xl border border-indigo-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Yes, Start Now
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Starting...
+                  </span>
+                ) : "Yes, Start Now"}
               </button>
             </div>
           </div>

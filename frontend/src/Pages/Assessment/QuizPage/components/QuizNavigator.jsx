@@ -24,14 +24,14 @@ const QuizNavigator = ({
 
         <div className="grid grid-cols-5 gap-2 mb-3">
           {questions.map((q, index) => {
-            const answered = answers && answers.find((a) => a.questionId === q._id);
-            const visited = visitedQuestions && visitedQuestions.includes(q._id);
-            const marked = markedForReview && markedForReview.includes(q._id);
+            const answered = answers && answers.find((a) => a.questionIndex === index);
+            const visited = visitedQuestions && visitedQuestions.includes(index);
+            const marked = markedForReview && markedForReview.includes(index);
 
             let bgColor = 'bg-slate-800 border border-white/20 text-gray-400';
             if (marked) bgColor = 'bg-yellow-500 text-gray-900';
-            else if (answered) bgColor = 'bg-green-600 border border-green-500/50 text-green-400';
-            else if (visited) bgColor = 'bg-blue-600 border border-blue-500/50 text-blue-400';
+            else if (answered) bgColor = 'bg-green-600 border border-green-500/50 text-white';
+            else if (visited) bgColor = 'bg-blue-600 border border-blue-500/50 text-white';
 
             return (
               <button

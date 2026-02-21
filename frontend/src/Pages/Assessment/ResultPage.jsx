@@ -1,121 +1,121 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getQuizResult, retryQuiz } from "../Services/assessmentService";
 import AssessmentSidebar from "../../component/Assessment/AssessmentSidebar";
 
 const ResultPage = () => {
-  const { state } = useLocation();
+  const { resultId } = useParams();
   const navigate = useNavigate();
   const [showReview, setShowReview] = useState(false);
+  const [resultData, setResultData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [retrying, setRetrying] = useState(false);
 
-  // 📦 STATIC RESULT DATA (for testing)
-  const staticResult = {
-    score: 8,
-    totalQuestions: 10,
-    percentage: 80,
-    passed: true,
-    correctAnswers: 8,
-    wrongAnswers: 2,
+  // Fetch result data from API
+  useEffect(() => {
+    if (resultId) {
+      fetchResultData();
+    } else {
+      navigate("/assessment");
+    }
+  }, [resultId]);
+
+  const fetchResultData = async () => {
+    try {
+      setLoading(true);
+      const response = await getQuizResult(resultId);
+      setResultData(response.data?.data);
+    } catch (err) {
+      console.error('Failed to fetch result:', err);
+      setError('Failed to load quiz result');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRetry = async () => {
+    try {
+      setRetrying(true);
+      const response = await retryQuiz(resultId);
+      const sessionData = response.data?.data;
+
+      if (sessionData && sessionData.sessionId) {
+        localStorage.setItem('sessionId', sessionData.sessionId);
+        localStorage.setItem('startTime', Date.now());
+        navigate("/assessment/quiz");
+      }
+    } catch (err) {
+      console.error('Failed to retry quiz:', err);
+      alert('Failed to start retry. Please try again.');
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+        <div className="text-white text-xl flex items-center gap-3">
+          <svg className="animate-spin h-8 w-8" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading results...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !resultData) {
+    return (
+      <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">{error || "Result not found"}</div>
+          <button
+            onClick={() => navigate("/assessment")}
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Back to Assessments
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Transform API data to match component structure
+  const result = {
+    score: resultData.score,
+    totalQuestions: resultData.totalQuestions,
+    percentage: resultData.percentage || Math.round((resultData.score / resultData.totalQuestions) * 100),
+    passed: resultData.status === 'pass',
+    correctAnswers: resultData.correctAnswers,
+    wrongAnswers: resultData.incorrectAnswers || (resultData.totalQuestions - resultData.correctAnswers),
     unanswered: 0,
     passingScore: 60,
-    skill: "React.js",
-    assessmentTitle: "Frontend Development Assessment",
-    attemptDate: new Date().toLocaleDateString('en-US', { 
+    skill: resultData.topic?.name || "Unknown",
+    topicIcon: resultData.topic?.icon || "📚",
+    assessmentTitle: `${resultData.topic?.name || 'Assessment'} - ${resultData.difficulty}`,
+    attemptDate: new Date(resultData.completedAt).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     }),
-    timeTaken: "25 minutes",
-    questionReview: [
-      {
-        id: 1,
-        question: "What is React?",
-        selectedAnswer: "A JavaScript library for building user interfaces",
-        correctAnswer: "A JavaScript library for building user interfaces",
-        isCorrect: true,
-        options: [
-          "A JavaScript library for building user interfaces",
-          "A server-side framework",
-          "A database management system",
-          "A CSS preprocessor"
-        ]
-      },
-      {
-        id: 2,
-        question: "Which hook is used to manage state in functional components?",
-        selectedAnswer: "useState",
-        correctAnswer: "useState",
-        isCorrect: true,
-        options: ["useEffect", "useState", "useContext", "useReducer"]
-      },
-      {
-        id: 3,
-        question: "What does JSX stand for?",
-        selectedAnswer: "JavaScript XML",
-        correctAnswer: "JavaScript XML",
-        isCorrect: true,
-        options: ["JavaScript XML", "Java Syntax Extension", "JavaScript Extension", "Java XML"]
-      },
-      {
-        id: 4,
-        question: "Which method is used to create components in React?",
-        selectedAnswer: "React.component()",
-        correctAnswer: "function or class",
-        isCorrect: false,
-        options: ["React.createComponent()", "React.component()", "function or class", "React.makeComponent()"]
-      },
-      {
-        id: 5,
-        question: "What is the virtual DOM?",
-        selectedAnswer: "A copy of the real DOM kept in memory",
-        correctAnswer: "A copy of the real DOM kept in memory",
-        isCorrect: true,
-        options: ["A copy of the real DOM kept in memory", "A new browser API", "A CSS framework", "A database structure"]
-      },
-      {
-        id: 6,
-        question: "Which hook is used for side effects in React?",
-        selectedAnswer: "useEffect",
-        correctAnswer: "useEffect",
-        isCorrect: true,
-        options: ["useState", "useEffect", "useCallback", "useMemo"]
-      },
-      {
-        id: 7,
-        question: "What is prop drilling in React?",
-        selectedAnswer: "Passing data through multiple layers of components",
-        correctAnswer: "Passing data through multiple layers of components",
-        isCorrect: true,
-        options: ["Passing data through multiple layers of components", "Creating new props", "Deleting props", "Updating props automatically"]
-      },
-      {
-        id: 8,
-        question: "Which of the following is true about React keys?",
-        selectedAnswer: "Keys should be unique among siblings",
-        correctAnswer: "Keys should be unique among siblings",
-        isCorrect: true,
-        options: ["Keys should be unique among siblings", "Keys can be random numbers", "Keys are not important", "Keys should always be index"]
-      },
-      {
-        id: 9,
-        question: "What is the purpose of useContext hook?",
-        selectedAnswer: "To manage state",
-        correctAnswer: "To access React Context",
-        isCorrect: false,
-        options: ["To manage state", "To access React Context", "To create side effects", "To optimize performance"]
-      },
-      {
-        id: 10,
-        question: "Which lifecycle method is equivalent to useEffect with empty dependency array?",
-        selectedAnswer: "componentDidMount",
-        correctAnswer: "componentDidMount",
-        isCorrect: true,
-        options: ["componentDidUpdate", "componentWillMount", "componentDidMount", "componentWillUnmount"]
-      }
-    ]
+    timeTaken: `${Math.floor(resultData.timeTaken / 60)} min ${resultData.timeTaken % 60} sec`,
+    questionReview: resultData.detailedAnswers?.map((answer, index) => ({
+      id: index + 1,
+      question: answer.question,
+      selectedAnswer: answer.userAnswer,
+      correctAnswer: answer.correctAnswer,
+      isCorrect: answer.isCorrect,
+      explanation: answer.explanation,
+      options: [] // Options not included in API response
+    })) || [],
+    performanceMessage: resultData.performance?.message || "",
+    performanceLevel: resultData.performance?.level || "",
   };
 
-  const result = state || staticResult;
-
+  // Destructure result properties
   const {
     score,
     totalQuestions,
@@ -125,15 +125,25 @@ const ResultPage = () => {
     wrongAnswers,
     unanswered = 0,
     passingScore = 60,
-    skill = "React.js",
-    assessmentTitle = "Frontend Development Assessment",
-    attemptDate = staticResult.attemptDate,
-    timeTaken = "25 minutes",
-    questionReview = staticResult.questionReview
+    skill,
+    topicIcon,
+    assessmentTitle,
+    attemptDate,
+    timeTaken,
+    questionReview,
+    performanceMessage,
+    performanceLevel
   } = result;
 
   // 🧠 Dynamic Performance Insight
   const getPerformanceInsight = () => {
+    if (performanceMessage) {
+      return {
+        message: performanceMessage,
+        color: passed ? "text-green-400" : "text-red-400"
+      };
+    }
+    
     if (passed) {
       const aboveAverage = percentage >= 80;
       return {
@@ -377,7 +387,7 @@ const ResultPage = () => {
                   <div className="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all ${
-                        passed ? 'bg-gradient-to-r from-green-500 to-green-400' : 'bg-gradient-to-r from-red-500 to-red-400'
+                        passed ? 'bg-linear-to-r from-green-500 to-green-400' : 'bg-linear-to-r from-red-500 to-red-400'
                       }`}
                       style={{ width: `${percentage}%` }}
                     ></div>
@@ -504,13 +514,26 @@ const ResultPage = () => {
             <div className="grid md:grid-cols-4 gap-3">
               
               <button
-                onClick={() => navigate("/assessment/instructions")}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500/40 border-2 border-green-400/50 text-white text-sm rounded-lg font-bold hover:bg-green-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+                onClick={handleRetry}
+                disabled={retrying}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500/40 border-2 border-green-400/50 text-white text-sm rounded-lg font-bold hover:bg-green-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Retake Assessment
+                {retrying ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Retry Quiz
+                  </>
+                )}
               </button>
 
               <button

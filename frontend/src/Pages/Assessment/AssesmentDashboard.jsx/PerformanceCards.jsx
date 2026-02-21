@@ -1,4 +1,4 @@
-const PerformanceCard = ({ label, value, color, icon }) => {
+const PerformanceCard = ({ label, value, color = "blue", icon }) => {
   const colorConfig = {
     blue: {
       border: "border-blue-500 hover:border-blue-400",
@@ -26,7 +26,7 @@ const PerformanceCard = ({ label, value, color, icon }) => {
     },
   };
 
-  const colorClasses = colorConfig[color];
+  const colorClasses = colorConfig[color] || colorConfig.blue;
 
   return (
     <div className={`bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 ${colorClasses.border} transition-all`}>

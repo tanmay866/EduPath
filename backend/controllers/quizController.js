@@ -288,6 +288,30 @@ export const retryQuiz = async (req, res) => {
   }
 };
 
+    /**
+ * Get all active topics with stats
+ * @route   GET /api/topics
+ * @access  Public
+ */
+export const getAllTopics = async (req, res) => {
+  try {
+    const topics = await Topic.getAllActiveWithStats();
+
+    res.status(200).json({
+      success: true,
+      count: topics.length,
+      data: topics,
+    });
+  } catch (error) {
+    console.error('Error fetching topics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch topics',
+      error: error.message,
+    });
+  }
+};
+
 /**
  * Start a new AI-generated quiz
  * POST /api/quiz/start

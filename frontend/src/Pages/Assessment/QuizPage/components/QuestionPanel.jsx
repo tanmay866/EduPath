@@ -40,7 +40,7 @@ const QuestionPanel = ({
               key={index}
               option={option}
               isSelected={selectedAnswer?.selectedOptionIndex === index}
-              onSelect={() => onSelectOption(currentQuestion._id, index)}
+              onSelect={() => onSelectOption(currentQuestionIndex, index)}
             />
           ))}
         </div>
