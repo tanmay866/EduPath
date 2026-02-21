@@ -16,29 +16,16 @@ const AdminNavbar = () => {
 
   const currentTitle = routeTitleMap[location.pathname] || 'Dashboard';
 
-  const handleLogout = () => {
-    sessionStorage.clear();
-    window.location.href = '/';
-  };
-
   return (
-    <header className="w-full h-19 bg-gray-900 border-b border-gray-800 shadow-sm px-6 flex items-center justify-between">
+    <header className="w-full h-19 bg-slate-900/85 backdrop-blur-xl border-b border-white/10 shadow-lg px-6 flex items-center justify-between">
       {/* Left Section - Dynamic Page Title */}
       <div>
         <h1 className="text-lg font-semibold text-white">{currentTitle}</h1>
       </div>
 
-      {/* Right Section - Admin Info & Logout */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-300">Admin</span>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-1.5 rounded-lg hover:bg-red-600 transition"
-        >
-          Logout
-        </button>
+      {/* Right Section - Admin Info */}
+      <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-lg">
+        <span className="text-sm font-medium text-white">Admin</span>
       </div>
     </header>
   );
