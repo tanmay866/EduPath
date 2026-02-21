@@ -94,4 +94,28 @@ export const optionalAuth = async (req, res, next) => {
   }
 };
 
-export default { protect, optionalAuth };
+/**
+ * Middleware to authorize specific roles
+ * @param {...string} roles - Roles allowed to access the route
+ */
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized to access this route. Please login.',
+      });
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `Role '${req.user.role}' is not authorized to access this route`,
+      });
+    }
+    next();
+  };
+};
+
+
+export default { protect, optionalAuth, authorize };

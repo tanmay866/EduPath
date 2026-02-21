@@ -3,8 +3,12 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import { verifyEmailConfig } from './config/mailConfig.js';
+
+// Import all routes
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import quizRoutes from './routes/quizRoutes.js';
+
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
 // Load environment variables
@@ -26,9 +30,18 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Request logging middleware (development)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+  });
+}
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/quiz', quizRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -47,6 +60,11 @@ app.get('/', (req, res) => {
     message: 'Welcome to EduPath API',
     version: '1.0.0',
     documentation: '/api/docs',
+    endpoints: {
+      auth: '/api/auth',
+      profile: '/api/profile',
+      quiz: '/api/quiz',
+    },
   });
 });
 
@@ -59,7 +77,7 @@ app.use(errorHandler);
 // Start server
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log('='.repeat(50));
   console.log(`EduPath Server is running`);
   console.log(`Port: ${PORT}`);
@@ -72,13 +90,13 @@ app.listen(PORT, () => {
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
   // Close server & exit process
-  process.exit(1);
+  server.close(() => process.exit(1));
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
-  process.exit(1);
+  server.close(() => process.exit(1));
 });
 
 export default app;
