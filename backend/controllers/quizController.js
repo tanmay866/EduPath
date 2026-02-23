@@ -101,6 +101,8 @@ export const getQuizResult = async (req, res) => {
         difficulty: result.difficulty,
         experienceLevel: result.experienceLevel,
         score: Math.round(result.score),
+        percentage: result.percentage,
+        status: result.status,
         correctAnswers: result.correctAnswers,
         totalQuestions: result.totalQuestions,
         timeTaken: result.timeTaken,
@@ -508,7 +510,7 @@ export const submitQuiz = async (req, res) => {
       correctAnswers,
       incorrectAnswers: session.totalQuestions - correctAnswers,
       percentage,
-      status: percentage >= 60 ? 'pass' : 'fail',
+      status: percentage >= 70 ? 'pass' : 'fail',
       timeTaken,
       averageTimePerQuestion: Math.floor(timeTaken / session.totalQuestions),
       answers: detailedResults,
@@ -522,7 +524,7 @@ export const submitQuiz = async (req, res) => {
     let performance = 'needs improvement';
     if (percentage >= 90) performance = 'excellent';
     else if (percentage >= 75) performance = 'good';
-    else if (percentage >= 60) performance = 'satisfactory';
+    else if (percentage >= 70) performance = 'satisfactory';
 
     res.json({
       success: true,

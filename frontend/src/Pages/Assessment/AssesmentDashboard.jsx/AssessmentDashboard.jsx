@@ -109,12 +109,18 @@ const AssessmentDashboard = () => {
   // Transform history for previous attempts table
   const previousAttempts = history.slice(0, 5).map(attempt => ({
     id: attempt._id,
-    date: new Date(attempt.createdAt).toLocaleDateString(),
-    skill: attempt.topicId?.name || "Unknown",
-    score: `${attempt.score}/${attempt.totalQuestions}`,
-    percentage: `${attempt.percentage}%`,
-    status: attempt.status,
     resultId: attempt._id,
+    date: new Date(attempt.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    score: attempt.score,
+    totalQuestions: attempt.totalQuestions,
+    percentage: attempt.percentage,
+    status: attempt.percentage >= 70 ? 'Pass' : 'Fail'
   }));
 
   const handleStartQuiz = () => {

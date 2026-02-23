@@ -14,6 +14,7 @@ import QuizPage from './Pages/Assessment/QuizPage/QuizPage'
 import ResultPage from './Pages/Assessment/ResultPage'
 import ProfilePage from './Pages/Profile/ProfilePage'
 import SettingsPage from './Pages/Settings/SettingsPage'
+import AllResult from './Pages/Assessment/Result/AllResult'
 
 // Admin Components
 import AdminNavbar from './Admin/component/AdminNavbar'
@@ -95,6 +96,7 @@ const App = () => {
         <Route path="/settings" element={<><Navbar /><SettingsPage /></>} />
         <Route path="/assessment" element={<><AssessmentDashboard /></>} />
         <Route path="/assessment/instructions" element={<><AssessmentInstructions /></>} />
+        <Route path="/assessment/result" element={<><AllResult /></>} />
         <Route path="/assessment/quiz" element={<><QuizPage /></>} />
         <Route path="/assessment/result/:resultId" element={<><ResultPage /></>} />
       </Routes>

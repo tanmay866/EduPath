@@ -84,15 +84,18 @@ const ResultPage = () => {
   }
 
   // Transform API data to match component structure
+  const calculatedPercentage = resultData.percentage || Math.round((resultData.score / resultData.totalQuestions) * 100);
+  const passingScore = 70;
+  
   const result = {
     score: resultData.score,
     totalQuestions: resultData.totalQuestions,
-    percentage: resultData.percentage || Math.round((resultData.score / resultData.totalQuestions) * 100),
-    passed: resultData.status === 'pass',
+    percentage: calculatedPercentage,
+    passed: calculatedPercentage >= passingScore,
     correctAnswers: resultData.correctAnswers,
     wrongAnswers: resultData.incorrectAnswers || (resultData.totalQuestions - resultData.correctAnswers),
     unanswered: 0,
-    passingScore: 60,
+    passingScore: passingScore,
     skill: resultData.topic?.name || "Unknown",
     topicIcon: resultData.topic?.icon || "📚",
     assessmentTitle: `${resultData.topic?.name || 'Assessment'} - ${resultData.difficulty}`,
@@ -124,7 +127,7 @@ const ResultPage = () => {
     correctAnswers,
     wrongAnswers,
     unanswered = 0,
-    passingScore = 60,
+    passingScore: resultPassingScore,
     skill,
     topicIcon,
     assessmentTitle,

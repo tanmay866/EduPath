@@ -54,7 +54,7 @@ const PreviousAttemptsTable = ({ attempts }) => {
                           style={{ width: `${attempt.percentage}%` }}
                         />
                       </div>
-                      <span className="font-medium">{attempt.percentage}%</span>
+                      <span className="font-medium">{attempt.percentage}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
