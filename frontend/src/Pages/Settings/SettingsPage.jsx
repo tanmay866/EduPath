@@ -123,7 +123,7 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-32 pb-20 px-4 relative">
+    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -183,7 +183,7 @@ const SettingsPage = () => {
         {/* Main Settings Grid - Preferences and Password Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Preferences Card */}
-          <div className="bg-slate-800 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
+          <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 h-full shadow-xl">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 backdrop-blur-lg bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
                 <SettingsIcon size={24} className="text-white" />
@@ -205,11 +205,11 @@ const SettingsPage = () => {
                   <select
                     value={settings.theme}
                     onChange={(e) => handleSettingsChange('theme', e.target.value)}
-                    className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                    className="w-full appearance-none px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
                     style={{ colorScheme: 'dark' }}
                   >
-                    <option value="light" className="bg-slate-800 text-white">Light</option>
-                    <option value="dark" className="bg-slate-800 text-white">Dark</option>
+                    <option value="light" className="bg-black text-white">Light</option>
+                    <option value="dark" className="bg-black text-white">Dark</option>
                   </select>
                   <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
@@ -225,13 +225,13 @@ const SettingsPage = () => {
                   <select
                     value={settings.language}
                     onChange={(e) => handleSettingsChange('language', e.target.value)}
-                    className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                    className="w-full appearance-none px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
                     style={{ colorScheme: 'dark' }}
                   >
-                    <option value="Eng" className="bg-slate-800 text-white">English</option>
-                    <option value="Esp" className="bg-slate-800 text-white">Spanish</option>
-                    <option value="Fra" className="bg-slate-800 text-white">French</option>
-                    <option value="Ger" className="bg-slate-800 text-white">German</option>
+                    <option value="Eng" className="bg-black text-white">English</option>
+                    <option value="Esp" className="bg-black text-white">Spanish</option>
+                    <option value="Fra" className="bg-black text-white">French</option>
+                    <option value="Ger" className="bg-black text-white">German</option>
                   </select>
                   <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
@@ -269,7 +269,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Change Password Card */}
-          <div className="bg-slate-800 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
+          <div className="bg-slate-900 rounded-2xl p-8 border border-slate-800 h-full shadow-xl">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 backdrop-blur-lg bg-indigo-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
                 <Lock size={24} className="text-white" />
@@ -303,7 +303,7 @@ const SettingsPage = () => {
                   name="currentPassword"
                   value={passwordData.currentPassword}
                   onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                   placeholder="Enter current password"
                 />
               </div>
@@ -318,7 +318,7 @@ const SettingsPage = () => {
                   name="newPassword"
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                   placeholder="Enter new password"
                 />
               </div>
@@ -333,7 +333,7 @@ const SettingsPage = () => {
                   name="confirmPassword"
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                   placeholder="Confirm new password"
                 />
               </div>
@@ -356,7 +356,7 @@ const SettingsPage = () => {
         {/* Additional Settings Sections */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Account Settings */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Account</h4>
             <p className="text-gray-400 text-sm mb-4">Manage your account settings</p>
             <button
@@ -368,7 +368,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Privacy Settings */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Privacy</h4>
             <p className="text-gray-400 text-sm mb-4">Control your privacy settings</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
@@ -377,7 +377,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Security Settings */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg">
+          <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Security</h4>
             <p className="text-gray-400 text-sm mb-4">Password changed successfully</p>
             <button className="text-green-400 text-sm font-medium">
@@ -386,7 +386,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Help & Support */}
-          <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
             <h4 className="text-lg font-semibold text-white mb-2">Help & Support</h4>
             <p className="text-gray-400 text-sm mb-4">Get help and contact support</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">

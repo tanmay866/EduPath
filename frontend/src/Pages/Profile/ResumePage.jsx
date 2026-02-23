@@ -160,7 +160,7 @@ const ResumePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-32 pb-20 px-4 relative">
+    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -223,7 +223,7 @@ const ResumePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Side - Uploaded Resumes List */}
           <div className="space-y-6">
-            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 shadow-xl">
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-lg flex items-center justify-center">
                   <FolderOpen size={20} className="text-white" />
@@ -248,7 +248,7 @@ const ResumePage = () => {
                   resumes.map((resume) => (
                     <div
                       key={resume._id}
-                      className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all group"
+                      className="bg-slate-800 border border-slate-700 rounded-xl p-4 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all group"
                     >
                       <div className="flex items-start gap-4">
                         <div className="w-14 h-14 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -318,7 +318,7 @@ const ResumePage = () => {
 
           {/* Right Side - Upload Section */}
           <div className="space-y-6">
-            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 shadow-xl sticky top-6">
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl sticky top-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-lg flex items-center justify-center">
                   <Upload size={20} className="text-white" />

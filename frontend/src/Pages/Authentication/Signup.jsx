@@ -65,7 +65,7 @@ const Signup = () => {
   }, [formik.submitCount]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 pt-32 pb-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-black pt-32 pb-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -94,7 +94,7 @@ const Signup = () => {
         <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
         <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
       </div>
-      <div className="max-w-md w-full space-y-4 bg-slate-900/40 backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/10 relative z-10">
+      <div className="max-w-md w-full space-y-4 backdrop-blur-xl bg-slate-900/60 p-8 rounded-2xl shadow-2xl border border-white/10 relative z-10">
         <button
           onClick={() => navigate('/')}
           className="absolute top-4 left-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
@@ -124,7 +124,7 @@ const Signup = () => {
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.firstName ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.firstName ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="John Doe"
               />
               {formik.touched.firstName && formik.errors.firstName && (
@@ -145,7 +145,7 @@ const Signup = () => {
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.lastName ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.lastName ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="Doe"
               />
               {formik.touched.lastName && formik.errors.lastName && (
@@ -166,7 +166,7 @@ const Signup = () => {
                 value={formik.values.email}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.email ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.email ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="john@example.com"
               />
               {formik.touched.email && formik.errors.email && (
@@ -188,7 +188,7 @@ const Signup = () => {
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.password ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.password ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                   placeholder="••••••••"
                 />
                 {formik.touched.password && formik.errors.password && (

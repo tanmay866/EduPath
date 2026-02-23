@@ -356,7 +356,7 @@ const ProfilePage = () => {
   const firstLetter = profileData.firstName?.charAt(0)?.toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-32 pb-20 px-4 relative">
+    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -416,7 +416,7 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column - Profile Card */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl">
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-indigo-500/30 transition-all shadow-xl">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
                   <input
@@ -468,7 +468,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Resume Card - Navigate to Resume Page */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')}>
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/40 group-hover:border-emerald-400/50 transition-all">
@@ -488,7 +488,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Settings Card - Navigate to Settings Page */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-500/40 group-hover:border-purple-400/50 transition-all">
@@ -511,7 +511,7 @@ const ProfilePage = () => {
           {/* Right Column - Forms */}
           <div className="lg:col-span-2">
             {/* Profile Information Card */}
-            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 h-full shadow-xl">
+            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 h-full shadow-xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/30 rounded-xl flex items-center justify-center">
                   <User size={20} className="text-white" />
@@ -533,7 +533,7 @@ const ProfilePage = () => {
                       name="firstName"
                       value={profileData.firstName}
                       onChange={handleProfileChange}
-                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                       placeholder="Enter first name"
                     />
                   </div>
@@ -546,7 +546,7 @@ const ProfilePage = () => {
                       name="lastName"
                       value={profileData.lastName}
                       onChange={handleProfileChange}
-                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                       placeholder="Enter last name"
                     />
                   </div>
@@ -561,7 +561,7 @@ const ProfilePage = () => {
                       type="email"
                       value={profileData.email}
                       disabled
-                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-gray-400 cursor-not-allowed"
+                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-gray-400 cursor-not-allowed"
                     />
                     <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                   </div>
@@ -577,7 +577,7 @@ const ProfilePage = () => {
                       pattern="[0-9]*"
                       inputMode="numeric"
                       maxLength="10"
-                      className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                       placeholder="Add phone number"
                     />
                   </div>
@@ -592,12 +592,12 @@ const ProfilePage = () => {
                       name="role"
                       value={profileData.role}
                       onChange={handleProfileChange}
-                      className="w-full px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
+                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
                       style={{ colorScheme: 'dark' }}
                     >
-                      <option value="student" className="bg-slate-800 text-white">Student</option>
-                      <option value="developer" className="bg-slate-800 text-white">Developer</option>
-                      <option value="other" className="bg-slate-800 text-white">Other</option>
+                      <option value="student" className="bg-black text-white">Student</option>
+                      <option value="developer" className="bg-black text-white">Developer</option>
+                      <option value="other" className="bg-black text-white">Other</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
                   </div>
@@ -612,7 +612,7 @@ const ProfilePage = () => {
                     name="skills"
                     value={profileData.skills}
                     onChange={handleProfileChange}
-                    className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                     placeholder="e.g., JavaScript, React, Node.js"
                   />
                 </div>
@@ -634,7 +634,7 @@ const ProfilePage = () => {
       {/* Image Editor Modal */}
       {showImageEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
+          <div className="bg-slate-900 rounded-2xl p-6 max-w-md w-full border border-slate-800 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">Adjust Profile Picture</h3>
               <button

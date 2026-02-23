@@ -118,7 +118,7 @@ const Signin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-black pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -147,7 +147,7 @@ const Signin = () => {
         <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
         <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
       </div>
-      <div className="max-w-md w-full space-y-8 bg-slate-900/40 backdrop-blur-xl p-10 rounded-2xl shadow-2xl border border-white/10 relative z-10">
+      <div className="max-w-md w-full space-y-8 backdrop-blur-xl bg-slate-900/60 p-10 rounded-2xl shadow-2xl border border-white/10 relative z-10">
         <button
           onClick={() => navigate('/')}
           className="absolute top-6 left-6 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
@@ -177,7 +177,7 @@ const Signin = () => {
                 value={formik.values.identifier}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-3 border ${formik.errors.identifier ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                className={`appearance-none relative block w-full px-3 py-3 border ${formik.errors.identifier ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="john@example.com / MEPA2026002"
               />
               {formik.touched.identifier && formik.errors.identifier && (
@@ -198,7 +198,7 @@ const Signin = () => {
                 value={formik.values.password}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-3 border ${formik.errors.password ? 'border-red-500' : 'border-slate-600'} placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                className={`appearance-none relative block w-full px-3 py-3 border ${formik.errors.password ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                 placeholder="••••••••"
               />
               {formik.touched.password && formik.errors.password && (

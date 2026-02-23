@@ -144,7 +144,7 @@ const ArcNavbar = () => {
                 
                 {contactDropdownOpen && (
                   <div className="absolute top-full left-0 pt-2 w-56">
-                    <div className="backdrop-blur-xl bg-slate-900/95 rounded-xl shadow-2xl py-2 border border-white/30 overflow-hidden">
+                    <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl shadow-2xl py-2 border border-white/10 overflow-hidden">
                       {/* Menu Items */}
                       <div className="py-1">
                         <button
@@ -201,9 +201,9 @@ const ArcNavbar = () => {
 
                   {/* Dropdown */}
                   {open && (
-                    <div className="absolute right-0 mt-2 w-72 backdrop-blur-xl bg-slate-900/95 rounded-xl shadow-2xl py-2 border border-white/30 overflow-hidden animate-slideDown">
+                    <div className="absolute right-0 mt-2 w-72 backdrop-blur-xl bg-slate-900/60 rounded-xl shadow-2xl py-2 border border-white/10 overflow-hidden animate-slideDown">
                       {/* Profile Header */}
-                      <div className="px-4 py-3 bg-slate-800/80 flex gap-3 items-center border-b border-white/20">
+                      <div className="px-4 py-3 bg-slate-800/50 flex gap-3 items-center border-b border-white/10">
                         <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden">
                           {profilePicture && !imageLoadError ? (
                             <img 
@@ -251,7 +251,7 @@ const ArcNavbar = () => {
                       </div>
 
                       {/* Divider */}
-                      <div className="border-t border-white/20 my-1"></div>
+                      <div className="border-t border-white/10 my-1"></div>
 
                       {/* Logout */}
                       <button
@@ -295,7 +295,7 @@ const ArcNavbar = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden backdrop-blur-xl bg-slate-900/95 rounded-3xl mt-4 mx-4 shadow-2xl border border-white/30">
+          <div className="md:hidden backdrop-blur-xl bg-slate-900/60 rounded-3xl mt-4 mx-4 shadow-2xl border border-white/10">
             <div className="px-6 py-4 space-y-3">
               {navItems.map((item, idx) => (
                 <button
@@ -321,7 +321,7 @@ const ArcNavbar = () => {
                   <ChevronRight size={16} className={`text-gray-400 transition-transform ${contactDropdownOpen ? 'rotate-90' : ''}`} />
                 </button>
                 {contactDropdownOpen && (
-                  <div className="pl-4 space-y-1 backdrop-blur-xl bg-slate-800/90 rounded-lg p-2 border border-white/30">
+                  <div className="pl-4 space-y-1 bg-slate-800/50 rounded-lg p-2 border border-white/10">
                     {contactSubmenu.map((item, idx) => (
                       <button
                         key={idx}
@@ -340,7 +340,7 @@ const ArcNavbar = () => {
               </div>
               
               {isEmail ? (
-                <div className="pt-3 border-t border-white/20 space-y-3">
+                <div className="pt-3 border-t border-white/10 space-y-3">
                   <button
                     onClick={() => {
                       navigate('/profile');
@@ -370,7 +370,7 @@ const ArcNavbar = () => {
                   </button>
                 </div>
               ) : (
-                <div className="pt-3 border-t border-white/20 space-y-3">
+                <div className="pt-3 border-t border-white/10 space-y-3">
                   <button
                     onClick={() => {
                       navigate('/signin');

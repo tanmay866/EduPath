@@ -97,7 +97,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-32 pb-20 px-4 relative">
+    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative">
       {/* Animated Background */}
       <div className="animated-bg">
         <div className="moving-shape shape-1"></div>
@@ -148,7 +148,7 @@ const Contact = () => {
           {/* Left Side - Contact Information */}
           <div className="space-y-4">
             {/* Our Address */}
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-5 shadow-xl">
+            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-5 shadow-xl hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 transition-all">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 backdrop-blur-lg bg-blue-500/30 border border-blue-400/30 rounded-xl flex items-center justify-center flex-shrink-0">
                   <MapPin size={20} className="text-blue-400" />
@@ -167,7 +167,7 @@ const Contact = () => {
             </div>
 
             {/* Contact Number */}
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-5 shadow-xl">
+            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-5 shadow-xl hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 transition-all">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 backdrop-blur-lg bg-blue-500/30 border border-blue-400/30 rounded-xl flex items-center justify-center flex-shrink-0">
                   <Phone size={20} className="text-blue-400" />
@@ -187,7 +187,7 @@ const Contact = () => {
             </div>
 
             {/* Email */}
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-2xl p-5 shadow-xl">
+            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-5 shadow-xl hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 transition-all">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 backdrop-blur-lg bg-blue-500/30 border border-blue-400/30 rounded-xl flex items-center justify-center flex-shrink-0">
                   <Mail size={20} className="text-blue-400" />
@@ -208,7 +208,7 @@ const Contact = () => {
           </div>
 
           {/* Right Side - Contact Form */}
-          <div className="backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-2xl p-8 shadow-xl">
+          <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-8 shadow-xl">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Field */}
               <div>
@@ -222,7 +222,7 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="Enter your name"
                   pattern="[a-zA-Z\s]*"
-                  className="w-full px-4 py-3 backdrop-blur-lg bg-slate-900/60 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all"
                   required
                 />
               </div>
@@ -238,7 +238,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 backdrop-blur-lg bg-slate-900/60 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all"
                   required
                 />
               </div>
@@ -257,7 +257,7 @@ const Contact = () => {
                   pattern="[0-9]*"
                   inputMode="numeric"
                   maxLength="10"
-                  className="w-full px-4 py-3 backdrop-blur-lg bg-slate-900/60 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all"
                 />
               </div>
 
@@ -272,7 +272,7 @@ const Contact = () => {
                   onChange={handleChange}
                   placeholder="Type your message..."
                   rows="5"
-                  className="w-full px-4 py-3 backdrop-blur-lg bg-slate-900/60 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all resize-none"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all resize-none"
                   required
                 ></textarea>
               </div>
