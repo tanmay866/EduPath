@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Settings as SettingsIcon, Save, ArrowLeft, Lock } from 'lucide-react';
-import { updateSettings } from '../Services/profileService';
+import { updateSettings, changePassword } from '../Services/profileService';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const SettingsPage = () => {
   const loadSettings = () => {
     const theme = sessionStorage.getItem('theme') || 'light';
     const language = sessionStorage.getItem('language') || 'Eng';
-    
+
     setSettings({ theme, language, notificationEnabled: true });
   };
 
@@ -103,14 +103,23 @@ const SettingsPage = () => {
       return;
     }
 
-    // TODO: Add API call to change password
-    // For now, just show success message
-    setTimeout(() => {
-      setPasswordMessage('Password changed successfully!');
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setTimeout(() => setPasswordMessage(''), 3000);
+    try {
+      const response = await changePassword(passwordData);
+      if (response.success) {
+        // Update token in sessionStorage
+        if (response.token) {
+          sessionStorage.setItem('token', response.token);
+        }
+        setPasswordMessage(response.message || 'Password changed successfully!');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setTimeout(() => setPasswordMessage(''), 3000);
+      }
+    } catch (err) {
+      setPasswordError(err.message || 'Failed to change password');
+      setTimeout(() => setPasswordError(''), 3000);
+    } finally {
       setPasswordLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -126,22 +135,22 @@ const SettingsPage = () => {
         <div className="moving-shape shape-6"></div>
         <div className="moving-shape shape-7"></div>
         <div className="moving-shape shape-8"></div>
-        
+
         {/* Rotating Center Gradient */}
         <div className="rotating-gradient"></div>
-        
+
         {/* Floating Particles */}
-        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
-        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
-        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
-        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
-        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+        <div className="floating-particle" style={{ top: '5%', left: '15%', animationDelay: '0s' }}></div>
+        <div className="floating-particle" style={{ top: '8%', left: '85%', animationDelay: '2s' }}></div>
+        <div className="floating-particle" style={{ top: '12%', left: '50%', animationDelay: '1.5s' }}></div>
+        <div className="floating-particle" style={{ top: '15%', left: '20%', animationDelay: '0s' }}></div>
+        <div className="floating-particle" style={{ top: '25%', left: '70%', animationDelay: '1s' }}></div>
+        <div className="floating-particle" style={{ top: '45%', left: '10%', animationDelay: '2s' }}></div>
+        <div className="floating-particle" style={{ top: '55%', left: '85%', animationDelay: '1.5s' }}></div>
+        <div className="floating-particle" style={{ top: '75%', left: '30%', animationDelay: '0.5s' }}></div>
+        <div className="floating-particle" style={{ top: '65%', left: '60%', animationDelay: '2.5s' }}></div>
+        <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
+        <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -175,173 +184,173 @@ const SettingsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Preferences Card */}
           <div className="bg-slate-800 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 backdrop-blur-lg bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
-              <SettingsIcon size={24} className="text-white" />
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 backdrop-blur-lg bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
+                <SettingsIcon size={24} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-white">Preferences</h3>
+                <p className="text-gray-400 text-sm">Customize your experience</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl font-semibold text-white">Preferences</h3>
-              <p className="text-gray-400 text-sm">Customize your experience</p>
+
+            <div className="space-y-6">
+              {/* Theme Setting */}
+              <div className="flex items-center justify-between py-4 border-b border-white/10">
+                <div>
+                  <label className="text-base font-medium text-white">Theme</label>
+                  <p className="text-sm text-gray-400 mt-1">Choose your preferred theme</p>
+                </div>
+                <div className="relative min-w-[160px]">
+                  <select
+                    value={settings.theme}
+                    onChange={(e) => handleSettingsChange('theme', e.target.value)}
+                    className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                    style={{ colorScheme: 'dark' }}
+                  >
+                    <option value="light" className="bg-slate-800 text-white">Light</option>
+                    <option value="dark" className="bg-slate-800 text-white">Dark</option>
+                  </select>
+                  <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Language Setting */}
+              <div className="flex items-center justify-between py-4 border-b border-white/10">
+                <div>
+                  <label className="text-base font-medium text-white">Language</label>
+                  <p className="text-sm text-gray-400 mt-1">Select your language</p>
+                </div>
+                <div className="relative min-w-[160px]">
+                  <select
+                    value={settings.language}
+                    onChange={(e) => handleSettingsChange('language', e.target.value)}
+                    className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
+                    style={{ colorScheme: 'dark' }}
+                  >
+                    <option value="Eng" className="bg-slate-800 text-white">English</option>
+                    <option value="Esp" className="bg-slate-800 text-white">Spanish</option>
+                    <option value="Fra" className="bg-slate-800 text-white">French</option>
+                    <option value="Ger" className="bg-slate-800 text-white">German</option>
+                  </select>
+                  <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Notification Setting */}
+              <div className="flex items-center justify-between py-4">
+                <div>
+                  <label className="text-base font-medium text-white">Notifications</label>
+                  <p className="text-sm text-gray-400 mt-1">Enable or disable notifications</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.notificationEnabled}
+                    onChange={(e) => handleSettingsChange('notificationEnabled', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-14 h-7 backdrop-blur-lg bg-white/10 border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500/40 peer-checked:border-purple-400/50"></div>
+                </label>
+              </div>
+
+              {/* Save Button */}
+              <div className="pt-6">
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={loading}
+                  className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-purple-500/30 hover:bg-purple-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-purple-400/50 hover:border-purple-400/70 hover:shadow-xl hover:shadow-purple-500/50"
+                >
+                  <Save size={20} />
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </div>
-
-          <div className="space-y-6">
-            {/* Theme Setting */}
-            <div className="flex items-center justify-between py-4 border-b border-white/10">
-              <div>
-                <label className="text-base font-medium text-white">Theme</label>
-                <p className="text-sm text-gray-400 mt-1">Choose your preferred theme</p>
-              </div>
-              <div className="relative min-w-[160px]">
-                <select
-                  value={settings.theme}
-                  onChange={(e) => handleSettingsChange('theme', e.target.value)}
-                  className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
-                  style={{ colorScheme: 'dark' }}
-                >
-                  <option value="light" className="bg-slate-800 text-white">Light</option>
-                  <option value="dark" className="bg-slate-800 text-white">Dark</option>
-                </select>
-                <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Language Setting */}
-            <div className="flex items-center justify-between py-4 border-b border-white/10">
-              <div>
-                <label className="text-base font-medium text-white">Language</label>
-                <p className="text-sm text-gray-400 mt-1">Select your language</p>
-              </div>
-              <div className="relative min-w-[160px]">
-                <select
-                  value={settings.language}
-                  onChange={(e) => handleSettingsChange('language', e.target.value)}
-                  className="w-full appearance-none px-4 py-3 backdrop-blur-lg bg-slate-800/60 border border-white/10 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
-                  style={{ colorScheme: 'dark' }}
-                >
-                  <option value="Eng" className="bg-slate-800 text-white">English</option>
-                  <option value="Esp" className="bg-slate-800 text-white">Spanish</option>
-                  <option value="Fra" className="bg-slate-800 text-white">French</option>
-                  <option value="Ger" className="bg-slate-800 text-white">German</option>
-                </select>
-                <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Notification Setting */}
-            <div className="flex items-center justify-between py-4">
-              <div>
-                <label className="text-base font-medium text-white">Notifications</label>
-                <p className="text-sm text-gray-400 mt-1">Enable or disable notifications</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.notificationEnabled}
-                  onChange={(e) => handleSettingsChange('notificationEnabled', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-14 h-7 backdrop-blur-lg bg-white/10 border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500/40 peer-checked:border-purple-400/50"></div>
-              </label>
-            </div>
-
-            {/* Save Button */}
-            <div className="pt-6">
-              <button
-                onClick={handleSaveSettings}
-                disabled={loading}
-                className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-purple-500/30 hover:bg-purple-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-purple-400/50 hover:border-purple-400/70 hover:shadow-xl hover:shadow-purple-500/50"
-              >
-                <Save size={20} />
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
-        </div>
 
           {/* Change Password Card */}
           <div className="bg-slate-800 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 backdrop-blur-lg bg-indigo-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
-              <Lock size={24} className="text-white" />
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 backdrop-blur-lg bg-indigo-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
+                <Lock size={24} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-white">Change Password</h3>
+                <p className="text-gray-400 text-sm">Update your account password</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl font-semibold text-white">Change Password</h3>
-              <p className="text-gray-400 text-sm">Update your account password</p>
-            </div>
+
+            {/* Password Messages */}
+            {passwordMessage && (
+              <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl font-medium">
+                {passwordMessage}
+              </div>
+            )}
+            {passwordError && (
+              <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl font-medium">
+                {passwordError}
+              </div>
+            )}
+
+            <form onSubmit={handleChangePassword} className="space-y-5">
+              {/* Current Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                  placeholder="Enter new password"
+                />
+              </div>
+
+              {/* Confirm New Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                  placeholder="Confirm new password"
+                />
+              </div>
+
+              {/* Change Password Button */}
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
+                >
+                  <Lock size={20} />
+                  {passwordLoading ? 'Changing...' : 'Change Password'}
+                </button>
+              </div>
+            </form>
           </div>
-
-          {/* Password Messages */}
-          {passwordMessage && (
-            <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl font-medium">
-              {passwordMessage}
-            </div>
-          )}
-          {passwordError && (
-            <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl font-medium">
-              {passwordError}
-            </div>
-          )}
-
-          <form onSubmit={handleChangePassword} className="space-y-5">
-            {/* Current Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Current Password
-              </label>
-              <input
-                type="password"
-                name="currentPassword"
-                value={passwordData.currentPassword}
-                onChange={handlePasswordChange}
-                className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                placeholder="Enter current password"
-              />
-            </div>
-
-            {/* New Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                New Password
-              </label>
-              <input
-                type="password"
-                name="newPassword"
-                value={passwordData.newPassword}
-                onChange={handlePasswordChange}
-                className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                placeholder="Enter new password"
-              />
-            </div>
-
-            {/* Confirm New Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={passwordData.confirmPassword}
-                onChange={handlePasswordChange}
-                className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                placeholder="Confirm new password"
-              />
-            </div>
-
-            {/* Change Password Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={passwordLoading}
-                className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
-              >
-                <Lock size={20} />
-                {passwordLoading ? 'Changing...' : 'Change Password'}
-              </button>
-            </div>
-          </form>
-        </div>
         </div>
 
         {/* Additional Settings Sections */}
