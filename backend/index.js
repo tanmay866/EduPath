@@ -8,6 +8,7 @@ import { verifyEmailConfig } from './config/mailConfig.js';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
@@ -42,6 +43,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -64,6 +66,7 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       profile: '/api/profile',
       quiz: '/api/quiz',
+      contact: '/api/contact',
     },
   });
 });

@@ -32,34 +32,81 @@ const ProfilePage = () => {
 
   useEffect(() => {
     // Check if user is logged in
-    const email = sessionStorage.getItem('email');
-    if (!email) {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
       navigate('/signin');
       return;
     }
 
-    // Load data from sessionStorage
-    loadProfileData();
+    // Load data from backend
+    loadProfileDataFromBackend();
   }, [navigate]);
 
-  const loadProfileData = () => {
-    const firstName = sessionStorage.getItem('firstName') || '';
-    const lastName = sessionStorage.getItem('lastName') || '';
-    const email = sessionStorage.getItem('email') || '';
-    const phone = sessionStorage.getItem('phone') || '';
-    const skills = sessionStorage.getItem('skills') || '';
-    const role = sessionStorage.getItem('role') || 'student';
-    const profilePicture = sessionStorage.getItem('profilePicture') || '';
+  const loadProfileDataFromBackend = async () => {
+    try {
+      setLoading(true);
+      const response = await getProfile();
+      
+      if (response.success) {
+        const profile = response.data;
+        
+        // Update state
+        setProfileData({
+          firstName: profile.firstName || '',
+          lastName: profile.lastName || '',
+          email: profile.email || '',
+          phone: profile.phone || '',
+          skills: profile.skills || '',
+          role: profile.role || 'student',
+          profilePicture: profile.profilePicture || ''
+        });
 
-    setProfileData({ firstName, lastName, email, phone, skills, role, profilePicture });
+        // Also update sessionStorage for quick access
+        sessionStorage.setItem('firstName', profile.firstName || '');
+        sessionStorage.setItem('lastName', profile.lastName || '');
+        sessionStorage.setItem('email', profile.email || '');
+        sessionStorage.setItem('phone', profile.phone || '');
+        sessionStorage.setItem('skills', profile.skills || '');
+        sessionStorage.setItem('role', profile.role || 'student');
+        sessionStorage.setItem('profilePicture', profile.profilePicture || '');
+        sessionStorage.setItem('loginId', profile.loginId || '');
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+      // Fallback to sessionStorage if API fails
+      const firstName = sessionStorage.getItem('firstName') || '';
+      const lastName = sessionStorage.getItem('lastName') || '';
+      const email = sessionStorage.getItem('email') || '';
+      const phone = sessionStorage.getItem('phone') || '';
+      const skills = sessionStorage.getItem('skills') || '';
+      const role = sessionStorage.getItem('role') || 'student';
+      const profilePicture = sessionStorage.getItem('profilePicture') || '';
+
+      setProfileData({ firstName, lastName, email, phone, skills, role, profilePicture });
+      
+      setError('Could not load profile from server');
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // For phone field, only allow numbers
+    if (name === 'phone') {
+      const numericValue = value.replace(/[^0-9]/g, '');
+      setProfileData(prev => ({
+        ...prev,
+        [name]: numericValue
+      }));
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -242,17 +289,22 @@ const ProfilePage = () => {
 
       if (response.success) {
         setMessage('Profile updated successfully!');
-        sessionStorage.setItem('firstName', profileData.firstName);
-        sessionStorage.setItem('lastName', profileData.lastName);
-        sessionStorage.setItem('phone', profileData.phone);
-        sessionStorage.setItem('skills', profileData.skills);
-        sessionStorage.setItem('role', profileData.role);
-        sessionStorage.setItem('profilePicture', profileData.profilePicture);
+        
+        // Update sessionStorage with the returned data
+        const updatedProfile = response.data;
+        sessionStorage.setItem('firstName', updatedProfile.firstName || profileData.firstName);
+        sessionStorage.setItem('lastName', updatedProfile.lastName || profileData.lastName);
+        sessionStorage.setItem('phone', updatedProfile.phone || profileData.phone);
+        sessionStorage.setItem('skills', updatedProfile.skills || profileData.skills);
+        sessionStorage.setItem('role', updatedProfile.role || profileData.role);
+        sessionStorage.setItem('profilePicture', updatedProfile.profilePicture || profileData.profilePicture);
 
         setTimeout(() => setMessage(''), 3000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
+      console.error('Save profile error:', err);
+      const errorMessage = err.message || err.response?.data?.message || 'Failed to update profile';
+      setError(errorMessage);
       setTimeout(() => setError(''), 3000);
     } finally {
       setLoading(false);
@@ -479,6 +531,9 @@ const ProfilePage = () => {
                       name="phone"
                       value={profileData.phone}
                       onChange={handleProfileChange}
+                      pattern="[0-9]*"
+                      inputMode="numeric"
+                      maxLength="10"
                       className="w-full px-4 py-3 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
                       placeholder="Add phone number"
                     />
@@ -499,10 +554,6 @@ const ProfilePage = () => {
                     >
                       <option value="student" className="bg-slate-800 text-white">Student</option>
                       <option value="developer" className="bg-slate-800 text-white">Developer</option>
-                      <option value="designer" className="bg-slate-800 text-white">Designer</option>
-                      <option value="teacher" className="bg-slate-800 text-white">Teacher</option>
-                      <option value="manager" className="bg-slate-800 text-white">Manager</option>
-                      <option value="entrepreneur" className="bg-slate-800 text-white">Entrepreneur</option>
                       <option value="other" className="bg-slate-800 text-white">Other</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />

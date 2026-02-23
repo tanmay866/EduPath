@@ -16,7 +16,16 @@ export const getProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: user
+      data: {
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.profile?.phone || '',
+        skills: user.profile?.skills || '',
+        role: user.role || 'student',
+        profilePicture: user.profile?.avatar || '',
+        loginId: user.loginId || ''
+      }
     });
   } catch (error) {
     console.error('Get profile error:', error);
@@ -44,13 +53,36 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Update profile fields
+    // Validate phone number if provided
+    if (phone && phone.length > 0 && !/^\d{10}$/.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit phone number'
+      });
+    }
+
+    // Validate role if provided
+    const validRoles = ['student', 'developer', 'other', 'admin', 'teacher', 'manager', 'entrepreneur', 'instructor'];
+    if (role && !validRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role selected'
+      });
+    }
+
+    // Update root level fields
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
-    if (phone !== undefined) user.phone = phone;
-    if (skills !== undefined) user.skills = skills;
     if (role !== undefined) user.role = role;
-    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+    
+    // Update profile nested fields
+    if (!user.profile) {
+      user.profile = {};
+    }
+    
+    if (phone !== undefined) user.profile.phone = phone;
+    if (skills !== undefined) user.profile.skills = skills;
+    if (profilePicture !== undefined) user.profile.avatar = profilePicture;
 
     await user.save();
 
@@ -60,7 +92,16 @@ export const updateProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
-      data: updatedUser
+      data: {
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        phone: updatedUser.profile?.phone || '',
+        skills: updatedUser.profile?.skills || '',
+        role: updatedUser.role,
+        profilePicture: updatedUser.profile?.avatar || '',
+        loginId: updatedUser.loginId
+      }
     });
   } catch (error) {
     console.error('Update profile error:', error);
