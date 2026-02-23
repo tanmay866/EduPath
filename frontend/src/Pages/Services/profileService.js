@@ -39,3 +39,23 @@ export const changePassword = async (passwordData) => {
     throw error.response?.data || error;
   }
 };
+
+// Forgot password - Send reset email
+export const forgotPassword = async (email) => {
+  try {
+    const response = await API.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Reset password with token
+export const resetPassword = async (token, passwordData) => {
+  try {
+    const response = await API.post(`/auth/reset-password/${token}`, passwordData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

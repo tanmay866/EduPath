@@ -7,6 +7,7 @@ import Work from './Pages/Work/Work'
 import Contact from './Pages/Contact/Contact'
 import Signup from './Pages/Authentication/Signup'
 import Signin from './Pages/Authentication/Signin'
+import ResetPassword from './Pages/Authentication/ResetPassword'
 import Footer from './component/Footer/Footer'
 import AssessmentDashboard from './Pages/Assessment/AssesmentDashboard.jsx/AssessmentDashboard'
 import AssessmentInstructions from './Pages/Assessment/AssessmentInstructions'
@@ -40,7 +41,7 @@ const App = () => {
       <div className="bg-slate-950 min-h-screen">
         {/* Admin Routes */}
 
-        <ToastContainer 
+        <ToastContainer
           position="top-right"
           autoClose={5000}
           hideProgressBar={false}
@@ -55,23 +56,23 @@ const App = () => {
         />
 
         <Routes>
-          <Route path="/*" element={<> <AdminDashboard/> </>} />
-          <Route path="/admin/*" element={<> <AdminDashboard/> </>} />
-          <Route path="/admin/users" element={<> <ManageUsers/> </>} />
-          <Route path="/admin/quiz-attempts" element={<> <QuizAttempts/> </>} />
-          <Route path="/admin/roadmaps" element={<> <RoadmapHistory/> </>} />
-          <Route path="/admin/analytics" element={<> <AIAnalytics/> </>} />
-          <Route path="/admin/settings" element={<> <SystemSettings/> </>} />
-      </Routes>
+          <Route path="/*" element={<> <AdminDashboard /> </>} />
+          <Route path="/admin/*" element={<> <AdminDashboard /> </>} />
+          <Route path="/admin/users" element={<> <ManageUsers /> </>} />
+          <Route path="/admin/quiz-attempts" element={<> <QuizAttempts /> </>} />
+          <Route path="/admin/roadmaps" element={<> <RoadmapHistory /> </>} />
+          <Route path="/admin/analytics" element={<> <AIAnalytics /> </>} />
+          <Route path="/admin/settings" element={<> <SystemSettings /> </>} />
+        </Routes>
 
       </div>
     )
 
   } else {
     return (
-    <div className="bg-slate-950 min-h-screen">
+      <div className="bg-slate-950 min-h-screen">
 
-      <ToastContainer 
+        <ToastContainer
           position="bottom-right"
           autoClose={5000}
           hideProgressBar={false}
@@ -84,26 +85,27 @@ const App = () => {
           theme='dark'
           toastClassName="toast-glass"
         />
-      
-      <Routes>
-        <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
-        <Route path="/about" element={<><Navbar /><About /></>} />
-        <Route path="/work" element={<><Navbar /><Work /></>} />
-        <Route path="/contact" element={<><Navbar /><Contact /></>} />
-        <Route path="/signup" element={<><Navbar /><Signup /></>} />
-        <Route path="/signin" element={<><Navbar /><Signin /></>} />
-        <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
-        <Route path="/settings" element={<><Navbar /><SettingsPage /></>} />
-        <Route path="/assessment" element={<><AssessmentDashboard /></>} />
-        <Route path="/assessment/instructions" element={<><AssessmentInstructions /></>} />
-        <Route path="/assessment/result" element={<><AllResult /></>} />
-        <Route path="/assessment/quiz" element={<><QuizPage /></>} />
-        <Route path="/assessment/result/:resultId" element={<><ResultPage /></>} />
-      </Routes>
-    </div>
-  )
+
+        <Routes>
+          <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
+          <Route path="/about" element={<><Navbar /><About /></>} />
+          <Route path="/work" element={<><Navbar /><Work /></>} />
+          <Route path="/contact" element={<><Navbar /><Contact /></>} />
+          <Route path="/signup" element={<><Navbar /><Signup /></>} />
+          <Route path="/signin" element={<><Navbar /><Signin /></>} />
+          <Route path="/reset-password/:token" element={<><Navbar /><ResetPassword /></>} />
+          <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
+          <Route path="/settings" element={<><Navbar /><SettingsPage /></>} />
+          <Route path="/assessment" element={<><AssessmentDashboard /></>} />
+          <Route path="/assessment/instructions" element={<><AssessmentInstructions /></>} />
+          <Route path="/assessment/result" element={<><AllResult /></>} />
+          <Route path="/assessment/quiz" element={<><QuizPage /></>} />
+          <Route path="/assessment/result/:resultId" element={<><ResultPage /></>} />
+        </Routes>
+      </div>
+    )
   }
-  
+
 }
 
 export default App

@@ -4,10 +4,11 @@ import { HiArrowLeft } from 'react-icons/hi';
 import { useFormik } from 'formik';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { forgotPassword } from '../Services/profileService';
 
 const Signin = () => {
   const navigate = useNavigate();
-  const formik  = useFormik({
+  const formik = useFormik({
     initialValues: {
       identifier: "",
       password: ""
@@ -24,24 +25,24 @@ const Signin = () => {
       }
       return errors;
     },
-    onSubmit: async (values,{resetForm}) => {
-      
+    onSubmit: async (values, { resetForm }) => {
+
       // Simulate API call
-      try{
+      try {
 
         let payload = {
           password: values.password
         }
 
         // detect email or loginId
-        if(values.identifier.includes('@')){
+        if (values.identifier.includes('@')) {
           payload.email = values.identifier;
         } else {
           payload.loginId = values.identifier;
         }
 
         console.log("Payload", payload);
-        
+
 
         const res = await axios.post('http://localhost:4000/api/auth/login', payload);
         console.log(res);
@@ -55,7 +56,7 @@ const Signin = () => {
         resetForm();
 
         const userRole = res.data.user.role;
-        if(userRole === 'admin'){          
+        if (userRole === 'admin') {
           setTimeout(() => {
             navigate('/admin');
             window.location.reload();
@@ -69,12 +70,37 @@ const Signin = () => {
       }
     }
   });
- 
+
   useEffect(() => {
-  if (formik.submitCount > 0 && !formik.isValid) {
-    toast.error("Please fill all required fields correctly");
-  }
-}, [formik.submitCount]);
+    if (formik.submitCount > 0 && !formik.isValid) {
+      toast.error("Please fill all required fields correctly");
+    }
+  }, [formik.submitCount]);
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+
+    // Get email from identifier field
+    const identifier = formik.values.identifier;
+
+    // Check if identifier contains @ (is email)
+    if (!identifier) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    if (!identifier.includes('@')) {
+      toast.error('Please enter a valid email address (not Login ID)');
+      return;
+    }
+
+    try {
+      const response = await forgotPassword(identifier);
+      toast.success(response.message || 'Password reset email sent successfully! Please check your inbox.');
+    } catch (error) {
+      toast.error(error.message || 'Failed to send reset email. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -89,22 +115,22 @@ const Signin = () => {
         <div className="moving-shape shape-6"></div>
         <div className="moving-shape shape-7"></div>
         <div className="moving-shape shape-8"></div>
-        
+
         {/* Rotating Center Gradient */}
         <div className="rotating-gradient"></div>
-        
+
         {/* Floating Particles */}
-        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
-        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
-        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
-        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
-        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+        <div className="floating-particle" style={{ top: '5%', left: '15%', animationDelay: '0s' }}></div>
+        <div className="floating-particle" style={{ top: '8%', left: '85%', animationDelay: '2s' }}></div>
+        <div className="floating-particle" style={{ top: '12%', left: '50%', animationDelay: '1.5s' }}></div>
+        <div className="floating-particle" style={{ top: '15%', left: '20%', animationDelay: '0s' }}></div>
+        <div className="floating-particle" style={{ top: '25%', left: '70%', animationDelay: '1s' }}></div>
+        <div className="floating-particle" style={{ top: '45%', left: '10%', animationDelay: '2s' }}></div>
+        <div className="floating-particle" style={{ top: '55%', left: '85%', animationDelay: '1.5s' }}></div>
+        <div className="floating-particle" style={{ top: '75%', left: '30%', animationDelay: '0.5s' }}></div>
+        <div className="floating-particle" style={{ top: '65%', left: '60%', animationDelay: '2.5s' }}></div>
+        <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
+        <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
       </div>
       <div className="max-w-md w-full space-y-8 bg-slate-900/40 backdrop-blur-xl p-10 rounded-2xl shadow-2xl border border-white/10 relative z-10">
         <button
@@ -168,8 +194,8 @@ const Signin = () => {
             </div>
           </div>
 
-          {/* <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div className="flex items-center justify-between">
+            {/* <div className="flex items-center">
               <input
                 id="remember-me"
                 name="remember-me"
@@ -179,14 +205,18 @@ const Signin = () => {
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
                 Remember me
               </label>
-            </div>
+            </div> */}
 
             <div className="text-sm">
-              <a href="#" className="font-medium text-indigo-400 hover:text-indigo-300">
+              <a
+                href="#"
+                onClick={handleForgotPassword}
+                className="font-medium text-indigo-400 hover:text-indigo-300"
+              >
                 Forgot password?
               </a>
             </div>
-          </div> */}
+          </div>
 
           <div>
             <button
