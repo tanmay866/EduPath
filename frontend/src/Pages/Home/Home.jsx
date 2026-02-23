@@ -1,9 +1,70 @@
-import React from 'react'
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
 
   const navigate = useNavigate();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const glowTextRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (glowTextRef.current) {
+      const rect = glowTextRef.current.getBoundingClientRect();
+      setMousePosition({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
+  const calculateGlow = (index, totalLetters) => {
+    if (!glowTextRef.current) return {};
+    
+    const letterElements = glowTextRef.current.querySelectorAll('.glow-letter');
+    if (!letterElements[index]) return {};
+    
+    const rect = letterElements[index].getBoundingClientRect();
+    const parentRect = glowTextRef.current.getBoundingClientRect();
+    
+    const letterCenterX = rect.left + rect.width / 2 - parentRect.left;
+    const letterCenterY = rect.top + rect.height / 2 - parentRect.top;
+    
+    const distance = Math.sqrt(
+      Math.pow(mousePosition.x - letterCenterX, 2) + 
+      Math.pow(mousePosition.y - letterCenterY, 2)
+    );
+    
+    // Spotlight parameters
+    const spotlightRadius = 180;
+    const falloffPower = 2; // Exponential falloff for realistic spotlight
+    
+    // Calculate intensity with smooth exponential falloff
+    let intensity = 0;
+    if (distance < spotlightRadius) {
+      const normalizedDistance = distance / spotlightRadius;
+      intensity = Math.pow(1 - normalizedDistance, falloffPower);
+    }
+    
+    // Base outline color
+    const baseGray = 'rgba(100, 116, 139, 0.4)';
+    
+    // Spotlight colors (brighter and more vibrant)
+    const spotlightColor = `rgba(16, 185, 129, ${0.5 + intensity * 0.5})`;
+    
+    return {
+      WebkitTextFillColor: 'transparent',
+      WebkitTextStrokeWidth: '3px',
+      WebkitTextStrokeColor: intensity > 0.05 ? spotlightColor : baseGray,
+      filter: intensity > 0.05 
+        ? `drop-shadow(0 0 ${15 + intensity * 60}px rgba(16, 185, 129, ${intensity * 1}))
+           drop-shadow(0 0 ${25 + intensity * 90}px rgba(34, 197, 94, ${intensity * 0.8}))
+           drop-shadow(0 0 ${35 + intensity * 120}px rgba(52, 211, 153, ${intensity * 0.6}))
+           drop-shadow(0 0 ${45 + intensity * 150}px rgba(16, 185, 129, ${intensity * 0.4}))
+           brightness(${1 + intensity * 0.5})`
+        : 'none',
+      transition: 'all 0.1s ease-out'
+    };
+  };
 
   return (
     <div className="bg-slate-900 font-sans relative">
@@ -269,6 +330,27 @@ const Home = () => {
               <div className="text-slate-400 text-sm">Avg Learning Time</div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Interactive Glow Text Section */}
+      <section className="py-32 px-6 bg-black overflow-hidden">
+        <div 
+          ref={glowTextRef}
+          onMouseMove={handleMouseMove}
+          className="relative flex items-center justify-center min-h-[400px] cursor-default select-none"
+        >
+          <h1 className="text-[120px] md:text-[180px] lg:text-[240px] font-black tracking-tighter leading-none uppercase">
+            {'EDUPATH'.split('').map((letter, index) => (
+              <span
+                key={index}
+                className="glow-letter inline-block"
+                style={calculateGlow(index, 7)}
+              >
+                {letter}
+              </span>
+            ))}
+          </h1>
         </div>
       </section>
 

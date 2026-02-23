@@ -49,7 +49,8 @@ const App = () => {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme='colored'
+          theme='dark'
+          toastClassName="toast-glass"
         />
 
         <Routes>
@@ -79,7 +80,8 @@ const App = () => {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme='colored'
+          theme='dark'
+          toastClassName="toast-glass"
         />
       
       <Routes>
