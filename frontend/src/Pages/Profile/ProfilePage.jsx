@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings as SettingsIcon, Save, ArrowLeft, ChevronDown, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { User, Settings as SettingsIcon, Save, ArrowLeft, ChevronDown, X, ZoomIn, ZoomOut, FileText } from 'lucide-react';
 import { getProfile, updateProfile } from '../Services/profileService';
 
 const ProfilePage = () => {
@@ -368,6 +368,26 @@ const ProfilePage = () => {
                     <span className="text-gray-400 text-sm">Status</span>
                     <span className="px-3 py-1 backdrop-blur-lg bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30">Active</span>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Resume Card - Navigate to Resume Page */}
+            <div className="bg-slate-800 rounded-2xl p-6 border border-white/10 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/40 group-hover:border-emerald-400/50 transition-all">
+                    <FileText size={20} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Resume</h3>
+                    <p className="text-gray-400 text-sm">Upload your resume</p>
+                  </div>
+                </div>
+                <div className="text-gray-400 group-hover:text-white transition-colors">
+                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
             </div>

@@ -15,6 +15,7 @@ import QuizPage from './Pages/Assessment/QuizPage/QuizPage'
 import ResultPage from './Pages/Assessment/ResultPage'
 import ProfilePage from './Pages/Profile/ProfilePage'
 import SettingsPage from './Pages/Settings/SettingsPage'
+import ResumePage from './Pages/Profile/ResumePage'
 import AllResult from './Pages/Assessment/Result/AllResult'
 
 // Admin Components
@@ -96,6 +97,7 @@ const App = () => {
           <Route path="/reset-password/:token" element={<><Navbar /><ResetPassword /></>} />
           <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
           <Route path="/settings" element={<><Navbar /><SettingsPage /></>} />
+          <Route path="/resume" element={<><Navbar /><ResumePage /></>} />
           <Route path="/assessment" element={<><AssessmentDashboard /></>} />
           <Route path="/assessment/instructions" element={<><AssessmentInstructions /></>} />
           <Route path="/assessment/result" element={<><AllResult /></>} />
