@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
+import resumeRoutes from './routes/resumeRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
@@ -44,6 +45,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/resume', resumeRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Settings as SettingsIcon, Save, ArrowLeft, ChevronDown, X, ZoomIn, ZoomOut, FileText } from 'lucide-react';
-import { getProfile, updateProfile } from '../Services/profileService';
+import { getProfile, updateProfile, uploadProfilePicture } from '../Services/profileService';
+import { getProfilePictureUrl } from '../../utils/cloudinaryHelper';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [uploadingPicture, setUploadingPicture] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [imageLoadError, setImageLoadError] = useState(false);
 
   // Image Editor Modal State
   const [showImageEditor, setShowImageEditor] = useState(false);
@@ -50,6 +53,11 @@ const ProfilePage = () => {
       if (response.success) {
         const profile = response.data;
         
+        // Get userId from sessionStorage to construct Cloudinary URL
+        const userId = sessionStorage.getItem('userId');
+        const profilePictureUrl = sessionStorage.getItem('profilePicture') || 
+                                  (userId ? getProfilePictureUrl(userId) : '');
+        
         // Update state
         setProfileData({
           firstName: profile.firstName || '',
@@ -58,7 +66,7 @@ const ProfilePage = () => {
           phone: profile.phone || '',
           skills: profile.skills || '',
           role: profile.role || 'student',
-          profilePicture: profile.profilePicture || ''
+          profilePicture: profilePictureUrl
         });
 
         // Also update sessionStorage for quick access
@@ -68,8 +76,11 @@ const ProfilePage = () => {
         sessionStorage.setItem('phone', profile.phone || '');
         sessionStorage.setItem('skills', profile.skills || '');
         sessionStorage.setItem('role', profile.role || 'student');
-        sessionStorage.setItem('profilePicture', profile.profilePicture || '');
+        sessionStorage.setItem('profilePicture', profilePictureUrl);
         sessionStorage.setItem('loginId', profile.loginId || '');
+        
+        // Notify other components that sessionStorage has been updated
+        window.dispatchEvent(new Event('sessionStorageUpdated'));
       }
     } catch (error) {
       console.error('Failed to load profile:', error);
@@ -80,7 +91,9 @@ const ProfilePage = () => {
       const phone = sessionStorage.getItem('phone') || '';
       const skills = sessionStorage.getItem('skills') || '';
       const role = sessionStorage.getItem('role') || 'student';
-      const profilePicture = sessionStorage.getItem('profilePicture') || '';
+      const userId = sessionStorage.getItem('userId');
+      const profilePicture = sessionStorage.getItem('profilePicture') || 
+                            (userId ? getProfilePictureUrl(userId) : '');
 
       setProfileData({ firstName, lastName, email, phone, skills, role, profilePicture });
       
@@ -137,7 +150,7 @@ const ProfilePage = () => {
     }
   };
 
-  const handleSaveEditedImage = () => {
+  const handleSaveEditedImage = async () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const image = imageRef.current;
@@ -172,13 +185,43 @@ const ProfilePage = () => {
     // Get the cropped image as data URL
     const croppedImage = canvas.toDataURL('image/png');
     
-    setProfileData(prev => ({
-      ...prev,
-      profilePicture: croppedImage
-    }));
+    // Upload to Cloudinary
+    setUploadingPicture(true);
+    setError('');
     
-    setShowImageEditor(false);
-    setTempImage(null);
+    try {
+      const response = await uploadProfilePicture(croppedImage);
+      
+      if (response.success) {
+        // Update profile data with Cloudinary URL
+        setProfileData(prev => ({
+          ...prev,
+          profilePicture: response.data.profilePicture
+        }));
+        
+        // Reset image load error since we have a new valid image
+        setImageLoadError(false);
+        
+        // Update sessionStorage
+        sessionStorage.setItem('profilePicture', response.data.profilePicture);
+        
+        // Notify other components that sessionStorage has been updated
+        window.dispatchEvent(new Event('sessionStorageUpdated'));
+        
+        setMessage('Profile picture updated successfully!');
+        setTimeout(() => setMessage(''), 3000);
+        
+        // Close editor
+        setShowImageEditor(false);
+        setTempImage(null);
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError(err.message || 'Failed to upload profile picture');
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setUploadingPicture(false);
+    }
   };
 
   const handleCancelImageEdit = () => {
@@ -283,8 +326,7 @@ const ProfilePage = () => {
         lastName: profileData.lastName,
         phone: profileData.phone,
         skills: profileData.skills,
-        role: profileData.role,
-        profilePicture: profileData.profilePicture
+        role: profileData.role
       });
 
       if (response.success) {
@@ -297,7 +339,6 @@ const ProfilePage = () => {
         sessionStorage.setItem('phone', updatedProfile.phone || profileData.phone);
         sessionStorage.setItem('skills', updatedProfile.skills || profileData.skills);
         sessionStorage.setItem('role', updatedProfile.role || profileData.role);
-        sessionStorage.setItem('profilePicture', updatedProfile.profilePicture || profileData.profilePicture);
 
         setTimeout(() => setMessage(''), 3000);
       }
@@ -312,7 +353,7 @@ const ProfilePage = () => {
   };
 
   const fullName = `${profileData.firstName} ${profileData.lastName}`.trim() || 'Your Name';
-  const initials = `${profileData.firstName?.charAt(0) || ''}${profileData.lastName?.charAt(0) || ''}`.toUpperCase() || 'YN';
+  const firstLetter = profileData.firstName?.charAt(0)?.toUpperCase() || 'U';
 
   return (
     <div className="min-h-screen bg-slate-900 pt-32 pb-20 px-4 relative">
@@ -385,15 +426,17 @@ const ProfilePage = () => {
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  {profileData.profilePicture ? (
+                  {profileData.profilePicture && !imageLoadError ? (
                     <img
                       src={profileData.profilePicture}
                       alt="Profile"
                       className="w-24 h-24 rounded-full object-cover border-4 border-slate-700"
+                      onError={() => setImageLoadError(true)}
+                      onLoad={() => setImageLoadError(false)}
                     />
                   ) : (
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-3xl">
-                      {initials}
+                      {firstLetter}
                     </div>
                   )}
                   <button
@@ -655,15 +698,17 @@ const ProfilePage = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleCancelImageEdit}
-                className="flex-1 px-4 py-3 backdrop-blur-lg bg-slate-600/30 hover:bg-slate-600/40 text-white font-semibold rounded-xl transition-all border border-slate-400/30"
+                disabled={uploadingPicture}
+                className="flex-1 px-4 py-3 backdrop-blur-lg bg-slate-600/30 hover:bg-slate-600/40 text-white font-semibold rounded-xl transition-all border border-slate-400/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEditedImage}
-                className="flex-1 px-4 py-3 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
+                disabled={uploadingPicture}
+                className="flex-1 px-4 py-3 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Photo
+                {uploadingPicture ? 'Uploading...' : 'Save Photo'}
               </button>
             </div>
           </div>

@@ -47,11 +47,26 @@ const Signin = () => {
         const res = await axios.post('http://localhost:4000/api/auth/login', payload);
         console.log(res);
         sessionStorage.setItem("token", res.data.token);
+        sessionStorage.setItem("userId", res.data.user.id);
         sessionStorage.setItem("email", res.data.user.email);
         sessionStorage.setItem("loginId", res.data.user.loginId);
         sessionStorage.setItem("role", res.data.user.role);
         sessionStorage.setItem("firstName", res.data.user.firstName);
         sessionStorage.setItem("lastName", res.data.user.lastName);
+        sessionStorage.setItem("phone", res.data.user.phone || '');
+        sessionStorage.setItem("skills", res.data.user.skills || '');
+        
+        // Profile picture is stored ONLY in Cloudinary, construct URL from userId
+        // Check sessionStorage first, then construct from Cloudinary
+        const storedPicture = sessionStorage.getItem("profilePicture");
+        if (!storedPicture && res.data.user.id) {
+          const cloudinaryUrl = `https://res.cloudinary.com/dmk1ekxzf/image/upload/w_300,h_300,c_fill,g_face,q_auto/edupath/profile-pictures/${res.data.user.id}`;
+          sessionStorage.setItem("profilePicture", cloudinaryUrl);
+        }
+        
+        // Notify other components that sessionStorage has been updated
+        window.dispatchEvent(new Event('sessionStorageUpdated'));
+        
         toast.success('Signin successful!');
         resetForm();
 

@@ -30,6 +30,26 @@ export const updateSettings = async (settings) => {
   }
 };
 
+// Upload profile picture to Cloudinary
+export const uploadProfilePicture = async (imageData) => {
+  try {
+    const response = await API.post('/profile/upload-picture', { imageData });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Delete profile picture
+export const deleteProfilePicture = async () => {
+  try {
+    const response = await API.delete('/profile/delete-picture');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 // Change user password
 export const changePassword = async (passwordData) => {
   try {

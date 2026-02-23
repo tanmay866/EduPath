@@ -10,16 +10,37 @@ const ArcNavbar = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isEmail = sessionStorage.getItem("email");
-  const firstName = sessionStorage.getItem("firstName");
-  const lastName = sessionStorage.getItem("lastName");
-  const profilePicture = sessionStorage.getItem("profilePicture");
+  const [isEmail, setIsEmail] = useState(sessionStorage.getItem("email"));
+  const [firstName, setFirstName] = useState(sessionStorage.getItem("firstName"));
+  const [lastName, setLastName] = useState(sessionStorage.getItem("lastName"));
+  const [profilePicture, setProfilePicture] = useState(sessionStorage.getItem("profilePicture"));
 
   const [open, setOpen] = useState(false);
   const [contactDropdownOpen, setContactDropdownOpen] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
 
   const firstLetter = firstName ? firstName.charAt(0).toUpperCase() : 'U';
   const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName || 'User';
+
+  // Listen for storage changes to update profile picture
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsEmail(sessionStorage.getItem("email"));
+      setFirstName(sessionStorage.getItem("firstName"));
+      setLastName(sessionStorage.getItem("lastName"));
+      setProfilePicture(sessionStorage.getItem("profilePicture"));
+      setImageLoadError(false); // Reset error when storage updates
+    };
+
+    // Listen for custom event when sessionStorage is updated
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('sessionStorageUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('sessionStorageUpdated', handleStorageChange);
+    };
+  }, []);
 
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -28,14 +49,23 @@ const ArcNavbar = () => {
   }
 
   const confirmLogout = () => {
-  sessionStorage.clear();
+    sessionStorage.clear();
+    
+    // Update state to reflect logged out status
+    setIsEmail(null);
+    setFirstName(null);
+    setLastName(null);
+    setProfilePicture(null);
+    
+    // Notify other components
+    window.dispatchEvent(new Event('sessionStorageUpdated'));
 
-  toast.success("Logged out successfully 👋");
+    toast.success("Logged out successfully 👋");
 
-  setShowLogoutModal(false);
+    setShowLogoutModal(false);
 
-  navigate("/");
-};
+    navigate("/");
+  };
 
   const cancelLogout = () => {
   setShowLogoutModal(false);
@@ -156,8 +186,14 @@ const ArcNavbar = () => {
                     onClick={() => setOpen(!open)}
                     className="w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-lg bg-white/20 text-white font-bold cursor-pointer overflow-hidden hover:bg-white/30 transition-colors border border-white/30"
                   >
-                    {profilePicture ? (
-                      <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                    {profilePicture && !imageLoadError ? (
+                      <img 
+                        src={profilePicture} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                        onError={() => setImageLoadError(true)}
+                        onLoad={() => setImageLoadError(false)}
+                      />
                     ) : (
                       firstLetter
                     )}
@@ -169,8 +205,14 @@ const ArcNavbar = () => {
                       {/* Profile Header */}
                       <div className="px-4 py-3 bg-slate-800/80 flex gap-3 items-center border-b border-white/20">
                         <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden">
-                          {profilePicture ? (
-                            <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                          {profilePicture && !imageLoadError ? (
+                            <img 
+                              src={profilePicture} 
+                              alt="Profile" 
+                              className="w-full h-full object-cover"
+                              onError={() => setImageLoadError(true)}
+                              onLoad={() => setImageLoadError(false)}
+                            />
                           ) : (
                             firstLetter
                           )}

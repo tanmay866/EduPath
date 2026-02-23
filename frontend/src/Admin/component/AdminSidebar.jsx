@@ -13,6 +13,8 @@ import {
 const AdminSidebar = () => {
   const handleLogout = () => {
     sessionStorage.clear();
+    // Notify other components
+    window.dispatchEvent(new Event('sessionStorageUpdated'));
     window.location.href = '/';
   };
 

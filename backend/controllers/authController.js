@@ -117,6 +117,9 @@ export const login = asyncHandler(async (req, res, next) => {
             loginId: user.loginId,
             role: user.role,
             lastLogin: user.lastLogin,
+            profilePicture: '', // Not stored in MongoDB, only in Cloudinary
+            phone: user.profile?.phone || '',
+            skills: user.profile?.skills || '',
         },
     });
 });
