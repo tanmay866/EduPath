@@ -13,10 +13,10 @@ const PreviousAttemptsTable = ({ attempts }) => {
         Previous Attempts
       </h2>
 
-      <div className="bg-slate-800 rounded-xl shadow-xl overflow-hidden border border-white/10">
+      <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl shadow-xl overflow-hidden border border-white/10">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-700/50 border-b-2 border-white/10">
+            <thead className="bg-white/5 border-b-2 border-white/10">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                   Attempt Date

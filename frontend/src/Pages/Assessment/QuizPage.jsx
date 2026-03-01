@@ -247,7 +247,7 @@ const QuizPage = () => {
   const seconds = timer % 60;
 
   return (
-    <div className="flex min-h-screen bg-slate-900 relative">
+    <div className="flex min-h-screen bg-black relative">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -286,7 +286,7 @@ const QuizPage = () => {
           <div className="max-w-7xl mx-auto space-y-8">
             
             {/* 🎯 TOP HEADER BAR */}
-            <div className="bg-slate-800 border border-white/10 px-4 py-3 rounded-lg sticky top-4 z-10">
+            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 px-4 py-3 rounded-lg sticky top-4 z-10">
               <div className="flex items-center justify-between">
                 
                 {/* Left: Assessment Info */}
@@ -313,7 +313,7 @@ const QuizPage = () => {
             <div className="grid grid-cols-10 gap-4">
 
             {/* LEFT PANEL - Question Section (70%) */}
-            <div className="col-span-7 bg-slate-800 p-5 rounded-lg shadow-lg border border-white/10">
+            <div className="col-span-7 backdrop-blur-xl bg-slate-900/60 p-5 rounded-lg shadow-lg border border-white/10">
 
               {/* Question Number & Text */}
               <div className="mb-4">
@@ -403,7 +403,7 @@ const QuizPage = () => {
               />
 
               {/* QUESTION NAVIGATOR */}
-              <div className="bg-slate-800 p-4 rounded-lg shadow-lg border border-white/10">
+              <div className="backdrop-blur-xl bg-slate-900/60 p-4 rounded-lg shadow-lg border border-white/10">
 
                 <h3 className="font-bold mb-3 text-white text-xs uppercase tracking-wide">Question Navigator</h3>
 

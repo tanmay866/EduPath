@@ -4,6 +4,7 @@ import { useQuiz } from "../../context/QuizContext";
 import { fetchQuizTopics, startQuiz } from "../../Services/assessmentService";
 import { useQuizLogic } from "./hooks/useQuizLogic";
 import QuizLayout from "./components/QuizLayout";
+import BackgroundAnimation from "../AssesmentDashboard.jsx/BackgroundAnimation";
 
 const QuizPage = () => {
   const navigate = useNavigate();
@@ -190,12 +191,13 @@ const QuizPage = () => {
   // Stage 1: Configuration Form
   if (stage === 'configure') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700 p-8">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-2">Configure Your Quiz</h1>
-              <p className="text-slate-300">Customize your assessment experience</p>
+      <div className="min-h-screen bg-black relative flex items-center justify-center py-4 px-4">
+        <BackgroundAnimation />
+        <div className="max-w-2xl w-full mx-auto relative z-10">
+          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6">
+            <div className="text-center mb-5">
+              <h1 className="text-3xl font-bold text-white mb-1">Configure Your Quiz</h1>
+              <p className="text-slate-300 text-sm">Customize your assessment experience</p>
             </div>
 
             {loadingTopics ? (
@@ -207,20 +209,20 @@ const QuizPage = () => {
                 <p className="text-slate-300 mt-4">Loading topics...</p>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Topic Selection */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Select Topic *
                   </label>
                   <select
                     value={quizConfig.topicId}
                     onChange={handleTopicChange}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-[#1a1f2e] border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="">Choose a topic...</option>
+                    <option value="" className="bg-[#1a1f2e] text-white">Choose a topic...</option>
                     {topics.map((topic) => (
-                      <option key={topic._id} value={topic._id}>
+                      <option key={topic._id} value={topic._id} className="bg-[#1a1f2e] text-white">
                         {topic.icon} {topic.name}
                       </option>
                     ))}
@@ -229,59 +231,59 @@ const QuizPage = () => {
 
                 {/* Difficulty Level */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Difficulty Level
                   </label>
                   <select
                     value={quizConfig.difficulty}
                     onChange={(e) => setQuizConfig({ ...quizConfig, difficulty: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-[#1a1f2e] border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
+                    <option value="beginner" className="bg-[#1a1f2e] text-white">Beginner</option>
+                    <option value="intermediate" className="bg-[#1a1f2e] text-white">Intermediate</option>
+                    <option value="advanced" className="bg-[#1a1f2e] text-white">Advanced</option>
                   </select>
                 </div>
 
                 {/* Experience Level */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Experience Level
                   </label>
                   <select
                     value={quizConfig.experienceLevel}
                     onChange={(e) => setQuizConfig({ ...quizConfig, experienceLevel: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-[#1a1f2e] border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="beginner">Beginner (0-1 years)</option>
-                    <option value="intermediate">Intermediate (1-3 years)</option>
-                    <option value="advanced">Advanced (3-5 years)</option>
-                    <option value="expert">Expert (5+ years)</option>
+                    <option value="beginner" className="bg-[#1a1f2e] text-white">Beginner (0-1 years)</option>
+                    <option value="intermediate" className="bg-[#1a1f2e] text-white">Intermediate (1-3 years)</option>
+                    <option value="advanced" className="bg-[#1a1f2e] text-white">Advanced (3-5 years)</option>
+                    <option value="expert" className="bg-[#1a1f2e] text-white">Expert (5+ years)</option>
                   </select>
                 </div>
 
                 {/* Number of Questions */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-1">
                     Number of Questions
                   </label>
                   <select
                     value={quizConfig.questionCount}
                     onChange={(e) => setQuizConfig({ ...quizConfig, questionCount: parseInt(e.target.value) })}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 bg-[#1a1f2e] border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="5">5 Questions</option>
-                    <option value="10">10 Questions</option>
-                    <option value="15">15 Questions</option>
-                    <option value="20">20 Questions</option>
+                    <option value="5" className="bg-[#1a1f2e] text-white">5 Questions</option>
+                    <option value="10" className="bg-[#1a1f2e] text-white">10 Questions</option>
+                    <option value="15" className="bg-[#1a1f2e] text-white">15 Questions</option>
+                    <option value="20" className="bg-[#1a1f2e] text-white">20 Questions</option>
                   </select>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-4 pt-4">
+                <div className="flex gap-4 pt-2">
                   <button
                     onClick={() => navigate('/assessment')}
-                    className="flex-1 px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
+                  className="flex-1 px-6 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors"
                   >
                     Cancel
                   </button>
@@ -303,77 +305,78 @@ const QuizPage = () => {
   // Stage 2: Instructions & Quiz Details
   if (stage === 'instructions') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-700 p-8">
+      <div className="min-h-screen bg-black relative flex items-center justify-center py-4 px-4">
+        <BackgroundAnimation />
+        <div className="max-w-4xl w-full mx-auto relative z-10">
+          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-5">
             {/* Header */}
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">{quizConfig.topicIcon}</div>
-              <h1 className="text-4xl font-bold text-white mb-2">{quizConfig.topicName}</h1>
-              <p className="text-slate-300">Assessment Details</p>
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-1">{quizConfig.topicIcon}</div>
+              <h1 className="text-2xl font-bold text-white mb-0.5">{quizConfig.topicName}</h1>
+              <p className="text-slate-300 text-sm">Assessment Details</p>
             </div>
 
             {/* Quiz Details */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-slate-700/30 rounded-lg p-4 text-center">
-                <div className="text-2xl mb-2">📝</div>
-                <div className="text-slate-400 text-sm">Questions</div>
-                <div className="text-white font-bold text-xl">{quizConfig.questionCount}</div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="text-xl mb-1">📝</div>
+                <div className="text-slate-400 text-xs">Questions</div>
+                <div className="text-white font-bold text-lg">{quizConfig.questionCount}</div>
               </div>
-              <div className="bg-slate-700/30 rounded-lg p-4 text-center">
-                <div className="text-2xl mb-2">⏱️</div>
-                <div className="text-slate-400 text-sm">Duration</div>
-                <div className="text-white font-bold text-xl">{quizConfig.questionCount * 1} min</div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="text-xl mb-1">⏱️</div>
+                <div className="text-slate-400 text-xs">Duration</div>
+                <div className="text-white font-bold text-lg">{quizConfig.questionCount * 1} min</div>
               </div>
-              <div className="bg-slate-700/30 rounded-lg p-4 text-center">
-                <div className="text-2xl mb-2">📊</div>
-                <div className="text-slate-400 text-sm">Difficulty</div>
-                <div className="text-white font-bold text-xl capitalize">{quizConfig.difficulty}</div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="text-xl mb-1">📊</div>
+                <div className="text-slate-400 text-xs">Difficulty</div>
+                <div className="text-white font-bold text-lg capitalize">{quizConfig.difficulty}</div>
               </div>
-              <div className="bg-slate-700/30 rounded-lg p-4 text-center">
-                <div className="text-2xl mb-2">👤</div>
-                <div className="text-slate-400 text-sm">Experience</div>
-                <div className="text-white font-bold text-xl capitalize">{quizConfig.experienceLevel}</div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="text-xl mb-1">👤</div>
+                <div className="text-slate-400 text-xs">Experience</div>
+                <div className="text-white font-bold text-lg capitalize">{quizConfig.experienceLevel}</div>
               </div>
             </div>
 
             {/* Instructions */}
-            <div className="bg-slate-700/20 rounded-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold text-white mb-4">Instructions</h2>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 mt-1">✓</span>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-3">
+              <h2 className="text-base font-semibold text-white mb-2">Instructions</h2>
+              <ul className="space-y-1.5 text-slate-300 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">✓</span>
                   <span>Read each question carefully before answering</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 mt-1">✓</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">✓</span>
                   <span>You can mark questions for review and come back later</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 mt-1">✓</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">✓</span>
                   <span>Once submitted, you cannot change your answers</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 mt-1">✓</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500">✓</span>
                   <span>The timer will start when you click "Start Quiz"</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-yellow-500 mt-1">⚠</span>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-500">⚠</span>
                   <span>Do not refresh the page or the quiz will be lost</span>
                 </li>
               </ul>
             </div>
 
             {/* Terms Agreement */}
-            <div className="bg-slate-700/20 rounded-lg p-4 mb-6">
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-1 w-5 h-5 text-indigo-600 bg-slate-700 border-slate-600 rounded focus:ring-indigo-500 focus:ring-2"
+                  className="mt-0.5 w-4 h-4 text-indigo-600 bg-slate-700 border-slate-600 rounded focus:ring-indigo-500 focus:ring-2"
                 />
-                <span className="text-slate-300">
+                <span className="text-slate-300 text-sm">
                   I agree to the terms and conditions. I understand that this quiz is timed and must be completed in one session.
                 </span>
               </label>
@@ -389,15 +392,15 @@ const QuizPage = () => {
             <div className="flex gap-4">
               <button
                 onClick={() => setStage('configure')}
-                className="flex-1 px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
-                disabled={loading}
+                  className="flex-1 px-6 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors"
+                    disabled={loading}
               >
                 Back
               </button>
               <button
                 onClick={handleStartQuizFromInstructions}
                 disabled={!agreedToTerms || loading}
-                className={`flex-1 px-6 py-4 text-white rounded-lg font-semibold text-lg transition-all transform shadow-lg ${
+                className={`flex-1 px-6 py-3 text-white rounded-lg font-semibold text-base transition-all transform shadow-lg ${
                   !agreedToTerms || loading
                     ? 'bg-slate-600 cursor-not-allowed'
                     : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 hover:scale-[1.02]'
@@ -426,7 +429,7 @@ const QuizPage = () => {
   if (stage === 'quiz' && quizStarted) {
     if (!assessment || !questions.length) {
       return (
-        <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+        <div className="flex min-h-screen bg-black items-center justify-center">
           <div className="text-center">
             <div className="text-red-500 text-xl mb-4">Quiz not found</div>
             <button
@@ -471,7 +474,7 @@ const QuizPage = () => {
 
   // Fallback
   return (
-    <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+    <div className="flex min-h-screen bg-black items-center justify-center">
       <div className="text-white text-xl">Loading...</div>
     </div>
   );

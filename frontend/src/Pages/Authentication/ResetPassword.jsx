@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HiArrowLeft } from 'react-icons/hi';
-import { Lock } from 'lucide-react';
+import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { resetPassword } from '../Services/profileService';
+import BackgroundAnimation from '../Assessment/AssesmentDashboard.jsx/BackgroundAnimation';
 
 const ResetPassword = () => {
     const navigate = useNavigate();
     const { token } = useParams();
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState({
         password: '',
         confirmPassword: ''
@@ -66,37 +69,10 @@ const ResetPassword = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-900 pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-            {/* Live Moving Background Animations */}
-            <div className="animated-bg">
-                {/* Moving Shapes */}
-                <div className="moving-shape shape-1"></div>
-                <div className="moving-shape shape-2"></div>
-                <div className="moving-shape shape-3"></div>
-                <div className="moving-shape shape-4"></div>
-                <div className="moving-shape shape-5"></div>
-                <div className="moving-shape shape-6"></div>
-                <div className="moving-shape shape-7"></div>
-                <div className="moving-shape shape-8"></div>
+        <div className="min-h-screen flex items-center justify-center bg-black pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+            <BackgroundAnimation />
 
-                {/* Rotating Center Gradient */}
-                <div className="rotating-gradient"></div>
-
-                {/* Floating Particles */}
-                <div className="floating-particle" style={{ top: '5%', left: '15%', animationDelay: '0s' }}></div>
-                <div className="floating-particle" style={{ top: '8%', left: '85%', animationDelay: '2s' }}></div>
-                <div className="floating-particle" style={{ top: '12%', left: '50%', animationDelay: '1.5s' }}></div>
-                <div className="floating-particle" style={{ top: '15%', left: '20%', animationDelay: '0s' }}></div>
-                <div className="floating-particle" style={{ top: '25%', left: '70%', animationDelay: '1s' }}></div>
-                <div className="floating-particle" style={{ top: '45%', left: '10%', animationDelay: '2s' }}></div>
-                <div className="floating-particle" style={{ top: '55%', left: '85%', animationDelay: '1.5s' }}></div>
-                <div className="floating-particle" style={{ top: '75%', left: '30%', animationDelay: '0.5s' }}></div>
-                <div className="floating-particle" style={{ top: '65%', left: '60%', animationDelay: '2.5s' }}></div>
-                <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
-                <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
-            </div>
-
-            <div className="max-w-md w-full space-y-8 bg-slate-900/40 backdrop-blur-xl p-10 rounded-2xl shadow-2xl border border-white/10 relative z-10">
+            <div className="max-w-md w-full space-y-8 backdrop-blur-xl bg-slate-900/60 p-10 rounded-2xl shadow-2xl border border-white/10 relative z-10">
                 <button
                     onClick={() => navigate('/signin')}
                     className="absolute top-6 left-6 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
@@ -124,16 +100,26 @@ const ResetPassword = () => {
                             <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
                                 New Password
                             </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                value={formData.password}
-                                onChange={handleChange}
-                                className="appearance-none relative block w-full px-4 py-3 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                placeholder="Enter new password"
-                            />
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    required
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    className="appearance-none relative block w-full px-4 py-3 pr-11 border border-white/20 placeholder-gray-500 text-white bg-white/5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    placeholder="Enter new password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(prev => !prev)}
+                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Confirm Password */}
@@ -141,16 +127,26 @@ const ResetPassword = () => {
                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
                                 Confirm New Password
                             </label>
-                            <input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type="password"
-                                required
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                className="appearance-none relative block w-full px-4 py-3 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                placeholder="Confirm new password"
-                            />
+                            <div className="relative">
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    required
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    className="appearance-none relative block w-full px-4 py-3 pr-11 border border-white/20 placeholder-gray-500 text-white bg-white/5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    placeholder="Confirm new password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(prev => !prev)}
+                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
+                                    tabIndex={-1}
+                                >
+                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
                         </div>
                     </div>
 

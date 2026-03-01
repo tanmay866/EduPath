@@ -416,7 +416,7 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column - Profile Card */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-indigo-500/30 transition-all shadow-xl">
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl">
               <div className="text-center">
                 <div className="relative inline-block mb-4">
                   <input
@@ -468,7 +468,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Resume Card - Navigate to Resume Page */}
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')}>
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/40 group-hover:border-emerald-400/50 transition-all">
@@ -488,7 +488,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Settings Card - Navigate to Settings Page */}
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-500/40 group-hover:border-purple-400/50 transition-all">
@@ -511,7 +511,7 @@ const ProfilePage = () => {
           {/* Right Column - Forms */}
           <div className="lg:col-span-2">
             {/* Profile Information Card */}
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 h-full shadow-xl">
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 h-full shadow-xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/30 rounded-xl flex items-center justify-center">
                   <User size={20} className="text-white" />
@@ -634,7 +634,7 @@ const ProfilePage = () => {
       {/* Image Editor Modal */}
       {showImageEditor && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-900 rounded-2xl p-6 max-w-md w-full border border-slate-800 shadow-2xl">
+          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">Adjust Profile Picture</h3>
               <button

@@ -1,25 +1,25 @@
 const PerformanceCard = ({ label, value, color = "blue", icon }) => {
   const colorConfig = {
     blue: {
-      border: "border-blue-500 hover:border-blue-400",
+      border: "border-l-blue-500 hover:border-l-blue-400",
       bg: "bg-blue-500/20",
       borderRing: "border-blue-500/30",
       text: "text-blue-400",
     },
     purple: {
-      border: "border-purple-500 hover:border-purple-400",
+      border: "border-l-purple-500 hover:border-l-purple-400",
       bg: "bg-purple-500/20",
       borderRing: "border-purple-500/30",
       text: "text-purple-400",
     },
     yellow: {
-      border: "border-yellow-500 hover:border-yellow-400",
+      border: "border-l-yellow-500 hover:border-l-yellow-400",
       bg: "bg-yellow-500/20",
       borderRing: "border-yellow-500/30",
       text: "text-yellow-400",
     },
     green: {
-      border: "border-green-500 hover:border-green-400",
+      border: "border-l-green-500 hover:border-l-green-400",
       bg: "bg-green-500/20",
       borderRing: "border-green-500/30",
       text: "text-green-400",
@@ -29,7 +29,7 @@ const PerformanceCard = ({ label, value, color = "blue", icon }) => {
   const colorClasses = colorConfig[color] || colorConfig.blue;
 
   return (
-    <div className={`bg-slate-800 rounded-xl shadow-xl p-6 border-l-4 ${colorClasses.border} transition-all`}>
+    <div className={`backdrop-blur-xl bg-slate-900/60 rounded-xl shadow-xl p-6 border border-white/10 border-l-4 ${colorClasses.border} transition-all`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-400 text-sm font-medium mb-1">

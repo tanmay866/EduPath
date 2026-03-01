@@ -50,7 +50,7 @@ const AllResult = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-900 relative">
+      <div className="flex min-h-screen bg-black relative">
         <BackgroundAnimation />
         <AssessmentSidebar />
         <div className="flex-1 flex items-center justify-center relative z-10">
@@ -65,7 +65,7 @@ const AllResult = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-screen bg-slate-900 relative">
+      <div className="flex min-h-screen bg-black relative">
         <BackgroundAnimation />
         <AssessmentSidebar />
         <div className="flex-1 flex items-center justify-center p-4 relative z-10">
@@ -85,7 +85,7 @@ const AllResult = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-900 relative">
+    <div className="flex min-h-screen bg-black relative">
       <BackgroundAnimation />
 
       <AssessmentSidebar />

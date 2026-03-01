@@ -223,7 +223,7 @@ const ResumePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Side - Uploaded Resumes List */}
           <div className="space-y-6">
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 shadow-xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-lg flex items-center justify-center">
                   <FolderOpen size={20} className="text-white" />
@@ -318,7 +318,7 @@ const ResumePage = () => {
 
           {/* Right Side - Upload Section */}
           <div className="space-y-6">
-            <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl sticky top-6">
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 shadow-xl sticky top-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-lg flex items-center justify-center">
                   <Upload size={20} className="text-white" />
