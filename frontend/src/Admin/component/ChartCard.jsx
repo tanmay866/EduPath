@@ -36,11 +36,13 @@ const ChartCard = ({ title, subtitle, data, type = 'bar' }) => {
               <YAxis stroke="#9ca3af" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
+                  backgroundColor: '#0a0a0a',
+                  border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: '0.5rem',
                   color: '#e5e7eb',
                 }}
+                labelStyle={{ color: '#e5e7eb', fontWeight: 600 }}
+                itemStyle={{ color: '#a5b4fc' }}
               />
               <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={2} />
             </LineChart>
@@ -67,11 +69,13 @@ const ChartCard = ({ title, subtitle, data, type = 'bar' }) => {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
+                  backgroundColor: '#0a0a0a',
+                  border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: '0.5rem',
                   color: '#e5e7eb',
                 }}
+                labelStyle={{ color: '#e5e7eb', fontWeight: 600 }}
+                itemStyle={{ color: '#a5b4fc' }}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -86,11 +90,13 @@ const ChartCard = ({ title, subtitle, data, type = 'bar' }) => {
               <YAxis stroke="#9ca3af" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1f2937',
-                  border: '1px solid #374151',
+                  backgroundColor: '#0a0a0a',
+                  border: '1px solid rgba(255,255,255,0.1)',
                   borderRadius: '0.5rem',
                   color: '#e5e7eb',
                 }}
+                labelStyle={{ color: '#e5e7eb', fontWeight: 600 }}
+                itemStyle={{ color: '#a5b4fc' }}
               />
               <Bar dataKey="value" fill="#6366f1" />
             </BarChart>
@@ -100,9 +106,9 @@ const ChartCard = ({ title, subtitle, data, type = 'bar' }) => {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-lg p-6 text-gray-200">
+    <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl shadow-lg p-6 text-gray-200 hover:border-white/20 transition">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-100">{title}</h3>
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
         {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
       </div>
       <div className="h-72">{renderChart()}</div>

@@ -24,12 +24,12 @@ const StatCard = ({ title, value, icon: Icon, change, changeType }) => {
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-lg p-5 transition hover:shadow-xl">
+    <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl shadow-lg p-5 transition hover:border-white/20 hover:bg-slate-900/80">
       <div className="flex justify-between items-center">
         {/* Left Side */}
         <div>
           <p className="text-sm text-gray-400">{title}</p>
-          <p className="text-2xl font-semibold text-gray-100 mt-1">{displayValue}</p>
+          <p className="text-2xl font-semibold text-white mt-1">{displayValue}</p>
           {change !== undefined && change !== null && (
             <p className={`text-sm font-medium mt-1 ${getChangeClass()}`}>
               {getChangeSymbol()}
@@ -40,7 +40,7 @@ const StatCard = ({ title, value, icon: Icon, change, changeType }) => {
 
         {/* Right Side - Icon */}
         {Icon && (
-          <div className="p-3 rounded-lg bg-gray-800 text-indigo-400">
+          <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
             <Icon className="w-6 h-6" />
           </div>
         )}

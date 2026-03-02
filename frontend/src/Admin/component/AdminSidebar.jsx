@@ -52,7 +52,7 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="w-64 h-screen bg-slate-900/85 backdrop-blur-xl text-gray-200 flex flex-col relative z-10 border-r border-white/10">
+    <aside className="w-64 h-screen backdrop-blur-xl bg-black/60 text-gray-200 flex flex-col relative z-10 border-r border-white/10">
       {/* Top Section */}
       <div className="p-6 border-b border-white/10">
         <h1 className="text-xl font-semibold text-white">EduPath Admin</h1>

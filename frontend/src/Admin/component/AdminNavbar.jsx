@@ -17,7 +17,7 @@ const AdminNavbar = () => {
   const currentTitle = routeTitleMap[location.pathname] || 'Dashboard';
 
   return (
-    <header className="w-full h-19 bg-slate-900/85 backdrop-blur-xl border-b border-white/10 shadow-lg px-6 flex items-center justify-between">
+    <header className="w-full h-19 backdrop-blur-xl bg-black/60 border-b border-white/10 shadow-lg px-6 flex items-center justify-between">
       {/* Left Section - Dynamic Page Title */}
       <div>
         <h1 className="text-lg font-semibold text-white">{currentTitle}</h1>

@@ -59,13 +59,13 @@ const AttemptsTable = () => {
     const baseClass = 'px-2 py-1 rounded-md text-xs font-medium';
     switch (difficulty) {
       case 'Easy':
-        return `${baseClass} bg-green-900 text-green-300`;
+        return `${baseClass} bg-green-500/10 border border-green-500/20 text-green-400`;
       case 'Medium':
-        return `${baseClass} bg-yellow-900 text-yellow-300`;
+        return `${baseClass} bg-yellow-500/10 border border-yellow-500/20 text-yellow-400`;
       case 'Hard':
-        return `${baseClass} bg-red-900 text-red-300`;
+        return `${baseClass} bg-red-500/10 border border-red-500/20 text-red-400`;
       default:
-        return `${baseClass} bg-gray-700 text-gray-300`;
+        return `${baseClass} bg-white/5 border border-white/10 text-gray-300`;
     }
   };
 
@@ -80,17 +80,17 @@ const AttemptsTable = () => {
 
   if (!attempts || attempts.length === 0) {
     return (
-      <div className="bg-gray-800 rounded-xl shadow-md p-8">
+      <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl shadow-md p-8">
         <p className="text-center text-gray-400">No quiz attempts found.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-800 rounded-xl shadow-md overflow-x-auto">
+    <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl shadow-md overflow-x-auto">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-gray-700 bg-gray-900">
+          <tr className="border-b border-white/10 bg-white/5">
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
               User
             </th>
@@ -111,9 +111,9 @@ const AttemptsTable = () => {
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-700">
+        <tbody className="divide-y divide-white/5">
           {attempts.map((attempt) => (
-            <tr key={attempt._id} className="hover:bg-gray-700 transition">
+            <tr key={attempt._id} className="hover:bg-white/5 transition">
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">
                 {attempt.userName}
               </td>

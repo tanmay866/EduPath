@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AdminSidebar from '../component/AdminSidebar';
 import AdminNavbar from '../component/AdminNavbar';
 import AttemptsTable from '../component/AttemptsTable';
+import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard.jsx/BackgroundAnimation';
 
 const QuizAttempts = () => {
   const [attempts, setAttempts] = useState([
@@ -53,35 +54,8 @@ const QuizAttempts = () => {
   });
 
   return (
-    <div className="flex h-screen bg-gray-950 relative overflow-hidden">
-      {/* Live Moving Background Animations */}
-      <div className="animated-bg">
-        {/* Moving Shapes */}
-        <div className="moving-shape shape-1"></div>
-        <div className="moving-shape shape-2"></div>
-        <div className="moving-shape shape-3"></div>
-        <div className="moving-shape shape-4"></div>
-        <div className="moving-shape shape-5"></div>
-        <div className="moving-shape shape-6"></div>
-        <div className="moving-shape shape-7"></div>
-        <div className="moving-shape shape-8"></div>
-        
-        {/* Rotating Center Gradient */}
-        <div className="rotating-gradient"></div>
-        
-        {/* Floating Particles */}
-        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
-        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
-        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
-        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
-        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
-      </div>
+    <div className="flex h-screen bg-black relative overflow-hidden">
+      <BackgroundAnimation />
 
       {/* Sidebar */}
       <AdminSidebar />
@@ -109,14 +83,14 @@ const QuizAttempts = () => {
               placeholder="Search by user or skill..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-gray-900 border border-gray-800 text-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-96"
+              className="bg-white/5 border border-white/10 text-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-96"
             />
 
             {/* Difficulty Filter */}
             <select
               value={difficultyFilter}
               onChange={(e) => setDifficultyFilter(e.target.value)}
-              className="bg-gray-900 border border-gray-800 text-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="bg-white/5 border border-white/10 text-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="All">All Difficulties</option>
               <option value="Easy">Easy</option>

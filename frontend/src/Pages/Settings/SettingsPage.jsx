@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Settings as SettingsIcon, Save, ArrowLeft, Lock } from 'lucide-react';
+import { ChevronDown, Settings as SettingsIcon, Save, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import { updateSettings, changePassword } from '../Services/profileService';
 
 const SettingsPage = () => {
@@ -18,6 +18,9 @@ const SettingsPage = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   // Settings Data
   const [settings, setSettings] = useState({
@@ -298,14 +301,20 @@ const SettingsPage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Current Password
                 </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                  placeholder="Enter current password"
-                />
+                <div className="relative">
+                  <input
+                    type={showCurrentPw ? 'text' : 'password'}
+                    name="currentPassword"
+                    value={passwordData.currentPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full px-4 py-3 pr-11 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                    placeholder="Enter current password"
+                  />
+                  <button type="button" onClick={() => setShowCurrentPw(p => !p)} tabIndex={-1}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors">
+                    {showCurrentPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {/* New Password */}
@@ -313,14 +322,20 @@ const SettingsPage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   New Password
                 </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                  placeholder="Enter new password"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPw ? 'text' : 'password'}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full px-4 py-3 pr-11 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                    placeholder="Enter new password"
+                  />
+                  <button type="button" onClick={() => setShowNewPw(p => !p)} tabIndex={-1}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors">
+                    {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {/* Confirm New Password */}
@@ -328,14 +343,20 @@ const SettingsPage = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Confirm New Password
                 </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                  placeholder="Confirm new password"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPw ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    className="w-full px-4 py-3 pr-11 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
+                    placeholder="Confirm new password"
+                  />
+                  <button type="button" onClick={() => setShowConfirmPw(p => !p)} tabIndex={-1}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors">
+                    {showConfirmPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {/* Change Password Button */}

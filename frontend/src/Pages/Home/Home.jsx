@@ -1,9 +1,25 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="bg-black font-sans relative">
@@ -38,7 +54,7 @@ const Home = () => {
 
         {/* SECTION 1: HERO (The first code I gave you) */}
       <section className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative z-10">
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
+        <h1 data-animate className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
           Your Personalized Path to Success
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400">
@@ -46,34 +62,31 @@ const Home = () => {
           </span>
         </h1>
         
-        <p className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl">
+        <p data-animate style={{transitionDelay: '0.15s'}} className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl">
           Learn Smarter, Grow Faster with our AI-powered personalized learning platform
         </p>
 
         {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+        <div data-animate style={{transitionDelay: '0.3s'}} className="flex flex-col sm:flex-row gap-4 mt-8">
           <button className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
             onClick={() => navigate('/assessment')}
           >
             Skill Assessment →
           </button>
-          {/* <button className="bg-slate-800 text-gray-200 px-8 py-4 rounded-xl font-bold border border-slate-700 hover:bg-slate-700 transition cursor-pointer active:scale-95">
-            Browse Top Providers
-          </button> */}
         </div>
       </section>
 
       <section className="py-20 px-6 bg-black">
         <div className="max-w-6xl mx-auto text-center">
           
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
-          <p className="text-slate-500 mb-16">Three simple steps to transform your career</p>
+          <h2 data-animate className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
+          <p data-animate style={{transitionDelay: '0.1s'}} className="text-slate-500 mb-16">Three simple steps to transform your career</p>
 
           {/* Grid Container for 3 Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             {/* Card 1 */}
-            <div className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-blue-500/50 shadow-2xl hover:shadow-blue-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+            <div data-animate style={{transitionDelay: '0s'}} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-blue-500/50 shadow-2xl hover:shadow-blue-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
               <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">1</div>
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               <div className="relative z-10">
@@ -84,7 +97,7 @@ const Home = () => {
             </div>
 
             {/* Card 2 */}
-            <div className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-emerald-500/50 shadow-2xl hover:shadow-emerald-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+            <div data-animate style={{transitionDelay: '0.15s'}} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-emerald-500/50 shadow-2xl hover:shadow-emerald-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
               <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">2</div>
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               <div className="relative z-10">
@@ -95,7 +108,7 @@ const Home = () => {
             </div>
 
             {/* Card 3 */}
-            <div className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+            <div data-animate style={{transitionDelay: '0.3s'}} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
               <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">3</div>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               <div className="relative z-10">
@@ -111,8 +124,8 @@ const Home = () => {
 
       <section className="py-20 px-6 bg-black">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">How Your Career Journey Works</h2>
-          <p className="text-slate-500 max-w-2xl mx-auto mb-12">
+          <h2 data-animate className="text-3xl md:text-4xl font-bold mb-4">How Your Career Journey Works</h2>
+          <p data-animate style={{transitionDelay: '0.1s'}} className="text-slate-500 max-w-2xl mx-auto mb-12">
             Our AI-powered career engine creates a personalized roadmap based on your current skills, interests, and market demand.
           </p>
 
@@ -123,7 +136,7 @@ const Home = () => {
               { title: "Learn & Build", desc: "Complete verified courses and build portfolio projects.", icon: "⟨⟩", color: "purple" },
               { title: "Get Hired", desc: "Connect with hiring partners and showcase your skills.", icon: "👥", color: "pink" }
             ].map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center group">
+              <div key={idx} data-animate style={{transitionDelay: `${idx * 0.12}s`}} className="flex flex-col items-center group">
                 <div className={`w-16 h-16 backdrop-blur-lg rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-xl transition-all duration-300 hover:scale-110
                   ${item.color === 'blue' ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-300 border border-blue-500/30 hover:border-blue-500/60 hover:shadow-blue-500/50 hover:from-blue-500/30 hover:to-blue-600/30' : ''}
                   ${item.color === 'emerald' ? 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-emerald-500/50 hover:from-emerald-500/30 hover:to-emerald-600/30' : ''}
@@ -149,7 +162,7 @@ const Home = () => {
       <section className="py-20 px-6 bg-black">
         <div className="max-w-4xl mx-auto">
           {/* Contact Support Box */}
-          <div className="relative backdrop-blur-lg bg-white/5 rounded-2xl p-8 md:p-12 text-center mb-20 border border-white/10 shadow-2xl transition-all duration-300">
+          <div data-animate className="relative backdrop-blur-lg bg-white/5 rounded-2xl p-8 md:p-12 text-center mb-20 border border-white/10 shadow-2xl transition-all duration-300">
             <div className="relative z-10">
               <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">Still have questions?</h2>
               <p className="text-slate-200 mb-6 max-w-xl mx-auto leading-relaxed">Can't find the answer you're looking for? Our support team is here to help you every step of the way.</p>
@@ -166,26 +179,26 @@ const Home = () => {
           </div>
 
           {/* Stats Bar */}
-          <div className="text-center mb-12">
+          <div data-animate className="text-center mb-12">
              <span className="text-emerald-500 font-bold bg-emerald-50 px-4 py-1 rounded-full text-xs uppercase tracking-widest">Community Success</span>
              <h2 className="text-3xl font-bold mt-4"><span className="text-emerald-500">Real Stories</span> from Our Community</h2>
              <p className="text-slate-500 mt-2 max-w-2xl mx-auto text-sm">Join thousands of learners who have transformed their careers with LearnPath.</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
+            <div data-animate style={{transitionDelay: '0s'}}>
               <div className="text-3xl font-black mb-1">10,000+</div>
               <div className="text-slate-400 text-sm">Success Stories</div>
             </div>
-            <div>
+            <div data-animate style={{transitionDelay: '0.1s'}}>
               <div className="text-3xl font-black mb-1">85%</div>
               <div className="text-slate-400 text-sm">Career Transitions</div>
             </div>
-            <div>
+            <div data-animate style={{transitionDelay: '0.2s'}}>
               <div className="text-3xl font-black mb-1">160%</div>
               <div className="text-slate-400 text-sm">Avg Salary Increase</div>
             </div>
-            <div>
+            <div data-animate style={{transitionDelay: '0.3s'}}>
               <div className="text-3xl font-black mb-1">6 months</div>
               <div className="text-slate-400 text-sm">Avg Learning Time</div>
             </div>
@@ -196,7 +209,7 @@ const Home = () => {
       {/* Interactive Glow Text Section */}
       <section className="py-32 px-6 bg-black overflow-hidden">
         <div className="relative flex items-center justify-center min-h-[400px]">
-          <h1 className="text-[120px] md:text-[180px] lg:text-[240px] font-black tracking-tighter leading-none uppercase text-white">
+          <h1 data-animate className="text-[120px] md:text-[180px] lg:text-[240px] font-black tracking-tighter leading-none uppercase text-white">
             EDUPATH
           </h1>
         </div>

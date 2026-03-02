@@ -1,6 +1,7 @@
 import React from 'react'
 import Navbar from './component/Navbar/Navbar'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import PageTransition from './component/PageTransition'
 import Home from './Pages/Home/Home'
 import About from './Pages/About/About'
 import Work from './Pages/Work/Work'
@@ -57,13 +58,13 @@ const App = () => {
         />
 
         <Routes>
-          <Route path="/*" element={<> <AdminDashboard /> </>} />
-          <Route path="/admin/*" element={<> <AdminDashboard /> </>} />
-          <Route path="/admin/users" element={<> <ManageUsers /> </>} />
-          <Route path="/admin/quiz-attempts" element={<> <QuizAttempts /> </>} />
-          <Route path="/admin/roadmaps" element={<> <RoadmapHistory /> </>} />
-          <Route path="/admin/analytics" element={<> <AIAnalytics /> </>} />
-          <Route path="/admin/settings" element={<> <SystemSettings /> </>} />
+          <Route path="/*" element={<PageTransition><AdminDashboard /></PageTransition>} />
+          <Route path="/admin/*" element={<PageTransition><AdminDashboard /></PageTransition>} />
+          <Route path="/admin/users" element={<PageTransition><ManageUsers /></PageTransition>} />
+          <Route path="/admin/quiz-attempts" element={<PageTransition><QuizAttempts /></PageTransition>} />
+          <Route path="/admin/roadmaps" element={<PageTransition><RoadmapHistory /></PageTransition>} />
+          <Route path="/admin/analytics" element={<PageTransition><AIAnalytics /></PageTransition>} />
+          <Route path="/admin/settings" element={<PageTransition><SystemSettings /></PageTransition>} />
         </Routes>
 
       </div>
@@ -88,21 +89,21 @@ const App = () => {
         />
 
         <Routes>
-          <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
-          <Route path="/about" element={<><Navbar /><About /></>} />
-          <Route path="/work" element={<><Navbar /><Work /></>} />
-          <Route path="/contact" element={<><Navbar /><Contact /></>} />
-          <Route path="/signup" element={<><Navbar /><Signup /></>} />
-          <Route path="/signin" element={<><Navbar /><Signin /></>} />
-          <Route path="/reset-password/:token" element={<><Navbar /><ResetPassword /></>} />
-          <Route path="/profile" element={<><Navbar /><ProfilePage /></>} />
-          <Route path="/settings" element={<><Navbar /><SettingsPage /></>} />
-          <Route path="/resume" element={<><Navbar /><ResumePage /></>} />
-          <Route path="/assessment" element={<><AssessmentDashboard /></>} />
-          <Route path="/assessment/instructions" element={<><AssessmentInstructions /></>} />
-          <Route path="/assessment/result" element={<><AllResult /></>} />
-          <Route path="/assessment/quiz" element={<><QuizPage /></>} />
-          <Route path="/assessment/result/:resultId" element={<><ResultPage /></>} />
+          <Route path="/" element={<PageTransition><Navbar /><Home /><Footer /></PageTransition>} />
+          <Route path="/about" element={<PageTransition><Navbar /><About /></PageTransition>} />
+          <Route path="/work" element={<PageTransition><Navbar /><Work /></PageTransition>} />
+          <Route path="/contact" element={<PageTransition><Navbar /><Contact /></PageTransition>} />
+          <Route path="/signup" element={<PageTransition><Navbar /><Signup /></PageTransition>} />
+          <Route path="/signin" element={<PageTransition><Navbar /><Signin /></PageTransition>} />
+          <Route path="/reset-password/:token" element={<PageTransition><Navbar /><ResetPassword /></PageTransition>} />
+          <Route path="/profile" element={<PageTransition><Navbar /><ProfilePage /></PageTransition>} />
+          <Route path="/settings" element={<PageTransition><Navbar /><SettingsPage /></PageTransition>} />
+          <Route path="/resume" element={<PageTransition><Navbar /><ResumePage /></PageTransition>} />
+          <Route path="/assessment" element={<PageTransition><AssessmentDashboard /></PageTransition>} />
+          <Route path="/assessment/instructions" element={<PageTransition><AssessmentInstructions /></PageTransition>} />
+          <Route path="/assessment/result" element={<PageTransition><AllResult /></PageTransition>} />
+          <Route path="/assessment/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
+          <Route path="/assessment/result/:resultId" element={<PageTransition><ResultPage /></PageTransition>} />
         </Routes>
       </div>
     )
