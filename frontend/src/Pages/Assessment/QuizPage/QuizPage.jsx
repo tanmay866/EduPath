@@ -4,7 +4,7 @@ import { useQuiz } from "../../context/QuizContext";
 import { fetchQuizTopics, startQuiz } from "../../Services/assessmentService";
 import { useQuizLogic } from "./hooks/useQuizLogic";
 import QuizLayout from "./components/QuizLayout";
-import BackgroundAnimation from "../AssesmentDashboard.jsx/BackgroundAnimation";
+import BackgroundAnimation from "./components/BackgroundAnimation";
 
 const QuizPage = () => {
   const navigate = useNavigate();

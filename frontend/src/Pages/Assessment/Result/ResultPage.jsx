@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getQuizResult, retryQuiz } from "../Services/assessmentService";
-import AssessmentSidebar from "../../component/Assessment/AssessmentSidebar";
+import { getQuizResult, retryQuiz } from "../../Services/assessmentService";
+import AssessmentSidebar from "../../../component/Assessment/AssessmentSidebar";
 
 const ResultPage = () => {
   const { resultId } = useParams();

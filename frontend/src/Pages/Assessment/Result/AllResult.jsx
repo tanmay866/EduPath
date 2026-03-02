@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getQuizHistory } from '../../Services/assessmentService';
 import AssessmentSidebar from '../../../component/Assessment/AssessmentSidebar';
-import BackgroundAnimation from '../AssesmentDashboard.jsx/BackgroundAnimation';
-import PreviousAttemptsTable from '../AssesmentDashboard.jsx/PreviousAttemptsTable';
+import BackgroundAnimation from '../AssesmentDashboard/components/BackgroundAnimation';
+import PreviousAttemptsTable from '../AssesmentDashboard/components/PreviousAttemptsTable';
 
 const AllResult = () => {
   const [attempts, setAttempts] = useState([]);

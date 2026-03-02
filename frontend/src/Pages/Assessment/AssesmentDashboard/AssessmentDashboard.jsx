@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { fetchQuizTopics, getQuizStats, getQuizHistory } from "../../Services/assessmentService";
 import { useQuiz } from "../../context/QuizContext";
 import AssessmentSidebar from "../../../component/Assessment/AssessmentSidebar";
-import BackgroundAnimation from "./BackgroundAnimation";
-import DashboardHeader from "./DashboardHeader";
-import PerformanceCards from "./PerformanceCards";
-import PreviousAttemptsTable from "./PreviousAttemptsTable";
+import BackgroundAnimation from "./components/BackgroundAnimation";
+import DashboardHeader from "./components/DashboardHeader";
+import PerformanceCards from "./components/PerformanceCards";
+import PreviousAttemptsTable from "./components/PreviousAttemptsTable";
 
 const AssessmentDashboard = () => {
   const { setAssessment } = useQuiz();
