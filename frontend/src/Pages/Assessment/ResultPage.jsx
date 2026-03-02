@@ -55,7 +55,7 @@ const ResultPage = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+      <div className="flex min-h-screen bg-black items-center justify-center">
         <div className="text-white text-xl flex items-center gap-3">
           <svg className="animate-spin h-8 w-8" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -69,7 +69,7 @@ const ResultPage = () => {
 
   if (error || !resultData) {
     return (
-      <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+      <div className="flex min-h-screen bg-black items-center justify-center">
         <div className="text-center">
           <div className="text-red-500 text-xl mb-4">{error || "Result not found"}</div>
           <button
@@ -167,7 +167,7 @@ const ResultPage = () => {
   const insight = getPerformanceInsight();
 
   return (
-    <div className="flex min-h-screen bg-slate-900 relative">
+    <div className="flex min-h-screen bg-black relative">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -203,7 +203,7 @@ const ResultPage = () => {
         <div className="max-w-6xl mx-auto space-y-4">
 
           {/* 1️⃣ SCORE SUMMARY CARD - Main Focus */}
-          <div className="bg-slate-800 shadow-2xl rounded-xl p-5 border-2 border-white/20">
+          <div className="backdrop-blur-xl bg-slate-900/60 shadow-2xl rounded-xl p-5 border-2 border-white/20">
             
             <div className="text-center mb-4">
               <h1 className="text-2xl font-bold text-white mb-1">Assessment Results</h1>
@@ -213,7 +213,7 @@ const ResultPage = () => {
             <div className="grid md:grid-cols-2 gap-5">
               
               {/* Left: Score Display */}
-              <div className="flex flex-col items-center justify-center bg-slate-800 rounded-xl p-4 border border-white/10">
+              <div className="flex flex-col items-center justify-center backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
                 
                 {/* Big Score Badge */}
                 <div className="relative mb-3">
@@ -305,7 +305,7 @@ const ResultPage = () => {
           <div className="grid md:grid-cols-2 gap-4">
 
             {/* 2️⃣ PERFORMANCE BREAKDOWN */}
-            <div className="bg-slate-800 rounded-xl p-4 border border-white/10">
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
               
               <h2 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
                 <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,7 +363,7 @@ const ResultPage = () => {
             </div>
 
             {/* 3️⃣ PERFORMANCE INSIGHT */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-white/10">
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-6 border border-white/10">
               
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -424,7 +424,7 @@ const ResultPage = () => {
           </div>
 
           {/* 4️⃣ QUESTION REVIEW SECTION */}
-          <div className="bg-slate-800 rounded-xl p-4 border border-white/10">
+          <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
             
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -512,7 +512,7 @@ const ResultPage = () => {
           </div>
 
           {/* 5️⃣ ACTION BUTTONS */}
-          <div className="bg-slate-800 rounded-xl p-4 border border-white/10">
+          <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
             
             <div className="grid md:grid-cols-4 gap-3">
               

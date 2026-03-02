@@ -51,7 +51,7 @@ const AssessmentSidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-gray-900 max-h-[70%] p-6 flex flex-col sticky top-0 h-screen overflow-y-auto relative">
+    <div className="w-64 bg-black max-h-[70%] p-6 flex flex-col sticky top-0 h-screen overflow-y-auto relative border-r border-white/5">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -98,7 +98,7 @@ const AssessmentSidebar = () => {
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive(item.path)
                     ? "bg-indigo-600 text-white shadow-lg"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                    : "text-gray-400 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {item.icon}
@@ -120,7 +120,7 @@ const AssessmentSidebar = () => {
 
         <button
           onClick={() => navigate("/")}
-          className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all duration-200"
+          className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

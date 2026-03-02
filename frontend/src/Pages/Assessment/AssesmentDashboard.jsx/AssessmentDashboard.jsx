@@ -130,7 +130,7 @@ const AssessmentDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+      <div className="flex min-h-screen bg-black items-center justify-center">
         <div className="text-white text-xl">Loading dashboard...</div>
       </div>
     );
@@ -138,14 +138,14 @@ const AssessmentDashboard = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-screen bg-slate-900 items-center justify-center">
+      <div className="flex min-h-screen bg-black items-center justify-center">
         <div className="text-red-500 text-xl">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-900 relative">
+    <div className="flex min-h-screen bg-black relative">
       <BackgroundAnimation />
 
       <AssessmentSidebar />
@@ -158,7 +158,7 @@ const AssessmentDashboard = () => {
 
           {/* Start Quiz Button */}
           <div className="mb-8">
-            <div className="bg-slate-800 rounded-xl shadow-xl p-8 border border-white/10">
+            <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl shadow-xl p-8 border border-white/10">
               <div className="text-center">
                 <h2 className="text-3xl font-bold text-white mb-3">
                   Ready to Test Your Skills?

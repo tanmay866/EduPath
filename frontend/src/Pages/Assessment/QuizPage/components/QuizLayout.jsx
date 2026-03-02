@@ -32,7 +32,7 @@ const QuizLayout = ({
   setCurrentQuestionIndex,
 }) => {
   return (
-    <div className="flex min-h-screen bg-slate-900 relative">
+    <div className="flex min-h-screen bg-black relative">
       <BackgroundAnimation />
       <AssessmentSidebar />
       
