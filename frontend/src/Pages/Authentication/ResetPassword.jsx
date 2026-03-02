@@ -4,7 +4,7 @@ import { HiArrowLeft } from 'react-icons/hi';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { resetPassword } from '../Services/profileService';
-import BackgroundAnimation from '../Assessment/AssesmentDashboard.jsx/BackgroundAnimation';
+import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const ResetPassword = () => {
     const navigate = useNavigate();

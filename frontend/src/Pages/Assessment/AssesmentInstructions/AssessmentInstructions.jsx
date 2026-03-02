@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useQuiz } from "../context/QuizContext";
+import { useQuiz } from "../../context/QuizContext";
 import { useNavigate } from "react-router-dom";
-import { startQuiz } from "../Services/assessmentService";
-import AssessmentSidebar from "../../component/Assessment/AssessmentSidebar";
+import { startQuiz } from "../../Services/assessmentService";
+import AssessmentSidebar from "../../../component/Assessment/AssessmentSidebar";
 
 const AssessmentInstructions = () => {
   const { assessment: contextAssessment, setTimer, setAssessment } = useQuiz();
