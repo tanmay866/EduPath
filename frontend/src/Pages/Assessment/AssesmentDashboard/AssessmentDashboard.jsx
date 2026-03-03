@@ -128,14 +128,6 @@ const AssessmentDashboard = () => {
     navigate("/assessment/quiz");
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen bg-black items-center justify-center">
-        <div className="text-white text-xl">Loading dashboard...</div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="flex min-h-screen bg-black items-center justify-center">
