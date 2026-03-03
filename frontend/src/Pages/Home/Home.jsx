@@ -1,9 +1,64 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 
+const FEATURES = [
+  {
+    id: 0,
+    title: 'Skill Assessment',
+    desc: 'Identify your current level with our AI-powered quiz engine.',
+    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+    color: 'indigo',
+    video: 'https://res.cloudinary.com/dmk1ekxzf/video/upload/v1772564071/How_to_Give_Assesement_r8rhac.mp4',
+  },
+  {
+    id: 1,
+    title: 'AI Roadmap',
+    desc: 'Get a personalised learning path generated for your goals.',
+    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>,
+    color: 'cyan',
+    video: null,
+  },
+  {
+    id: 2,
+    title: 'Resume Analysis',
+    desc: 'Upload your resume and receive AI-powered improvement tips.',
+    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
+    color: 'purple',
+    video: 'https://res.cloudinary.com/dmk1ekxzf/video/upload/v1772564129/How_to_Upload_Resume_twlaai.mp4',
+  },
+  {
+    id: 3,
+    title: 'Progress Tracking',
+    desc: 'Visualise your growth with scores, streaks and analytics.',
+    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
+    color: 'emerald',
+    video: 'https://res.cloudinary.com/dmk1ekxzf/video/upload/v1772564003/Progress_Traking_wj1etg.mp4',
+  },
+];
+
+const COLORS = {
+  indigo:  { bg: 'bg-indigo-500/15',  border: 'border-indigo-500/40',  title: 'text-indigo-400',  icon: 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-400',  dot: 'bg-indigo-400',  glow: 'shadow-indigo-500/20' },
+  cyan:    { bg: 'bg-cyan-500/15',    border: 'border-cyan-500/40',    title: 'text-cyan-400',    icon: 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400',    dot: 'bg-cyan-400',    glow: 'shadow-cyan-500/20' },
+  purple:  { bg: 'bg-purple-500/15',  border: 'border-purple-500/40',  title: 'text-purple-400',  icon: 'bg-purple-500/20 border border-purple-500/40 text-purple-400',  dot: 'bg-purple-400',  glow: 'shadow-purple-500/20' },
+  emerald: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', title: 'text-emerald-400', icon: 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400', dot: 'bg-emerald-400', glow: 'shadow-emerald-500/20' },
+};
+
 const Home = () => {
 
   const navigate = useNavigate();
+
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [videoVisible, setVideoVisible]   = useState(true);
+  const videoRef = useRef(null);
+
+  const handleFeatureClick = (id) => {
+    if (id === activeFeature) return;
+    setVideoVisible(false);
+    setTimeout(() => {
+      setActiveFeature(id);
+      setVideoVisible(true);
+    }, 280);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -76,7 +131,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-black">
+      <section className="py-20 px-6 relative z-10">
         <div className="max-w-6xl mx-auto text-center">
           
           <h2 data-animate className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
@@ -122,7 +177,179 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-black">
+      {/* SECTION: Feature Showcase */}
+      <section className="py-24 px-6 relative z-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Heading */}
+          <div className="text-center mb-14">
+            <div data-animate className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-widest uppercase mb-5" style={{backdropFilter:'blur(8px)'}}>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">Explore Features</span>
+            </div>
+            <h2 data-animate style={{transitionDelay:'0.05s'}} className="text-3xl md:text-5xl font-bold text-white mb-4">
+              Everything You Need to
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400"> Grow Faster</span>
+            </h2>
+            <p data-animate style={{transitionDelay:'0.1s'}} className="text-slate-500 max-w-xl mx-auto">
+              Click a feature to see it in action
+            </p>
+          </div>
+
+          {/* Two-column layout */}
+          <div data-animate style={{transitionDelay:'0.15s'}} className="flex flex-col lg:flex-row gap-6 items-start">
+
+            {/* Left — Feature List */}
+            <div className="flex flex-col gap-3 lg:w-[340px] w-full flex-shrink-0">
+              {FEATURES.map((f) => {
+                const active = activeFeature === f.id;
+                const c = COLORS[f.color];
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => handleFeatureClick(f.id)}
+                    className={`text-left w-full rounded-2xl border p-5 transition-all duration-300 backdrop-blur-lg ${
+                      active
+                        ? `${c.bg} ${c.border} shadow-xl ${c.glow}`
+                        : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/8'
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`mt-0.5 w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                        active ? c.icon : 'bg-white/10 border-white/20 text-gray-400'
+                      }`}>
+                        {f.icon}
+                      </div>
+                      <div>
+                        <div className={`font-semibold text-base transition-colors duration-300 ${
+                          active ? c.title : 'text-white'
+                        }`}>{f.title}</div>
+                        <div className="text-gray-400 text-sm mt-1 leading-relaxed">{f.desc}</div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right — Video Preview */}
+            <div className="flex-1 w-full">
+              {/* Device frame */}
+              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-slate-900/60 backdrop-blur-xl shadow-2xl">
+                {/* Browser bar */}
+                <div className="flex items-center gap-2 px-4 py-3 bg-slate-900/80 border-b border-white/10">
+                  <span className="w-3 h-3 rounded-full bg-red-500/70"></span>
+                  <span className="w-3 h-3 rounded-full bg-yellow-500/70"></span>
+                  <span className="w-3 h-3 rounded-full bg-green-500/70"></span>
+                  <div className="ml-3 flex-1 bg-white/5 border border-white/10 rounded-md px-3 py-1 text-xs text-gray-500">
+                    localhost:5173 — {FEATURES[activeFeature].title}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400 border border-white/10 rounded-full px-2.5 py-1">
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${COLORS[FEATURES[activeFeature].color].dot}`}></span>
+                    Live Demo
+                  </div>
+                </div>
+
+                {/* Video */}
+                <div className="relative aspect-video overflow-hidden">
+                  <div
+                    style={{
+                      opacity: videoVisible ? 1 : 0,
+                      transform: videoVisible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(8px)',
+                      transition: 'opacity 0.3s ease, transform 0.3s ease',
+                      width: '100%',
+                      height: '100%',
+                    }}
+                  >
+                    {FEATURES[activeFeature].video ? (
+                      <>
+                        <video
+                          ref={videoRef}
+                          key={FEATURES[activeFeature].video}
+                          src={FEATURES[activeFeature].video}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          disablePictureInPicture
+                          className="w-full h-full object-cover pointer-events-none"
+                        />
+                        <div className={`absolute bottom-3 left-3 text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-md border flex items-center gap-2 ${COLORS[FEATURES[activeFeature].color].bg} ${COLORS[FEATURES[activeFeature].color].border} ${COLORS[FEATURES[activeFeature].color].title}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${COLORS[FEATURES[activeFeature].color].dot}`} />
+                          <span>{FEATURES[activeFeature].title}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+
+                        {/* Grid pattern */}
+                        <div className="absolute inset-0 opacity-[0.07]" style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '40px 40px'}} />
+
+                        {/* Cyan glow blobs */}
+                        <div className="absolute top-1/4 left-1/4 w-56 h-56 rounded-full blur-3xl opacity-10 bg-cyan-400" />
+                        <div className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full blur-3xl opacity-10 bg-indigo-500" />
+
+                        {/* Fake roadmap UI preview */}
+                        <div className="relative z-10 w-full max-w-sm px-6 flex flex-col gap-3">
+
+                          {/* Title row */}
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
+                                {FEATURES[activeFeature].icon}
+                              </div>
+                              <span className="text-white font-semibold text-sm">Your AI Roadmap</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                              Coming Soon
+                            </div>
+                          </div>
+
+                          {/* Roadmap steps */}
+                          {[
+                            { label: 'HTML & CSS Basics',     pct: 100, done: true  },
+                            { label: 'JavaScript Fundamentals', pct: 72, done: false },
+                            { label: 'React & Component Design', pct: 30, done: false },
+                            { label: 'Node.js & REST APIs',    pct: 0,  done: false },
+                          ].map((step, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              {/* dot + line */}
+                              <div className="flex flex-col items-center flex-shrink-0">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${step.done ? 'bg-cyan-500 border-cyan-400' : step.pct > 0 ? 'bg-cyan-500/20 border-cyan-500/60' : 'bg-slate-700 border-slate-600'}`}>
+                                  {step.done && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>}
+                                </div>
+                                {i < 3 && <div className={`w-px h-5 mt-0.5 ${step.done ? 'bg-cyan-500/50' : 'bg-slate-700'}`} />}
+                              </div>
+                              {/* content */}
+                              <div className="flex-1 pb-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className={`text-xs font-medium ${step.done ? 'text-cyan-400' : step.pct > 0 ? 'text-white' : 'text-slate-500'}`}>{step.label}</span>
+                                  <span className={`text-[10px] font-bold ${step.done ? 'text-cyan-400' : step.pct > 0 ? 'text-slate-300' : 'text-slate-600'}`}>{step.pct}%</span>
+                                </div>
+                                <div className="h-1 rounded-full bg-slate-700/60 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-400"
+                                    style={{width: `${step.pct}%`, opacity: step.pct === 0 ? 0.2 : 1}}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Bottom hint */}
+                          <p className="text-center text-slate-600 text-[11px] mt-1">🚀 Full demo dropping soon</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 px-6 relative z-10">
         <div className="max-w-6xl mx-auto text-center">
           <h2 data-animate className="text-3xl md:text-4xl font-bold mb-4">How Your Career Journey Works</h2>
           <p data-animate style={{transitionDelay: '0.1s'}} className="text-slate-500 max-w-2xl mx-auto mb-12">
@@ -159,7 +386,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-black">
+      <section className="py-20 px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Contact Support Box */}
           <div data-animate className="relative backdrop-blur-lg bg-white/5 rounded-2xl p-8 md:p-12 text-center mb-20 border border-white/10 shadow-2xl transition-all duration-300">
@@ -207,7 +434,7 @@ const Home = () => {
       </section>
 
       {/* Interactive Glow Text Section */}
-      <section className="py-32 px-6 bg-black overflow-hidden">
+      <section className="py-32 px-6 overflow-hidden relative z-10">
         <div className="relative flex items-center justify-center min-h-[400px]">
           <h1 data-animate className="text-[120px] md:text-[180px] lg:text-[240px] font-black tracking-tighter leading-none uppercase text-white">
             EDUPATH
