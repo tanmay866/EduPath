@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AdminSidebar from '../component/AdminSidebar';
 import AdminNavbar from '../component/AdminNavbar';
 import UsersTable from '../component/UsersTable';
-import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard.jsx/BackgroundAnimation';
+import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([

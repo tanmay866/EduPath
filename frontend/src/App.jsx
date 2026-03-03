@@ -18,6 +18,7 @@ import ProfilePage from './Pages/Profile/ProfilePage'
 import SettingsPage from './Pages/Settings/SettingsPage'
 import ResumePage from './Pages/Profile/ResumePage'
 import AllResult from './Pages/Assessment/Result/AllResult'
+import FAQ from './Pages/FAQ/FAQ'
 
 // Admin Components
 import AdminNavbar from './Admin/component/AdminNavbar'
@@ -32,6 +33,7 @@ import SystemSettings from './Admin/pages/SystemSettings'
 //comman components
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ScrollToTop from './component/ScrollToTop';
 
 const App = () => {
 
@@ -57,6 +59,7 @@ const App = () => {
           toastClassName="toast-glass"
         />
 
+        <ScrollToTop />
         <Routes>
           <Route path="/*" element={<PageTransition><AdminDashboard /></PageTransition>} />
           <Route path="/admin/*" element={<PageTransition><AdminDashboard /></PageTransition>} />
@@ -88,11 +91,13 @@ const App = () => {
           toastClassName="toast-glass"
         />
 
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<PageTransition><Navbar /><Home /><Footer /></PageTransition>} />
           <Route path="/about" element={<PageTransition><Navbar /><About /></PageTransition>} />
           <Route path="/work" element={<PageTransition><Navbar /><Work /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Navbar /><Contact /></PageTransition>} />
+          <Route path="/faq" element={<PageTransition><Navbar /><FAQ /></PageTransition>} />
           <Route path="/signup" element={<PageTransition><Navbar /><Signup /></PageTransition>} />
           <Route path="/signin" element={<PageTransition><Navbar /><Signin /></PageTransition>} />
           <Route path="/reset-password/:token" element={<PageTransition><Navbar /><ResetPassword /></PageTransition>} />

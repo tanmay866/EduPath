@@ -41,6 +41,23 @@ const SettingsPage = () => {
     loadSettings();
   }, [navigate]);
 
+  // Scroll-in animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const loadSettings = () => {
     const theme = sessionStorage.getItem('theme') || 'light';
     const language = sessionStorage.getItem('language') || 'Eng';
@@ -158,7 +175,7 @@ const SettingsPage = () => {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
+        <div data-animate className="mb-8 flex items-center gap-4" style={{transitionDelay: '0s'}}>
           <button
             onClick={() => navigate('/profile')}
             className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-white/20"
@@ -186,7 +203,7 @@ const SettingsPage = () => {
         {/* Main Settings Grid - Preferences and Password Side by Side */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           {/* Preferences Card */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
+          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-8 border border-white/10 h-full shadow-xl" style={{transitionDelay: '0.1s'}}>
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 backdrop-blur-lg bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
                 <SettingsIcon size={24} className="text-white" />
@@ -272,7 +289,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Change Password Card */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-8 border border-white/10 h-full shadow-xl">
+          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-8 border border-white/10 h-full shadow-xl" style={{transitionDelay: '0.2s'}}>
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 backdrop-blur-lg bg-indigo-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
                 <Lock size={24} className="text-white" />
@@ -377,7 +394,7 @@ const SettingsPage = () => {
         {/* Additional Settings Sections */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Account Settings */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg" style={{transitionDelay: '0.1s'}}>
             <h4 className="text-lg font-semibold text-white mb-2">Account</h4>
             <p className="text-gray-400 text-sm mb-4">Manage your account settings</p>
             <button
@@ -389,7 +406,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Privacy Settings */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg" style={{transitionDelay: '0.2s'}}>
             <h4 className="text-lg font-semibold text-white mb-2">Privacy</h4>
             <p className="text-gray-400 text-sm mb-4">Control your privacy settings</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
@@ -398,7 +415,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Security Settings */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg">
+          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg" style={{transitionDelay: '0.3s'}}>
             <h4 className="text-lg font-semibold text-white mb-2">Security</h4>
             <p className="text-gray-400 text-sm mb-4">Password changed successfully</p>
             <button className="text-green-400 text-sm font-medium">
@@ -407,7 +424,7 @@ const SettingsPage = () => {
           </div>
 
           {/* Help & Support */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg">
+          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg" style={{transitionDelay: '0.4s'}}>
             <h4 className="text-lg font-semibold text-white mb-2">Help & Support</h4>
             <p className="text-gray-400 text-sm mb-4">Get help and contact support</p>
             <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">

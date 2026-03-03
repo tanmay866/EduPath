@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AdminSidebar from '../component/AdminSidebar';
 import AdminNavbar from '../component/AdminNavbar';
 import RoadmapTable from '../component/RoadmapTable';
-import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard.jsx/BackgroundAnimation';
+import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const RoadmapHistory = () => {
   const [roadmaps, setRoadmaps] = useState([

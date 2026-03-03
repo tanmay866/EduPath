@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import BackgroundAnimation from '../Assessment/AssesmentDashboard.jsx/BackgroundAnimation'
+import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation'
 import { Brain, Target, Users, Zap, BookOpen, Award, TrendingUp, Shield } from 'lucide-react'
 
 const About = () => {

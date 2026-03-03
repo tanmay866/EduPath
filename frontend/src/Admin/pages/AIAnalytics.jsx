@@ -4,7 +4,7 @@ import AdminNavbar from '../component/AdminNavbar';
 import StatCard from '../component/StatCard';
 import ChartCard from '../component/ChartCard';
 import { Zap, TrendingUp, ClipboardList, Map } from 'lucide-react';
-import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard.jsx/BackgroundAnimation';
+import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const AIAnalytics = () => {
   const statsData = {

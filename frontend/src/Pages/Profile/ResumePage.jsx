@@ -24,6 +24,23 @@ const ResumePage = () => {
     loadResumes();
   }, [navigate]);
 
+  // Scroll-in animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const loadResumes = async () => {
     try {
       const response = await getResumes();
@@ -192,7 +209,7 @@ const ResumePage = () => {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
+        <div data-animate className="mb-8 flex items-center gap-4" style={{transitionDelay: '0s'}}>
           <button
             onClick={() => navigate('/profile')}
             className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-white/20"
@@ -223,7 +240,7 @@ const ResumePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Side - Uploaded Resumes List */}
           <div className="space-y-6">
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 shadow-xl">
+            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 shadow-xl" style={{transitionDelay: '0.1s'}}>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-lg flex items-center justify-center">
                   <FolderOpen size={20} className="text-white" />
@@ -318,7 +335,7 @@ const ResumePage = () => {
 
           {/* Right Side - Upload Section */}
           <div className="space-y-6">
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 shadow-xl sticky top-6">
+            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 shadow-xl sticky top-6" style={{transitionDelay: '0.2s'}}>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-lg flex items-center justify-center">
                   <Upload size={20} className="text-white" />

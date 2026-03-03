@@ -45,6 +45,23 @@ const ProfilePage = () => {
     loadProfileDataFromBackend();
   }, [navigate]);
 
+  // Scroll-in animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const loadProfileDataFromBackend = async () => {
     try {
       setLoading(true);
@@ -388,7 +405,7 @@ const ProfilePage = () => {
 
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
+        <div data-animate className="mb-8 flex items-center gap-4" style={{transitionDelay: '0s'}}>
           <button
             onClick={() => navigate('/')}
             className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-white/20"
@@ -416,7 +433,7 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Column - Profile Card */}
           <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl">
+            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl" style={{transitionDelay: '0.1s'}}>
               <div className="text-center">
                 <div className="relative inline-block mb-4">
                   <input
@@ -468,7 +485,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Resume Card - Navigate to Resume Page */}
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')}>
+            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')} style={{transitionDelay: '0.2s'}}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/40 group-hover:border-emerald-400/50 transition-all">
@@ -488,7 +505,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Settings Card - Navigate to Settings Page */}
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')}>
+            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')} style={{transitionDelay: '0.3s'}}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-500/40 group-hover:border-purple-400/50 transition-all">
@@ -511,7 +528,7 @@ const ProfilePage = () => {
           {/* Right Column - Forms */}
           <div className="lg:col-span-2">
             {/* Profile Information Card */}
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 h-full shadow-xl">
+            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 h-full shadow-xl" style={{transitionDelay: '0.15s'}}>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/30 rounded-xl flex items-center justify-center">
                   <User size={20} className="text-white" />

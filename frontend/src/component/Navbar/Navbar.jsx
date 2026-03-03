@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Menu, X, Info, Mail } from 'lucide-react';
+import { ChevronRight, Menu, X, Info, Mail, HelpCircle } from 'lucide-react';
 import { FaUser, FaSignOutAlt, FaCog } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ConfirmModal from '../Comman/ConfirmModal';
+import EduPathLogo from '../EduPathLogo';
 
 const ArcNavbar = () => {
   const navRef = useRef(null);
@@ -78,8 +79,9 @@ const ArcNavbar = () => {
   ];
 
   const contactSubmenu = [
-    { label: 'About Us', path: '/about' },
-    { label: 'Contact Us', path: '/contact' },
+    { label: 'About Us',   path: '/about',   icon: Info },
+    { label: 'Contact Us', path: '/contact', icon: Mail },
+    { label: 'FAQs',       path: '/faq',     icon: HelpCircle },
   ];
 
   useEffect(() => {
@@ -106,10 +108,9 @@ const ArcNavbar = () => {
             <div className="shrink-0">
               <button
                 onClick={() => navigate('/')}
-                className="text-2xl font-bold transition-colors"
+                className="transition-opacity hover:opacity-80 active:opacity-60"
               >
-                <span className="text-white hover:text-gray-300">Edu</span>
-                <span className="text-cyan-400 hover:text-cyan-300">Path</span>
+                <EduPathLogo size={34} showText={true} fontSize={22} />
               </button>
             </div>
 
@@ -150,29 +151,20 @@ const ArcNavbar = () => {
                     <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl shadow-2xl py-2 border border-white/10 overflow-hidden">
                       {/* Menu Items */}
                       <div className="py-1">
-                        <button
-                          onClick={() => {
-                            navigate('/about');
-                            setContactDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
-                        >
-                          <Info size={18} className="text-gray-400" />
-                          <span className="flex-1 text-left text-sm font-medium">About Us</span>
-                          <ChevronRight size={16} className="text-gray-500" />
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            navigate('/contact');
-                            setContactDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
-                        >
-                          <Mail size={18} className="text-gray-400" />
-                          <span className="flex-1 text-left text-sm font-medium">Contact Us</span>
-                          <ChevronRight size={16} className="text-gray-500" />
-                        </button>
+                        {contactSubmenu.map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              navigate(item.path);
+                              setContactDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
+                          >
+                            <item.icon size={18} className="text-gray-400" />
+                            <span className="flex-1 text-left text-sm font-medium">{item.label}</span>
+                            <ChevronRight size={16} className="text-gray-500" />
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>

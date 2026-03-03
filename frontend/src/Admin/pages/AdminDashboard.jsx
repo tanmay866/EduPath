@@ -5,7 +5,7 @@ import StatCard from '../component/StatCard';
 import ChartCard from '../component/ChartCard';
 import AttemptsTable from '../component/AttemptsTable';
 import { Users, ClipboardList, Map, Zap } from 'lucide-react';
-import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard.jsx/BackgroundAnimation';
+import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const AdminDashboard = () => {
   const statsData = {
