@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react'
+﻿import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
+import EduPathLogo from '../../component/EduPathLogo';
 
 const FEATURES = [
   {
@@ -49,7 +50,39 @@ const Home = () => {
 
   const [activeFeature, setActiveFeature] = useState(0);
   const [videoVisible, setVideoVisible]   = useState(true);
-  const videoRef = useRef(null);
+  const [typedText, setTypedText]         = useState('');
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const [heroReady, setHeroReady]         = useState(false);
+  const videoRef   = useRef(null);
+  const canvasRef  = useRef(null);
+
+  const HERO_LINE1 = 'Your Personalized Path';
+  const HERO_LINE2 = 'to Success';
+  const FULL_TEXT  = HERO_LINE1 + '\n' + HERO_LINE2;
+
+  // Typewriter effect on mount
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setTypedText(FULL_TEXT.slice(0, i));
+      if (i >= FULL_TEXT.length) {
+        clearInterval(interval);
+        setHeroReady(true);
+      }
+    }, 48);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Blinking cursor (stops when typing finishes)
+  useEffect(() => {
+    if (heroReady) {
+      setCursorVisible(false);
+      return;
+    }
+    const id = setInterval(() => setCursorVisible(v => !v), 530);
+    return () => clearInterval(id);
+  }, [heroReady]);
 
   const handleFeatureClick = (id) => {
     if (id === activeFeature) return;
@@ -59,6 +92,90 @@ const Home = () => {
       setVideoVisible(true);
     }, 280);
   };
+
+  // Dot-grid glow effect — scoped to hero section canvas (not body)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const SPACING = 38;   // grid gap in px
+    const RADIUS  = 150;  // mouse influence radius
+    const DOT_R   = 1.6;  // resting dot radius
+    const GLOW_R  = 4.5;  // radius at full glow
+
+    let W, H, animId;
+    const mouse = { x: -9999, y: -9999 };
+    let dots = [];
+
+    const build = () => {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      W = canvas.width  = rect.width;
+      H = canvas.height = rect.height;
+      dots = [];
+      const cols = Math.ceil(W / SPACING) + 1;
+      const rows = Math.ceil(H / SPACING) + 1;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          dots.push({ x: c * SPACING, y: r * SPACING });
+        }
+      }
+    };
+    build();
+    window.addEventListener('resize', build);
+
+    const onMove  = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    };
+    const onLeave = ()  => { mouse.x = -9999; mouse.y = -9999; };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseleave', onLeave);
+
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+
+      dots.forEach(d => {
+        const dx   = mouse.x - d.x;
+        const dy   = mouse.y - d.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const t    = dist < RADIUS ? 1 - dist / RADIUS : 0;
+
+        const radius = DOT_R + t * (GLOW_R - DOT_R);
+        const alpha  = 0.18 + t * 0.72;
+
+        if (t > 0.01) {
+          const hue = 240 + t * 50;
+          const grd = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, radius * 2.5);
+          grd.addColorStop(0,   `hsla(${hue},90%,70%,${alpha * 0.8})`);
+          grd.addColorStop(0.5, `hsla(${hue},80%,60%,${alpha * 0.35})`);
+          grd.addColorStop(1,   `hsla(${hue},70%,50%,0)`);
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, radius * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = grd;
+          ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = t > 0.01
+          ? `hsla(${240 + t * 50},90%,78%,${0.55 + t * 0.45})`
+          : 'rgba(148,163,184,0.18)';
+        ctx.fill();
+      });
+
+      animId = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', build);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -76,62 +193,103 @@ const Home = () => {
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <div className="bg-black font-sans relative">
-      {/* Live Moving Background Animations */}
-      <div className="animated-bg">
-        {/* Moving Shapes */}
-        <div className="moving-shape shape-1"></div>
-        <div className="moving-shape shape-2"></div>
-        <div className="moving-shape shape-3"></div>
-        <div className="moving-shape shape-4"></div>
-        <div className="moving-shape shape-5"></div>
-        <div className="moving-shape shape-6"></div>
-        <div className="moving-shape shape-7"></div>
-        <div className="moving-shape shape-8"></div>
-        
-        {/* Rotating Center Gradient */}
-        <div className="rotating-gradient"></div>
-        
-        {/* Floating Particles */}
-        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
-        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
-        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
-        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
-        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
-      </div>
 
-        {/* SECTION 1: HERO (The first code I gave you) */}
-      <section className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative z-10">
-        <h1 data-animate className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
-          Your Personalized Path to Success
-          <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-emerald-400">
-            with EduPath
-          </span>
+
+  return (
+    <div className="bg-black font-sans">
+
+        {/* SECTION 1: HERO */}
+      <section data-section="0" className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative overflow-hidden">
+        {/* Dot-grid canvas — scoped to hero only, sits behind all content */}
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{zIndex: 0}} />
+
+        {/* All hero content sits above the canvas */}
+        <div className="relative z-10 flex flex-col items-center text-center">
+        {/* EduPath logo badge — fades in with buttons after typing */}
+        <div
+          style={{
+            opacity: heroReady ? 1 : 0,
+            transform: heroReady ? 'translateY(0)' : 'translateY(24px)',
+            transition: 'opacity 0.7s ease 0.55s, transform 0.7s ease 0.55s',
+          }}
+          className="mb-8"
+        >
+          <EduPathLogo size={32} showText={true} fontSize={18} />
+        </div>
+
+        {/* Typewriter heading — Antigravity style */}
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight min-h-[3.5em] md:min-h-[2.8em]">
+          {(() => {
+            const parts = typedText.split('\n');
+            return (
+              <>
+                <span>{parts[0]}</span>
+                {parts[1] !== undefined && (
+                  <>
+                    <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">
+                      {parts[1]}
+                    </span>
+                  </>
+                )}
+                {/* Blinking cursor — hidden once typing completes */}
+                {!heroReady && (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '3px',
+                      height: '0.85em',
+                      background: 'rgb(99 102 241)',
+                      marginLeft: '4px',
+                      verticalAlign: 'middle',
+                      borderRadius: '2px',
+                      opacity: cursorVisible ? 1 : 0,
+                      transition: 'opacity 0.1s',
+                    }}
+                  />
+                )}
+              </>
+            );
+          })()}
         </h1>
-        
-        <p data-animate style={{transitionDelay: '0.15s'}} className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl">
+
+        <p
+          className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl"
+          style={{
+            opacity: heroReady ? 1 : 0,
+            transform: heroReady ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s',
+          }}
+        >
           Learn Smarter, Grow Faster with our AI-powered personalized learning platform
         </p>
 
-        {/* Buttons */}
-        <div data-animate style={{transitionDelay: '0.3s'}} className="flex flex-col sm:flex-row gap-4 mt-8">
-          <button className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
+        {/* Buttons — fade + slide in from below after typing done */}
+        <div
+          className="flex flex-col sm:flex-row gap-4 mt-8"
+          style={{
+            opacity: heroReady ? 1 : 0,
+            transform: heroReady ? 'translateY(0)' : 'translateY(28px)',
+            transition: 'opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s',
+          }}
+        >
+          <button
+            className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
             onClick={() => navigate('/assessment')}
           >
             Skill Assessment →
           </button>
+          <button
+            className="backdrop-blur-lg bg-white/5 text-white px-8 py-4 rounded-xl font-bold border border-white/15 hover:bg-white/10 hover:border-white/30 hover:scale-105 transition-all duration-300 cursor-pointer"
+            onClick={() => navigate('/services')}
+          >
+            Explore EduPath
+          </button>
+        </div>
         </div>
       </section>
 
-      <section className="py-20 px-6 relative z-10">
+      <section data-section="1" className="py-20 px-6 relative z-10 bg-black">
         <div className="max-w-6xl mx-auto text-center">
           
           <h2 data-animate className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
@@ -178,7 +336,7 @@ const Home = () => {
       </section>
 
       {/* SECTION: Feature Showcase */}
-      <section className="py-24 px-6 relative z-10">
+      <section data-section="2" className="py-24 px-6 relative z-10 bg-black">
         <div className="max-w-6xl mx-auto">
           {/* Heading */}
           <div className="text-center mb-14">
@@ -349,7 +507,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 px-6 relative z-10">
+      <section data-section="3" className="py-20 px-6 relative z-10 bg-black">
         <div className="max-w-6xl mx-auto text-center">
           <h2 data-animate className="text-3xl md:text-4xl font-bold mb-4">How Your Career Journey Works</h2>
           <p data-animate style={{transitionDelay: '0.1s'}} className="text-slate-500 max-w-2xl mx-auto mb-12">
@@ -386,7 +544,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 px-6 relative z-10">
+      <section data-section="4" className="py-20 px-6 relative z-10 bg-black">
         <div className="max-w-4xl mx-auto">
           {/* Contact Support Box */}
           <div data-animate className="relative backdrop-blur-lg bg-white/5 rounded-2xl p-8 md:p-12 text-center mb-20 border border-white/10 shadow-2xl transition-all duration-300">
@@ -434,7 +592,7 @@ const Home = () => {
       </section>
 
       {/* Interactive Glow Text Section */}
-      <section className="py-32 px-6 overflow-hidden relative z-10">
+      <section data-section="5" className="py-32 px-6 overflow-hidden relative z-10 bg-black">
         <div className="relative flex items-center justify-center min-h-[400px]">
           <h1 data-animate className="text-[120px] md:text-[180px] lg:text-[240px] font-black tracking-tighter leading-none uppercase text-white">
             EDUPATH

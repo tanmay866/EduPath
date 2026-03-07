@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getQuizHistory } from '../../Services/assessmentService';
 import AssessmentSidebar from '../../../component/Assessment/AssessmentSidebar';
-import BackgroundAnimation from '../AssesmentDashboard/components/BackgroundAnimation';
 import PreviousAttemptsTable from '../AssesmentDashboard/components/PreviousAttemptsTable';
 
 const AllResult = () => {
@@ -51,7 +50,6 @@ const AllResult = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-black relative">
-        <BackgroundAnimation />
         <AssessmentSidebar />
         <div className="flex-1 flex items-center justify-center relative z-10">
           <div className="text-center">
@@ -66,7 +64,6 @@ const AllResult = () => {
   if (error) {
     return (
       <div className="flex min-h-screen bg-black relative">
-        <BackgroundAnimation />
         <AssessmentSidebar />
         <div className="flex-1 flex items-center justify-center p-4 relative z-10">
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 max-w-md backdrop-blur-lg">
@@ -86,8 +83,6 @@ const AllResult = () => {
 
   return (
     <div className="flex min-h-screen bg-black relative">
-      <BackgroundAnimation />
-
       <AssessmentSidebar />
 
       <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto relative z-10">

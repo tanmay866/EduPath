@@ -1,6 +1,5 @@
 import AssessmentSidebar from "../../../../component/Assessment/AssessmentSidebar";
 import ConfirmModal from "../../../../component/Comman/ConfirmModal";
-import BackgroundAnimation from "./BackgroundAnimation";
 import QuizHeader from "./QuizHeader";
 import QuestionPanel from "./QuestionPanel";
 import QuizNavigator from "./QuizNavigator";
@@ -33,7 +32,6 @@ const QuizLayout = ({
 }) => {
   return (
     <div className="flex min-h-screen bg-black relative">
-      <BackgroundAnimation />
       <AssessmentSidebar />
       
       <div className="flex-1 flex flex-col relative z-10">

@@ -1,8 +1,40 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation'
 import { Brain, Target, Users, Zap, BookOpen, Award, TrendingUp, Shield } from 'lucide-react'
 
 const About = () => {
+
+  const LINE1 = 'Building the Future of'
+  const LINE2 = 'Career Growth'
+  const FULL_TEXT = LINE1 + '\n' + LINE2
+
+  const [typedText, setTypedText] = useState('')
+  const [cursorVisible, setCursorVisible] = useState(true)
+  const [heroReady, setHeroReady] = useState(false)
+
+  // Typewriter
+  useEffect(() => {
+    let i = 0
+    const interval = setInterval(() => {
+      i++
+      setTypedText(FULL_TEXT.slice(0, i))
+      if (i >= FULL_TEXT.length) {
+        clearInterval(interval)
+        setHeroReady(true)
+      }
+    }, 55)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Blinking cursor — stops when done
+  useEffect(() => {
+    if (heroReady) {
+      setCursorVisible(false)
+      return
+    }
+    const id = setInterval(() => setCursorVisible(v => !v), 530)
+    return () => clearInterval(id)
+  }, [heroReady])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -83,11 +115,38 @@ const About = () => {
             <Users size={16} />
             About EduPath
           </div>
-          <h1 data-animate style={{transitionDelay: '0.1s'}} className="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
-            Building the Future of{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-teal-400">
-              Career Growth
-            </span>
+          <h1 data-animate style={{transitionDelay: '0.1s'}} className="text-5xl md:text-6xl font-extrabold text-white mb-6 leading-tight min-h-[2.4em] md:min-h-[2em]">
+            {(() => {
+              const parts = typedText.split('\n')
+              return (
+                <>
+                  <span className="text-white">{parts[0]}</span>
+                  {parts[1] !== undefined && (
+                    <>
+                      {' '}
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-teal-400">
+                        {parts[1]}
+                      </span>
+                    </>
+                  )}
+                  {!heroReady && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: '3px',
+                        height: '0.85em',
+                        background: 'rgb(99 102 241)',
+                        marginLeft: '4px',
+                        verticalAlign: 'middle',
+                        borderRadius: '2px',
+                        opacity: cursorVisible ? 1 : 0,
+                        transition: 'opacity 0.1s',
+                      }}
+                    />
+                  )}
+                </>
+              )
+            })()}
           </h1>
           <p data-animate style={{transitionDelay: '0.2s'}} className="text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
             EduPath is an AI-powered learning and assessment platform designed to help students and professionals identify skill gaps, build resumes, and accelerate their career journey.

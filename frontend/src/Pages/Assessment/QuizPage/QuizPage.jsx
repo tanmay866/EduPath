@@ -4,7 +4,6 @@ import { useQuiz } from "../../context/QuizContext";
 import { fetchQuizTopics, startQuiz } from "../../Services/assessmentService";
 import { useQuizLogic } from "./hooks/useQuizLogic";
 import QuizLayout from "./components/QuizLayout";
-import BackgroundAnimation from "./components/BackgroundAnimation";
 
 const QuizPage = () => {
   const navigate = useNavigate();
@@ -192,7 +191,6 @@ const QuizPage = () => {
   if (stage === 'configure') {
     return (
       <div className="min-h-screen bg-black relative flex items-center justify-center py-4 px-4">
-        <BackgroundAnimation />
         <div className="max-w-2xl w-full mx-auto relative z-10">
           <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6">
             <div className="text-center mb-5">
@@ -306,7 +304,6 @@ const QuizPage = () => {
   if (stage === 'instructions') {
     return (
       <div className="min-h-screen bg-black relative flex items-center justify-center py-4 px-4">
-        <BackgroundAnimation />
         <div className="max-w-4xl w-full mx-auto relative z-10">
           <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-5">
             {/* Header */}

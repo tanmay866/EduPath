@@ -1,6 +1,5 @@
 import ConfirmModal from "../../../../component/Comman/ConfirmModal";
 import AssessmentSidebar from "../../../../component/Assessment/AssessmentSidebar";
-import BackgroundAnimation from "./BackgroundAnimation";
 
 const QuizPreview = ({
   assessment,
@@ -12,7 +11,6 @@ const QuizPreview = ({
 }) => {
   return (
     <div className="flex min-h-screen bg-black relative">
-      <BackgroundAnimation />
       <AssessmentSidebar />
       
       <div className="flex-1 flex items-center justify-center relative z-10 p-4">

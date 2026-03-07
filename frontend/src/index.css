@@ -43,7 +43,7 @@ html {
 }
 
 body {
-  background-color: #0f172a;
+  background-color: #000;
   color: #e2e8f0;
 }
 
@@ -192,6 +192,14 @@ input[type="range"]::-moz-range-thumb:hover {
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
+  background: #000;
+}
+
+.neural-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .moving-shape {
@@ -342,6 +350,11 @@ input[type="range"]::-moz-range-thumb:hover {
 }
 
 /* Fade In Animation */
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

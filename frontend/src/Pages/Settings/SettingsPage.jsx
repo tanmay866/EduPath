@@ -143,35 +143,49 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative">
-      {/* Live Moving Background Animations */}
-      <div className="animated-bg">
-        {/* Moving Shapes */}
-        <div className="moving-shape shape-1"></div>
-        <div className="moving-shape shape-2"></div>
-        <div className="moving-shape shape-3"></div>
-        <div className="moving-shape shape-4"></div>
-        <div className="moving-shape shape-5"></div>
-        <div className="moving-shape shape-6"></div>
-        <div className="moving-shape shape-7"></div>
-        <div className="moving-shape shape-8"></div>
-
-        {/* Rotating Center Gradient */}
-        <div className="rotating-gradient"></div>
-
-        {/* Floating Particles */}
-        <div className="floating-particle" style={{ top: '5%', left: '15%', animationDelay: '0s' }}></div>
-        <div className="floating-particle" style={{ top: '8%', left: '85%', animationDelay: '2s' }}></div>
-        <div className="floating-particle" style={{ top: '12%', left: '50%', animationDelay: '1.5s' }}></div>
-        <div className="floating-particle" style={{ top: '15%', left: '20%', animationDelay: '0s' }}></div>
-        <div className="floating-particle" style={{ top: '25%', left: '70%', animationDelay: '1s' }}></div>
-        <div className="floating-particle" style={{ top: '45%', left: '10%', animationDelay: '2s' }}></div>
-        <div className="floating-particle" style={{ top: '55%', left: '85%', animationDelay: '1.5s' }}></div>
-        <div className="floating-particle" style={{ top: '75%', left: '30%', animationDelay: '0.5s' }}></div>
-        <div className="floating-particle" style={{ top: '65%', left: '60%', animationDelay: '2.5s' }}></div>
-        <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
-        <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
+    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative overflow-hidden">
+      {/* Settings page background — subtle grid + slow drifting orbs */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        {/* Dot grid */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+          opacity: 0.5,
+        }} />
+        {/* Slow ambient orbs */}
+        <div style={{
+          position: 'absolute', top: '8%', left: '10%',
+          width: 420, height: 420,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.09), transparent 70%)',
+          animation: 'profileOrb1 18s ease-in-out infinite alternate',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '10%', right: '8%',
+          width: 360, height: 360,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%)',
+          animation: 'profileOrb2 22s ease-in-out infinite alternate',
+        }} />
+        <div style={{
+          position: 'absolute', top: '45%', right: '20%',
+          width: 260, height: 260,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(56,189,248,0.06), transparent 70%)',
+          animation: 'profileOrb1 26s ease-in-out infinite alternate-reverse',
+        }} />
       </div>
+      <style>{`
+        @keyframes profileOrb1 {
+          from { transform: translate(0, 0) scale(1); }
+          to   { transform: translate(40px, 30px) scale(1.08); }
+        }
+        @keyframes profileOrb2 {
+          from { transform: translate(0, 0) scale(1); }
+          to   { transform: translate(-35px, -25px) scale(1.06); }
+        }
+      `}</style>
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
