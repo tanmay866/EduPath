@@ -188,6 +188,10 @@ const SettingsPage = () => {
       `}</style>
 
       <div className="max-w-7xl mx-auto relative z-10">
+        {/* Static glow blobs — complement animated orbs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-40 right-10 w-64 h-64 bg-purple-600/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-80 left-0 w-56 h-56 bg-cyan-600/8 rounded-full blur-3xl pointer-events-none" />
         {/* Header */}
         <div data-animate className="mb-8 flex items-center gap-4" style={{transitionDelay: '0s'}}>
           <button

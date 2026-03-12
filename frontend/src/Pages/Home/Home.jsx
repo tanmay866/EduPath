@@ -54,7 +54,6 @@ const Home = () => {
   const [cursorVisible, setCursorVisible] = useState(true);
   const [heroReady, setHeroReady]         = useState(false);
   const videoRef   = useRef(null);
-  const canvasRef  = useRef(null);
 
   const HERO_LINE1 = 'Your Personalized Path';
   const HERO_LINE2 = 'to Success';
@@ -93,90 +92,6 @@ const Home = () => {
     }, 280);
   };
 
-  // Dot-grid glow effect — scoped to hero section canvas (not body)
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    const SPACING = 38;   // grid gap in px
-    const RADIUS  = 150;  // mouse influence radius
-    const DOT_R   = 1.6;  // resting dot radius
-    const GLOW_R  = 4.5;  // radius at full glow
-
-    let W, H, animId;
-    const mouse = { x: -9999, y: -9999 };
-    let dots = [];
-
-    const build = () => {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      W = canvas.width  = rect.width;
-      H = canvas.height = rect.height;
-      dots = [];
-      const cols = Math.ceil(W / SPACING) + 1;
-      const rows = Math.ceil(H / SPACING) + 1;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          dots.push({ x: c * SPACING, y: r * SPACING });
-        }
-      }
-    };
-    build();
-    window.addEventListener('resize', build);
-
-    const onMove  = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-    };
-    const onLeave = ()  => { mouse.x = -9999; mouse.y = -9999; };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseleave', onLeave);
-
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-
-      dots.forEach(d => {
-        const dx   = mouse.x - d.x;
-        const dy   = mouse.y - d.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const t    = dist < RADIUS ? 1 - dist / RADIUS : 0;
-
-        const radius = DOT_R + t * (GLOW_R - DOT_R);
-        const alpha  = 0.18 + t * 0.72;
-
-        if (t > 0.01) {
-          const hue = 240 + t * 50;
-          const grd = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, radius * 2.5);
-          grd.addColorStop(0,   `hsla(${hue},90%,70%,${alpha * 0.8})`);
-          grd.addColorStop(0.5, `hsla(${hue},80%,60%,${alpha * 0.35})`);
-          grd.addColorStop(1,   `hsla(${hue},70%,50%,0)`);
-          ctx.beginPath();
-          ctx.arc(d.x, d.y, radius * 2.5, 0, Math.PI * 2);
-          ctx.fillStyle = grd;
-          ctx.fill();
-        }
-
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = t > 0.01
-          ? `hsla(${240 + t * 50},90%,78%,${0.55 + t * 0.45})`
-          : 'rgba(148,163,184,0.18)';
-        ctx.fill();
-      });
-
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', build);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseleave', onLeave);
-    };
-  }, []);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -200,8 +115,9 @@ const Home = () => {
 
         {/* SECTION 1: HERO */}
       <section data-section="0" className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative overflow-hidden">
-        {/* Dot-grid canvas — scoped to hero only, sits behind all content */}
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{zIndex: 0}} />
+        {/* Glow blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-1/4 w-64 h-64 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
 
         {/* All hero content sits above the canvas */}
         <div className="relative z-10 flex flex-col items-center text-center">
@@ -289,7 +205,10 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-section="1" className="py-20 px-6 relative z-10 bg-black">
+      <section data-section="1" className="py-20 px-6 relative z-10 bg-black overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute -left-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto text-center">
           
           <h2 data-animate className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
@@ -336,7 +255,10 @@ const Home = () => {
       </section>
 
       {/* SECTION: Feature Showcase */}
-      <section data-section="2" className="py-24 px-6 relative z-10 bg-black">
+      <section data-section="2" className="py-24 px-6 relative z-10 bg-black overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] bg-cyan-600/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-600/8 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto">
           {/* Heading */}
           <div className="text-center mb-14">
@@ -507,7 +429,10 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-section="3" className="py-20 px-6 relative z-10 bg-black">
+      <section data-section="3" className="py-20 px-6 relative z-10 bg-black overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute top-1/4 -left-16 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 -right-16 w-64 h-64 bg-pink-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto text-center">
           <h2 data-animate className="text-3xl md:text-4xl font-bold mb-4">How Your Career Journey Works</h2>
           <p data-animate style={{transitionDelay: '0.1s'}} className="text-slate-500 max-w-2xl mx-auto mb-12">
@@ -544,7 +469,10 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-section="4" className="py-20 px-6 relative z-10 bg-black">
+      <section data-section="4" className="py-20 px-6 relative z-10 bg-black overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[480px] h-[220px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-56 h-56 bg-emerald-600/8 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-4xl mx-auto">
           {/* Contact Support Box */}
           <div data-animate className="relative backdrop-blur-lg bg-white/5 rounded-2xl p-8 md:p-12 text-center mb-20 border border-white/10 shadow-2xl transition-all duration-300">
@@ -593,6 +521,9 @@ const Home = () => {
 
       {/* Interactive Glow Text Section */}
       <section data-section="5" className="py-32 px-6 overflow-hidden relative z-10 bg-black">
+        {/* Glow blobs */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-indigo-600/12 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative flex items-center justify-center min-h-[400px]">
           <h1 data-animate className="text-[120px] md:text-[180px] lg:text-[240px] font-black tracking-tighter leading-none uppercase text-white">
             EDUPATH

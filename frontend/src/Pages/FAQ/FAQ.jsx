@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, HelpCircle, Zap, ShieldCheck, BookOpen, CreditCard, UserCircle } from 'lucide-react';
-import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const faqs = [
   {
@@ -139,7 +138,7 @@ const FAQItem = ({ q, a, color, isOpen, onToggle }) => {
         onClick={onToggle}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left group"
       >
-        <span className={`text-sm font-medium leading-snug transition-colors duration-200 ${isOpen ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>
+        <span className={`text-base font-medium leading-snug transition-colors duration-200 ${isOpen ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>
           {q}
         </span>
         <div className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
@@ -160,7 +159,7 @@ const FAQItem = ({ q, a, color, isOpen, onToggle }) => {
         <div ref={contentRef}>
           <div className={`mx-5 mb-3 h-px ${c.bar} transition-opacity duration-300`} style={{ opacity: isOpen ? 1 : 0 }} />
           <p
-            className="px-5 pb-5 text-sm text-gray-400 leading-relaxed"
+            className="px-5 pb-5 text-base text-gray-400 leading-relaxed"
             style={{
               opacity: isOpen ? 1 : 0,
               transform: isOpen ? 'translateY(0)' : 'translateY(-6px)',
@@ -201,19 +200,22 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-black text-white pt-28 pb-24 px-4 relative overflow-hidden">
-      <BackgroundAnimation />
+      {/* Glow blobs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-20 right-1/4 w-64 h-64 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/3 left-1/4 w-72 h-72 bg-cyan-600/8 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 max-w-3xl mx-auto">
+      <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-14">
           <div
             data-animate
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-5"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-medium mb-5"
           >
-            <HelpCircle size={13} />
+            <HelpCircle size={16} />
             Help Center
           </div>
-          <h1 data-animate style={{transitionDelay: '0.1s'}} className="text-4xl sm:text-5xl font-bold mb-4">
+          <h1 data-animate style={{transitionDelay: '0.1s'}} className="text-5xl md:text-6xl font-extrabold mb-4">
             Frequently Asked{' '}
             <span
               style={{
@@ -226,7 +228,7 @@ const FAQ = () => {
               Questions
             </span>
           </h1>
-          <p data-animate style={{transitionDelay: '0.2s'}} className="text-gray-400 text-base max-w-xl mx-auto leading-relaxed">
+          <p data-animate style={{transitionDelay: '0.2s'}} className="text-gray-400 text-lg max-w-xl mx-auto leading-relaxed">
             Can't find an answer? Reach out via the{' '}
             <a href="/contact" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors">
               Contact Us
@@ -248,10 +250,10 @@ const FAQ = () => {
                   style={{ transitionDelay: `${catIdx * 0.08}s` }}
                   className="flex items-center gap-3 mb-4"
                 >
-                  <div className={`w-8 h-8 rounded-lg border flex items-center justify-center ${c.icon}`}>
-                    <Icon size={15} />
+                  <div className={`w-10 h-10 rounded-lg border flex items-center justify-center ${c.icon}`}>
+                    <Icon size={18} />
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${c.badge}`}>
+                  <span className={`text-sm font-semibold px-3 py-1 rounded-full border ${c.badge}`}>
                     {section.category}
                   </span>
                   <div className="flex-1 h-px bg-white/5" />

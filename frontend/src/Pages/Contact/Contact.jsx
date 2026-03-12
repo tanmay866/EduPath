@@ -110,25 +110,11 @@ const Contact = () => {
     'hover:border-white/20 transition-all duration-200';
 
   return (
-    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative">
-      {/* Animated Background */}
-      <div className="animated-bg">
-        <div className="moving-shape shape-1"></div>
-        <div className="moving-shape shape-2"></div>
-        <div className="moving-shape shape-3"></div>
-        <div className="moving-shape shape-4"></div>
-        <div className="moving-shape shape-5"></div>
-        <div className="moving-shape shape-6"></div>
-        <div className="rotating-gradient"></div>
-        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '15%', left: '50%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
-        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '65%', left: '80%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
-        <div className="floating-particle" style={{top: '85%', left: '60%', animationDelay: '2.5s'}}></div>
-      </div>
+    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative overflow-hidden">
+      {/* Glow blobs */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-20 right-1/4 w-64 h-64 bg-blue-600/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 left-1/4 w-72 h-72 bg-cyan-600/8 rounded-full blur-3xl pointer-events-none" />
 
       <style>{`
         @keyframes planeFly {

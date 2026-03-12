@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation'
 import { Brain, Target, Users, Zap, BookOpen, Award, TrendingUp, Shield } from 'lucide-react'
 
 const About = () => {
@@ -106,10 +105,12 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <BackgroundAnimation />
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-32 pb-20 px-4 text-center">
+      <section className="relative z-10 pt-32 pb-20 px-4 text-center overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-1/4 w-64 h-64 bg-teal-600/8 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-4xl mx-auto">
           <div data-animate className="inline-flex items-center gap-2 backdrop-blur-lg bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-2 text-indigo-400 text-sm font-medium mb-6">
             <Users size={16} />
@@ -155,7 +156,9 @@ const About = () => {
       </section>
 
       {/* Stats Bar */}
-      <section className="relative z-10 px-4 pb-16">
+      <section className="relative z-10 px-4 pb-16 overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[500px] h-[120px] bg-indigo-600/8 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {stats.map((stat, i) => (
@@ -170,7 +173,10 @@ const About = () => {
       </section>
 
       {/* Mission Section */}
-      <section className="relative z-10 px-4 pb-16">
+      <section className="relative z-10 px-4 pb-16 overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute -left-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-600/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-teal-600/8 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-5xl mx-auto">
           <div data-animate className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -205,7 +211,10 @@ const About = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="relative z-10 px-4 pb-24">
+      <section className="relative z-10 px-4 pb-24 overflow-hidden">
+        {/* Glow blobs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-indigo-600/8 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 data-animate className="text-3xl md:text-4xl font-bold text-white mb-3">What We Offer</h2>
