@@ -1,37 +1,52 @@
-# Python Requirements for AI Service
-# Location: ai_service/requirements.txt
+# ============================================
+# EduPath AI Service - Required Dependencies
+# ============================================
 
-# FastAPI and Web Server
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-multipart==0.0.6
+# Core Framework
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.10.0
+pydantic-settings==2.6.0
+python-multipart==0.0.12
 
-# Surya OCR - Main OCR Engine (97.7% accuracy)
+# AI & ML - LangChain for LLM integration
+langchain==0.3.14
+langchain-community==0.3.14
+langchain-huggingface==0.1.2
+huggingface-hub==0.23.0
+transformers==4.41.2
+
+# Database - MongoDB with async support
+motor==3.6.0
+pymongo==4.9.1
+beanie==1.27.0
+
+# Resume Parsing - Surya OCR Engine (97.7% accuracy)
 surya-ocr==0.4.14
-
-# PDF Processing
 PyMuPDF>=1.24.13
 pdf2image==1.17.0
-# Note: Requires system package 'poppler-utils'
-# Ubuntu/Debian: sudo apt-get install poppler-utils
-# macOS: brew install poppler
-
-# Image Processing
 Pillow>=10.2.0
-
-# Document Processing
 python-docx==1.1.0
 
-# NLP
+# NLP & Text Processing
 spacy>=3.7.2
-# After installing, run: python3 -m spacy download en_core_web_sm
-
-# Date Extraction
 datefinder==0.7.3
 
 # Data Processing
-numpy==1.26.3
+numpy==1.26.4
+pandas==2.2.3
+
+# HTTP & Async
+httpx==0.28.1
+aiohttp==3.9.5
+
+# Configuration
+python-dotenv==1.0.0
 
 # Utilities
 python-dateutil==2.8.2
-regex==2023.12.25
+regex>=2024.9.11
+
+# Development & Testing
+pytest==8.3.3
+pytest-asyncio==0.24.0

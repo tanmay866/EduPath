@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/ai_service/.edp/bin/python",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/ai_service/.edp/lib/python3.12/site-packages"
+    ]
+}

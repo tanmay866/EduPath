@@ -2,6 +2,7 @@ import QuizSession from '../models/QuizSession.js';
 import QuizResult from '../models/QuizResult.js';
 import Topic from '../models/Topic.js';
 import huggingFaceService from '../services/huggingFaceService.js';
+import aiService from '../services/aiService.js';
 
 
 /**
@@ -520,36 +521,81 @@ export const submitQuiz = async (req, res) => {
     console.log(`📊 Score: ${percentage.toFixed(2)}%`);
     console.log(`✔️  Correct: ${correctAnswers}/${session.totalQuestions}\n`);
 
+    // Calculate difficulty breakdown for AI assessment
+    const difficultyBreakdown = calculateDifficultyBreakdown(detailedResults);
+
+    // Get AI-powered skill assessment (async, non-blocking)
+    let aiAnalysis = null;
+    try {
+      const assessmentData = {
+        userId: userId.toString(),
+        skillName: session.topicId.name,
+        normalizedScore: percentage,
+        accuracy: percentage,
+        difficultyBreakdown,
+        answers: detailedResults.map(r => ({
+          questionId: r.questionIndex.toString(),
+          selectedOption: r.selectedOptionIndex !== undefined ? r.selectedOptionIndex : -1,
+          correctOption: r.correctOptionIndex,
+          isCorrect: r.isCorrect,
+          weight: 1, // Base weight
+          difficulty: session.difficultySelected.charAt(0).toUpperCase() + session.difficultySelected.slice(1)
+        })),
+        careerPath: 'MERN', // Can be fetched from user profile
+        userLevel: session.experienceLevelSelected.charAt(0).toUpperCase() + session.experienceLevelSelected.slice(1)
+      };
+
+      const aiResponse = await aiService.assessSkill(assessmentData);
+      if (aiResponse.success) {
+        aiAnalysis = aiResponse.analysis;
+        console.log('✅ AI assessment completed');
+      } else {
+        console.log('⚠️  AI assessment failed, using fallback');
+        aiAnalysis = aiResponse.fallback;
+      }
+    } catch (error) {
+      console.error('❌ AI assessment error:', error.message);
+      // Continue without AI analysis
+    }
+
     // Determine performance level
     let performance = 'needs improvement';
     if (percentage >= 90) performance = 'excellent';
     else if (percentage >= 75) performance = 'good';
     else if (percentage >= 70) performance = 'satisfactory';
 
+    // Build response with AI analysis
+    const responseData = {
+      resultId: quizResult._id,
+      score: correctAnswers,
+      percentage: Math.round(percentage),
+      correctAnswers,
+      totalQuestions: session.totalQuestions,
+      status: quizResult.status,
+      timeTaken,
+      topic: {
+        id: session.topicId._id,
+        name: session.topicId.name,
+      },
+      detailedResults: detailedResults.map(r => ({
+        question: r.question,
+        userAnswer: r.userAnswer,
+        correctAnswer: r.correctAnswer,
+        isCorrect: r.isCorrect,
+        explanation: r.explanation,
+      })),
+      performance,
+    };
+
+    // Add AI analysis if available
+    if (aiAnalysis) {
+      responseData.aiAnalysis = aiAnalysis;
+    }
+
     res.json({
       success: true,
       message: 'Quiz submitted successfully',
-      data: {
-        resultId: quizResult._id,
-        score: correctAnswers,
-        percentage: Math.round(percentage),
-        correctAnswers,
-        totalQuestions: session.totalQuestions,
-        status: quizResult.status,
-        timeTaken,
-        topic: {
-          id: session.topicId._id,
-          name: session.topicId.name,
-        },
-        detailedResults: detailedResults.map(r => ({
-          question: r.question,
-          userAnswer: r.userAnswer,
-          correctAnswer: r.correctAnswer,
-          isCorrect: r.isCorrect,
-          explanation: r.explanation,
-        })),
-        performance,
-      },
+      data: responseData,
     });
 
   } catch (error) {
@@ -569,6 +615,46 @@ const getPerformanceLevel = (score) => {
   if (score >= 75) return { level: 'Good', message: 'Great job! Keep it up! 👍' };
   if (score >= 60) return { level: 'Average', message: 'Good effort! Room for improvement. 📚' };
   return { level: 'Needs Improvement', message: 'Keep practicing! You can do better! 💪' };
+};
+
+/**
+ * Calculate difficulty breakdown from quiz results
+ * Maps answer details to difficulty categories
+ */
+const calculateDifficultyBreakdown = (detailedResults) => {
+  const breakdown = {
+    beginner: { attempted: 0, correct: 0, accuracy: 0 },
+    intermediate: { attempted: 0, correct: 0, accuracy: 0 },
+    advanced: { attempted: 0, correct: 0, accuracy: 0 }
+  };
+
+  // Group answers by difficulty (using tags if available, else default)
+  detailedResults.forEach(result => {
+    // Determine difficulty from tags or default to beginner
+    let difficulty = 'beginner';
+    if (result.tags && result.tags.length > 0) {
+      const diffTag = result.tags.find(tag =>
+        ['beginner', 'intermediate', 'advanced'].includes(tag.toLowerCase())
+      );
+      if (diffTag) {
+        difficulty = diffTag.toLowerCase();
+      }
+    }
+
+    breakdown[difficulty].attempted++;
+    if (result.isCorrect) {
+      breakdown[difficulty].correct++;
+    }
+  });
+
+  // Calculate accuracy percentages
+  Object.keys(breakdown).forEach(level => {
+    if (breakdown[level].attempted > 0) {
+      breakdown[level].accuracy = (breakdown[level].correct / breakdown[level].attempted) * 100;
+    }
+  });
+
+  return breakdown;
 };
 
 /**
