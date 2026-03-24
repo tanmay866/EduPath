@@ -1,0 +1,5 @@
+# Python dependencies for ATS Analyzer
+# Install with: pip install -r requirements.txt
+
+sentence-transformers>=2.2.0
+torch>=2.0.0

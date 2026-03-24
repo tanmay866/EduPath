@@ -21,6 +21,12 @@ import AllResult from './Pages/Assessment/Result/AllResult'
 import FAQ from './Pages/FAQ/FAQ'
 import Services from './Pages/Services/Services'
 
+// New Features - Resume Builder, Portfolio Generator, ATS Analyzer
+import ResumeBuilder from './component/features/ResumeBuilder'
+import PortfolioGenerator from './component/features/PortfolioGenerator'
+import ATSAnalyzer from './component/features/ATSAnalyzer'
+import PublicPortfolio from './Pages/PublicPortfolio'
+
 // Admin Components
 import AdminNavbar from './Admin/component/AdminNavbar'
 import AdminSidebar from './Admin/component/AdminSidebar'
@@ -111,6 +117,15 @@ const App = () => {
           <Route path="/assessment/result" element={<PageTransition><AllResult /></PageTransition>} />
           <Route path="/assessment/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
           <Route path="/assessment/result/:resultId" element={<PageTransition><ResultPage /></PageTransition>} />
+
+          {/* New Feature Routes */}
+          <Route path="/resume-builder" element={<PageTransition><Navbar /><ResumeBuilder /></PageTransition>} />
+          <Route path="/portfolio-generator" element={<PageTransition><Navbar /><PortfolioGenerator /></PageTransition>} />
+          <Route path="/ats-analyzer" element={<PageTransition><Navbar /><ATSAnalyzer /></PageTransition>} />
+
+          {/* Public Portfolio Routes */}
+          <Route path="/p/:portfolioId" element={<PublicPortfolio />} />
+          <Route path="/:username" element={<PublicPortfolio />} />
         </Routes>
       </div>
     )

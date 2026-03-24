@@ -10,6 +10,9 @@ import profileRoutes from './routes/profileRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import resumeRoutes from './routes/resumeRoutes.js';
+import resumeGeneratorRoutes from './routes/resumeGeneratorRoutes.js';
+import portfolioRoutes from './routes/portfolioRoutes.js';
+import atsRoutes from './routes/atsRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
@@ -46,6 +49,9 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/resume', resumeRoutes);
+app.use('/api/resume-generator', resumeGeneratorRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/ats', atsRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -69,6 +75,9 @@ app.get('/', (req, res) => {
       profile: '/api/profile',
       quiz: '/api/quiz',
       contact: '/api/contact',
+      resumeGenerator: '/api/resume-generator',
+      portfolio: '/api/portfolio',
+      ats: '/api/ats',
     },
   });
 });
