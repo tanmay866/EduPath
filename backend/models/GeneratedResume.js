@@ -22,6 +22,10 @@ const generatedResumeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  cloudinaryPublicId: {
+    type: String,
+    default: null
+  },
   format: {
     type: String,
     enum: ['pdf', 'docx'],

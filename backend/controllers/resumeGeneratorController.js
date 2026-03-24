@@ -37,13 +37,14 @@ export const generateResume = async (req, res) => {
     const latestResume = await GeneratedResume.findOne({ userId }).sort({ version: -1 });
     const newVersion = latestResume ? latestResume.version + 1 : 1;
 
-    // Save to database with complete resume data
+    // Save to database with complete resume data and Cloudinary info
     const resume = new GeneratedResume({
       userId,
       version: newVersion,
       resumeData: sanitizedData,
-      resumeUrl: result.url,
+      resumeUrl: result.cloudinaryUrl,
       filename: result.filename,
+      cloudinaryPublicId: result.cloudinaryPublicId,
       format: 'docx'
     });
 
@@ -54,9 +55,10 @@ export const generateResume = async (req, res) => {
       message: 'Resume generated successfully',
       data: {
         version: newVersion,
-        downloadUrl: result.url,
+        downloadUrl: result.cloudinaryUrl, // Direct Cloudinary URL for download
         filename: result.filename,
         format: 'docx',
+        cloudinaryPublicId: result.cloudinaryPublicId,
         createdAt: resume.createdAt
       }
     });
@@ -71,12 +73,13 @@ export const generateResume = async (req, res) => {
 };
 
 /**
- * Download Generated Resume
+ * Download Generated Resume (Redirect to Cloudinary)
  * GET /api/resume-generator/download/:filename
  */
 export const downloadResume = async (req, res) => {
   try {
     const { filename } = req.params;
+    const userId = req.user.id;
 
     // Security: Validate filename to prevent directory traversal
     if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
@@ -86,19 +89,22 @@ export const downloadResume = async (req, res) => {
       });
     }
 
-    const filepath = path.join(__dirname, '../generated', filename);
-
-    res.download(filepath, filename, (err) => {
-      if (err) {
-        console.error('Download error:', err);
-        if (!res.headersSent) {
-          res.status(404).json({
-            success: false,
-            message: 'File not found'
-          });
-        }
-      }
+    // Find the resume in database to get the Cloudinary URL
+    const resume = await GeneratedResume.findOne({
+      userId,
+      filename,
     });
+
+    if (!resume) {
+      return res.status(404).json({
+        success: false,
+        message: 'Resume not found'
+      });
+    }
+
+    // Redirect to Cloudinary URL for download
+    res.redirect(resume.resumeUrl);
+
   } catch (error) {
     console.error('Download error:', error);
     res.status(500).json({
@@ -200,8 +206,12 @@ export const deleteResume = async (req, res) => {
       });
     }
 
-    // Delete physical file
-    await resumeGeneratorService.deleteFile(resume.filename);
+    // Delete physical file from Cloudinary
+    if (resume.cloudinaryPublicId) {
+      await resumeGeneratorService.deleteFile(resume.cloudinaryPublicId);
+    } else {
+      console.warn('No Cloudinary public ID found for resume:', resume._id);
+    }
 
     // Delete database record
     await GeneratedResume.deleteOne({ _id: id });

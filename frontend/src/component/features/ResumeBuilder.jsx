@@ -1,4 +1,64 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+
+// InputField component moved outside to prevent recreation on every render
+const InputField = ({
+  label,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  error = "",
+  helperText = "",
+  maxLength = null,
+  textarea = false,
+  multiline = false,
+  rows = 3,
+  className = "",
+  showLabel = true
+}) => (
+  <div className={className}>
+    {showLabel && label && (
+      <label className="block text-sm font-medium text-gray-400 mb-2">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+    )}
+    {(textarea || multiline) ? (
+      <textarea
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        maxLength={maxLength}
+        className={`w-full px-4 py-3 bg-slate-900/50 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200 resize-y ${
+          error ? 'border-red-500/50 focus:ring-red-500/60 focus:border-red-500/50' : 'border-white/10'
+        }`}
+        placeholder={placeholder}
+      />
+    ) : (
+      <input
+        type={type}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={maxLength}
+        className={`w-full px-4 py-3 bg-slate-900/50 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200 ${
+          error ? 'border-red-500/50 focus:ring-red-500/60 focus:border-red-500/50' : 'border-white/10'
+        }`}
+        placeholder={placeholder}
+      />
+    )}
+    {(error || helperText) && (
+      <div className="mt-1 text-xs">
+        {error && <p className="text-red-400">{error}</p>}
+        {!error && helperText && <p className="text-gray-500">{helperText}</p>}
+      </div>
+    )}
+    {maxLength && (
+      <div className="mt-1 text-xs text-gray-500 text-right">
+        {(value || '').length}/{maxLength}
+      </div>
+    )}
+  </div>
+);
 
 function ResumeBuilder() {
   const [format, setFormat] = useState('pdf');
@@ -6,6 +66,7 @@ function ResumeBuilder() {
   const [message, setMessage] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [generatedResumeUrl, setGeneratedResumeUrl] = useState('');
+  const [errors, setErrors] = useState({});
 
   const [resumeData, setResumeData] = useState({
     personalInfo: {
@@ -58,16 +119,203 @@ function ResumeBuilder() {
     achievements: ['']
   });
 
+  // Validation functions
+  const validateName = (name) => {
+    const nameRegex = /^[a-zA-Z\s.'-]+$/;
+    if (!name) return 'Name is required';
+    if (name.length < 2) return 'Name must be at least 2 characters';
+    if (name.length > 50) return 'Name must be less than 50 characters';
+    if (!nameRegex.test(name)) return 'Name can only contain letters, spaces, dots, hyphens and apostrophes';
+    return '';
+  };
+
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) return 'Email is required';
+    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    if (email.length > 100) return 'Email must be less than 100 characters';
+    return '';
+  };
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[+]?[\d\s\-\(\)]{10,20}$/;
+    if (!phone) return 'Phone number is required';
+    if (!phoneRegex.test(phone)) return 'Please enter a valid phone number';
+    return '';
+  };
+
+  const validateLocation = (location) => {
+    const locationRegex = /^[a-zA-Z0-9\s,.\-']+$/;
+    if (location && !locationRegex.test(location)) return 'Location contains invalid characters';
+    if (location && location.length > 100) return 'Location must be less than 100 characters';
+    return '';
+  };
+
+  const validateURL = (url, type = 'URL') => {
+    if (!url) return '';
+    try {
+      const validUrl = new URL(url.startsWith('http') ? url : `https://${url}`);
+
+      if (type === 'LinkedIn') {
+        if (!validUrl.hostname.includes('linkedin.com')) {
+          return 'Please enter a valid LinkedIn URL';
+        }
+      } else if (type === 'GitHub') {
+        if (!validUrl.hostname.includes('github.com')) {
+          return 'Please enter a valid GitHub URL';
+        }
+      }
+
+      if (url.length > 200) return `${type} must be less than 200 characters`;
+      return '';
+    } catch {
+      return `Please enter a valid ${type} URL`;
+    }
+  };
+
+  const validateText = (text, fieldName, minLength = 0, maxLength = 500) => {
+    if (!text && minLength > 0) return `${fieldName} is required`;
+    if (text && text.length < minLength) return `${fieldName} must be at least ${minLength} characters`;
+    if (text && text.length > maxLength) return `${fieldName} must be less than ${maxLength} characters`;
+    return '';
+  };
+
+  const validateYear = (year) => {
+    if (!year) return '';
+    const yearRegex = /^(19|20)\d{2}$|^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(19|20)\d{2}$|^Present$|^Current$/i;
+    if (!yearRegex.test(year)) return 'Please enter a valid year (e.g., 2023) or "Present"';
+    return '';
+  };
+
+  const validateGPA = (gpa) => {
+    if (!gpa) return '';
+    const gpaRegex = /^\d+(\.\d{1,2})?$/;
+    if (!gpaRegex.test(gpa)) return 'Please enter a valid GPA (e.g., 3.8)';
+    const gpaNum = parseFloat(gpa);
+    if (gpaNum < 0 || gpaNum > 10) return 'GPA must be between 0 and 10';
+    return '';
+  };
+
+  // Input formatters
+  const formatNameInput = (value) => {
+    return value.replace(/[^a-zA-Z\s.'-]/g, '').slice(0, 50);
+  };
+
+  const formatPhoneInput = (value) => {
+    return value.replace(/[^\d\s+\-\(\)]/g, '').slice(0, 20);
+  };
+
+  const formatLocationInput = (value) => {
+    return value.replace(/[^a-zA-Z0-9\s,.\-']/g, '').slice(0, 100);
+  };
+
+  const formatTextInput = (value, maxLength = 500) => {
+    return value.slice(0, maxLength);
+  };
+
+  const formatYearInput = (value) => {
+    return value.replace(/[^a-zA-Z0-9\s]/g, '').slice(0, 20);
+  };
+
+  const formatGPAInput = (value) => {
+    return value.replace(/[^\d.]/g, '').slice(0, 5);
+  };
+
+  const setFieldError = (section, field, index, error) => {
+    const errorKey = index !== undefined ? `${section}.${index}.${field}` : `${section}.${field}`;
+    setErrors(prev => ({
+      ...prev,
+      [errorKey]: error
+    }));
+  };
+
+  const getFieldError = (section, field, index, subIndex) => {
+    let errorKey;
+    if (subIndex !== undefined) {
+      // For nested arrays like experience.responsibilities
+      errorKey = `${section}.${index}.${field}.${subIndex}`;
+    } else if (index !== undefined) {
+      errorKey = `${section}.${index}.${field}`;
+    } else {
+      errorKey = `${section}.${field}`;
+    }
+    return errors[errorKey] || '';
+  };
+
   const handlePersonalInfoChange = (field, value) => {
+    let formattedValue = value;
+    let error = '';
+
+    // Format input based on field type
+    switch (field) {
+      case 'name':
+        formattedValue = formatNameInput(value);
+        error = validateName(formattedValue);
+        break;
+      case 'email':
+        formattedValue = value.slice(0, 100);
+        error = validateEmail(formattedValue);
+        break;
+      case 'phone':
+        formattedValue = formatPhoneInput(value);
+        error = validatePhone(formattedValue);
+        break;
+      case 'location':
+        formattedValue = formatLocationInput(value);
+        error = validateLocation(formattedValue);
+        break;
+      case 'linkedin':
+        formattedValue = value.slice(0, 200);
+        error = validateURL(formattedValue, 'LinkedIn');
+        break;
+      case 'github':
+        formattedValue = value.slice(0, 200);
+        error = validateURL(formattedValue, 'GitHub');
+        break;
+      case 'website':
+        formattedValue = value.slice(0, 200);
+        error = validateURL(formattedValue, 'Website');
+        break;
+      default:
+        break;
+    }
+
+    setFieldError('personalInfo', field, undefined, error);
     setResumeData({
       ...resumeData,
-      personalInfo: { ...resumeData.personalInfo, [field]: value }
+      personalInfo: { ...resumeData.personalInfo, [field]: formattedValue }
     });
   };
 
   const handleEducationChange = (index, field, value) => {
+    let formattedValue = value;
+    let error = '';
+
+    switch (field) {
+      case 'degree':
+        formattedValue = formatTextInput(value, 200);
+        error = validateText(formattedValue, 'Degree', 2, 200);
+        break;
+      case 'institution':
+        formattedValue = formatTextInput(value, 200);
+        error = validateText(formattedValue, 'Institution', 2, 200);
+        break;
+      case 'startDate':
+      case 'endDate':
+        formattedValue = formatYearInput(value);
+        error = validateYear(formattedValue);
+        break;
+      case 'cgpa':
+        formattedValue = formatGPAInput(value);
+        error = validateGPA(formattedValue);
+        break;
+      default:
+        break;
+    }
+
+    setFieldError('education', field, index, error);
     const newEducation = [...resumeData.education];
-    newEducation[index][field] = value;
+    newEducation[index][field] = formattedValue;
     setResumeData({ ...resumeData, education: newEducation });
   };
 
@@ -84,14 +332,44 @@ function ResumeBuilder() {
   };
 
   const handleExperienceChange = (index, field, value) => {
+    let formattedValue = value;
+    let error = '';
+
+    switch (field) {
+      case 'position':
+        formattedValue = formatTextInput(value, 100);
+        error = validateText(formattedValue, 'Position', 2, 100);
+        break;
+      case 'company':
+        formattedValue = formatTextInput(value, 100);
+        error = validateText(formattedValue, 'Company', 2, 100);
+        break;
+      case 'location':
+        formattedValue = formatLocationInput(value);
+        error = validateLocation(formattedValue);
+        break;
+      case 'startDate':
+      case 'endDate':
+        formattedValue = formatYearInput(value);
+        error = validateYear(formattedValue);
+        break;
+      default:
+        break;
+    }
+
+    setFieldError('experience', field, index, error);
     const newExperience = [...resumeData.experience];
-    newExperience[index][field] = value;
+    newExperience[index][field] = formattedValue;
     setResumeData({ ...resumeData, experience: newExperience });
   };
 
   const handleResponsibilityChange = (expIndex, respIndex, value) => {
+    const formattedValue = formatTextInput(value, 300);
+    const error = validateText(formattedValue, 'Responsibility', 5, 300);
+
+    setFieldError('experience', `responsibilities.${respIndex}`, expIndex, error);
     const newExperience = [...resumeData.experience];
-    newExperience[expIndex].responsibilities[respIndex] = value;
+    newExperience[expIndex].responsibilities[respIndex] = formattedValue;
     setResumeData({ ...resumeData, experience: newExperience });
   };
 
@@ -114,14 +392,39 @@ function ResumeBuilder() {
   };
 
   const handleProjectChange = (index, field, value) => {
+    let formattedValue = value;
+    let error = '';
+
+    switch (field) {
+      case 'title':
+        formattedValue = formatTextInput(value, 100);
+        error = validateText(formattedValue, 'Project title', 3, 100);
+        break;
+      case 'description':
+        formattedValue = formatTextInput(value, 500);
+        error = validateText(formattedValue, 'Description', 0, 500);
+        break;
+      case 'link':
+        formattedValue = value.slice(0, 200);
+        error = validateURL(formattedValue, 'Project link');
+        break;
+      default:
+        break;
+    }
+
+    setFieldError('projects', field, index, error);
     const newProjects = [...resumeData.projects];
-    newProjects[index][field] = value;
+    newProjects[index][field] = formattedValue;
     setResumeData({ ...resumeData, projects: newProjects });
   };
 
   const handleTechnologyChange = (projIndex, techIndex, value) => {
+    const formattedValue = formatTextInput(value, 50);
+    const error = validateText(formattedValue, 'Technology', 0, 50);
+
+    setFieldError('projects', `technologies.${techIndex}`, projIndex, error);
     const newProjects = [...resumeData.projects];
-    newProjects[projIndex].technologies[techIndex] = value;
+    newProjects[projIndex].technologies[techIndex] = formattedValue;
     setResumeData({ ...resumeData, projects: newProjects });
   };
 
@@ -144,8 +447,12 @@ function ResumeBuilder() {
   };
 
   const handleSkillChange = (type, index, value) => {
+    const formattedValue = formatTextInput(value, 50);
+    const error = validateText(formattedValue, 'Skill', 0, 50);
+
+    setFieldError('skills', `${type}.${index}`, undefined, error);
     const newSkills = { ...resumeData.skills };
-    newSkills[type][index] = value;
+    newSkills[type][index] = formattedValue;
     setResumeData({ ...resumeData, skills: newSkills });
   };
 
@@ -156,8 +463,29 @@ function ResumeBuilder() {
   };
 
   const handleCertificationChange = (index, field, value) => {
+    let formattedValue = value;
+    let error = '';
+
+    switch (field) {
+      case 'name':
+        formattedValue = formatTextInput(value, 150);
+        error = validateText(formattedValue, 'Certification name', 3, 150);
+        break;
+      case 'issuer':
+        formattedValue = formatTextInput(value, 100);
+        error = validateText(formattedValue, 'Issuer', 0, 100);
+        break;
+      case 'date':
+        formattedValue = formatYearInput(value);
+        error = validateYear(formattedValue);
+        break;
+      default:
+        break;
+    }
+
+    setFieldError('certifications', field, index, error);
     const newCertifications = [...resumeData.certifications];
-    newCertifications[index][field] = value;
+    newCertifications[index][field] = formattedValue;
     setResumeData({ ...resumeData, certifications: newCertifications });
   };
 
@@ -174,8 +502,12 @@ function ResumeBuilder() {
   };
 
   const handleAchievementChange = (index, value) => {
+    const formattedValue = formatTextInput(value, 200);
+    const error = validateText(formattedValue, 'Achievement', 5, 200);
+
+    setFieldError('achievements', index.toString(), undefined, error);
     const newAchievements = [...resumeData.achievements];
-    newAchievements[index] = value;
+    newAchievements[index] = formattedValue;
     setResumeData({ ...resumeData, achievements: newAchievements });
   };
 
@@ -353,7 +685,100 @@ function ResumeBuilder() {
     }
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    let hasErrors = false;
+
+    // Validate personal info
+    const personalErrors = {
+      name: validateName(resumeData.personalInfo.name),
+      email: validateEmail(resumeData.personalInfo.email),
+      phone: validatePhone(resumeData.personalInfo.phone),
+      location: validateLocation(resumeData.personalInfo.location),
+      linkedin: validateURL(resumeData.personalInfo.linkedin, 'LinkedIn'),
+      github: validateURL(resumeData.personalInfo.github, 'GitHub'),
+      website: validateURL(resumeData.personalInfo.website, 'Website'),
+    };
+
+    Object.keys(personalErrors).forEach(field => {
+      if (personalErrors[field]) {
+        newErrors[`personalInfo.${field}`] = personalErrors[field];
+        hasErrors = true;
+      }
+    });
+
+    // Validate education
+    resumeData.education.forEach((edu, index) => {
+      const eduErrors = {
+        degree: validateText(edu.degree, 'Degree', 2, 200),
+        institution: validateText(edu.institution, 'Institution', 2, 200),
+        startDate: validateYear(edu.startDate),
+        endDate: validateYear(edu.endDate),
+        cgpa: validateGPA(edu.cgpa),
+      };
+
+      Object.keys(eduErrors).forEach(field => {
+        if (eduErrors[field]) {
+          newErrors[`education.${index}.${field}`] = eduErrors[field];
+          hasErrors = true;
+        }
+      });
+    });
+
+    // Validate experience
+    resumeData.experience.forEach((exp, expIndex) => {
+      const expErrors = {
+        position: validateText(exp.position, 'Position', 2, 100),
+        company: validateText(exp.company, 'Company', 2, 100),
+        location: validateLocation(exp.location),
+        startDate: validateYear(exp.startDate),
+        endDate: validateYear(exp.endDate),
+      };
+
+      Object.keys(expErrors).forEach(field => {
+        if (expErrors[field]) {
+          newErrors[`experience.${expIndex}.${field}`] = expErrors[field];
+          hasErrors = true;
+        }
+      });
+
+      // Validate responsibilities
+      exp.responsibilities.forEach((resp, respIndex) => {
+        const respError = validateText(resp, 'Responsibility', 5, 300);
+        if (respError) {
+          newErrors[`experience.${expIndex}.responsibilities.${respIndex}`] = respError;
+          hasErrors = true;
+        }
+      });
+    });
+
+    // Validate projects
+    resumeData.projects.forEach((proj, index) => {
+      const projErrors = {
+        title: validateText(proj.title, 'Project title', 3, 100),
+        description: validateText(proj.description, 'Description', 0, 500),
+        link: validateURL(proj.link, 'Project link'),
+      };
+
+      Object.keys(projErrors).forEach(field => {
+        if (projErrors[field]) {
+          newErrors[`projects.${index}.${field}`] = projErrors[field];
+          hasErrors = true;
+        }
+      });
+    });
+
+    setErrors(newErrors);
+    return !hasErrors;
+  };
+
   const handleGenerateResume = async () => {
+    // Validate form before generating
+    if (!validateForm()) {
+      setMessage('Please fix the errors in the form before generating the resume.');
+      return;
+    }
+
     setLoading(true);
     setMessage('');
 
@@ -377,7 +802,8 @@ function ResumeBuilder() {
         throw new Error(data.message || 'Failed to generate resume');
       }
 
-      const docxUrl = `http://localhost:4000${data.data.downloadUrl}`;
+      // Now downloadUrl is a full Cloudinary URL, no need to prepend localhost
+      const docxUrl = data.data.downloadUrl;
       setGeneratedResumeUrl(docxUrl);
 
       setShowPreview(true);
@@ -768,76 +1194,77 @@ function ResumeBuilder() {
             <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
               <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Personal Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Full Name *</label>
-                  <input
-                    type="text"
-                    value={resumeData.personalInfo.name}
-                    onChange={(e) => handlePersonalInfoChange('name', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                    placeholder="John Doe"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Email *</label>
-                  <input
-                    type="email"
-                    value={resumeData.personalInfo.email}
-                    onChange={(e) => handlePersonalInfoChange('email', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                    placeholder="john@example.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Phone *</label>
-                  <input
-                    type="tel"
-                    value={resumeData.personalInfo.phone}
-                    onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                    placeholder="+1 234 567 890"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Location</label>
-                  <input
-                    type="text"
-                    value={resumeData.personalInfo.location}
-                    onChange={(e) => handlePersonalInfoChange('location', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                    placeholder="City, State"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">LinkedIn</label>
-                  <input
-                    type="url"
-                    value={resumeData.personalInfo.linkedin}
-                    onChange={(e) => handlePersonalInfoChange('linkedin', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                    placeholder="https://linkedin.com/in/username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">GitHub</label>
-                  <input
-                    type="url"
-                    value={resumeData.personalInfo.github}
-                    onChange={(e) => handlePersonalInfoChange('github', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                    placeholder="https://github.com/username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Website</label>
-                  <input
-                    type="url"
-                    value={resumeData.personalInfo.website}
-                    onChange={(e) => handlePersonalInfoChange('website', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                    placeholder="https://yourwebsite.com"
-                  />
-                </div>
+                <InputField
+                  className="md:col-span-2"
+                  label="Full Name"
+                  value={resumeData.personalInfo.name}
+                  onChange={(value) => handlePersonalInfoChange('name', value)}
+                  placeholder="John Doe"
+                  required
+                  error={getFieldError('personalInfo', 'name')}
+                  helperText="Only letters, spaces, dots, hyphens and apostrophes allowed"
+                  maxLength={50}
+                />
+
+                <InputField
+                  label="Email"
+                  type="email"
+                  value={resumeData.personalInfo.email}
+                  onChange={(value) => handlePersonalInfoChange('email', value)}
+                  placeholder="john@example.com"
+                  required
+                  error={getFieldError('personalInfo', 'email')}
+                  maxLength={100}
+                />
+
+                <InputField
+                  label="Phone"
+                  value={resumeData.personalInfo.phone}
+                  onChange={(value) => handlePersonalInfoChange('phone', value)}
+                  placeholder="+1 234 567 890"
+                  required
+                  error={getFieldError('personalInfo', 'phone')}
+                  helperText="Numbers, +, -, (), and spaces only"
+                  maxLength={20}
+                />
+
+                <InputField
+                  label="Location"
+                  value={resumeData.personalInfo.location}
+                  onChange={(value) => handlePersonalInfoChange('location', value)}
+                  placeholder="City, State"
+                  error={getFieldError('personalInfo', 'location')}
+                  maxLength={100}
+                />
+
+                <InputField
+                  label="LinkedIn"
+                  value={resumeData.personalInfo.linkedin}
+                  onChange={(value) => handlePersonalInfoChange('linkedin', value)}
+                  placeholder="https://linkedin.com/in/username"
+                  error={getFieldError('personalInfo', 'linkedin')}
+                  helperText="Must include linkedin.com"
+                  maxLength={200}
+                />
+
+                <InputField
+                  label="GitHub"
+                  value={resumeData.personalInfo.github}
+                  onChange={(value) => handlePersonalInfoChange('github', value)}
+                  placeholder="https://github.com/username"
+                  error={getFieldError('personalInfo', 'github')}
+                  helperText="Must include github.com"
+                  maxLength={200}
+                />
+
+                <InputField
+                  label="Website"
+                  value={resumeData.personalInfo.website}
+                  onChange={(value) => handlePersonalInfoChange('website', value)}
+                  placeholder="https://yourwebsite.com"
+                  error={getFieldError('personalInfo', 'website')}
+                  maxLength={200}
+                />
               </div>
             </div>
 
@@ -866,56 +1293,57 @@ function ResumeBuilder() {
                     )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Degree *</label>
-                      <input
-                        type="text"
-                        value={edu.degree}
-                        onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="Bachelor of Science in Computer Science"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Institution *</label>
-                      <input
-                        type="text"
-                        value={edu.institution}
-                        onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="University Name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Start Date</label>
-                      <input
-                        type="text"
-                        value={edu.startDate}
-                        onChange={(e) => handleEducationChange(index, 'startDate', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="2018"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">End Date</label>
-                      <input
-                        type="text"
-                        value={edu.endDate}
-                        onChange={(e) => handleEducationChange(index, 'endDate', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="2022"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">CGPA/GPA</label>
-                      <input
-                        type="text"
-                        value={edu.cgpa}
-                        onChange={(e) => handleEducationChange(index, 'cgpa', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="3.8"
-                      />
-                    </div>
+                    <InputField
+                      className="md:col-span-2"
+                      label="Degree"
+                      value={edu.degree}
+                      onChange={(value) => handleEducationChange(index, 'degree', value)}
+                      placeholder="Bachelor of Science in Computer Science"
+                      required
+                      error={getFieldError('education', 'degree', index)}
+                      maxLength={200}
+                    />
+
+                    <InputField
+                      className="md:col-span-2"
+                      label="Institution"
+                      value={edu.institution}
+                      onChange={(value) => handleEducationChange(index, 'institution', value)}
+                      placeholder="University Name"
+                      required
+                      error={getFieldError('education', 'institution', index)}
+                      maxLength={200}
+                    />
+
+                    <InputField
+                      label="Start Date"
+                      value={edu.startDate}
+                      onChange={(value) => handleEducationChange(index, 'startDate', value)}
+                      placeholder="2018 or Sep 2018"
+                      error={getFieldError('education', 'startDate', index)}
+                      helperText="Year or Month Year format"
+                      maxLength={20}
+                    />
+
+                    <InputField
+                      label="End Date"
+                      value={edu.endDate}
+                      onChange={(value) => handleEducationChange(index, 'endDate', value)}
+                      placeholder="2022 or Present"
+                      error={getFieldError('education', 'endDate', index)}
+                      helperText="Year, Month Year, or Present"
+                      maxLength={20}
+                    />
+
+                    <InputField
+                      label="CGPA/GPA"
+                      value={edu.cgpa}
+                      onChange={(value) => handleEducationChange(index, 'cgpa', value)}
+                      placeholder="3.8"
+                      error={getFieldError('education', 'cgpa', index)}
+                      helperText="Numbers only (0-10)"
+                      maxLength={5}
+                    />
                   </div>
                 </div>
               ))}
@@ -946,67 +1374,67 @@ function ResumeBuilder() {
                     )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Position *</label>
-                      <input
-                        type="text"
-                        value={exp.position}
-                        onChange={(e) => handleExperienceChange(expIndex, 'position', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="Software Engineer"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Company *</label>
-                      <input
-                        type="text"
-                        value={exp.company}
-                        onChange={(e) => handleExperienceChange(expIndex, 'company', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="Company Name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Location</label>
-                      <input
-                        type="text"
-                        value={exp.location}
-                        onChange={(e) => handleExperienceChange(expIndex, 'location', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="City, State"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Start Date</label>
-                      <input
-                        type="text"
-                        value={exp.startDate}
-                        onChange={(e) => handleExperienceChange(expIndex, 'startDate', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="Jan 2020"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">End Date</label>
-                      <input
-                        type="text"
-                        value={exp.endDate}
-                        onChange={(e) => handleExperienceChange(expIndex, 'endDate', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="Present"
-                      />
-                    </div>
+                    <InputField
+                      label="Position"
+                      value={exp.position}
+                      onChange={(value) => handleExperienceChange(expIndex, 'position', value)}
+                      placeholder="Software Engineer"
+                      required
+                      error={getFieldError('experience', 'position', expIndex)}
+                      maxLength={100}
+                    />
+
+                    <InputField
+                      label="Company"
+                      value={exp.company}
+                      onChange={(value) => handleExperienceChange(expIndex, 'company', value)}
+                      placeholder="Company Name"
+                      required
+                      error={getFieldError('experience', 'company', expIndex)}
+                      maxLength={100}
+                    />
+
+                    <InputField
+                      label="Location"
+                      value={exp.location}
+                      onChange={(value) => handleExperienceChange(expIndex, 'location', value)}
+                      placeholder="City, State"
+                      error={getFieldError('experience', 'location', expIndex)}
+                      helperText="City, State format"
+                      maxLength={100}
+                    />
+
+                    <InputField
+                      label="Start Date"
+                      value={exp.startDate}
+                      onChange={(value) => handleExperienceChange(expIndex, 'startDate', value)}
+                      placeholder="Jan 2020"
+                      error={getFieldError('experience', 'startDate', expIndex)}
+                      helperText="Month Year format"
+                      maxLength={20}
+                    />
+
+                    <InputField
+                      label="End Date"
+                      value={exp.endDate}
+                      onChange={(value) => handleExperienceChange(expIndex, 'endDate', value)}
+                      placeholder="Present"
+                      error={getFieldError('experience', 'endDate', expIndex)}
+                      helperText="Month Year or 'Present'"
+                      maxLength={20}
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-400 mb-2">Responsibilities</label>
                     {exp.responsibilities.map((resp, respIndex) => (
                       <div key={respIndex} className="mb-2">
-                        <input
-                          type="text"
+                        <InputField
                           value={resp}
-                          onChange={(e) => handleResponsibilityChange(expIndex, respIndex, e.target.value)}
-                          className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                          onChange={(value) => handleResponsibilityChange(expIndex, respIndex, value)}
                           placeholder="Describe your responsibility"
+                          error={getFieldError('experience', 'responsibilities', expIndex, respIndex)}
+                          helperText="Minimum 5 characters"
+                          maxLength={300}
                         />
                       </div>
                     ))}
@@ -1046,36 +1474,38 @@ function ResumeBuilder() {
                     )}
                   </div>
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Project Title *</label>
-                      <input
-                        type="text"
-                        value={project.title}
-                        onChange={(e) => handleProjectChange(projIndex, 'title', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="Project Name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Description</label>
-                      <textarea
-                        value={project.description}
-                        onChange={(e) => handleProjectChange(projIndex, 'description', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200 resize-y"
-                        rows="3"
-                        placeholder="Brief description of the project"
-                      />
-                    </div>
+                    <InputField
+                      label="Project Title"
+                      value={project.title}
+                      onChange={(value) => handleProjectChange(projIndex, 'title', value)}
+                      placeholder="Project Name"
+                      required
+                      error={getFieldError('projects', 'title', projIndex)}
+                      maxLength={100}
+                    />
+
+                    <InputField
+                      label="Description"
+                      value={project.description}
+                      onChange={(value) => handleProjectChange(projIndex, 'description', value)}
+                      placeholder="Brief description of the project"
+                      error={getFieldError('projects', 'description', projIndex)}
+                      maxLength={500}
+                      textarea={true}
+                      rows={3}
+                    />
+
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-2">Technologies</label>
                       {project.technologies.map((tech, techIndex) => (
                         <div key={techIndex} className="mb-2">
-                          <input
-                            type="text"
+                          <InputField
                             value={tech}
-                            onChange={(e) => handleTechnologyChange(projIndex, techIndex, e.target.value)}
-                            className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                            onChange={(value) => handleTechnologyChange(projIndex, techIndex, value)}
                             placeholder="e.g., React, Node.js"
+                            error={getFieldError('projects', 'technologies', projIndex, techIndex)}
+                            helperText="Technology name only"
+                            maxLength={50}
                           />
                         </div>
                       ))}
@@ -1086,16 +1516,16 @@ function ResumeBuilder() {
                         + Add Technology
                       </button>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Project Link</label>
-                      <input
-                        type="url"
-                        value={project.link}
-                        onChange={(e) => handleProjectChange(projIndex, 'link', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
-                        placeholder="https://github.com/username/project"
-                      />
-                    </div>
+
+                    <InputField
+                      label="Project Link"
+                      value={project.link}
+                      onChange={(value) => handleProjectChange(projIndex, 'link', value)}
+                      placeholder="https://github.com/username/project"
+                      error={getFieldError('projects', 'link', projIndex)}
+                      helperText="Must be a valid URL"
+                      maxLength={200}
+                    />
                   </div>
                 </div>
               ))}
@@ -1109,12 +1539,13 @@ function ResumeBuilder() {
                   <label className="block text-sm font-medium text-gray-400 mb-2">Technical Skills</label>
                   {resumeData.skills.technical.map((skill, index) => (
                     <div key={index} className="mb-2">
-                      <input
-                        type="text"
+                      <InputField
                         value={skill}
-                        onChange={(e) => handleSkillChange('technical', index, e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                        onChange={(value) => handleSkillChange('technical', index, value)}
                         placeholder="e.g., JavaScript, Python, React"
+                        error={getFieldError('skills', 'technical', index)}
+                        helperText="Enter one technical skill"
+                        maxLength={50}
                       />
                     </div>
                   ))}
@@ -1129,12 +1560,13 @@ function ResumeBuilder() {
                   <label className="block text-sm font-medium text-gray-400 mb-2">Soft Skills</label>
                   {resumeData.skills.soft.map((skill, index) => (
                     <div key={index} className="mb-2">
-                      <input
-                        type="text"
+                      <InputField
                         value={skill}
-                        onChange={(e) => handleSkillChange('soft', index, e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                        onChange={(value) => handleSkillChange('soft', index, value)}
                         placeholder="e.g., Leadership, Communication"
+                        error={getFieldError('skills', 'soft', index)}
+                        helperText="Enter one soft skill"
+                        maxLength={50}
                       />
                     </div>
                   ))}
@@ -1174,33 +1606,36 @@ function ResumeBuilder() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Certification Name</label>
-                      <input
-                        type="text"
+                      <InputField
+                        label="Certification Name"
                         value={cert.name}
-                        onChange={(e) => handleCertificationChange(index, 'name', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                        onChange={(value) => handleCertificationChange(index, 'name', value)}
                         placeholder="AWS Certified Solutions Architect"
+                        required
+                        error={getFieldError('certifications', 'name', index)}
+                        maxLength={100}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Issuer</label>
-                      <input
-                        type="text"
+                      <InputField
+                        label="Issuer"
                         value={cert.issuer}
-                        onChange={(e) => handleCertificationChange(index, 'issuer', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                        onChange={(value) => handleCertificationChange(index, 'issuer', value)}
                         placeholder="Amazon Web Services"
+                        required
+                        error={getFieldError('certifications', 'issuer', index)}
+                        maxLength={100}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Date</label>
-                      <input
-                        type="text"
+                      <InputField
+                        label="Date"
                         value={cert.date}
-                        onChange={(e) => handleCertificationChange(index, 'date', e.target.value)}
-                        className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                        onChange={(value) => handleCertificationChange(index, 'date', value)}
                         placeholder="Jan 2023"
+                        error={getFieldError('certifications', 'date', index)}
+                        helperText="Month and year"
+                        maxLength={20}
                       />
                     </div>
                   </div>
@@ -1213,12 +1648,13 @@ function ResumeBuilder() {
               <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Achievements</h3>
               {resumeData.achievements.map((achievement, index) => (
                 <div key={index} className="mb-2">
-                  <input
-                    type="text"
+                  <InputField
                     value={achievement}
-                    onChange={(e) => handleAchievementChange(index, e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200"
+                    onChange={(value) => handleAchievementChange(index, value)}
                     placeholder="Describe your achievement"
+                    error={getFieldError('achievements', 'achievement', index)}
+                    helperText="Minimum 5 characters"
+                    maxLength={200}
                   />
                 </div>
               ))}

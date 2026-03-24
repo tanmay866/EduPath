@@ -14,16 +14,18 @@ import {
   convertInchesToTwip
 } from 'docx';
 import SanitizerUtils from '../utils/sanitizer.js';
+import cloudinary from '../config/cloudinaryConfig.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const GENERATED_DIR = path.join(__dirname, '../generated');
+// Note: Using Cloudinary for storage instead of local files
+// const GENERATED_DIR = path.join(__dirname, '../generated');
 
-// Ensure directory exists
-if (!fs.existsSync(GENERATED_DIR)) {
-  fs.mkdirSync(GENERATED_DIR, { recursive: true });
-}
+// Ensure directory exists (Not needed for Cloudinary)
+// if (!fs.existsSync(GENERATED_DIR)) {
+//   fs.mkdirSync(GENERATED_DIR, { recursive: true });
+// }
 
 // Professional color scheme
 const COLORS = {
@@ -438,27 +440,56 @@ class ResumeGeneratorService {
       const timestamp = Date.now();
       const nameSlug = personalInfo?.name?.toLowerCase().replace(/\s+/g, '_') || 'resume';
       const filename = SanitizerUtils.sanitizeFilename(`${nameSlug}_${timestamp}.docx`);
-      const filepath = path.join(GENERATED_DIR, filename);
 
+      // Generate DOCX buffer
       const buffer = await Packer.toBuffer(doc);
-      await fs.writeFile(filepath, buffer);
+
+      // Upload to Cloudinary
+      console.log('Uploading resume to Cloudinary...');
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${buffer.toString('base64')}`,
+        {
+          folder: 'edupath/generated-resumes',
+          public_id: `${userId}_${timestamp}`,
+          resource_type: 'raw',
+          overwrite: true,
+          type: 'upload',
+          access_mode: 'public'
+        }
+      );
+
+      console.log('Resume uploaded to Cloudinary successfully:', uploadResult.secure_url);
 
       return {
         filename,
-        filepath,
-        url: `/api/resume-generator/download/${filename}`
+        cloudinaryUrl: uploadResult.secure_url,
+        cloudinaryPublicId: uploadResult.public_id,
+        url: uploadResult.secure_url // For compatibility with existing code
       };
     } catch (error) {
       throw new Error(`DOCX generation failed: ${error.message}`);
     }
   }
 
-  async deleteFile(filename) {
+  async deleteFile(cloudinaryPublicId) {
     try {
-      const filepath = path.join(GENERATED_DIR, filename);
-      await fs.remove(filepath);
-      return { success: true, message: 'File deleted successfully' };
+      if (!cloudinaryPublicId) {
+        throw new Error('Cloudinary public ID is required for deletion');
+      }
+
+      console.log('Deleting file from Cloudinary:', cloudinaryPublicId);
+      const result = await cloudinary.uploader.destroy(cloudinaryPublicId, {
+        resource_type: 'raw'
+      });
+
+      if (result.result === 'ok' || result.result === 'not found') {
+        console.log('File deleted from Cloudinary successfully');
+        return { success: true, message: 'File deleted successfully' };
+      } else {
+        throw new Error(`Cloudinary deletion failed: ${result.result}`);
+      }
     } catch (error) {
+      console.error('Cloudinary deletion error:', error);
       throw new Error(`File deletion failed: ${error.message}`);
     }
   }

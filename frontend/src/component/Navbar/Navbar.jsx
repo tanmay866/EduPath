@@ -148,7 +148,7 @@ const ArcNavbar = () => {
                   className="flex items-center gap-2 text-white hover:text-gray-300 font-medium text-sm tracking-wide transition-colors group"
                 >
                   <span className="relative pb-1">
-                    BUILD
+                    TOOLS
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
                   </span>
                   <ChevronRight size={16} className={`text-gray-400 transition-transform ${buildDropdownOpen ? 'rotate-90' : ''}`} />
@@ -362,7 +362,7 @@ const ArcNavbar = () => {
                   onClick={() => setBuildDropdownOpen(!buildDropdownOpen)}
                   className="w-full flex items-center justify-between text-white hover:bg-white/10 px-4 py-3 rounded-xl font-medium text-sm transition-colors"
                 >
-                  <span>BUILD</span>
+                  <span>TOOLS</span>
                   <ChevronRight size={16} className={`text-gray-400 transition-transform ${buildDropdownOpen ? 'rotate-90' : ''}`} />
                 </button>
                 {buildDropdownOpen && (
