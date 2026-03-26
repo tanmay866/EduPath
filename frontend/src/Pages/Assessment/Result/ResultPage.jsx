@@ -12,6 +12,15 @@ const ResultPage = () => {
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
 
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
+
   // Fetch result data from API
   useEffect(() => {
     if (resultId) {

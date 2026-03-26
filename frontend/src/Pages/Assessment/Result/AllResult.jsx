@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getQuizHistory } from '../../Services/assessmentService';
 import AssessmentSidebar from '../../../component/Assessment/AssessmentSidebar';
 import PreviousAttemptsTable from '../AssesmentDashboard/components/PreviousAttemptsTable';
 
 const AllResult = () => {
+  const navigate = useNavigate();
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
 
   useEffect(() => {
     fetchQuizHistory();

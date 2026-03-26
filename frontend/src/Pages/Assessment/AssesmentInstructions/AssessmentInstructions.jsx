@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuiz } from "../../context/QuizContext";
 import { useNavigate } from "react-router-dom";
 import { startQuiz } from "../../Services/assessmentService";
@@ -11,6 +11,15 @@ const AssessmentInstructions = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
 
   // Quiz configuration state
   const [quizConfig, setQuizConfig] = useState({

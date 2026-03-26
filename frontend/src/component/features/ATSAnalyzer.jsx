@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ATSAnalyzer() {
+  const navigate = useNavigate();
   const [resumeFile, setResumeFile] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
@@ -8,6 +10,15 @@ function ATSAnalyzer() {
   const [error, setError] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -164,7 +175,12 @@ function ATSAnalyzer() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-36 pb-8 px-4">
+    <div className="min-h-screen bg-black pt-36 pb-8 px-4 relative overflow-hidden">
+      {/* Glowing Background Effects */}
+      <div className="absolute top-20 left-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute top-40 right-10 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute bottom-20 left-1/3 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -z-10"></div>
+
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header with Back Button */}
         <div className="flex items-start gap-4">

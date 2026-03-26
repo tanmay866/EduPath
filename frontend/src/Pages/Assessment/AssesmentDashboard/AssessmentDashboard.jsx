@@ -17,6 +17,15 @@ const AssessmentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
+
   // Fetch data from APIs
   useEffect(() => {
     fetchDashboardData();

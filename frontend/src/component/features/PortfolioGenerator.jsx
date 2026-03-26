@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Template1, Template2, Template3, Template4, Template5,
   Template6, Template7, Template8, Template9, Template10
@@ -27,6 +28,8 @@ const TEMPLATE_META = [
 const API_BASE = 'http://localhost:4000/api/portfolio';
 
 function PortfolioGenerator() {
+  const navigate = useNavigate();
+
   // Views: 'home' | 'create' | 'deployed'
   const [view, setView] = useState('home');
   const [currentStep, setCurrentStep] = useState(1); // 1=Upload, 2=Review, 3=Template
@@ -59,7 +62,15 @@ function PortfolioGenerator() {
 
   const token = sessionStorage.getItem('token');
 
-  useEffect(() => { fetchMyPortfolios(); }, []);
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+    fetchMyPortfolios();
+  }, [navigate]);
 
   const fetchMyPortfolios = async () => {
     setLoadingPortfolios(true);
@@ -535,7 +546,12 @@ function PortfolioGenerator() {
   //  CREATE VIEW: 3-Step Wizard
   // ════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-black pt-36 pb-8 px-4">
+    <div className="min-h-screen bg-black pt-36 pb-8 px-4 relative overflow-hidden">
+      {/* Glowing Background Effects */}
+      <div className="absolute top-20 left-10 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute top-40 right-10 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl -z-10"></div>
+
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header with Back Button */}
         <div className="flex items-start gap-4">

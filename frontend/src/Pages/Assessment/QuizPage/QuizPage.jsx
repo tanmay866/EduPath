@@ -7,10 +7,19 @@ import QuizLayout from "./components/QuizLayout";
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+  }, [navigate]);
+
   // Quiz stages: 'configure', 'instructions', 'quiz'
   const [stage, setStage] = useState('configure');
-  
+
   const [quizStarted, setQuizStarted] = useState(false);
   const [showStartModal, setShowStartModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
