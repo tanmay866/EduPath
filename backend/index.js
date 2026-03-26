@@ -13,6 +13,8 @@ import resumeRoutes from './routes/resumeRoutes.js';
 import resumeGeneratorRoutes from './routes/resumeGeneratorRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
 import atsRoutes from './routes/atsRoutes.js';
+import csRoutes from './routes/csRoutes.js';
+import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
@@ -52,6 +54,8 @@ app.use('/api/resume', resumeRoutes);
 app.use('/api/resume-generator', resumeGeneratorRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/ats', atsRoutes);
+app.use('/api/cs', csRoutes);
+app.use('/api/mock-interview', mockInterviewRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -78,6 +82,8 @@ app.get('/', (req, res) => {
       resumeGenerator: '/api/resume-generator',
       portfolio: '/api/portfolio',
       ats: '/api/ats',
+      cs: '/api/cs',
+      mockInterview: '/api/mock-interview',
     },
   });
 });

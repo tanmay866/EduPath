@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Menu, X, Info, Mail, HelpCircle, FileText, Briefcase, Target } from 'lucide-react';
+import { ChevronRight, Menu, X, Info, Mail, HelpCircle, FileText, Briefcase, Target, Brain, PuzzleIcon, Code, Mic } from 'lucide-react';
 import { FaUser, FaSignOutAlt, FaCog } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -20,6 +20,7 @@ const ArcNavbar = () => {
   const [open, setOpen] = useState(false);
   const [contactDropdownOpen, setContactDropdownOpen] = useState(false);
   const [buildDropdownOpen, setBuildDropdownOpen] = useState(false);
+  const [assessmentDropdownOpen, setAssessmentDropdownOpen] = useState(false);
   const [imageLoadError, setImageLoadError] = useState(false);
 
   const firstLetter = firstName ? firstName.charAt(0).toUpperCase() : 'U';
@@ -76,7 +77,13 @@ const ArcNavbar = () => {
 
   const navItems = [
     { label: 'HOME', path: '/' },
-    { label: 'ASSESSMENT', path: '/assessment' },
+  ];
+
+  const assessmentSubmenu = [
+    { label: 'Skill Assessment',     path: '/assessment',                     icon: Brain },
+    { label: 'Aptitude Test',        path: '/assessment-hub/aptitude',        icon: PuzzleIcon },
+    { label: 'CS Fundamentals',      path: '/assessment-hub/cs-fundamentals', icon: Code },
+    { label: 'AI Mock Interview',    path: '/assessment-hub/mock-interview',  icon: Mic },
   ];
 
   const buildSubmenu = [
@@ -100,6 +107,7 @@ const ArcNavbar = () => {
         setMobileMenuOpen(false);
         setContactDropdownOpen(false);
         setBuildDropdownOpen(false);
+        setAssessmentDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -137,6 +145,47 @@ const ArcNavbar = () => {
                   <ChevronRight size={16} className="text-gray-400 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               ))}
+
+              {/* Assessment Hub Dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setAssessmentDropdownOpen(true)}
+                onMouseLeave={() => setAssessmentDropdownOpen(false)}
+              >
+                <button
+                  className="flex items-center gap-2 text-white hover:text-gray-300 font-medium text-sm tracking-wide transition-colors group"
+                >
+                  <span className="relative pb-1">
+                    ASSESSMENT HUB
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                  <ChevronRight size={16} className={`text-gray-400 transition-transform ${assessmentDropdownOpen ? 'rotate-90' : ''}`} />
+                </button>
+
+                {assessmentDropdownOpen && (
+                  <div className="absolute top-full left-0 pt-2 w-56">
+                    <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl shadow-2xl py-2 border border-white/10 overflow-hidden">
+                      {/* Menu Items */}
+                      <div className="py-1">
+                        {assessmentSubmenu.map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              navigate(item.path);
+                              setAssessmentDropdownOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-white hover:bg-white/20 transition-colors"
+                          >
+                            <item.icon size={18} className="text-gray-400" />
+                            <span className="flex-1 text-left text-sm font-medium">{item.label}</span>
+                            <ChevronRight size={16} className="text-gray-500" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Build Dropdown */}
               <div
@@ -355,6 +404,34 @@ const ArcNavbar = () => {
                   <ChevronRight size={16} className="text-gray-400" />
                 </button>
               ))}
+
+              {/* Assessment Hub Dropdown in Mobile */}
+              <div className="space-y-1">
+                <button
+                  onClick={() => setAssessmentDropdownOpen(!assessmentDropdownOpen)}
+                  className="w-full flex items-center justify-between text-white hover:bg-white/10 px-4 py-3 rounded-xl font-medium text-sm transition-colors"
+                >
+                  <span>ASSESSMENT HUB</span>
+                  <ChevronRight size={16} className={`text-gray-400 transition-transform ${assessmentDropdownOpen ? 'rotate-90' : ''}`} />
+                </button>
+                {assessmentDropdownOpen && (
+                  <div className="pl-4 space-y-1 bg-white/5 rounded-xl p-2 border border-white/10">
+                    {assessmentSubmenu.map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          navigate(item.path);
+                          setMobileMenuOpen(false);
+                          setAssessmentDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-white hover:bg-white/10 rounded-lg text-sm transition-colors"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Build Dropdown in Mobile */}
               <div className="space-y-1">

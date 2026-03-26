@@ -27,6 +27,12 @@ import PortfolioGenerator from './component/features/PortfolioGenerator'
 import ATSAnalyzer from './component/features/ATSAnalyzer'
 import PublicPortfolio from './Pages/PublicPortfolio'
 
+// Assessment Hub Components
+import SkillAssessment from './Pages/AssessmentHub/SkillAssessment'
+import AptitudeTest from './Pages/AssessmentHub/AptitudeTest'
+import CSFundamentals from './Pages/AssessmentHub/CSFundamentals'
+import AIMockInterview from './Pages/AssessmentHub/AIMockInterview'
+
 // Admin Components
 import AdminNavbar from './Admin/component/AdminNavbar'
 import AdminSidebar from './Admin/component/AdminSidebar'
@@ -117,6 +123,12 @@ const App = () => {
           <Route path="/assessment/result" element={<PageTransition><AllResult /></PageTransition>} />
           <Route path="/assessment/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
           <Route path="/assessment/result/:resultId" element={<PageTransition><ResultPage /></PageTransition>} />
+
+          {/* Assessment Hub Routes */}
+          <Route path="/assessment-hub/skill" element={<PageTransition><Navbar /><SkillAssessment /><Footer /></PageTransition>} />
+          <Route path="/assessment-hub/aptitude" element={<PageTransition><Navbar /><AptitudeTest /><Footer /></PageTransition>} />
+          <Route path="/assessment-hub/cs-fundamentals" element={<PageTransition><Navbar /><CSFundamentals /><Footer /></PageTransition>} />
+          <Route path="/assessment-hub/mock-interview" element={<PageTransition><Navbar /><AIMockInterview /><Footer /></PageTransition>} />
 
           {/* New Feature Routes */}
           <Route path="/resume-builder" element={<PageTransition><Navbar /><ResumeBuilder /></PageTransition>} />
