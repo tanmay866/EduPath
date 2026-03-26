@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuiz } from "../../context/QuizContext";
 import { useNavigate } from "react-router-dom";
 import { startQuiz } from "../../Services/assessmentService";
-import AssessmentSidebar from "../../../component/Assessment/AssessmentSidebar";
+import BackToHomeButton from "../../../component/Assessment/BackToHomeButton";
 
 const AssessmentInstructions = () => {
   const { assessment: contextAssessment, setTimer, setAssessment } = useQuiz();
@@ -98,7 +98,7 @@ const AssessmentInstructions = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-black relative">
+    <div className="min-h-screen bg-black relative">
       {/* Live Moving Background Animations */}
       <div className="animated-bg">
         {/* Moving Shapes */}
@@ -128,9 +128,11 @@ const AssessmentInstructions = () => {
         <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
       </div>
 
-      <AssessmentSidebar />
-      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
+      <div className="p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
         <div className="max-w-4xl mx-auto">
+          <div className="mb-6 flex justify-end">
+            <BackToHomeButton />
+          </div>
 
           {/* 1️⃣ PAGE HEADER SECTION */}
           <div className="mb-8">

@@ -1,4 +1,3 @@
-import AssessmentSidebar from "../../../../component/Assessment/AssessmentSidebar";
 import ConfirmModal from "../../../../component/Comman/ConfirmModal";
 import QuizHeader from "./QuizHeader";
 import QuestionPanel from "./QuestionPanel";
@@ -31,10 +30,8 @@ const QuizLayout = ({
   setCurrentQuestionIndex,
 }) => {
   return (
-    <div className="flex min-h-screen bg-black relative">
-      <AssessmentSidebar />
-      
-      <div className="flex-1 flex flex-col relative z-10">
+    <div className="min-h-screen bg-black relative">
+      <div className="flex flex-col relative z-10">
         <div className="flex-1 p-4 overflow-auto">
           <div className="max-w-7xl mx-auto space-y-8">
             <QuizHeader

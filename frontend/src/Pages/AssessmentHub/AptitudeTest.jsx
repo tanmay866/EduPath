@@ -248,7 +248,7 @@ const AptitudeTest = () => {
               {/* Buttons */}
               <div className="flex gap-4 pt-2">
                 <button
-                  onClick={() => navigate('/assessment-hub')}
+                  onClick={() => navigate('/')}
                   className="flex-1 px-6 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors"
                 >
                   Cancel

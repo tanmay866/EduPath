@@ -125,10 +125,10 @@ const App = () => {
           <Route path="/assessment/result/:resultId" element={<PageTransition><ResultPage /></PageTransition>} />
 
           {/* Assessment Hub Routes */}
-          <Route path="/assessment-hub/skill" element={<PageTransition><Navbar /><SkillAssessment /><Footer /></PageTransition>} />
-          <Route path="/assessment-hub/aptitude" element={<PageTransition><Navbar /><AptitudeTest /><Footer /></PageTransition>} />
-          <Route path="/assessment-hub/cs-fundamentals" element={<PageTransition><Navbar /><CSFundamentals /><Footer /></PageTransition>} />
-          <Route path="/assessment-hub/mock-interview" element={<PageTransition><Navbar /><AIMockInterview /><Footer /></PageTransition>} />
+          <Route path="/assessment-hub/skill" element={<PageTransition><Navbar /><SkillAssessment /></PageTransition>} />
+          <Route path="/assessment-hub/aptitude" element={<PageTransition><Navbar /><AptitudeTest /></PageTransition>} />
+          <Route path="/assessment-hub/cs-fundamentals" element={<PageTransition><Navbar /><CSFundamentals /></PageTransition>} />
+          <Route path="/assessment-hub/mock-interview" element={<PageTransition><Navbar /><AIMockInterview /></PageTransition>} />
 
           {/* New Feature Routes */}
           <Route path="/resume-builder" element={<PageTransition><Navbar /><ResumeBuilder /></PageTransition>} />

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getQuizHistory } from '../../Services/assessmentService';
-import AssessmentSidebar from '../../../component/Assessment/AssessmentSidebar';
 import PreviousAttemptsTable from '../AssesmentDashboard/components/PreviousAttemptsTable';
+import BackToHomeButton from '../../../component/Assessment/BackToHomeButton';
 
 const AllResult = () => {
   const navigate = useNavigate();
@@ -60,9 +60,8 @@ const AllResult = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-black relative">
-        <AssessmentSidebar />
-        <div className="flex-1 flex items-center justify-center relative z-10">
+      <div className="min-h-screen bg-black relative">
+        <div className="flex items-center justify-center relative z-10 min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
             <p className="text-white mt-4 text-lg">Loading your quiz history...</p>
@@ -74,9 +73,8 @@ const AllResult = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-screen bg-black relative">
-        <AssessmentSidebar />
-        <div className="flex-1 flex items-center justify-center p-4 relative z-10">
+      <div className="min-h-screen bg-black relative">
+        <div className="flex items-center justify-center p-4 relative z-10 min-h-screen">
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 max-w-md backdrop-blur-lg">
             <h2 className="text-2xl font-bold text-red-400 mb-4">Error</h2>
             <p className="text-gray-300 mb-6">{error}</p>
@@ -93,11 +91,13 @@ const AllResult = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-black relative">
-      <AssessmentSidebar />
-
-      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
+    <div className="min-h-screen bg-black relative">
+      <div className="p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
         <div className="max-w-7xl mx-auto">
+          <div className="mb-6 flex justify-end">
+            <BackToHomeButton />
+          </div>
+
           {/* Page Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">

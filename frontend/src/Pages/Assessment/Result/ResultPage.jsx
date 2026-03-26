@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getQuizResult, retryQuiz } from "../../Services/assessmentService";
-import AssessmentSidebar from "../../../component/Assessment/AssessmentSidebar";
+import BackToHomeButton from "../../../component/Assessment/BackToHomeButton";
 
 const ResultPage = () => {
   const { resultId } = useParams();
@@ -176,12 +176,12 @@ const ResultPage = () => {
   const insight = getPerformanceInsight();
 
   return (
-    <div className="flex min-h-screen bg-black relative">
-
-      <AssessmentSidebar />
-      
-      <div className="flex-1 p-4 overflow-auto relative z-10">
+    <div className="min-h-screen bg-black relative">
+      <div className="p-4 overflow-auto relative z-10">
         <div className="max-w-6xl mx-auto space-y-4">
+          <div className="flex justify-end">
+            <BackToHomeButton />
+          </div>
 
           {/* 1️⃣ SCORE SUMMARY CARD - Main Focus */}
           <div className="backdrop-blur-xl bg-slate-900/60 shadow-2xl rounded-xl p-5 border-2 border-white/20">

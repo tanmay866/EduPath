@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchQuizTopics, getQuizStats, getQuizHistory } from "../../Services/assessmentService";
 import { useQuiz } from "../../context/QuizContext";
-import AssessmentSidebar from "../../../component/Assessment/AssessmentSidebar";
+import BackToHomeButton from "../../../component/Assessment/BackToHomeButton";
 import DashboardHeader from "./components/DashboardHeader";
 import PerformanceCards from "./components/PerformanceCards";
 import PreviousAttemptsTable from "./components/PreviousAttemptsTable";
@@ -145,12 +145,13 @@ const AssessmentDashboard = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-black relative">
-
-      <AssessmentSidebar />
-
-      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
+    <div className="min-h-screen bg-black relative">
+      <div className="p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
         <div className="max-w-7xl mx-auto">
+          <div className="mb-6 flex justify-end">
+            <BackToHomeButton />
+          </div>
+
           <DashboardHeader totalAttempts={stats?.overall?.totalQuizzes || 0} />
 
           <PerformanceCards cards={performanceCardsConfig} />

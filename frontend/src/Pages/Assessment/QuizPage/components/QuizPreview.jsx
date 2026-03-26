@@ -1,5 +1,5 @@
 import ConfirmModal from "../../../../component/Comman/ConfirmModal";
-import AssessmentSidebar from "../../../../component/Assessment/AssessmentSidebar";
+import BackToHomeButton from "../../../../component/Assessment/BackToHomeButton";
 
 const QuizPreview = ({
   assessment,
@@ -10,11 +10,13 @@ const QuizPreview = ({
   onCancelStart,
 }) => {
   return (
-    <div className="flex min-h-screen bg-black relative">
-      <AssessmentSidebar />
-      
-      <div className="flex-1 flex items-center justify-center relative z-10 p-4">
+    <div className="min-h-screen bg-black relative">
+      <div className="flex items-center justify-center relative z-10 p-4 min-h-screen">
         <div className="max-w-3xl w-full">
+          <div className="mb-4 flex justify-end">
+            <BackToHomeButton />
+          </div>
+
           <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl shadow-2xl p-8">
             <div className="text-center mb-8">
               <div className="inline-block bg-indigo-500/20 p-4 rounded-full mb-4">
