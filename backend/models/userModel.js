@@ -53,6 +53,32 @@ const userSchema = new mongoose.Schema(
       default: 'student',
     },
     // Profile information
+    target_role: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    experience_level: {
+      type: String,
+      enum: ['beginner', 'intermediate', 'advanced'],
+    },
+    hours_per_week: {
+      type: Number,
+      default: 0,
+    },
+    learning_style: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    current_skills: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
+    },
+    profile_complete: {
+      type: Boolean,
+      default: false,
+    },
     profile: {
       phone: {
         type: String,
@@ -105,7 +131,20 @@ const userSchema = new mongoose.Schema(
       currentSkills: [String],
       targetRole: {
         type: String,
-        enum: ['MERN', 'AI', 'Cyber', 'Data Science', 'DevOps', 'Mobile'],
+        enum: [
+          'MERN',
+          'AI',
+          'Cyber',
+          'Data Science',
+          'DevOps',
+          'Mobile',
+          'MERN Developer',
+          'AI/ML Engineer',
+          'Cybersecurity Engineer',
+          'Data Science Engineer',
+          'DevOps Engineer',
+          'Mobile Developer',
+        ],
       },
       availableLearningTime: {
         type: Number,
@@ -228,9 +267,16 @@ const userSchema = new mongoose.Schema(
     lastLoginIP: {
       type: String,
     },
+    // Roadmap reference
+    activeRoadmap: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Roadmap',
+    },
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
@@ -238,6 +284,7 @@ const userSchema = new mongoose.Schema(
 // Note: email and loginId already have unique indexes from schema definition
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ 'quizStats.averageScore': -1 });
+userSchema.index({ activeRoadmap: 1 });
 
 // Virtual for full name
 userSchema.virtual('fullName').get(function () {
@@ -248,6 +295,14 @@ userSchema.virtual('fullName').get(function () {
 userSchema.virtual('isLocked').get(function () {
   return !!(this.lockUntil && this.lockUntil > Date.now());
 });
+
+// Virtual to populate all roadmaps for this user
+userSchema.virtual('roadmaps', {
+  ref: 'Roadmap',
+  localField: '_id',
+  foreignField: 'user_id',
+});
+
 
 // Hash password before saving
 userSchema.pre('save', async function () {
@@ -350,6 +405,30 @@ userSchema.methods.updateQuizStats = async function (result) {
   updates.$inc['quizStats.totalTimeSpent'] = result.timeTaken;
 
   return this.updateOne(updates);
+};
+
+// Method to set active roadmap
+userSchema.methods.setActiveRoadmap = async function (roadmapId) {
+  return this.updateOne({
+    $set: { activeRoadmap: roadmapId },
+  });
+};
+
+// Method to get active roadmap with populated data
+userSchema.methods.getActiveRoadmap = async function () {
+  if (!this.activeRoadmap) {
+    return null;
+  }
+  return mongoose.model('Roadmap').findById(this.activeRoadmap);
+};
+
+// Method to check if user has completed roadmap profile
+userSchema.methods.hasRoadmapProfile = function () {
+  return !!(
+    this.profile?.targetRole &&
+    this.profile?.occupation?.experienceLevel &&
+    this.profile?.availableLearningTime
+  );
 };
 
 // Static method to get the next serial number for user ID generation

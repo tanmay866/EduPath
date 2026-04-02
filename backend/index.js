@@ -15,6 +15,8 @@ import portfolioRoutes from './routes/portfolioRoutes.js';
 import atsRoutes from './routes/atsRoutes.js';
 import csRoutes from './routes/csRoutes.js';
 import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
+import roadmapRoutes from './routes/roadmapRoutes.js';
+import progressRoutes from './routes/progress.js';
 
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
@@ -30,8 +32,15 @@ connectDB();
 // Verify email configuration
 verifyEmailConfig();
 
-// Basic CORS - Allow all origins for testing
-app.use(cors());
+// CORS configuration
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
@@ -56,6 +65,8 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/ats', atsRoutes);
 app.use('/api/cs', csRoutes);
 app.use('/api/mock-interview', mockInterviewRoutes);
+app.use('/api/roadmap', roadmapRoutes);
+app.use('/api/progress', progressRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -79,11 +90,14 @@ app.get('/', (req, res) => {
       profile: '/api/profile',
       quiz: '/api/quiz',
       contact: '/api/contact',
+      resume: '/api/resume',
       resumeGenerator: '/api/resume-generator',
       portfolio: '/api/portfolio',
       ats: '/api/ats',
       cs: '/api/cs',
       mockInterview: '/api/mock-interview',
+      roadmap: '/api/roadmap',
+      progress: '/api/progress',
     },
   });
 });
