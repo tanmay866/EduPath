@@ -145,6 +145,12 @@ export const getMe = asyncHandler(async (req, res, next) => {
             isActive: user.isActive,
             lastLogin: user.lastLogin,
             createdAt: user.createdAt,
+            target_role: user.target_role || '',
+            experience_level: user.experience_level || '',
+            hours_per_week: user.hours_per_week || 0,
+            learning_style: user.learning_style || '',
+            current_skills: user.current_skills || [],
+            profile_complete: Boolean(user.profile_complete),
         },
     });
 });

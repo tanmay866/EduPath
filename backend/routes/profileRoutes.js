@@ -5,27 +5,23 @@ import {
   updateProfile,
   updateSettings,
   uploadProfilePicture,
-  deleteProfilePicture
+  deleteProfilePicture,
+  updateBasic,
+  updateSkills,
+  updateAvailability
 } from '../controllers/profileController.js';
 
 const router = express.Router();
 
-// All routes are protected
+
 router.use(protect);
-
-// @route   GET /api/profile
 router.get('/', getProfile);
-
-// @route   PUT /api/profile
 router.put('/', updateProfile);
-
-// @route   PUT /api/profile/settings
+router.put('/basic', updateBasic);
+router.put('/skills', updateSkills);
+router.put('/availability', updateAvailability);
 router.put('/settings', updateSettings);
-
-// @route   POST /api/profile/upload-picture
 router.post('/upload-picture', uploadProfilePicture);
-
-// @route   DELETE /api/profile/delete-picture
 router.delete('/delete-picture', deleteProfilePicture);
 
 export default router;

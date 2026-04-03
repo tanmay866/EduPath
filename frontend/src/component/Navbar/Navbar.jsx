@@ -77,6 +77,7 @@ const ArcNavbar = () => {
 
   const navItems = [
     { label: 'HOME', path: '/' },
+    { label: 'ROADMAP', path: '/roadmap' },
   ];
 
   const assessmentSubmenu = [

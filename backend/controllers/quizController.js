@@ -291,11 +291,11 @@ export const retryQuiz = async (req, res) => {
   }
 };
 
-    /**
- * Get all active topics with stats
- * @route   GET /api/topics
- * @access  Public
- */
+/**
+* Get all active topics with stats
+* @route   GET /api/topics
+* @access  Public
+*/
 export const getAllTopics = async (req, res) => {
   try {
     const topics = await Topic.getAllActiveWithStats();

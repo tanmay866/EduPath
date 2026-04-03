@@ -30,6 +30,12 @@ except ImportError as e:
     print(f"Error: resume_parser module not found. {e}")
     sys.exit(1)
 
+try:
+    from agents.roadmap_generator import RoadmapGeneratorAgent
+except ImportError as e:
+    print(f"Warning: Roadmap generator module not found. Feature disabled. {e}")
+    RoadmapGeneratorAgent = None
+
 # Import new modules for Skill Assessment with CrewAI
 try:
     from config.settings import settings
@@ -117,6 +123,40 @@ class SkillMatchRequest(BaseModel):
     """Request model for skill matching endpoint"""
     extracted_skills: List[str]
     database_skills: List[str]
+
+
+class SkillGapItem(BaseModel):
+    skill: str
+    gap_severity: str = "medium"
+    priority_rank: int = 0
+    current_score: float = 0.0
+    required_score: float = 80.0
+
+
+class CurrentSkillItem(BaseModel):
+    skill: str
+    level: str = "basic"
+
+
+class RoadmapGenerateRequest(BaseModel):
+    user_id: str
+    target_role: str
+    experience_level: str = "beginner"
+    hours_per_week: int = 10
+    learning_style: str = "mixed"
+    skill_gaps: List[SkillGapItem] = []
+    skill_scores: dict = {}
+    current_skills: List[CurrentSkillItem] = []
+
+
+class AdaptRoadmapRequest(BaseModel):
+    user_id: str
+    roadmap_id: str
+    progress_data: dict
+    adaptation_reason: str = "slow_progress"
+
+
+roadmap_agent = RoadmapGeneratorAgent() if RoadmapGeneratorAgent else None
 
 
 @app.get("/")
@@ -252,6 +292,77 @@ async def match_skills(request: SkillMatchRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error matching skills: {str(e)}")
+
+
+@app.get("/api/roles")
+async def list_supported_roles():
+    """Returns list of supported career roles."""
+    from data.role_templates import ROLE_TEMPLATES
+
+    return {
+        "roles": list(ROLE_TEMPLATES.keys()),
+        "count": len(ROLE_TEMPLATES),
+    }
+
+
+@app.get("/api/roles/{role_name}/skills")
+async def get_role_skills(role_name: str):
+    """Returns the full skill map for a given role."""
+    from data.role_templates import ROLE_TEMPLATES
+
+    for name, template in ROLE_TEMPLATES.items():
+        if name.lower() == role_name.lower():
+            return {
+                "role": name,
+                "skills": list(template["skills"].keys()),
+                "skill_count": len(template["skills"]),
+            }
+
+    raise HTTPException(status_code=404, detail=f"Role '{role_name}' not found.")
+
+
+@app.post("/api/roadmap/generate")
+async def generate_roadmap(request: RoadmapGenerateRequest):
+    """
+    Core roadmap generation endpoint.
+    Called by Node.js backend after skill gap analysis is available.
+    """
+    if not roadmap_agent:
+        raise HTTPException(status_code=503, detail="Roadmap generation module unavailable")
+
+    try:
+        payload = {
+            "user_id": request.user_id,
+            "target_role": request.target_role,
+            "experience_level": request.experience_level,
+            "hours_per_week": request.hours_per_week,
+            "learning_style": request.learning_style,
+            "skill_gaps": [g.dict() for g in request.skill_gaps],
+            "skill_scores": request.skill_scores,
+            "current_skills": [s.dict() for s in request.current_skills],
+        }
+
+        result = roadmap_agent.generate(payload)
+        return result
+
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
+
+
+@app.post("/api/roadmap/adapt")
+async def adapt_roadmap(request: AdaptRoadmapRequest):
+    """
+    Autonomous adaptation endpoint.
+    Placeholder for future AdaptationAgent implementation.
+    """
+    return {
+        "success": True,
+        "message": "Adaptation agent queued.",
+        "roadmap_id": request.roadmap_id,
+        "adaptation_reason": request.adaptation_reason,
+    }
     
 if SKILL_ASSESSMENT_ENABLED:
     @app.post(
