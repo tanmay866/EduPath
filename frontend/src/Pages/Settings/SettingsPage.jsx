@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Settings as SettingsIcon, Save, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
-import { updateSettings, changePassword } from '../Services/profileService';
+import { Settings as SettingsIcon, ArrowLeft, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { changePassword } from '../Services/profileService';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -22,13 +19,6 @@ const SettingsPage = () => {
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
 
-  // Settings Data
-  const [settings, setSettings] = useState({
-    theme: 'light',
-    language: 'Eng',
-    notificationEnabled: true
-  });
-
   useEffect(() => {
     // Check if user is logged in
     const email = sessionStorage.getItem('email');
@@ -36,9 +26,6 @@ const SettingsPage = () => {
       navigate('/signin');
       return;
     }
-
-    // Load data from sessionStorage
-    loadSettings();
   }, [navigate]);
 
   // Scroll-in animations
@@ -57,38 +44,6 @@ const SettingsPage = () => {
     document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
-
-  const loadSettings = () => {
-    const theme = sessionStorage.getItem('theme') || 'light';
-    const language = sessionStorage.getItem('language') || 'Eng';
-
-    setSettings({ theme, language, notificationEnabled: true });
-  };
-
-  const handleSettingsChange = (field, value) => {
-    setSettings(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSaveSettings = async () => {
-    setLoading(true);
-    setError('');
-    setMessage('');
-
-    try {
-      const response = await updateSettings(settings);
-      if (response.success) {
-        sessionStorage.setItem('theme', settings.theme);
-        sessionStorage.setItem('language', settings.language);
-        setMessage('Settings updated successfully!');
-        setTimeout(() => setMessage(''), 3000);
-      }
-    } catch (err) {
-      setError('Failed to update settings');
-      setTimeout(() => setError(''), 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -143,312 +98,212 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative overflow-hidden">
-      {/* Settings page background — subtle grid + slow drifting orbs */}
+    <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
       <div className="pointer-events-none fixed inset-0 z-0">
-        {/* Dot grid */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)',
           backgroundSize: '36px 36px',
-          opacity: 0.5,
         }} />
-        {/* Slow ambient orbs */}
         <div style={{
           position: 'absolute', top: '8%', left: '10%',
           width: 420, height: 420,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.09), transparent 70%)',
-          animation: 'profileOrb1 18s ease-in-out infinite alternate',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)',
+          animation: 'settingOrb1 18s ease-in-out infinite alternate',
         }} />
         <div style={{
           position: 'absolute', bottom: '10%', right: '8%',
           width: 360, height: 360,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%)',
-          animation: 'profileOrb2 22s ease-in-out infinite alternate',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)',
+          animation: 'settingOrb2 22s ease-in-out infinite alternate',
         }} />
         <div style={{
           position: 'absolute', top: '45%', right: '20%',
           width: 260, height: 260,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(56,189,248,0.06), transparent 70%)',
-          animation: 'profileOrb1 26s ease-in-out infinite alternate-reverse',
+          background: 'radial-gradient(circle, rgba(56,189,248,0.03), transparent 70%)',
+          animation: 'settingOrb1 26s ease-in-out infinite alternate-reverse',
         }} />
       </div>
       <style>{`
-        @keyframes profileOrb1 {
+        @keyframes settingOrb1 {
           from { transform: translate(0, 0) scale(1); }
           to   { transform: translate(40px, 30px) scale(1.08); }
         }
-        @keyframes profileOrb2 {
+        @keyframes settingOrb2 {
           from { transform: translate(0, 0) scale(1); }
           to   { transform: translate(-35px, -25px) scale(1.06); }
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* Static glow blobs — complement animated orbs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-40 right-10 w-64 h-64 bg-purple-600/8 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-80 left-0 w-56 h-56 bg-cyan-600/8 rounded-full blur-3xl pointer-events-none" />
-        {/* Header */}
-        <div data-animate className="mb-8 flex items-center gap-4" style={{transitionDelay: '0s'}}>
-          <button
-            onClick={() => navigate('/profile')}
-            className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-white/20"
-          >
-            <ArrowLeft size={24} className="text-gray-400" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-            <p className="text-gray-400">Manage your preferences and account settings</p>
-          </div>
-        </div>
-
-        {/* Success/Error Messages */}
-        {message && (
-          <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl">
-            {message}
-          </div>
-        )}
-        {error && (
-          <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl">
-            {error}
-          </div>
-        )}
-
-        {/* Main Settings Grid - Preferences and Password Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {/* Preferences Card */}
-          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-8 border border-white/10 h-full shadow-xl" style={{transitionDelay: '0.1s'}}>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 backdrop-blur-lg bg-purple-500/30 rounded-xl flex items-center justify-center border border-purple-400/30">
-                <SettingsIcon size={24} className="text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">Preferences</h3>
-                <p className="text-gray-400 text-sm">Customize your experience</p>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              {/* Theme Setting */}
-              <div className="flex items-center justify-between py-4 border-b border-white/10">
-                <div>
-                  <label className="text-base font-medium text-white">Theme</label>
-                  <p className="text-sm text-gray-400 mt-1">Choose your preferred theme</p>
-                </div>
-                <div className="relative min-w-[160px]">
-                  <select
-                    value={settings.theme}
-                    onChange={(e) => handleSettingsChange('theme', e.target.value)}
-                    className="w-full appearance-none px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
-                    style={{ colorScheme: 'dark' }}
-                  >
-                    <option value="light" className="bg-black text-white">Light</option>
-                    <option value="dark" className="bg-black text-white">Dark</option>
-                  </select>
-                  <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Language Setting */}
-              <div className="flex items-center justify-between py-4 border-b border-white/10">
-                <div>
-                  <label className="text-base font-medium text-white">Language</label>
-                  <p className="text-sm text-gray-400 mt-1">Select your language</p>
-                </div>
-                <div className="relative min-w-[160px]">
-                  <select
-                    value={settings.language}
-                    onChange={(e) => handleSettingsChange('language', e.target.value)}
-                    className="w-full appearance-none px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500 text-base"
-                    style={{ colorScheme: 'dark' }}
-                  >
-                    <option value="Eng" className="bg-black text-white">English</option>
-                    <option value="Esp" className="bg-black text-white">Spanish</option>
-                    <option value="Fra" className="bg-black text-white">French</option>
-                    <option value="Ger" className="bg-black text-white">German</option>
-                  </select>
-                  <ChevronDown size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Notification Setting */}
-              <div className="flex items-center justify-between py-4">
-                <div>
-                  <label className="text-base font-medium text-white">Notifications</label>
-                  <p className="text-sm text-gray-400 mt-1">Enable or disable notifications</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.notificationEnabled}
-                    onChange={(e) => handleSettingsChange('notificationEnabled', e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-14 h-7 backdrop-blur-lg bg-white/10 border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500/40 peer-checked:border-purple-400/50"></div>
-                </label>
-              </div>
-
-              {/* Save Button */}
-              <div className="pt-6">
-                <button
-                  onClick={handleSaveSettings}
-                  disabled={loading}
-                  className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-purple-500/30 hover:bg-purple-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-purple-400/50 hover:border-purple-400/70 hover:shadow-xl hover:shadow-purple-500/50"
-                >
-                  <Save size={20} />
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Change Password Card */}
-          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-8 border border-white/10 h-full shadow-xl" style={{transitionDelay: '0.2s'}}>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 backdrop-blur-lg bg-indigo-500/30 rounded-xl flex items-center justify-center border border-indigo-400/30">
-                <Lock size={24} className="text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">Change Password</h3>
-                <p className="text-gray-400 text-sm">Update your account password</p>
-              </div>
-            </div>
-
-            {/* Password Messages */}
-            {passwordMessage && (
-              <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl font-medium">
-                {passwordMessage}
-              </div>
-            )}
-            {passwordError && (
-              <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl font-medium">
-                {passwordError}
-              </div>
-            )}
-
-            <form onSubmit={handleChangePassword} className="space-y-5">
-              {/* Current Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Current Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showCurrentPw ? 'text' : 'password'}
-                    name="currentPassword"
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 pr-11 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                    placeholder="Enter current password"
-                  />
-                  <button type="button" onClick={() => setShowCurrentPw(p => !p)} tabIndex={-1}
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors">
-                    {showCurrentPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* New Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  New Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showNewPw ? 'text' : 'password'}
-                    name="newPassword"
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 pr-11 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                    placeholder="Enter new password"
-                  />
-                  <button type="button" onClick={() => setShowNewPw(p => !p)} tabIndex={-1}
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors">
-                    {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Confirm New Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Confirm New Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPw ? 'text' : 'password'}
-                    name="confirmPassword"
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    className="w-full px-4 py-3 pr-11 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                    placeholder="Confirm new password"
-                  />
-                  <button type="button" onClick={() => setShowConfirmPw(p => !p)} tabIndex={-1}
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors">
-                    {showConfirmPw ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Change Password Button */}
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={passwordLoading}
-                  className="w-full md:w-auto px-8 py-3.5 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
-                >
-                  <Lock size={20} />
-                  {passwordLoading ? 'Changing...' : 'Change Password'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        {/* Additional Settings Sections */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Account Settings */}
-          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg" style={{transitionDelay: '0.1s'}}>
-            <h4 className="text-lg font-semibold text-white mb-2">Account</h4>
-            <p className="text-gray-400 text-sm mb-4">Manage your account settings</p>
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 relative z-10 items-start">
+        {/* Left Column (Spans 4 Columns) - Header & Preferences */}
+        <div className="lg:col-span-4 flex flex-col gap-5">
+          {/* Header */}
+          <div data-animate className="mb-4 flex items-center gap-4" style={{ transitionDelay: '0s' }}>
             <button
               onClick={() => navigate('/profile')}
-              className="text-purple-400 hover:text-purple-300 text-sm font-medium"
+              className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5"
             >
-              Go to Profile →
+              <ArrowLeft size={20} className="text-gray-400" />
             </button>
+            <div>
+              <h1 className="text-3xl font-black text-white leading-none tracking-tight">Settings</h1>
+              <p className="text-slate-400 text-sm mt-1">Manage your preferences</p>
+            </div>
           </div>
 
-          {/* Privacy Settings */}
-          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg" style={{transitionDelay: '0.2s'}}>
-            <h4 className="text-lg font-semibold text-white mb-2">Privacy</h4>
-            <p className="text-gray-400 text-sm mb-4">Control your privacy settings</p>
-            <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
-              Coming Soon
-            </button>
+
+          {/* Quick Links Group */}
+          <div className="rounded-[1.5rem] border border-white/5 overflow-hidden shadow-xl bg-[#0a0a0a]/50">
+            {/* Account Settings */}
+            <div data-animate className="backdrop-blur-xl py-4 px-5 border-b border-white/5 hover:bg-white/[0.03] transition-all cursor-pointer group flex items-center justify-between" onClick={() => navigate('/profile')} style={{ transitionDelay: '0.1s' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-indigo-500/10 rounded-xl flex items-center justify-center group-hover:scale-105 group-hover:bg-indigo-500/20 transition-all border border-indigo-500/20">
+                  <User size={16} className="text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white tracking-wide">Account settings</h3>
+                  <p className="text-slate-500 text-xs mt-0.5">Edit personal info</p>
+                </div>
+              </div>
+              <ArrowLeft className="text-slate-600 group-hover:text-white transition-colors rotate-180" size={16} />
+            </div>
+
+            {/* Privacy Settings */}
+            <div data-animate className="backdrop-blur-xl py-4 px-5 border-b border-white/5 hover:bg-white/[0.03] transition-all cursor-pointer group flex items-center justify-between" style={{ transitionDelay: '0.2s' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center group-hover:scale-105 group-hover:bg-emerald-500/20 transition-all border border-emerald-500/20">
+                  <EyeOff size={16} className="text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white tracking-wide">Privacy & Data</h3>
+                  <p className="text-slate-500 text-xs mt-0.5">Control footprint</p>
+                </div>
+              </div>
+              <ArrowLeft className="text-slate-600 group-hover:text-white transition-colors rotate-180" size={16} />
+            </div>
+
+            {/* Help & Support */}
+            <div data-animate className="backdrop-blur-xl py-4 px-5 hover:bg-white/[0.03] transition-all cursor-pointer group flex items-center justify-between" style={{ transitionDelay: '0.3s' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-cyan-500/10 rounded-xl flex items-center justify-center group-hover:scale-105 group-hover:bg-cyan-500/20 transition-all border border-cyan-500/20">
+                  <SettingsIcon size={16} className="text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white tracking-wide">Help & Support</h3>
+                  <p className="text-slate-500 text-xs mt-0.5">Get assistance</p>
+                </div>
+              </div>
+              <ArrowLeft className="text-slate-600 group-hover:text-white transition-colors rotate-180" size={16} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column (Spans 8 Columns) */}
+        <div className="lg:col-span-8 backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6 lg:p-8 relative flex flex-col">
+          <div className="flex items-center gap-4 mb-6 shrink-0">
+            <div className="w-10 h-10 bg-white/[0.03] border border-white/10 rounded-xl flex items-center justify-center">
+              <Lock size={20} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Account Security</h2>
+              <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] uppercase tracking-wider font-bold text-emerald-400 mt-2 inline-block">
+                Authentication
+              </span>
+            </div>
           </div>
 
-          {/* Security Settings */}
-          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/20 transition-all shadow-lg" style={{transitionDelay: '0.3s'}}>
-            <h4 className="text-lg font-semibold text-white mb-2">Security</h4>
-            <p className="text-gray-400 text-sm mb-4">Password changed successfully</p>
-            <button className="text-green-400 text-sm font-medium">
-              ✓ Password Settings Active
-            </button>
-          </div>
+          {/* Password Messages Overlay */}
+          {passwordMessage && (
+            <div className="mb-6 backdrop-blur-lg bg-green-500/10 border border-green-500/30 text-green-400 px-5 py-4 rounded-xl font-medium text-sm">
+              {passwordMessage}
+            </div>
+          )}
+          {passwordError && (
+            <div className="mb-6 backdrop-blur-lg bg-red-500/10 border border-red-500/30 text-red-400 px-5 py-4 rounded-xl font-medium text-sm">
+              {passwordError}
+            </div>
+          )}
 
-          {/* Help & Support */}
-          <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20 transition-all shadow-lg" style={{transitionDelay: '0.4s'}}>
-            <h4 className="text-lg font-semibold text-white mb-2">Help & Support</h4>
-            <p className="text-gray-400 text-sm mb-4">Get help and contact support</p>
-            <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
-              Contact Us
-            </button>
-          </div>
+          <form onSubmit={handleChangePassword} className="space-y-4 flex-1 flex flex-col">
+            <div className="p-0.5">
+              <label className="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-wider uppercase ml-1">
+                Current Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPw ? 'text' : 'password'}
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 pr-12 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors text-sm"
+                  placeholder="Enter current password"
+                />
+                <button type="button" onClick={() => setShowCurrentPw(p => !p)} tabIndex={-1}
+                  className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-white transition-colors">
+                  {showCurrentPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-0.5">
+              <label className="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-wider uppercase ml-1">
+                New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPw ? 'text' : 'password'}
+                  name="newPassword"
+                  value={passwordData.newPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 pr-12 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors text-sm"
+                  placeholder="Enter new password"
+                />
+                <button type="button" onClick={() => setShowNewPw(p => !p)} tabIndex={-1}
+                  className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-white transition-colors">
+                  {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="p-0.5">
+              <label className="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-wider uppercase ml-1">
+                Confirm New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPw ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={passwordData.confirmPassword}
+                  onChange={handlePasswordChange}
+                  className="w-full px-4 py-3 pr-12 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors text-sm"
+                  placeholder="Confirm new password"
+                />
+                <button type="button" onClick={() => setShowConfirmPw(p => !p)} tabIndex={-1}
+                  className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-white transition-colors">
+                  {showConfirmPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-6 mt-2 border-t border-white/5 flex justify-end">
+              <button
+                type="submit"
+                disabled={passwordLoading}
+                className="px-6 py-3 rounded-xl font-bold text-sm transition-all duration-500 group bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2.5"
+              >
+                <span className="tracking-wide">{passwordLoading ? 'Updating Security...' : 'Update Password'}</span>
+                {!passwordLoading && (
+                  <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                    <Lock size={12} className="text-white" />
+                  </div>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

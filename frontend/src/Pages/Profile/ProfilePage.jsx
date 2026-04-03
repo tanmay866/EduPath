@@ -373,36 +373,33 @@ const ProfilePage = () => {
   const firstLetter = profileData.firstName?.charAt(0)?.toUpperCase() || 'U';
 
   return (
-    <div className="min-h-screen bg-black pt-32 pb-20 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-black pt-32 pb-20 px-8 relative overflow-hidden flex flex-col justify-center">
       {/* Profile page background — subtle grid + slow drifting orbs */}
       <div className="pointer-events-none fixed inset-0 z-0">
-        {/* Dot grid */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)',
           backgroundSize: '36px 36px',
-          opacity: 0.5,
         }} />
-        {/* Slow ambient orbs */}
         <div style={{
           position: 'absolute', top: '8%', left: '10%',
           width: 420, height: 420,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.09), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)',
           animation: 'profileOrb1 18s ease-in-out infinite alternate',
         }} />
         <div style={{
           position: 'absolute', bottom: '10%', right: '8%',
           width: 360, height: 360,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)',
           animation: 'profileOrb2 22s ease-in-out infinite alternate',
         }} />
         <div style={{
           position: 'absolute', top: '45%', right: '20%',
           width: 260, height: 260,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(56,189,248,0.06), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(56,189,248,0.03), transparent 70%)',
           animation: 'profileOrb1 26s ease-in-out infinite alternate-reverse',
         }} />
       </div>
@@ -417,252 +414,239 @@ const ProfilePage = () => {
         }
       `}</style>
 
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Static glow blobs — complement animated orbs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-40 right-10 w-64 h-64 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-80 left-0 w-56 h-56 bg-cyan-600/8 rounded-full blur-3xl pointer-events-none" />
-        {/* Header */}
-        <div data-animate className="mb-8 flex items-center gap-4" style={{transitionDelay: '0s'}}>
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-lg transition-all border border-white/10 hover:border-white/20"
-          >
-            <ArrowLeft size={24} className="text-gray-400" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Profile Settings</h1>
-            <p className="text-gray-400">Manage your account settings and preferences</p>
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 relative z-10 items-start">
+        {/* Left Column (Spans 4 Columns) */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          <div data-animate className="mb-6 flex items-center gap-4" style={{transitionDelay: '0s'}}>
+            <button
+              onClick={() => navigate('/')}
+              className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5"
+            >
+              <ArrowLeft size={20} className="text-gray-400" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-black text-white leading-none tracking-tight">Profile</h1>
+              <p className="text-slate-400 text-sm mt-1">Manage your account settings</p>
+            </div>
+          </div>
+
+          {/* Success/Error Messages */}
+          {message && (
+            <div className="mb-4 backdrop-blur-lg bg-green-500/10 border border-green-500/30 text-green-400 px-5 py-3 rounded-xl font-medium shadow-xl text-sm">
+              {message}
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 backdrop-blur-lg bg-red-500/10 border border-red-500/30 text-red-400 px-5 py-3 rounded-xl font-medium shadow-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Profile Card */}
+          <div data-animate className="backdrop-blur-xl bg-[#0a0a0a]/80 rounded-[2rem] p-8 border border-white/5 transition-all shadow-xl flex flex-col items-center" style={{transitionDelay: '0.1s'}}>
+            <div className="relative inline-block mb-5 group">
+              <input
+                type="file"
+                id="profile-picture-input"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              {profileData.profilePicture && !imageLoadError ? (
+                <div className="w-28 h-28 rounded-full p-1 bg-gradient-to-br from-indigo-500/40 to-violet-500/40 backdrop-blur-sm">
+                  <img
+                    src={profileData.profilePicture}
+                    alt="Profile"
+                    className="w-full h-full rounded-full object-cover border border-white/10"
+                    onError={() => setImageLoadError(true)}
+                    onLoad={() => setImageLoadError(false)}
+                  />
+                </div>
+              ) : (
+                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-4xl shadow-inner border border-white/10">
+                  {firstLetter}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleImageClick}
+                className="absolute bottom-0 right-0 w-9 h-9 backdrop-blur-lg bg-indigo-500 border-2 border-[#0a0a0a] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg shadow-indigo-500/40 group-hover:bg-indigo-400"
+              >
+                <div className="w-4 h-4 bg-white/20 rounded-sm opacity-80" />
+              </button>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-white tracking-tight">{fullName}</h2>
+            <p className="text-slate-400 text-sm mb-6 bg-white/[0.03] px-3 py-1 rounded-full mt-2 font-medium">{profileData.email}</p>
+            
+            <div className="w-full border-t border-white/5 pt-5 space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02]">
+                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Role</span>
+                <span className="text-slate-300 font-medium capitalize text-sm">{profileData.role || 'Student'}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02]">
+                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Login ID</span>
+                <span className="text-slate-300 font-medium text-sm">{sessionStorage.getItem('loginId') || 'N/A'}</span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02]">
+                <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Status</span>
+                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] uppercase tracking-widest font-bold border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]">Active</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div data-animate className="backdrop-blur-xl bg-[#0a0a0a]/50 rounded-[1.5rem] p-5 border border-white/5 hover:bg-[#0a0a0a]/80 transition-all cursor-pointer group shadow-lg flex items-center justify-between" onClick={() => navigate('/resume')} style={{transitionDelay: '0.2s'}}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center group-hover:scale-105 group-hover:bg-indigo-500/20 transition-all">
+                <FileText size={20} className="text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white tracking-wide">Resume</h3>
+                <p className="text-slate-500 text-xs mt-0.5">Manage your documents</p>
+              </div>
+            </div>
+            <ArrowLeft className="text-slate-600 group-hover:text-white transition-colors rotate-180" size={18} />
+          </div>
+
+          <div data-animate className="backdrop-blur-xl bg-[#0a0a0a]/50 rounded-[1.5rem] p-5 border border-white/5 hover:bg-[#0a0a0a]/80 transition-all cursor-pointer group shadow-lg flex items-center justify-between" onClick={() => navigate('/settings')} style={{transitionDelay: '0.3s'}}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-slate-800/50 border border-white/10 rounded-xl flex items-center justify-center group-hover:scale-105 group-hover:bg-white/5 transition-all">
+                <SettingsIcon size={20} className="text-slate-400 group-hover:text-white transition-colors" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white tracking-wide">Settings</h3>
+                <p className="text-slate-500 text-xs mt-0.5">App preferences</p>
+              </div>
+            </div>
+            <ArrowLeft className="text-slate-600 group-hover:text-white transition-colors rotate-180" size={18} />
           </div>
         </div>
 
-        {/* Success/Error Messages */}
-        {message && (
-          <div className="mb-6 backdrop-blur-lg bg-green-500/20 border border-green-500/50 text-green-400 px-6 py-4 rounded-xl font-medium shadow-xl">
-            {message}
-          </div>
-        )}
-        {error && (
-          <div className="mb-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-red-400 px-6 py-4 rounded-xl font-medium shadow-xl">
-            {error}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* Left Column - Profile Card */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/30 transition-all shadow-xl" style={{transitionDelay: '0.1s'}}>
-              <div className="text-center">
-                <div className="relative inline-block mb-4">
-                  <input
-                    type="file"
-                    id="profile-picture-input"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  {profileData.profilePicture && !imageLoadError ? (
-                    <img
-                      src={profileData.profilePicture}
-                      alt="Profile"
-                      className="w-24 h-24 rounded-full object-cover border-4 border-slate-700"
-                      onError={() => setImageLoadError(true)}
-                      onLoad={() => setImageLoadError(false)}
-                    />
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-3xl">
-                      {firstLetter}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleImageClick}
-                    className="absolute bottom-0 right-0 w-8 h-8 backdrop-blur-lg bg-indigo-500/40 rounded-full flex items-center justify-center hover:bg-indigo-500/50 transition-all border-2 border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-500/50"
-                  >
-                    ✏️
-                  </button>
-                </div>
-                <h2 className="text-xl font-semibold text-white mb-1">{fullName}</h2>
-                <p className="text-gray-400 text-sm mb-4">{profileData.email}</p>
-                
-                <div className="border-t border-white/10 pt-4 mt-4">
-                  <div className="flex items-center justify-between py-3">
-                    <span className="text-gray-400 text-sm">Role</span>
-                    <span className="text-white font-medium capitalize">{profileData.role || 'Student'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-3">
-                    <span className="text-gray-400 text-sm">Login ID</span>
-                    <span className="text-white font-medium">{sessionStorage.getItem('loginId') || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-3">
-                    <span className="text-gray-400 text-sm">Status</span>
-                    <span className="px-3 py-1 backdrop-blur-lg bg-green-500/20 text-green-400 rounded-full text-xs font-semibold border border-green-500/30">Active</span>
-                  </div>
-                </div>
-              </div>
+        {/* Right Column (Spans 8 Columns) */}
+        <div className="lg:col-span-8 backdrop-blur-3xl bg-[#090b14]/70 rounded-[2rem] border border-white/5 shadow-2xl p-6 lg:p-10 relative flex flex-col h-full">
+          <div className="flex items-center gap-4 mb-8 shrink-0">
+            <div className="w-12 h-12 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center justify-center">
+              <User size={22} className="text-white" />
             </div>
-
-            {/* Resume Card - Navigate to Resume Page */}
-            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/resume')} style={{transitionDelay: '0.2s'}}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 backdrop-blur-lg bg-emerald-500/30 border border-emerald-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/40 group-hover:border-emerald-400/50 transition-all">
-                    <FileText size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Resume</h3>
-                    <p className="text-gray-400 text-sm">Upload your resume</p>
-                  </div>
-                </div>
-                <div className="text-gray-400 group-hover:text-white transition-colors">
-                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Settings Card - Navigate to Settings Page */}
-            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-500/20 transition-all cursor-pointer group shadow-lg" onClick={() => navigate('/settings')} style={{transitionDelay: '0.3s'}}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 backdrop-blur-lg bg-purple-500/30 border border-purple-400/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-500/40 group-hover:border-purple-400/50 transition-all">
-                    <SettingsIcon size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">Settings</h3>
-                    <p className="text-gray-400 text-sm">Manage your preferences</p>
-                  </div>
-                </div>
-                <div className="text-gray-400 group-hover:text-white transition-colors">
-                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Profile Information</h2>
+              <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] uppercase tracking-wider font-bold text-indigo-400 mt-2 inline-block">
+                Editable Details
+              </span>
             </div>
           </div>
 
-          {/* Right Column - Forms */}
-          <div className="lg:col-span-2">
-            {/* Profile Information Card */}
-            <div data-animate className="backdrop-blur-xl bg-slate-900/60 rounded-2xl p-6 border border-white/10 h-full shadow-xl" style={{transitionDelay: '0.15s'}}>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 backdrop-blur-lg bg-indigo-500/30 border border-indigo-400/30 rounded-xl flex items-center justify-center">
-                  <User size={20} className="text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Profile Information</h3>
-                  <p className="text-gray-400 text-sm">Update your personal details</p>
-                </div>
+          <form onSubmit={handleSaveProfile} className="space-y-6 flex-1 flex flex-col">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-1 rounded-2xl">
+                <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider uppercase ml-2">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  name="firstName"
+                  value={profileData.firstName}
+                  onChange={handleProfileChange}
+                  className="w-full px-5 py-4 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors"
+                  placeholder="Enter first name"
+                />
               </div>
+              <div className="p-1 rounded-2xl">
+                <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider uppercase ml-2">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={profileData.lastName}
+                  onChange={handleProfileChange}
+                  className="w-full px-5 py-4 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors"
+                  placeholder="Enter last name"
+                />
+              </div>
+            </div>
 
-              <form onSubmit={handleSaveProfile} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={profileData.firstName}
-                      onChange={handleProfileChange}
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                      placeholder="Enter first name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={profileData.lastName}
-                      onChange={handleProfileChange}
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                      placeholder="Enter last name"
-                    />
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-1 rounded-2xl opacity-80">
+                <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider uppercase ml-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={profileData.email}
+                  disabled
+                  className="w-full px-5 py-4 bg-[#050505] border border-white/5 rounded-xl text-slate-500 cursor-not-allowed"
+                />
+                <p className="text-[10px] text-slate-500 mt-2 ml-2 italic">Cannot be changed</p>
+              </div>
+              <div className="p-1 rounded-2xl">
+                <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider uppercase ml-2">
+                  Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={profileData.phone}
+                  onChange={handleProfileChange}
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  maxLength="10"
+                  className="w-full px-5 py-4 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors"
+                  placeholder="Add phone number"
+                />
+              </div>
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      value={profileData.email}
-                      disabled
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-gray-400 cursor-not-allowed"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Mobile Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={profileData.phone}
-                      onChange={handleProfileChange}
-                      pattern="[0-9]*"
-                      inputMode="numeric"
-                      maxLength="10"
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                      placeholder="Add phone number"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Role
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="role"
-                      value={profileData.role}
-                      onChange={handleProfileChange}
-                      className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
-                      style={{ colorScheme: 'dark' }}
-                    >
-                      <option value="student" className="bg-black text-white">Student</option>
-                      <option value="developer" className="bg-black text-white">Developer</option>
-                      <option value="other" className="bg-black text-white">Other</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Skills
-                  </label>
-                  <input
-                    type="text"
-                    name="skills"
-                    value={profileData.skills}
-                    onChange={handleProfileChange}
-                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500/50 transition-all"
-                    placeholder="e.g., JavaScript, React, Node.js"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full md:w-auto px-6 py-3 backdrop-blur-lg bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-semibold rounded-xl transition-all disabled:bg-gray-600/30 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-indigo-400/50 hover:border-indigo-400/70 hover:shadow-xl hover:shadow-indigo-500/50"
+            <div className="p-1 rounded-2xl">
+              <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider uppercase ml-2">
+                Primary Role
+              </label>
+              <div className="relative">
+                <select
+                  name="role"
+                  value={profileData.role}
+                  onChange={handleProfileChange}
+                  className="w-full px-5 py-4 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors appearance-none cursor-pointer"
+                  style={{ colorScheme: 'dark' }}
                 >
-                  <Save size={18} />
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </form>
+                  <option value="student" className="bg-[#0a0a0a] text-white">Student</option>
+                  <option value="developer" className="bg-[#0a0a0a] text-white">Developer</option>
+                  <option value="other" className="bg-[#0a0a0a] text-white">Other</option>
+                </select>
+                <ChevronDown className="absolute right-5 top-1/2 transform -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
+              </div>
             </div>
-          </div>
+
+            <div className="p-1 rounded-2xl">
+              <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider uppercase ml-2">
+                Skills
+              </label>
+              <input
+                type="text"
+                name="skills"
+                value={profileData.skills}
+                onChange={handleProfileChange}
+                className="w-full px-5 py-4 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors"
+                placeholder="e.g., JavaScript, React, Node.js"
+              />
+            </div>
+
+            <div className="pt-8 mt-auto border-t border-white/5 flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-8 py-4 rounded-xl font-bold text-sm transition-all duration-500 group bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+              >
+                <span className="tracking-wide">{loading ? 'Saving Changes...' : 'Save Profile Details'}</span>
+                {!loading && (
+                  <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                    <Save size={12} className="text-white" />
+                  </div>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
