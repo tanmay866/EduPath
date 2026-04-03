@@ -26,6 +26,8 @@ dotenv.config();
 // Create Express app
 const app = express();
 
+const frontendOrigin = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+
 // Connect to MongoDB
 connectDB();
 
@@ -35,7 +37,7 @@ verifyEmailConfig();
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: frontendOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

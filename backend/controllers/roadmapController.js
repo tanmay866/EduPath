@@ -35,6 +35,38 @@ const resolveRoadmapProfile = (user) => {
     };
 };
 
+const normalizeCurrentSkillsForAI = (currentSkills) => {
+    if (!Array.isArray(currentSkills)) {
+        return [];
+    }
+
+    return currentSkills
+        .map((item) => {
+            if (!item) {
+                return null;
+            }
+
+            if (typeof item === 'string') {
+                const skill = item.trim();
+                return skill ? { skill, level: 'basic' } : null;
+            }
+
+            if (typeof item === 'object') {
+                const skill = String(item.skill || item.name || '').trim();
+                if (!skill) {
+                    return null;
+                }
+
+                const level = String(item.level || 'basic').trim().toLowerCase() || 'basic';
+                return { skill, level };
+            }
+
+            const skill = String(item).trim();
+            return skill ? { skill, level: 'basic' } : null;
+        })
+        .filter(Boolean);
+};
+
 // ─────────────────────────────────────────────
 // POST /api/roadmap/generate
 // ─────────────────────────────────────────────
@@ -97,7 +129,7 @@ export const generateRoadmap = async (req, res) => {
             skill_scores: skillGap?.skill_scores
                 ? Object.fromEntries(skillGap.skill_scores)
                 : {},
-            current_skills: user.current_skills,
+            current_skills: normalizeCurrentSkillsForAI(user.current_skills),
         };
 
         let aiResult;
