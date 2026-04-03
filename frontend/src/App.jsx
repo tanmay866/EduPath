@@ -21,6 +21,7 @@ import AllResult from './Pages/Assessment/Result/AllResult'
 import FAQ from './Pages/FAQ/FAQ'
 import Services from './Pages/Services/Services'
 import CareerRoadmap from './Pages/Roadmap/CareerRoadmap'
+import RoadmapPage from './Pages/Roadmap/RoadmapPage'
 
 // New Features - Resume Builder, Portfolio Generator, ATS Analyzer
 import ResumeBuilder from './component/features/ResumeBuilder'
@@ -114,6 +115,7 @@ const App = () => {
           <Route path="/faq" element={<PageTransition><Navbar /><FAQ /></PageTransition>} />
           <Route path="/services" element={<PageTransition><Navbar /><Services /></PageTransition>} />
           <Route path="/roadmap" element={<PageTransition><Navbar /><CareerRoadmap /></PageTransition>} />
+          <Route path="/roadmap/generate" element={<PageTransition><Navbar /><RoadmapPage /></PageTransition>} />
           <Route path="/signup" element={<PageTransition><Navbar /><Signup /></PageTransition>} />
           <Route path="/signin" element={<PageTransition><Navbar /><Signin /></PageTransition>} />
           <Route path="/reset-password/:token" element={<PageTransition><Navbar /><ResetPassword /></PageTransition>} />

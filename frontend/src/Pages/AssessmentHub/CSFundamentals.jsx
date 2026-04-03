@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Code, CheckCircle, Clock, Award, XCircle, RotateCcw } from 'lucide-react';
+import { Code, CheckCircle, Clock, Award, XCircle, RotateCcw, Play } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
@@ -213,66 +213,108 @@ const CSFundamentals = () => {
   // Configure Stage
   if (stage === 'configure') {
     return (
-      <div className="min-h-screen bg-black relative flex items-center justify-center pt-28 pb-8 px-4">
-        <div className="max-w-2xl w-full mx-auto relative z-10">
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6">
-            <div className="text-center mb-5">
-              <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-emerald-500/40">
-                <Code size={32} strokeWidth={2} />
+      <div className="min-h-screen bg-black w-full relative pt-32 pb-12 px-8 flex flex-col justify-center overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 relative z-10 items-center h-full max-h-[600px]">
+          
+          {/* Left Column: Branding (Spans 5 Columns) */}
+          <div className="lg:col-span-5 flex flex-col justify-center h-full">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mb-6 w-max">
+              <Code size={16} className="animate-pulse" />
+              <span className="text-xs font-bold tracking-widest uppercase">Technical Assessment Engine</span>
+            </div>
+            
+            <h1 className="text-4xl lg:text-5xl font-black text-white mb-5 leading-[1.1] tracking-tight">
+              Test Your <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">CS Fundamentals</span>
+            </h1>
+            
+            <p className="text-slate-400 text-lg mb-8 font-light max-w-md leading-relaxed hidden md:block">
+              Solidify your core computer science knowledge. Evaluate your grasp on data structures, algorithms, and system concepts to sharpen your technical edge.
+            </p>
+
+            <div className="space-y-4 hidden md:block">
+              {[
+                { icon: "💻", title: "Core Concepts", desc: "Data structures and algorithms focus" },
+                { icon: "⏱️", title: "Time Management", desc: "Practice under realistic constraints" },
+                { icon: "📈", title: "Performance Stats", desc: "Detailed breakdown of your results" }
+              ].map((f, i) => (
+                <div key={i} className="flex items-center gap-4 group">
+                  <div className="w-12 h-12 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center text-xl group-hover:bg-white/[0.05] group-hover:-translate-y-0.5 transition-all">
+                    {f.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm tracking-wide mb-1">{f.title}</h3>
+                    <p className="text-slate-500 text-xs">{f.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Interactive Configuration (Spans 7 Columns) */}
+          <div className="lg:col-span-7 backdrop-blur-3xl bg-[#090b14]/70 rounded-[2rem] border border-white/5 shadow-2xl p-6 lg:p-8 relative flex flex-col h-full max-h-[550px] justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-8 shrink-0">
+                <h2 className="text-2xl font-bold text-white">Configure Your Quiz</h2>
+                <span className="px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 text-[11px] uppercase tracking-wider font-bold text-slate-400">
+                  Customizable
+                </span>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-1">Configure Your Quiz</h1>
-              <p className="text-slate-300 text-sm">Customize your CS fundamentals test experience</p>
+
+              <div className="space-y-6 flex-1 pr-2">
+                {/* Difficulty Level */}
+                <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] transition-colors focus-within:border-cyan-500/30">
+                  <label className="block text-sm font-bold text-slate-300 mb-3 tracking-wide">
+                    Difficulty Level
+                  </label>
+                  <select
+                    value={quizConfig.difficulty}
+                    onChange={(e) => setQuizConfig({ ...quizConfig, difficulty: e.target.value })}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 hover:bg-white/[0.02] transition-colors appearance-none cursor-pointer"
+                  >
+                    <option value="Easy" className="bg-[#0a0a0a] text-white">Easy</option>
+                    <option value="Medium" className="bg-[#0a0a0a] text-white">Medium</option>
+                    <option value="Hard" className="bg-[#0a0a0a] text-white">Hard</option>
+                  </select>
+                </div>
+
+                {/* Number of Questions */}
+                <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] transition-colors focus-within:border-cyan-500/30">
+                  <label className="block text-sm font-bold text-slate-300 mb-3 tracking-wide">
+                    Number of Questions
+                  </label>
+                  <select
+                    value={quizConfig.questionCount}
+                    onChange={(e) => setQuizConfig({ ...quizConfig, questionCount: parseInt(e.target.value) })}
+                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 hover:bg-white/[0.02] transition-colors appearance-none cursor-pointer"
+                  >
+                    <option value="5" className="bg-[#0a0a0a] text-white">5 Questions</option>
+                    <option value="10" className="bg-[#0a0a0a] text-white">10 Questions</option>
+                    <option value="15" className="bg-[#0a0a0a] text-white">15 Questions</option>
+                    <option value="20" className="bg-[#0a0a0a] text-white">20 Questions</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              {/* Difficulty Level */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Difficulty Level
-                </label>
-                <select
-                  value={quizConfig.difficulty}
-                  onChange={(e) => setQuizConfig({ ...quizConfig, difficulty: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#1a1f2e] border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  <option value="Easy" className="bg-[#1a1f2e] text-white">Easy</option>
-                  <option value="Medium" className="bg-[#1a1f2e] text-white">Medium</option>
-                  <option value="Hard" className="bg-[#1a1f2e] text-white">Hard</option>
-                </select>
-              </div>
-
-              {/* Number of Questions */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Number of Questions
-                </label>
-                <select
-                  value={quizConfig.questionCount}
-                  onChange={(e) => setQuizConfig({ ...quizConfig, questionCount: parseInt(e.target.value) })}
-                  className="w-full px-4 py-3 bg-[#1a1f2e] border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  <option value="5" className="bg-[#1a1f2e] text-white">5 Questions</option>
-                  <option value="10" className="bg-[#1a1f2e] text-white">10 Questions</option>
-                  <option value="15" className="bg-[#1a1f2e] text-white">15 Questions</option>
-                  <option value="20" className="bg-[#1a1f2e] text-white">20 Questions</option>
-                </select>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-4 pt-2">
-                <button
-                  onClick={() => navigate('/')}
-                  className="flex-1 px-6 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => setStage('instructions')}
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all transform hover:scale-[1.02] shadow-lg"
-                >
-                  Next
-                </button>
-              </div>
+            <div className="pt-5 mt-8 border-t border-white/5 flex gap-4 shrink-0">
+              <button
+                onClick={() => navigate('/')}
+                className="px-6 py-3 rounded-xl font-bold bg-white/5 text-slate-300 hover:bg-white/10 text-sm transition-all w-28"
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setStage('instructions')}
+                className="flex-1 flex items-center justify-between px-6 md:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-500 group bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40"
+              >
+                <span className="text-sm tracking-wide flex items-center gap-2">
+                  Next Step
+                </span>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-300 bg-white/20">
+                  <Play size={14} className="fill-white text-white translate-x-0.5" />
+                </div>
+              </button>
             </div>
           </div>
         </div>
