@@ -13,8 +13,10 @@ python-multipart==0.0.12
 langchain==0.3.14
 langchain-community==0.3.14
 langchain-huggingface==0.1.2
-huggingface-hub==0.23.0
-transformers==4.41.2
+# 0.23.0 predates Python 3.13 support and can cause ResolutionImpossible.
+huggingface-hub>=0.30.0,<1.0.0
+# Python 3.13 compatibility: avoid old tokenizers (<0.20) that trigger Rust source builds.
+transformers>=4.52.0,<4.58.0
 
 # Database - MongoDB with async support
 motor==3.6.0
@@ -33,7 +35,9 @@ spacy>=3.7.2
 datefinder==0.7.3
 
 # Data Processing
-numpy==1.26.4
+# NumPy 1.26.x has no wheels for Python 3.13; use a 2.x line there to avoid source builds.
+numpy==1.26.4; python_version < "3.13"
+numpy>=2.1.0,<2.3.0; python_version >= "3.13"
 pandas==2.2.3
 
 # HTTP & Async
