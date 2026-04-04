@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 const Signup = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const formik  = useFormik({
+  const formik = useFormik({
     initialValues: {
       firstName: "",
       lastName: "",
@@ -39,12 +39,12 @@ const Signup = () => {
       }
       return errors;
     },
-    onSubmit: async (values,{resetForm, setSubmitting}) => {
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
       console.log(values);
       try {
         const response = await axios.post('http://localhost:4000/api/auth/signup', values);
         console.log("user created");
-        
+
         console.log('Signup response:', response.data);
         toast.success('Signup successful! Please sign in.');
         resetForm();
@@ -57,7 +57,7 @@ const Signup = () => {
       }
     }
 
-    
+
   });
 
   useEffect(() => {
@@ -79,22 +79,22 @@ const Signup = () => {
         <div className="moving-shape shape-6"></div>
         <div className="moving-shape shape-7"></div>
         <div className="moving-shape shape-8"></div>
-        
+
         {/* Rotating Center Gradient */}
         <div className="rotating-gradient"></div>
-        
+
         {/* Floating Particles */}
-        <div className="floating-particle" style={{top: '5%', left: '15%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '8%', left: '85%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '12%', left: '50%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '15%', left: '20%', animationDelay: '0s'}}></div>
-        <div className="floating-particle" style={{top: '25%', left: '70%', animationDelay: '1s'}}></div>
-        <div className="floating-particle" style={{top: '45%', left: '10%', animationDelay: '2s'}}></div>
-        <div className="floating-particle" style={{top: '55%', left: '85%', animationDelay: '1.5s'}}></div>
-        <div className="floating-particle" style={{top: '75%', left: '30%', animationDelay: '0.5s'}}></div>
-        <div className="floating-particle" style={{top: '65%', left: '60%', animationDelay: '2.5s'}}></div>
-        <div className="floating-particle" style={{top: '35%', left: '50%', animationDelay: '3s'}}></div>
-        <div className="floating-particle" style={{top: '85%', left: '75%', animationDelay: '1.2s'}}></div>
+        <div className="floating-particle" style={{ top: '5%', left: '15%', animationDelay: '0s' }}></div>
+        <div className="floating-particle" style={{ top: '8%', left: '85%', animationDelay: '2s' }}></div>
+        <div className="floating-particle" style={{ top: '12%', left: '50%', animationDelay: '1.5s' }}></div>
+        <div className="floating-particle" style={{ top: '15%', left: '20%', animationDelay: '0s' }}></div>
+        <div className="floating-particle" style={{ top: '25%', left: '70%', animationDelay: '1s' }}></div>
+        <div className="floating-particle" style={{ top: '45%', left: '10%', animationDelay: '2s' }}></div>
+        <div className="floating-particle" style={{ top: '55%', left: '85%', animationDelay: '1.5s' }}></div>
+        <div className="floating-particle" style={{ top: '75%', left: '30%', animationDelay: '0.5s' }}></div>
+        <div className="floating-particle" style={{ top: '65%', left: '60%', animationDelay: '2.5s' }}></div>
+        <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
+        <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
       </div>
       <div className="max-w-md w-full space-y-4 backdrop-blur-xl bg-slate-900/60 p-8 rounded-2xl shadow-2xl border border-white/10 relative z-10">
         <button
@@ -133,7 +133,7 @@ const Signup = () => {
                 <p className="mt-1 text-sm text-red-500">
                   {formik.errors.firstName}
                 </p>
-               )}
+              )}
             </div>
             <div>
               <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-1">
@@ -178,38 +178,38 @@ const Signup = () => {
               )}
             </div>
             {/* <div className="grid grid-cols-2 gap-3"> */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formik.values.password}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className={`appearance-none relative block w-full px-3 py-2 pr-11 border ${formik.errors.password ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(prev => !prev)}
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {formik.touched.password && formik.errors.password && (
-                  <p className="mt-1 text-sm text-red-500">
-                    {formik.errors.password}
-                  </p>
-                )}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={formik.values.password}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={`appearance-none relative block w-full px-3 py-2 pr-11 border ${formik.errors.password ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
-              {/* <div>
+              {formik.touched.password && formik.errors.password && (
+                <p className="mt-1 text-sm text-red-500">
+                  {formik.errors.password}
+                </p>
+              )}
+            </div>
+            {/* <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
                   Confirm
                 </label>

@@ -57,7 +57,7 @@ const Signin = () => {
         sessionStorage.setItem("lastName", res.data.user.lastName);
         sessionStorage.setItem("phone", res.data.user.phone || '');
         sessionStorage.setItem("skills", res.data.user.skills || '');
-        
+
         // Profile picture is stored ONLY in Cloudinary, construct URL from userId
         // Check sessionStorage first, then construct from Cloudinary
         const storedPicture = sessionStorage.getItem("profilePicture");
@@ -65,10 +65,10 @@ const Signin = () => {
           const cloudinaryUrl = `https://res.cloudinary.com/dmk1ekxzf/image/upload/w_300,h_300,c_fill,g_face,q_auto/edupath/profile-pictures/${res.data.user.id}`;
           sessionStorage.setItem("profilePicture", cloudinaryUrl);
         }
-        
+
         // Notify other components that sessionStorage has been updated
         window.dispatchEvent(new Event('sessionStorageUpdated'));
-        
+
         toast.success('Signin successful!');
         resetForm();
 
@@ -120,36 +120,8 @@ const Signin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Live Moving Background Animations */}
-      <div className="animated-bg">
-        {/* Moving Shapes */}
-        <div className="moving-shape shape-1"></div>
-        <div className="moving-shape shape-2"></div>
-        <div className="moving-shape shape-3"></div>
-        <div className="moving-shape shape-4"></div>
-        <div className="moving-shape shape-5"></div>
-        <div className="moving-shape shape-6"></div>
-        <div className="moving-shape shape-7"></div>
-        <div className="moving-shape shape-8"></div>
-
-        {/* Rotating Center Gradient */}
-        <div className="rotating-gradient"></div>
-
-        {/* Floating Particles */}
-        <div className="floating-particle" style={{ top: '5%', left: '15%', animationDelay: '0s' }}></div>
-        <div className="floating-particle" style={{ top: '8%', left: '85%', animationDelay: '2s' }}></div>
-        <div className="floating-particle" style={{ top: '12%', left: '50%', animationDelay: '1.5s' }}></div>
-        <div className="floating-particle" style={{ top: '15%', left: '20%', animationDelay: '0s' }}></div>
-        <div className="floating-particle" style={{ top: '25%', left: '70%', animationDelay: '1s' }}></div>
-        <div className="floating-particle" style={{ top: '45%', left: '10%', animationDelay: '2s' }}></div>
-        <div className="floating-particle" style={{ top: '55%', left: '85%', animationDelay: '1.5s' }}></div>
-        <div className="floating-particle" style={{ top: '75%', left: '30%', animationDelay: '0.5s' }}></div>
-        <div className="floating-particle" style={{ top: '65%', left: '60%', animationDelay: '2.5s' }}></div>
-        <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
-        <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
-      </div>
-      <div className="max-w-md w-full space-y-8 backdrop-blur-xl bg-slate-900/60 p-10 rounded-2xl shadow-2xl border border-white/10 relative z-10">
+    <div className="min-h-screen flex items-center justify-center bg-[#02040a] pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="max-w-md w-full space-y-8 backdrop-blur-3xl bg-[#090b14]/70 p-10 rounded-[2rem] shadow-[0_0_50px_rgba(6,182,212,0.05)] border border-white/5 relative z-10">
         <button
           onClick={() => navigate('/')}
           className="absolute top-6 left-6 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
@@ -158,10 +130,10 @@ const Signin = () => {
           <span className="text-sm font-medium">Back to Home</span>
         </button>
         <div>
-          <h2 className="mt-6 text-center text-4xl font-extrabold text-white">
-            Welcome Back
+          <h2 className="mt-6 text-center text-4xl font-extrabold text-white tracking-tight">
+            Welcome <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Back</span>
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-300">
+          <p className="mt-2 text-center text-sm text-slate-400">
             Sign in to your EduPath account
           </p>
         </div>
@@ -179,7 +151,7 @@ const Signin = () => {
                 value={formik.values.identifier}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-3 border ${formik.errors.identifier ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                className={`appearance-none relative block w-full px-4 py-3 border ${formik.errors.identifier ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : 'border-white/5 focus:border-cyan-500/50 focus:ring-cyan-500/20'} placeholder-slate-500 text-white bg-[#0a0a0a]/50 rounded-xl focus:outline-none focus:ring-4 transition-all`}
                 placeholder="john@example.com / MEPA2026002"
               />
               {formik.touched.identifier && formik.errors.identifier && (
@@ -201,7 +173,7 @@ const Signin = () => {
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`appearance-none relative block w-full px-3 py-3 pr-11 border ${formik.errors.password ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  className={`appearance-none relative block w-full px-4 py-3 pr-11 border ${formik.errors.password ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : 'border-white/5 focus:border-cyan-500/50 focus:ring-cyan-500/20'} placeholder-slate-500 text-white bg-[#0a0a0a]/50 rounded-xl focus:outline-none focus:ring-4 transition-all`}
                   placeholder="••••••••"
                 />
                 <button
@@ -238,7 +210,7 @@ const Signin = () => {
               <a
                 href="#"
                 onClick={handleForgotPassword}
-                className="font-medium text-indigo-400 hover:text-indigo-300"
+                className="font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
               >
                 Forgot password?
               </a>
@@ -249,7 +221,7 @@ const Signin = () => {
             <button
               type="submit"
               disabled={formik.isSubmitting}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/20 transition-all duration-200 shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40"
             >
               {formik.isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
@@ -258,7 +230,7 @@ const Signin = () => {
           <div className="text-center">
             <p className="text-sm text-gray-300">
               Don't have an account?{' '}
-              <Link to="/signup" className="font-medium text-indigo-400 hover:text-indigo-300">
+              <Link to="/signup" className="font-medium text-cyan-400 hover:text-cyan-300 transition-colors">
                 Sign Up
               </Link>
             </p>
