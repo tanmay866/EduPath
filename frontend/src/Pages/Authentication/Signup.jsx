@@ -67,94 +67,68 @@ const Signup = () => {
   }, [formik.submitCount]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black pt-32 pb-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Live Moving Background Animations */}
-      <div className="animated-bg">
-        {/* Moving Shapes */}
-        <div className="moving-shape shape-1"></div>
-        <div className="moving-shape shape-2"></div>
-        <div className="moving-shape shape-3"></div>
-        <div className="moving-shape shape-4"></div>
-        <div className="moving-shape shape-5"></div>
-        <div className="moving-shape shape-6"></div>
-        <div className="moving-shape shape-7"></div>
-        <div className="moving-shape shape-8"></div>
-
-        {/* Rotating Center Gradient */}
-        <div className="rotating-gradient"></div>
-
-        {/* Floating Particles */}
-        <div className="floating-particle" style={{ top: '5%', left: '15%', animationDelay: '0s' }}></div>
-        <div className="floating-particle" style={{ top: '8%', left: '85%', animationDelay: '2s' }}></div>
-        <div className="floating-particle" style={{ top: '12%', left: '50%', animationDelay: '1.5s' }}></div>
-        <div className="floating-particle" style={{ top: '15%', left: '20%', animationDelay: '0s' }}></div>
-        <div className="floating-particle" style={{ top: '25%', left: '70%', animationDelay: '1s' }}></div>
-        <div className="floating-particle" style={{ top: '45%', left: '10%', animationDelay: '2s' }}></div>
-        <div className="floating-particle" style={{ top: '55%', left: '85%', animationDelay: '1.5s' }}></div>
-        <div className="floating-particle" style={{ top: '75%', left: '30%', animationDelay: '0.5s' }}></div>
-        <div className="floating-particle" style={{ top: '65%', left: '60%', animationDelay: '2.5s' }}></div>
-        <div className="floating-particle" style={{ top: '35%', left: '50%', animationDelay: '3s' }}></div>
-        <div className="floating-particle" style={{ top: '85%', left: '75%', animationDelay: '1.2s' }}></div>
-      </div>
-      <div className="max-w-md w-full space-y-4 backdrop-blur-xl bg-slate-900/60 p-8 rounded-2xl shadow-2xl border border-white/10 relative z-10">
+    <div className="min-h-screen flex items-center justify-center bg-[#02040a] pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="max-w-md w-full space-y-8 backdrop-blur-3xl bg-[#090b14]/70 p-10 rounded-[2rem] shadow-[0_0_50px_rgba(6,182,212,0.05)] border border-white/5 relative z-10">
         <button
           onClick={() => navigate('/')}
-          className="absolute top-4 left-4 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
+          className="absolute top-6 left-6 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
         >
           <HiArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Back to Home</span>
         </button>
-        <div className="pt-4">
-          <h2 className="text-center text-3xl font-extrabold text-white">
-            Create Account
+        <div>
+          <h2 className="mt-6 text-center text-4xl font-extrabold text-white tracking-tight">
+            Create <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Account</span>
           </h2>
-          <p className="mt-1 text-center text-sm text-gray-300">
+          <p className="mt-2 text-center text-sm text-slate-400">
             Join EduPath today
           </p>
         </div>
-        <form className="mt-4 space-y-3" onSubmit={formik.handleSubmit} noValidate>
-          <div className="space-y-3">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-1">
-                First Name
-              </label>
-              <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                required
-                value={formik.values.firstName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.firstName ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                placeholder="John Doe"
-              />
-              {formik.touched.firstName && formik.errors.firstName && (
-                <p className="mt-1 text-sm text-red-500">
-                  {formik.errors.firstName}
-                </p>
-              )}
-            </div>
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-1">
-                Last Name
-              </label>
-              <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                required
-                value={formik.values.lastName}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.lastName ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
-                placeholder="Doe"
-              />
-              {formik.touched.lastName && formik.errors.lastName && (
-                <p className="mt-1 text-sm text-red-500">
-                  {formik.errors.lastName}
-                </p>
-              )}
+        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit} noValidate>
+          <div className="rounded-md shadow-sm space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-1">
+                  First Name
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  required
+                  value={formik.values.firstName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={`appearance-none relative block w-full px-4 py-3 border ${formik.errors.firstName ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : 'border-white/5 focus:border-cyan-500/50 focus:ring-cyan-500/20'} placeholder-slate-500 text-white bg-[#0a0a0a]/50 rounded-xl focus:outline-none focus:ring-4 transition-all`}
+                  placeholder="John"
+                />
+                {formik.touched.firstName && formik.errors.firstName && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {formik.errors.firstName}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-1">
+                  Last Name
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  required
+                  value={formik.values.lastName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={`appearance-none relative block w-full px-4 py-3 border ${formik.errors.lastName ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : 'border-white/5 focus:border-cyan-500/50 focus:ring-cyan-500/20'} placeholder-slate-500 text-white bg-[#0a0a0a]/50 rounded-xl focus:outline-none focus:ring-4 transition-all`}
+                  placeholder="Doe"
+                />
+                {formik.touched.lastName && formik.errors.lastName && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {formik.errors.lastName}
+                  </p>
+                )}
+              </div>
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
@@ -168,7 +142,7 @@ const Signup = () => {
                 value={formik.values.email}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`appearance-none relative block w-full px-3 py-2 border ${formik.errors.email ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                className={`appearance-none relative block w-full px-4 py-3 border ${formik.errors.email ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : 'border-white/5 focus:border-cyan-500/50 focus:ring-cyan-500/20'} placeholder-slate-500 text-white bg-[#0a0a0a]/50 rounded-xl focus:outline-none focus:ring-4 transition-all`}
                 placeholder="john@example.com"
               />
               {formik.touched.email && formik.errors.email && (
@@ -177,7 +151,6 @@ const Signup = () => {
                 </p>
               )}
             </div>
-            {/* <div className="grid grid-cols-2 gap-3"> */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Password
@@ -191,7 +164,7 @@ const Signup = () => {
                   value={formik.values.password}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`appearance-none relative block w-full px-3 py-2 pr-11 border ${formik.errors.password ? 'border-red-500' : 'border-slate-700'} placeholder-gray-500 text-white bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
+                  className={`appearance-none relative block w-full px-4 py-3 pr-11 border ${formik.errors.password ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20' : 'border-white/5 focus:border-cyan-500/50 focus:ring-cyan-500/20'} placeholder-slate-500 text-white bg-[#0a0a0a]/50 rounded-xl focus:outline-none focus:ring-4 transition-all`}
                   placeholder="••••••••"
                 />
                 <button
@@ -209,38 +182,22 @@ const Signup = () => {
                 </p>
               )}
             </div>
-            {/* <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1">
-                  Confirm
-                </label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  value={formik.values.confirmPassword}
-                  onChange={formik.handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-gray-500 text-white bg-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="••••••••"
-                />
-              </div> */}
-            {/* </div> */}
           </div>
 
-          <div className="pt-2">
+          <div>
             <button
               type="submit"
               disabled={formik.isSubmitting}
-              className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 focus:outline-none focus:ring-4 focus:ring-cyan-500/20 transition-all duration-200 shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40"
             >
               {formik.isSubmitting ? 'Signing Up...' : 'Sign Up'}
             </button>
           </div>
 
-          <div className="text-center pt-1">
+          <div className="text-center">
             <p className="text-sm text-gray-300">
               Already have an account?{' '}
-              <Link to="/signin" className="font-medium text-indigo-400 hover:text-indigo-300">
+              <Link to="/signin" className="font-medium text-cyan-400 hover:text-cyan-300 transition-colors">
                 Sign In
               </Link>
             </p>
