@@ -324,11 +324,9 @@ const AIMockInterview = () => {
 
   // Handle quit
   const handleQuit = () => {
-    if (window.confirm('Are you sure you want to quit? Your progress will be lost.')) {
-      try { stopRecording(); } catch (e) { console.error(e) }
-      try { stopSpeaking(); } catch (e) { console.error(e) }
-      restartInterview();
-    }
+    try { stopRecording(); } catch (e) { console.error(e) }
+    try { stopSpeaking(); } catch (e) { console.error(e) }
+    restartInterview();
   };
 
   // Get score color

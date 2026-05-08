@@ -1,6 +1,6 @@
 import React from 'react'
 import Navbar from './component/Navbar/Navbar'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import PageTransition from './component/PageTransition'
 import Home from './Pages/Home/Home'
 import About from './Pages/About/About'
@@ -30,6 +30,7 @@ import ATSAnalyzer from './component/features/ATSAnalyzer'
 import PublicPortfolio from './Pages/PublicPortfolio'
 
 // Assessment Hub Components
+import AssessmentHub from './Pages/AssessmentHub/AssessmentHub'
 import SkillAssessment from './Pages/AssessmentHub/SkillAssessment'
 import AptitudeTest from './Pages/AssessmentHub/AptitudeTest'
 import CSFundamentals from './Pages/AssessmentHub/CSFundamentals'
@@ -129,6 +130,7 @@ const App = () => {
           <Route path="/assessment/result/:resultId" element={<PageTransition><ResultPage /></PageTransition>} />
 
           {/* Assessment Hub Routes */}
+          <Route path="/assessment-hub" element={<PageTransition><Navbar /><AssessmentHub /></PageTransition>} />
           <Route path="/assessment-hub/skill" element={<PageTransition><Navbar /><SkillAssessment /></PageTransition>} />
           <Route path="/assessment-hub/aptitude" element={<PageTransition><Navbar /><AptitudeTest /></PageTransition>} />
           <Route path="/assessment-hub/cs-fundamentals" element={<PageTransition><Navbar /><CSFundamentals /></PageTransition>} />

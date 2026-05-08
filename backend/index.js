@@ -26,7 +26,24 @@ dotenv.config();
 // Create Express app
 const app = express();
 
-const frontendOrigin = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+const configuredFrontendOrigin = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) {
+    return true;
+  }
+
+  if (origin.replace(/\/+$/, '') === configuredFrontendOrigin) {
+    return true;
+  }
+
+  if (isDevelopment) {
+    return /^http:\/\/(localhost|127\.0\.0\.1|\[::1\]|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2}):\d+$/.test(origin);
+  }
+
+  return false;
+};
 
 // Connect to MongoDB
 connectDB();
@@ -37,7 +54,13 @@ verifyEmailConfig();
 // CORS configuration
 app.use(
   cors({
-    origin: frontendOrigin,
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

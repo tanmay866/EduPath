@@ -3,9 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { HiArrowLeft } from 'react-icons/hi';
 import { Eye, EyeOff } from 'lucide-react';
 import { useFormik } from 'formik';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { forgotPassword } from '../Services/profileService';
+import API from '../Services/assessmentService';
 
 const Signin = () => {
   const navigate = useNavigate();
@@ -32,21 +32,22 @@ const Signin = () => {
       // Simulate API call
       try {
 
+        const identifier = values.identifier.trim();
         let payload = {
           password: values.password
         }
 
         // detect email or loginId
-        if (values.identifier.includes('@')) {
-          payload.email = values.identifier;
+        if (identifier.includes('@')) {
+          payload.email = identifier;
         } else {
-          payload.loginId = values.identifier;
+          payload.loginId = identifier;
         }
 
         console.log("Payload", payload);
 
 
-        const res = await axios.post('http://localhost:4000/api/auth/login', payload);
+        const res = await API.post('/auth/login', payload);
         console.log(res);
         sessionStorage.setItem("token", res.data.token);
         sessionStorage.setItem("userId", res.data.user.id);
@@ -83,7 +84,9 @@ const Signin = () => {
         }
       } catch (error) {
         console.error('Signin error:', error);
-        toast.error(error.response?.data?.message || 'Signin failed. Please try again.');
+        const message = error.response?.data?.message
+          || (error.request ? 'Cannot reach the server. Please make sure the backend is running.' : 'Signin failed. Please try again.');
+        toast.error(message);
       }
     }
   });

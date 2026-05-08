@@ -52,7 +52,7 @@ const extractTextFromFile = async (file) => {
 };
 
 /**
- * Analyze resume using Python ATS scorer with Sentence Transformers
+ * Analyze resume using the Python ATS scorer.
  */
 export const analyzeResume = async (req, res) => {
   try {
@@ -84,7 +84,7 @@ export const analyzeResume = async (req, res) => {
     // Path to Python script
     const pythonScript = path.join(__dirname, '../services/atsScorer.py');
 
-    console.log('Executing ATS analysis with Sentence Transformers...');
+    console.log('Executing ATS analysis...');
 
     const pythonPath = process.env.PYTHON_PATH || 'python';
 
@@ -104,33 +104,35 @@ export const analyzeResume = async (req, res) => {
     });
 
     // Wait for Python process to complete
-    await new Promise((resolve, reject) => {
-      python.on('close', (code) => {
-        if (code !== 0) {
-          console.error('Python stderr:', stderr);
-          reject(new Error(`Python process exited with code ${code}: ${stderr}`));
-        } else {
-          resolve();
-        }
-      });
+    try {
+      await new Promise((resolve, reject) => {
+        python.on('close', (code) => {
+          if (code !== 0) {
+            console.error('Python stderr:', stderr);
+            reject(new Error(`Python process exited with code ${code}: ${stderr}`));
+          } else {
+            resolve();
+          }
+        });
 
-      python.on('error', (error) => {
-        console.error('Failed to start Python:', error);
-        reject(new Error('Failed to execute ATS analysis. Make sure Python and sentence-transformers are installed.'));
-      });
+        python.on('error', (error) => {
+          console.error('Failed to start Python:', error);
+          reject(new Error('Failed to execute ATS analysis. Make sure Python is installed.'));
+        });
 
-      // Set timeout
-      setTimeout(() => {
-        python.kill();
-        reject(new Error('ATS analysis timeout'));
-      }, 60000);
-    }).catch((error) => {
+        // Set timeout
+        setTimeout(() => {
+          python.kill();
+          reject(new Error('ATS analysis timeout'));
+        }, 60000);
+      });
+    } catch (error) {
       return res.status(500).json({
         success: false,
         message: error.message || 'Failed to execute ATS analysis',
         error: stderr || error.toString()
       });
-    });
+    }
 
     // Parse Python output
     let result;
