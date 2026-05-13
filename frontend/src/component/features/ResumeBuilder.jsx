@@ -18,43 +18,45 @@ const InputField = ({
   className = "",
   showLabel = true
 }) => (
-  <div className={className}>
+  <div className={`p-0.5 ${className}`}>
     {showLabel && label && (
-      <label className="block text-sm font-medium text-gray-400 mb-2">
+      <label className="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-wider uppercase ml-1">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
     )}
-    {(textarea || multiline) ? (
-      <textarea
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        rows={rows}
-        maxLength={maxLength}
-        className={`w-full px-4 py-3 bg-slate-900/50 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200 resize-y ${
-          error ? 'border-red-500/50 focus:ring-red-500/60 focus:border-red-500/50' : 'border-white/10'
-        }`}
-        placeholder={placeholder}
-      />
-    ) : (
-      <input
-        type={type}
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-        maxLength={maxLength}
-        className={`w-full px-4 py-3 bg-slate-900/50 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200 ${
-          error ? 'border-red-500/50 focus:ring-red-500/60 focus:border-red-500/50' : 'border-white/10'
-        }`}
-        placeholder={placeholder}
-      />
-    )}
+    <div className="relative">
+      {(textarea || multiline) ? (
+        <textarea
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          rows={rows}
+          maxLength={maxLength}
+          className={`w-full px-4 py-3 bg-[#0a0a0a] border rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors text-sm resize-y ${
+            error ? 'border-red-500/50' : 'border-white/10'
+          }`}
+          placeholder={placeholder}
+        />
+      ) : (
+        <input
+          type={type}
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          maxLength={maxLength}
+          className={`w-full px-4 py-3 bg-[#0a0a0a] border rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors text-sm ${
+            error ? 'border-red-500/50' : 'border-white/10'
+          }`}
+          placeholder={placeholder}
+        />
+      )}
+    </div>
     {(error || helperText) && (
-      <div className="mt-1 text-xs">
+      <div className="mt-1 text-xs ml-1">
         {error && <p className="text-red-400">{error}</p>}
-        {!error && helperText && <p className="text-gray-500">{helperText}</p>}
+        {!error && helperText && <p className="text-slate-500">{helperText}</p>}
       </div>
     )}
     {maxLength && (
-      <div className="mt-1 text-xs text-gray-500 text-right">
+      <div className="mt-1 text-xs text-slate-500 text-right mr-1">
         {(value || '').length}/{maxLength}
       </div>
     )}
@@ -870,28 +872,62 @@ function ResumeBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-36 pb-8 px-4 relative overflow-hidden">
-      {/* Glowing Background Effects */}
-      <div className="absolute top-20 right-10 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute top-60 left-10 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute bottom-40 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -z-10"></div>
+    <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+        }} />
+        <div style={{
+          position: 'absolute', top: '8%', left: '10%',
+          width: 420, height: 420,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)',
+          animation: 'settingOrb1 18s ease-in-out infinite alternate',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '10%', right: '8%',
+          width: 360, height: 360,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)',
+          animation: 'settingOrb2 22s ease-in-out infinite alternate',
+        }} />
+        <div style={{
+          position: 'absolute', top: '45%', right: '20%',
+          width: 260, height: 260,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(56,189,248,0.03), transparent 70%)',
+          animation: 'settingOrb1 26s ease-in-out infinite alternate-reverse',
+        }} />
+      </div>
+      <style>{`
+        @keyframes settingOrb1 {
+          from { transform: translate(0, 0) scale(1); }
+          to   { transform: translate(40px, 30px) scale(1.08); }
+        }
+        @keyframes settingOrb2 {
+          from { transform: translate(0, 0) scale(1); }
+          to   { transform: translate(-35px, -25px) scale(1.06); }
+        }
+      `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
         {/* Header with Back Button */}
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => showPreview ? handleEditResume() : window.history.back()}
-            className="mt-1 p-3 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-200"
+            className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
           <div>
-            <h1 className="text-4xl font-extrabold text-white mb-2">
+            <h1 className="text-3xl font-black text-white leading-none tracking-tight">
               {showPreview ? 'Resume Preview' : 'Resume Builder'}
             </h1>
-            <p className="text-gray-400 text-lg">
+            <p className="text-slate-400 text-sm mt-1">
               {showPreview ? 'Review your resume before downloading' : 'Create your professional resume with ease'}
             </p>
           </div>
@@ -910,7 +946,7 @@ function ResumeBuilder() {
             {/* Left Panel - Controls */}
             <div className="lg:col-span-1 space-y-6">
               {/* Resume Info Card */}
-              <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+              <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2.5 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
                     <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -975,7 +1011,7 @@ function ResumeBuilder() {
               </div>
 
               {/* Info Box */}
-              <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+              <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
                 <div className="flex items-center gap-2 mb-3">
                   <svg className="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -1001,7 +1037,7 @@ function ResumeBuilder() {
 
             {/* Right Panel - Resume Summary */}
             <div className="lg:col-span-3">
-              <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+              <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1010,7 +1046,7 @@ function ResumeBuilder() {
                 </div>
 
                 {/* Resume Content Summary */}
-                <div className="bg-slate-800/50 rounded-xl p-6 max-h-[calc(100vh-280px)] overflow-y-auto space-y-6">
+                <div className="bg-[#0a0a0a] border border-white/5 rounded-xl p-6 max-h-[calc(100vh-280px)] overflow-y-auto space-y-6">
                   {/* Personal Info */}
                   <div>
                     <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
@@ -1019,7 +1055,7 @@ function ResumeBuilder() {
                       </svg>
                       Personal Information
                     </h4>
-                    <div className="bg-slate-900/50 rounded-lg p-4 space-y-2 text-sm">
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4 space-y-2 text-sm">
                       <p className="text-white font-medium text-lg">{resumeData.personalInfo.name || 'Not provided'}</p>
                       {resumeData.personalInfo.email && <p className="text-gray-300">{resumeData.personalInfo.email}</p>}
                       {resumeData.personalInfo.phone && <p className="text-gray-300">{resumeData.personalInfo.phone}</p>}
@@ -1045,7 +1081,7 @@ function ResumeBuilder() {
                       <div className="space-y-3">
                         {resumeData.education.map((edu, index) => (
                           (edu.degree || edu.institution) && (
-                            <div key={index} className="bg-slate-900/50 rounded-lg p-4">
+                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
                               <p className="text-white font-medium">{edu.degree || 'Degree not specified'}</p>
                               <p className="text-gray-300 text-sm">{edu.institution}</p>
                               {(edu.startDate || edu.endDate) && (
@@ -1071,7 +1107,7 @@ function ResumeBuilder() {
                       <div className="space-y-3">
                         {resumeData.experience.map((exp, index) => (
                           (exp.company || exp.position) && (
-                            <div key={index} className="bg-slate-900/50 rounded-lg p-4">
+                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
                               <p className="text-white font-medium">{exp.position || 'Position not specified'}</p>
                               <p className="text-gray-300 text-sm">{exp.company}{exp.location && `, ${exp.location}`}</p>
                               {(exp.startDate || exp.endDate) && (
@@ -1099,7 +1135,7 @@ function ResumeBuilder() {
                       <div className="space-y-3">
                         {resumeData.projects.map((proj, index) => (
                           proj.title && (
-                            <div key={index} className="bg-slate-900/50 rounded-lg p-4">
+                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
                               <p className="text-white font-medium">{proj.title}</p>
                               {proj.description && <p className="text-gray-300 text-sm mt-1">{proj.description}</p>}
                               {proj.technologies.filter(t => t).length > 0 && (
@@ -1127,7 +1163,7 @@ function ResumeBuilder() {
                         </svg>
                         Skills
                       </h4>
-                      <div className="bg-slate-900/50 rounded-lg p-4 space-y-3">
+                      <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4 space-y-3">
                         {resumeData.skills.technical.filter(s => s).length > 0 && (
                           <div>
                             <p className="text-white text-sm font-medium mb-2">Technical Skills</p>
@@ -1168,7 +1204,7 @@ function ResumeBuilder() {
                       <div className="space-y-2">
                         {resumeData.certifications.map((cert, index) => (
                           cert.name && (
-                            <div key={index} className="bg-slate-900/50 rounded-lg p-3">
+                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-3">
                               <p className="text-white text-sm font-medium">{cert.name}</p>
                               {cert.issuer && <p className="text-gray-300 text-xs">{cert.issuer}</p>}
                               {cert.date && <p className="text-gray-400 text-xs">{cert.date}</p>}
@@ -1190,7 +1226,7 @@ function ResumeBuilder() {
                       </h4>
                       <div className="space-y-2">
                         {resumeData.achievements.filter(a => a).map((achievement, index) => (
-                          <div key={index} className="bg-slate-900/50 rounded-lg p-3">
+                          <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-3">
                             <p className="text-gray-300 text-sm">{achievement}</p>
                           </div>
                         ))}
@@ -1208,7 +1244,7 @@ function ResumeBuilder() {
           <div className="lg:col-span-2 space-y-6">
 
             {/* Personal Information */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Personal Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputField
@@ -1286,18 +1322,18 @@ function ResumeBuilder() {
             </div>
 
             {/* Education */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Education</h3>
                 <button
                   onClick={addEducation}
-                  className="px-6 py-2.5 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 text-white rounded-xl font-medium border border-indigo-500/40 hover:from-indigo-500/90 hover:to-purple-500/90 hover:scale-105 transition-all duration-200"
+                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
                 >
                   + Add Education
                 </button>
               </div>
               {resumeData.education.map((edu, index) => (
-                <div key={index} className="mb-6 p-4 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl">
+                <div key={index} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold text-white">Education {index + 1}</h4>
                     {resumeData.education.length > 1 && (
@@ -1367,18 +1403,18 @@ function ResumeBuilder() {
             </div>
 
             {/* Experience */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Experience</h3>
                 <button
                   onClick={addExperience}
-                  className="px-6 py-2.5 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 text-white rounded-xl font-medium border border-indigo-500/40 hover:from-indigo-500/90 hover:to-purple-500/90 hover:scale-105 transition-all duration-200"
+                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
                 >
                   + Add Experience
                 </button>
               </div>
               {resumeData.experience.map((exp, expIndex) => (
-                <div key={expIndex} className="mb-6 p-4 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl">
+                <div key={expIndex} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold text-white">Experience {expIndex + 1}</h4>
                     {resumeData.experience.length > 1 && (
@@ -1467,18 +1503,18 @@ function ResumeBuilder() {
             </div>
 
             {/* Projects */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Projects</h3>
                 <button
                   onClick={addProject}
-                  className="px-6 py-2.5 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 text-white rounded-xl font-medium border border-indigo-500/40 hover:from-indigo-500/90 hover:to-purple-500/90 hover:scale-105 transition-all duration-200"
+                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
                 >
                   + Add Project
                 </button>
               </div>
               {resumeData.projects.map((project, projIndex) => (
-                <div key={projIndex} className="mb-6 p-4 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl">
+                <div key={projIndex} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold text-white">Project {projIndex + 1}</h4>
                     {resumeData.projects.length > 1 && (
@@ -1549,7 +1585,7 @@ function ResumeBuilder() {
             </div>
 
             {/* Skills */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Skills</h3>
               <div className="space-y-4">
                 <div>
@@ -1598,18 +1634,18 @@ function ResumeBuilder() {
             </div>
 
             {/* Certifications */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Certifications</h3>
                 <button
                   onClick={addCertification}
-                  className="px-6 py-2.5 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 text-white rounded-xl font-medium border border-indigo-500/40 hover:from-indigo-500/90 hover:to-purple-500/90 hover:scale-105 transition-all duration-200"
+                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
                 >
                   + Add Certification
                 </button>
               </div>
               {resumeData.certifications.map((cert, index) => (
-                <div key={index} className="mb-6 p-4 backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl">
+                <div key={index} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold text-white">Certification {index + 1}</h4>
                     {resumeData.certifications.length > 1 && (
@@ -1661,7 +1697,7 @@ function ResumeBuilder() {
             </div>
 
             {/* Achievements */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Achievements</h3>
               {resumeData.achievements.map((achievement, index) => (
                 <div key={index} className="mb-2">
@@ -1687,7 +1723,7 @@ function ResumeBuilder() {
           {/* Sidebar Actions */}
           <div className="lg:col-span-1 space-y-6">
             {/* Quick Actions */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6 sticky top-28 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6 sticky top-28 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
               <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Generate Resume</h3>
 
               {message && (
@@ -1732,7 +1768,7 @@ function ResumeBuilder() {
                 <button
                   onClick={handleGenerateResume}
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-indigo-500 hover:to-purple-500 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-[0_0_25px_rgba(99,102,241,0.3)] hover:shadow-[0_0_35px_rgba(99,102,241,0.5)]"
+                  className="w-full px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">

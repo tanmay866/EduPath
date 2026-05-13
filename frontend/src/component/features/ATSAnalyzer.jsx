@@ -175,26 +175,60 @@ function ATSAnalyzer() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-36 pb-8 px-4 relative overflow-hidden">
-      {/* Glowing Background Effects */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute top-40 right-10 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute bottom-20 left-1/3 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl -z-10"></div>
+    <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+        }} />
+        <div style={{
+          position: 'absolute', top: '8%', left: '10%',
+          width: 420, height: 420,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)',
+          animation: 'settingOrb1 18s ease-in-out infinite alternate',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '10%', right: '8%',
+          width: 360, height: 360,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)',
+          animation: 'settingOrb2 22s ease-in-out infinite alternate',
+        }} />
+        <div style={{
+          position: 'absolute', top: '45%', right: '20%',
+          width: 260, height: 260,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(56,189,248,0.03), transparent 70%)',
+          animation: 'settingOrb1 26s ease-in-out infinite alternate-reverse',
+        }} />
+      </div>
+      <style>{`
+        @keyframes settingOrb1 {
+          from { transform: translate(0, 0) scale(1); }
+          to   { transform: translate(40px, 30px) scale(1.08); }
+        }
+        @keyframes settingOrb2 {
+          from { transform: translate(0, 0) scale(1); }
+          to   { transform: translate(-35px, -25px) scale(1.06); }
+        }
+      `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
         {/* Header with Back Button */}
-        <div className="flex items-start gap-4">
+        <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => window.history.back()}
-            className="p-3 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-200"
+            className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5"
           >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-white">ATS Analyzer</h1>
-            <p className="text-gray-400">Analyze your resume against job descriptions for better matches</p>
+            <h1 className="text-3xl font-black text-white leading-none tracking-tight">ATS Analyzer</h1>
+            <p className="text-slate-400 text-sm mt-1">Analyze your resume against job descriptions for better matches</p>
           </div>
         </div>
 
@@ -214,7 +248,7 @@ function ATSAnalyzer() {
         {!results && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Column - Job Description */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 bg-purple-500/20 rounded-xl border border-purple-500/30">
                   <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +270,7 @@ Include:
 • Key responsibilities
 • Required skills and technologies
 • Preferred experience"
-                className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 focus:border-transparent rounded-xl resize-none transition-all duration-200"
+                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors resize-none text-sm"
               />
               <p className="text-gray-500 text-sm mt-3">
                 Tip: Include the full job description for more accurate analysis
@@ -244,7 +278,7 @@ Include:
             </div>
 
             {/* Right Column - Resume Upload */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-6">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
                   <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,7 +299,7 @@ Include:
                     ? 'border-emerald-500 bg-emerald-500/10'
                     : resumeFile
                     ? 'border-emerald-500/50 bg-emerald-500/5'
-                    : 'border-slate-700 bg-slate-800/30 hover:border-emerald-500/50 hover:bg-slate-800/50'
+                    : 'border-white/10 bg-[#0a0a0a]/50 hover:border-emerald-500/50 hover:bg-[#0a0a0a]'
                 }`}
               >
                 {resumeFile ? (
@@ -299,7 +333,7 @@ Include:
                       <p className="font-semibold text-white text-lg">Drag & Drop</p>
                       <p className="text-gray-400 text-sm">or click to browse your files</p>
                     </div>
-                    <label className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium cursor-pointer transition-all duration-200">
+                    <label className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/40 cursor-pointer">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                       </svg>
@@ -324,7 +358,7 @@ Include:
               <button
                 onClick={handleAnalyze}
                 disabled={analyzing || !resumeFile || !jobDescription.trim()}
-                className="w-full mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                className="w-full mt-6 px-6 py-4 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {analyzing ? (
                   <span className="flex items-center justify-center gap-3">
@@ -349,7 +383,7 @@ Include:
 
         {/* Why Use ATS Analyzer - Info Box */}
         {!results && (
-          <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl p-6">
+          <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-cyan-500/20 rounded-lg border border-cyan-500/30">
                 <svg className="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
@@ -383,7 +417,7 @@ Include:
         {results && (
           <div className="space-y-8">
             {/* Main Score Card */}
-            <div className="backdrop-blur-xl bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border border-cyan-500/20 rounded-3xl p-8">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-white mb-2">Analysis Complete</h2>
                 <p className="text-gray-400">Your resume has been analyzed against the job requirements</p>
@@ -443,11 +477,11 @@ Include:
 
                   {/* Quick Stats */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
                       <div className="text-2xl font-bold text-white">{results.similarity || 0}</div>
                       <div className="text-sm text-gray-400">Similarity Score</div>
                     </div>
-                    <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                    <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
                       <div className={`text-2xl font-bold ${
                         results.score >= 80 ? 'text-emerald-400' :
                         results.score >= 60 ? 'text-cyan-400' :
@@ -465,7 +499,7 @@ Include:
             </div>
 
             {/* Recommendations */}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-3xl p-8">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-8">
               <div className="flex items-center gap-4 mb-6">
                 <div className="p-3 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl border border-amber-500/30">
                   <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -479,7 +513,7 @@ Include:
               </div>
 
               {results.score >= 80 ? (
-                <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-2xl p-6">
+                <div className="bg-[#0a0a0a] border border-emerald-500/20 rounded-xl shadow-lg p-6">
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-emerald-500/20 rounded-full">
                       <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -494,7 +528,7 @@ Include:
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-6">
+                  <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-6">
                     <div className="flex items-start gap-4">
                       <div className="p-2 bg-blue-500/20 rounded-lg flex-shrink-0">
                         <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -508,7 +542,7 @@ Include:
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-6">
+                  <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-6">
                     <div className="flex items-start gap-4">
                       <div className="p-2 bg-purple-500/20 rounded-lg flex-shrink-0">
                         <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,7 +556,7 @@ Include:
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-2xl p-6">
+                  <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-6">
                     <div className="flex items-start gap-4">
                       <div className="p-2 bg-green-500/20 rounded-lg flex-shrink-0">
                         <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -536,7 +570,7 @@ Include:
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl p-6">
+                  <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-6">
                     <div className="flex items-start gap-4">
                       <div className="p-2 bg-orange-500/20 rounded-lg flex-shrink-0">
                         <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -557,7 +591,7 @@ Include:
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={resetAnalysis}
-                className="flex-1 px-8 py-4 backdrop-blur-lg bg-white/5 hover:bg-white/10 text-white rounded-2xl border border-white/10 hover:border-white/20 font-semibold transition-all duration-200 flex items-center justify-center gap-3 text-lg"
+                className="flex-1 px-6 py-4 bg-[#0a0a0a] hover:bg-white/[0.02] text-white rounded-xl border border-white/10 hover:border-white/20 font-bold text-sm transition-all duration-500 flex items-center justify-center gap-3 text-lg"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -567,7 +601,7 @@ Include:
               <button
                 onClick={downloadReport}
                 disabled={generatingReport}
-                className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-2xl font-semibold transition-all duration-200 shadow-lg hover:shadow-purple-500/30 flex items-center justify-center gap-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-8 py-4 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 flex items-center justify-center gap-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {generatingReport ? (
                   <>

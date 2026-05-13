@@ -147,6 +147,19 @@ function PortfolioGenerator() {
   };
   const handleRemoveSkill = (skill) => setPortfolioData(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
 
+  // ────── Profile Photo Upload ──────
+  const handleProfilePhotoUpload = (file) => {
+    if (!file) return;
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) { setError('Please upload a JPG, PNG, or WebP image'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('Photo size must be less than 5MB'); return; }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPortfolioData(prev => ({ ...prev, profilePhoto: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   // ────── Deploy to MongoDB ──────
   const handleDeploy = async () => {
     if (!portfolioData.name || !portfolioData.title) { setError('Name and Title are required'); return; }
@@ -300,24 +313,33 @@ function PortfolioGenerator() {
   // ════════════════════════════════════════════
   if (view === 'home') {
     return (
-      <div className="min-h-screen bg-black pt-36 pb-8 px-4">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
+        <div style={{ position: 'absolute', top: '8%', left: '10%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)', animation: 'settingOrb1 18s ease-in-out infinite alternate' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)', animation: 'settingOrb2 22s ease-in-out infinite alternate' }} />
+      </div>
+      <style>{`
+        @keyframes settingOrb1 { from { transform: translate(0, 0) scale(1); } to { transform: translate(40px, 30px) scale(1.08); } }
+        @keyframes settingOrb2 { from { transform: translate(0, 0) scale(1); } to { transform: translate(-35px, -25px) scale(1.06); } }
+      `}</style>
+      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-start gap-4">
               <button onClick={() => window.history.back()}
-                className="mt-1 p-3 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-200">
+                className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
               </button>
               <div>
-                <h1 className="text-4xl font-extrabold text-white mb-2">Portfolio Generator</h1>
+                <h1 className="text-3xl font-black text-white leading-none tracking-tight mb-2">Portfolio Generator</h1>
                 <p className="text-gray-400 text-lg">Create, manage, and deploy your professional portfolio</p>
               </div>
             </div>
             <button onClick={handleCreateNew}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-500 hover:to-purple-500 hover:scale-105 transition-all duration-200 shadow-[0_0_25px_rgba(99,102,241,0.3)]">
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               Create New Portfolio
             </button>
@@ -328,7 +350,7 @@ function PortfolioGenerator() {
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center border border-blue-500/30">
                   <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
@@ -339,7 +361,7 @@ function PortfolioGenerator() {
                 </div>
               </div>
             </div>
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
                   <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -350,7 +372,7 @@ function PortfolioGenerator() {
                 </div>
               </div>
             </div>
-            <div className="backdrop-blur-lg bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center border border-purple-500/30">
                   <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -369,11 +391,11 @@ function PortfolioGenerator() {
             {loadingPortfolios ? (
               <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" /></div>
             ) : myPortfolios.length === 0 ? (
-              <div className="backdrop-blur-xl bg-slate-900/60 border-2 border-dashed border-white/20 rounded-xl p-12 text-center">
+              <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-12 text-center">
                 <div className="text-5xl mb-4">📂</div>
                 <h3 className="text-xl font-semibold text-white mb-2">No portfolios yet</h3>
                 <p className="text-gray-400 mb-6">Create your first portfolio by uploading your resume</p>
-                <button onClick={handleCreateNew} className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-500 hover:to-purple-500 hover:scale-105 transition-all duration-200 shadow-[0_0_25px_rgba(99,102,241,0.3)]">
+                <button onClick={handleCreateNew} className="px-6 py-3 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40">
                   Create Your First Portfolio
                 </button>
               </div>
@@ -382,7 +404,7 @@ function PortfolioGenerator() {
                 {myPortfolios.map((p) => {
                   const tmpl = TEMPLATE_META.find(t => t.key === p.template) || TEMPLATE_META[0];
                   return (
-                    <div key={p.portfolioId} className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl overflow-hidden hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-200">
+                    <div key={p.portfolioId} className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl overflow-hidden hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all duration-200">
                       <div className="flex flex-col lg:flex-row">
                         <div className={`w-full lg:w-2 bg-gradient-to-b ${tmpl.gradient} shrink-0`} />
                         <div className="flex-1 p-6">
@@ -454,9 +476,18 @@ function PortfolioGenerator() {
   // ════════════════════════════════════════════
   if (view === 'deployed') {
     return (
-      <div className="min-h-screen bg-black pt-36 pb-8 px-4">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <button onClick={() => setView('home')} className="inline-flex items-center gap-2 p-3 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-200">
+      <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
+        <div style={{ position: 'absolute', top: '8%', left: '10%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)', animation: 'settingOrb1 18s ease-in-out infinite alternate' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)', animation: 'settingOrb2 22s ease-in-out infinite alternate' }} />
+      </div>
+      <style>{`
+        @keyframes settingOrb1 { from { transform: translate(0, 0) scale(1); } to { transform: translate(40px, 30px) scale(1.08); } }
+        @keyframes settingOrb2 { from { transform: translate(0, 0) scale(1); } to { transform: translate(-35px, -25px) scale(1.06); } }
+      `}</style>
+      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
+          <button onClick={() => setView('home')} className="inline-flex items-center gap-2 p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             <span className="text-white font-medium">Back to Portfolios</span>
           </button>
@@ -464,7 +495,7 @@ function PortfolioGenerator() {
           <Alert type="error" message={error} onClose={() => setError('')} />
           <Alert type="success" message={successMsg} onClose={() => setSuccessMsg('')} />
 
-          <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-8 text-center">
+          <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-8 text-center">
             <div className="w-20 h-20 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
@@ -483,7 +514,7 @@ function PortfolioGenerator() {
                 </button>
               </div>
               <a href={portfolioLink} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-500 hover:to-purple-500 hover:scale-105 transition-all duration-200 shadow-[0_0_25px_rgba(99,102,241,0.3)]">
+                className="inline-flex items-center gap-2 mt-4 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                 Visit Portfolio
               </a>
@@ -546,20 +577,24 @@ function PortfolioGenerator() {
   //  CREATE VIEW: 3-Step Wizard
   // ════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-black pt-36 pb-8 px-4 relative overflow-hidden">
-      {/* Glowing Background Effects */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute top-40 right-10 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl -z-10"></div>
-
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
+        <div style={{ position: 'absolute', top: '8%', left: '10%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)', animation: 'settingOrb1 18s ease-in-out infinite alternate' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)', animation: 'settingOrb2 22s ease-in-out infinite alternate' }} />
+      </div>
+      <style>{`
+        @keyframes settingOrb1 { from { transform: translate(0, 0) scale(1); } to { transform: translate(40px, 30px) scale(1.08); } }
+        @keyframes settingOrb2 { from { transform: translate(0, 0) scale(1); } to { transform: translate(-35px, -25px) scale(1.06); } }
+      `}</style>
+      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
         {/* Header with Back Button */}
         <div className="flex items-start gap-4">
-          <button onClick={() => setView('home')} className="mt-1 p-3 backdrop-blur-lg bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-white/20 transition-all duration-200">
+          <button onClick={() => setView('home')} className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <div>
-            <h1 className="text-4xl font-extrabold text-white mb-2">Create Portfolio</h1>
+            <h1 className="text-3xl font-black text-white leading-none tracking-tight mb-2">Create Portfolio</h1>
             <p className="text-gray-400 text-lg">Auto-generate your portfolio from your resume</p>
           </div>
         </div>
@@ -570,7 +605,7 @@ function PortfolioGenerator() {
 
         {/* STEP 1: Upload */}
         {currentStep === 1 && (
-          <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-8">
+          <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-8">
             <div className="flex items-center gap-4 mb-8">
               <div className="w-14 h-14 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/30">
                 <svg className="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -628,10 +663,62 @@ function PortfolioGenerator() {
                 </div>
               </div>
             )}
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-8">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-8">
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Portfolio Details</h2>
                 <button onClick={() => setCurrentStep(1)} className="text-sm text-cyan-400 hover:text-cyan-300 font-medium">← Re-upload Resume</button>
+              </div>
+
+              {/* Profile Photo Upload */}
+              <div className="mb-6 p-6 bg-[#0a0a0a] border border-white/10 rounded-xl">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2 mb-4">
+                  📸 Profile Photo
+                </h3>
+                <div className="flex items-center gap-8">
+                  {/* Preview */}
+                  <div className="relative flex-shrink-0">
+                    <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-indigo-500/40 shadow-lg shadow-indigo-500/20 bg-[#090b14] flex items-center justify-center">
+                      {portfolioData.profilePhoto ? (
+                        <img src={portfolioData.profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <svg className="w-12 h-12 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      )}
+                    </div>
+                    {portfolioData.profilePhoto && (
+                      <button
+                        onClick={() => setPortfolioData(prev => ({ ...prev, profilePhoto: '' }))}
+                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-400 transition-colors shadow-lg"
+                      >×</button>
+                    )}
+                  </div>
+
+                  {/* Upload Controls */}
+                  <div className="flex-1">
+                    <label
+                      className="flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed border-white/10 rounded-xl bg-[#090b14]/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all duration-300 cursor-pointer group"
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={e => { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file) handleProfilePhotoUpload(file); }}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center group-hover:bg-indigo-500/30 transition-colors">
+                        <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-white">
+                          {portfolioData.profilePhoto ? 'Click to change photo' : 'Click or drag to upload'}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">JPG, PNG, WebP — Max 5MB</p>
+                      </div>
+                      <input
+                        type="file" accept="image/*" className="hidden"
+                        onChange={e => { if (e.target.files[0]) handleProfilePhotoUpload(e.target.files[0]); }}
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
 
               {/* Personal Info */}
@@ -649,7 +736,7 @@ function PortfolioGenerator() {
                     <label className="block text-sm font-semibold text-gray-300 mb-2">About / Bio</label>
                     <textarea value={portfolioData.about} onChange={e => handleDataUpdate('about', e.target.value)} rows="4"
                       placeholder="Write a brief about yourself..."
-                      className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200 resize-none" />
+                      className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors resize-none" />
                   </div>
                 </div>
               </SectionCard>
@@ -657,15 +744,15 @@ function PortfolioGenerator() {
               {/* Experience */}
               <SectionCard title="Experience" icon="💼" onAdd={() => handleArrayAdd('experience', { company: '', position: '', duration: '', description: '' })}>
                 {portfolioData.experience.map((exp, i) => (
-                  <div key={i} className="p-4 bg-slate-900/50 border border-white/10 rounded-xl mb-3 relative group hover:border-white/20 transition-all duration-200">
+                  <div key={i} className="p-4 bg-[#0a0a0a] border border-white/10 rounded-xl mb-3 relative group hover:border-white/20 transition-all duration-200">
                     <button onClick={() => handleArrayRemove('experience', i)} className="absolute top-3 right-3 text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                     <div className="grid md:grid-cols-2 gap-3">
-                      <input placeholder="Position" value={exp.position} onChange={e => handleArrayUpdate('experience', i, 'position', e.target.value)} className="px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
-                      <input placeholder="Company" value={exp.company} onChange={e => handleArrayUpdate('experience', i, 'company', e.target.value)} className="px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
-                      <input placeholder="Duration" value={exp.duration} onChange={e => handleArrayUpdate('experience', i, 'duration', e.target.value)} className="px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200 md:col-span-2" />
-                      <textarea placeholder="Description" value={exp.description} onChange={e => handleArrayUpdate('experience', i, 'description', e.target.value)} rows="2" className="px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200 md:col-span-2 resize-none" />
+                      <input placeholder="Position" value={exp.position} onChange={e => handleArrayUpdate('experience', i, 'position', e.target.value)} className="px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
+                      <input placeholder="Company" value={exp.company} onChange={e => handleArrayUpdate('experience', i, 'company', e.target.value)} className="px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
+                      <input placeholder="Duration" value={exp.duration} onChange={e => handleArrayUpdate('experience', i, 'duration', e.target.value)} className="px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors md:col-span-2" />
+                      <textarea placeholder="Description" value={exp.description} onChange={e => handleArrayUpdate('experience', i, 'description', e.target.value)} rows="2" className="px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors md:col-span-2 resize-none" />
                     </div>
                   </div>
                 ))}
@@ -675,14 +762,14 @@ function PortfolioGenerator() {
               {/* Education */}
               <SectionCard title="Education" icon="🎓" onAdd={() => handleArrayAdd('education', { degree: '', institution: '', year: '', cgpa: '' })}>
                 {portfolioData.education.map((edu, i) => (
-                  <div key={i} className="p-4 bg-slate-900/50 border border-white/10 rounded-xl mb-3 relative group hover:border-white/20 transition-all duration-200">
+                  <div key={i} className="p-4 bg-[#0a0a0a] border border-white/10 rounded-xl mb-3 relative group hover:border-white/20 transition-all duration-200">
                     <button onClick={() => handleArrayRemove('education', i)} className="absolute top-3 right-3 text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                     <div className="grid md:grid-cols-2 gap-3">
-                      <input placeholder="Degree" value={edu.degree} onChange={e => handleArrayUpdate('education', i, 'degree', e.target.value)} className="px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200 md:col-span-2" />
-                      <input placeholder="Institution" value={edu.institution} onChange={e => handleArrayUpdate('education', i, 'institution', e.target.value)} className="px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
-                      <input placeholder="Year" value={edu.year} onChange={e => handleArrayUpdate('education', i, 'year', e.target.value)} className="px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
+                      <input placeholder="Degree" value={edu.degree} onChange={e => handleArrayUpdate('education', i, 'degree', e.target.value)} className="px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors md:col-span-2" />
+                      <input placeholder="Institution" value={edu.institution} onChange={e => handleArrayUpdate('education', i, 'institution', e.target.value)} className="px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
+                      <input placeholder="Year" value={edu.year} onChange={e => handleArrayUpdate('education', i, 'year', e.target.value)} className="px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
                     </div>
                   </div>
                 ))}
@@ -700,25 +787,25 @@ function PortfolioGenerator() {
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <input type="text" placeholder="Add a skill (press Enter)" className="flex-1 px-4 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200"
+                  <input type="text" placeholder="Add a skill (press Enter)" className="flex-1 px-4 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors"
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSkill(e.target.value.trim()); e.target.value = ''; } }} />
                   <button onClick={e => { const input = e.target.closest('div').querySelector('input'); handleAddSkill(input.value.trim()); input.value = ''; }}
-                    className="px-6 py-2.5 backdrop-blur-lg bg-cyan-600 text-white rounded-xl font-medium hover:bg-cyan-500 transition-all duration-200">Add</button>
+                    className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40">Add</button>
                 </div>
               </SectionCard>
 
               {/* Projects */}
               <SectionCard title="Projects" icon="🚀" onAdd={() => handleArrayAdd('projects', { name: '', description: '', technologies: [], link: '' })}>
                 {portfolioData.projects.map((proj, i) => (
-                  <div key={i} className="p-4 bg-slate-900/50 border border-white/10 rounded-xl mb-3 relative group hover:border-white/20 transition-all duration-200">
+                  <div key={i} className="p-4 bg-[#0a0a0a] border border-white/10 rounded-xl mb-3 relative group hover:border-white/20 transition-all duration-200">
                     <button onClick={() => handleArrayRemove('projects', i)} className="absolute top-3 right-3 text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                     <div className="space-y-3">
-                      <input placeholder="Project Name" value={proj.name} onChange={e => handleArrayUpdate('projects', i, 'name', e.target.value)} className="w-full px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
-                      <textarea placeholder="Description" value={proj.description} onChange={e => handleArrayUpdate('projects', i, 'description', e.target.value)} rows="2" className="w-full px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200 resize-none" />
-                      <input placeholder="Technologies (comma separated)" value={Array.isArray(proj.technologies) ? proj.technologies.join(', ') : ''} onChange={e => handleArrayUpdate('projects', i, 'technologies', e.target.value.split(',').map(t => t.trim()))} className="w-full px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
-                      <input placeholder="Project Link (optional)" value={proj.link || ''} onChange={e => handleArrayUpdate('projects', i, 'link', e.target.value)} className="w-full px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
+                      <input placeholder="Project Name" value={proj.name} onChange={e => handleArrayUpdate('projects', i, 'name', e.target.value)} className="w-full px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
+                      <textarea placeholder="Description" value={proj.description} onChange={e => handleArrayUpdate('projects', i, 'description', e.target.value)} rows="2" className="w-full px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors resize-none" />
+                      <input placeholder="Technologies (comma separated)" value={Array.isArray(proj.technologies) ? proj.technologies.join(', ') : ''} onChange={e => handleArrayUpdate('projects', i, 'technologies', e.target.value.split(',').map(t => t.trim()))} className="w-full px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
+                      <input placeholder="Project Link (optional)" value={proj.link || ''} onChange={e => handleArrayUpdate('projects', i, 'link', e.target.value)} className="w-full px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
                     </div>
                   </div>
                 ))}
@@ -730,7 +817,7 @@ function PortfolioGenerator() {
                 {portfolioData.certifications.map((cert, i) => (
                   <div key={i} className="flex gap-2 mb-2">
                     <input placeholder="e.g., AWS Certified Developer" value={cert} onChange={e => handleArrayUpdate('certifications', i, null, e.target.value)}
-                      className="flex-1 px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
+                      className="flex-1 px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
                     <button onClick={() => handleArrayRemove('certifications', i)} className="text-red-400 hover:text-red-300 px-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -744,7 +831,7 @@ function PortfolioGenerator() {
                 {portfolioData.achievements.map((ach, i) => (
                   <div key={i} className="flex gap-2 mb-2">
                     <input placeholder="e.g., Won National Hackathon" value={ach} onChange={e => handleArrayUpdate('achievements', i, null, e.target.value)}
-                      className="flex-1 px-3 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:ring-2 focus:ring-cyan-500/60 focus:outline-none hover:border-white/20 transition-all duration-200" />
+                      className="flex-1 px-3 py-2 bg-[#0a0a0a] border border-white/10 rounded-lg text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors" />
                     <button onClick={() => handleArrayRemove('achievements', i)} className="text-red-400 hover:text-red-300 px-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
@@ -762,7 +849,7 @@ function PortfolioGenerator() {
                   setError('');
                   setCurrentStep(3);
                 }}
-                className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-500 hover:to-purple-500 hover:scale-105 transition-all duration-200 shadow-[0_0_25px_rgba(99,102,241,0.3)]">
+                className="w-full mt-6 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40">
                 Continue to Template Selection →
               </button>
             </div>
@@ -772,7 +859,7 @@ function PortfolioGenerator() {
         {/* STEP 3: Template Selection */}
         {currentStep === 3 && (
           <div className="space-y-6">
-            <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-8">
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-8">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Choose Your Template</h2>
@@ -785,7 +872,7 @@ function PortfolioGenerator() {
                   const isSelected = selectedTemplate === tmpl.key;
                   return (
                     <div key={tmpl.key} onClick={() => setSelectedTemplate(tmpl.key)}
-                      className={`relative backdrop-blur-lg bg-slate-900/40 border rounded-xl cursor-pointer overflow-hidden transition-all duration-200 ${
+                      className={`relative backdrop-blur-lg bg-[#0a0a0a] border rounded-xl cursor-pointer overflow-hidden transition-all duration-200 ${
                         isSelected ? 'border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] scale-105' : 'border-white/10 hover:border-cyan-400/50 hover:scale-105'
                       }`}>
                       <div className={`bg-gradient-to-br ${tmpl.gradient} h-32 flex items-end p-3 text-white relative`}>
@@ -806,7 +893,7 @@ function PortfolioGenerator() {
                           </div>
                         )}
                       </div>
-                      <div className="p-3 bg-slate-900/60">
+                      <div className="p-3 bg-[#0a0a0a]">
                         <div className="flex items-center gap-2 mb-0.5">
                           <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${tmpl.gradient}`} />
                           <h3 className="font-bold text-white text-xs truncate">{tmpl.name}</h3>
@@ -836,7 +923,7 @@ function PortfolioGenerator() {
               )}
 
               <button onClick={handleDeploy} disabled={loading}
-                className="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-500 hover:to-purple-500 hover:scale-105 disabled:opacity-50 transition-all duration-200 shadow-[0_0_25px_rgba(99,102,241,0.3)]">
+                className="w-full px-6 py-3 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 disabled:opacity-50">
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -856,14 +943,14 @@ function PortfolioGenerator() {
 
 function SectionCard({ title, icon, children, onAdd }) {
   return (
-    <div className="mb-6 p-6 backdrop-blur-lg bg-slate-900/40 border border-white/10 rounded-xl">
+    <div className="mb-6 p-6 bg-[#0a0a0a] border border-white/10 rounded-xl">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-2">
           <span>{icon}</span> {title}
         </h3>
         {onAdd && (
-          <button onClick={onAdd} className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 text-sm font-semibold transition-all duration-200">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+          <button onClick={onAdd} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-300 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/40">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             Add
           </button>
         )}
@@ -876,12 +963,12 @@ function SectionCard({ title, icon, children, onAdd }) {
 function InputField({ label, value, onChange, placeholder, type = 'text', required }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-300 mb-1.5">
+      <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       <input type={type} value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className={`w-full px-4 py-3 bg-slate-900/50 border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:border-cyan-500/50 focus:shadow-[0_0_18px_rgba(6,182,212,0.25)] hover:border-white/20 transition-all duration-200 ${
-          required && !value ? 'border-amber-500/50 bg-amber-500/5' : 'border-white/10'
+        className={`w-full px-4 py-3 bg-[#0a0a0a] border rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors ${
+          required && !value ? 'border-amber-500/50' : 'border-white/10'
         }`} />
     </div>
   );

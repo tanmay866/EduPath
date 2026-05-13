@@ -10,9 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@splinetool/react-spline": "^4.1.0",
+    "@splinetool/runtime": "^1.12.92",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.5",
     "formik": "^2.4.9",
+    "framer-motion": "^12.38.0",
     "lucide-react": "^0.574.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

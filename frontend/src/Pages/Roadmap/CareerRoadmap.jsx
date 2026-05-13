@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Map, Zap, Star, Clock, CheckCircle2, ArrowRight, ChevronDown, BookOpen, Target, Brain, Award } from 'lucide-react';
 
 const SUPPORTED_ROLES = [
-  { label: 'MERN Developer', color: 'text-indigo-300', bg: 'bg-indigo-500/10 border-indigo-500/25' },
-  { label: 'AI/ML Engineer', color: 'text-violet-300', bg: 'bg-violet-500/10 border-violet-500/25' },
-  { label: 'Data Science Engineer', color: 'text-cyan-300', bg: 'bg-cyan-500/10 border-cyan-500/25' },
-  { label: 'DevOps Engineer', color: 'text-emerald-300', bg: 'bg-emerald-500/10 border-emerald-500/25' },
-  { label: 'Mobile Developer', color: 'text-amber-300', bg: 'bg-amber-500/10 border-amber-500/25' },
-  { label: 'Cybersecurity Engineer', color: 'text-rose-300', bg: 'bg-rose-500/10 border-rose-500/25' },
+  { label: 'MERN Developer',        color: 'text-indigo-300', bg: 'bg-indigo-500/10 border-indigo-500/25',  hover: 'pill-indigo' },
+  { label: 'AI/ML Engineer',        color: 'text-violet-300', bg: 'bg-violet-500/10 border-violet-500/25',  hover: 'pill-violet' },
+  { label: 'Data Science Engineer', color: 'text-cyan-300',   bg: 'bg-cyan-500/10 border-cyan-500/25',      hover: 'pill-cyan'   },
+  { label: 'DevOps Engineer',       color: 'text-emerald-300',bg: 'bg-emerald-500/10 border-emerald-500/25',hover: 'pill-emerald'},
+  { label: 'Mobile Developer',      color: 'text-amber-300',  bg: 'bg-amber-500/10 border-amber-500/25',    hover: 'pill-amber'  },
+  { label: 'Cybersecurity Engineer',color: 'text-rose-300',   bg: 'bg-rose-500/10 border-rose-500/25',      hover: 'pill-rose'   },
 ];
 
 const HOW_IT_WORKS = [
@@ -233,12 +233,27 @@ const CareerRoadmap = () => {
           <p data-animate className="text-slate-500 mb-8 opacity-0 translate-y-4 transition-all duration-500" style={{ transitionDelay: '0.1s' }}>
             Roadmaps are available for these high-demand tech roles.
           </p>
+
+          <style>{`
+            .career-pill {
+              cursor: default;
+              transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+            }
+            .career-pill:hover { transform: translateY(-4px) scale(1.06); }
+            .pill-indigo:hover  { border-color: rgba(99,102,241,0.6)  !important; background: rgba(99,102,241,0.2)  !important; box-shadow: 0 6px 24px -4px rgba(99,102,241,0.35);  color: #c7d2fe !important; }
+            .pill-violet:hover  { border-color: rgba(139,92,246,0.6)  !important; background: rgba(139,92,246,0.2)  !important; box-shadow: 0 6px 24px -4px rgba(139,92,246,0.35);  color: #ddd6fe !important; }
+            .pill-cyan:hover    { border-color: rgba(34,211,238,0.6)  !important; background: rgba(34,211,238,0.15) !important; box-shadow: 0 6px 24px -4px rgba(34,211,238,0.3);   color: #a5f3fc !important; }
+            .pill-emerald:hover { border-color: rgba(52,211,153,0.6)  !important; background: rgba(52,211,153,0.15) !important; box-shadow: 0 6px 24px -4px rgba(52,211,153,0.3);   color: #a7f3d0 !important; }
+            .pill-amber:hover   { border-color: rgba(251,191,36,0.6)  !important; background: rgba(251,191,36,0.15) !important; box-shadow: 0 6px 24px -4px rgba(251,191,36,0.3);   color: #fde68a !important; }
+            .pill-rose:hover    { border-color: rgba(251,113,133,0.6) !important; background: rgba(251,113,133,0.15)!important; box-shadow: 0 6px 24px -4px rgba(251,113,133,0.3);  color: #fecdd3 !important; }
+          `}</style>
+
           <div className="flex flex-wrap justify-center gap-3">
             {SUPPORTED_ROLES.map((role, i) => (
               <span
                 key={role.label}
                 data-animate
-                className={`px-4 py-2 rounded-full text-sm font-semibold border ${role.bg} ${role.color} opacity-0 translate-y-4 transition-all duration-500`}
+                className={`career-pill ${role.hover} px-5 py-2.5 rounded-full text-sm font-bold border ${role.bg} ${role.color} opacity-0 translate-y-4 transition-all duration-500`}
                 style={{ transitionDelay: `${i * 0.07}s` }}
               >
                 {role.label}

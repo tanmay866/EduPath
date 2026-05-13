@@ -1,6 +1,7 @@
-﻿import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import EduPathLogo from '../../component/EduPathLogo';
+import GlowingPathSection from './components/GlowingPathSection';
 
 const FEATURES = [
   {
@@ -38,9 +39,9 @@ const FEATURES = [
 ];
 
 const COLORS = {
-  indigo:  { bg: 'bg-indigo-500/15',  border: 'border-indigo-500/40',  title: 'text-indigo-400',  icon: 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-400',  dot: 'bg-indigo-400',  glow: 'shadow-indigo-500/20' },
-  cyan:    { bg: 'bg-cyan-500/15',    border: 'border-cyan-500/40',    title: 'text-cyan-400',    icon: 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400',    dot: 'bg-cyan-400',    glow: 'shadow-cyan-500/20' },
-  purple:  { bg: 'bg-purple-500/15',  border: 'border-purple-500/40',  title: 'text-purple-400',  icon: 'bg-purple-500/20 border border-purple-500/40 text-purple-400',  dot: 'bg-purple-400',  glow: 'shadow-purple-500/20' },
+  indigo: { bg: 'bg-indigo-500/15', border: 'border-indigo-500/40', title: 'text-indigo-400', icon: 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-400', dot: 'bg-indigo-400', glow: 'shadow-indigo-500/20' },
+  cyan: { bg: 'bg-cyan-500/15', border: 'border-cyan-500/40', title: 'text-cyan-400', icon: 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400', dot: 'bg-cyan-400', glow: 'shadow-cyan-500/20' },
+  purple: { bg: 'bg-purple-500/15', border: 'border-purple-500/40', title: 'text-purple-400', icon: 'bg-purple-500/20 border border-purple-500/40 text-purple-400', dot: 'bg-purple-400', glow: 'shadow-purple-500/20' },
   emerald: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', title: 'text-emerald-400', icon: 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400', dot: 'bg-emerald-400', glow: 'shadow-emerald-500/20' },
 };
 
@@ -49,15 +50,15 @@ const Home = () => {
   const navigate = useNavigate();
 
   const [activeFeature, setActiveFeature] = useState(0);
-  const [videoVisible, setVideoVisible]   = useState(true);
-  const [typedText, setTypedText]         = useState('');
+  const [videoVisible, setVideoVisible] = useState(true);
+  const [typedText, setTypedText] = useState('');
   const [cursorVisible, setCursorVisible] = useState(true);
-  const [heroReady, setHeroReady]         = useState(false);
-  const videoRef   = useRef(null);
+  const [heroReady, setHeroReady] = useState(false);
+  const videoRef = useRef(null);
 
   const HERO_LINE1 = 'Your Personalized Path';
   const HERO_LINE2 = 'to Success';
-  const FULL_TEXT  = HERO_LINE1 + '\n' + HERO_LINE2;
+  const FULL_TEXT = HERO_LINE1 + '\n' + HERO_LINE2;
 
   // Typewriter effect on mount
   useEffect(() => {
@@ -113,7 +114,7 @@ const Home = () => {
   return (
     <div className="bg-black font-sans">
 
-        {/* SECTION 1: HERO */}
+      {/* SECTION 1: HERO */}
       <section data-section="0" className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative overflow-hidden">
         {/* Glow blobs */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -121,87 +122,87 @@ const Home = () => {
 
         {/* All hero content sits above the canvas */}
         <div className="relative z-10 flex flex-col items-center text-center">
-        {/* EduPath logo badge — fades in with buttons after typing */}
-        <div
-          style={{
-            opacity: heroReady ? 1 : 0,
-            transform: heroReady ? 'translateY(0)' : 'translateY(24px)',
-            transition: 'opacity 0.7s ease 0.55s, transform 0.7s ease 0.55s',
-          }}
-          className="mb-8"
-        >
-          <EduPathLogo size={32} showText={true} fontSize={18} />
-        </div>
-
-        {/* Typewriter heading — Antigravity style */}
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight min-h-[3.5em] md:min-h-[2.8em]">
-          {(() => {
-            const parts = typedText.split('\n');
-            return (
-              <>
-                <span>{parts[0]}</span>
-                {parts[1] !== undefined && (
-                  <>
-                    <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">
-                      {parts[1]}
-                    </span>
-                  </>
-                )}
-                {/* Blinking cursor — hidden once typing completes */}
-                {!heroReady && (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      width: '3px',
-                      height: '0.85em',
-                      background: 'rgb(99 102 241)',
-                      marginLeft: '4px',
-                      verticalAlign: 'middle',
-                      borderRadius: '2px',
-                      opacity: cursorVisible ? 1 : 0,
-                      transition: 'opacity 0.1s',
-                    }}
-                  />
-                )}
-              </>
-            );
-          })()}
-        </h1>
-
-        <p
-          className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl"
-          style={{
-            opacity: heroReady ? 1 : 0,
-            transform: heroReady ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s',
-          }}
-        >
-          Learn Smarter, Grow Faster with our AI-powered personalized learning platform
-        </p>
-
-        {/* Buttons — fade + slide in from below after typing done */}
-        <div
-          className="flex flex-col sm:flex-row gap-4 mt-8"
-          style={{
-            opacity: heroReady ? 1 : 0,
-            transform: heroReady ? 'translateY(0)' : 'translateY(28px)',
-            transition: 'opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s',
-          }}
-        >
-          <button
-            className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
-            onClick={() => navigate('/assessment')}
+          {/* EduPath logo badge — fades in with buttons after typing */}
+          <div
+            style={{
+              opacity: heroReady ? 1 : 0,
+              transform: heroReady ? 'translateY(0)' : 'translateY(24px)',
+              transition: 'opacity 0.7s ease 0.55s, transform 0.7s ease 0.55s',
+            }}
+            className="mb-8"
           >
-            Skill Assessment →
-          </button>
-          <button
-            className="backdrop-blur-lg bg-white/5 text-white px-8 py-4 rounded-xl font-bold border border-white/15 hover:bg-white/10 hover:border-white/30 hover:scale-105 transition-all duration-300 cursor-pointer"
-            onClick={() => navigate('/services')}
+            <EduPathLogo size={32} showText={true} fontSize={18} />
+          </div>
+
+          {/* Typewriter heading — Antigravity style */}
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight min-h-[3.5em] md:min-h-[2.8em]">
+            {(() => {
+              const parts = typedText.split('\n');
+              return (
+                <>
+                  <span>{parts[0]}</span>
+                  {parts[1] !== undefined && (
+                    <>
+                      <br />
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">
+                        {parts[1]}
+                      </span>
+                    </>
+                  )}
+                  {/* Blinking cursor — hidden once typing completes */}
+                  {!heroReady && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: '3px',
+                        height: '0.85em',
+                        background: 'rgb(99 102 241)',
+                        marginLeft: '4px',
+                        verticalAlign: 'middle',
+                        borderRadius: '2px',
+                        opacity: cursorVisible ? 1 : 0,
+                        transition: 'opacity 0.1s',
+                      }}
+                    />
+                  )}
+                </>
+              );
+            })()}
+          </h1>
+
+          <p
+            className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl"
+            style={{
+              opacity: heroReady ? 1 : 0,
+              transform: heroReady ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s',
+            }}
           >
-            Explore EduPath
-          </button>
-        </div>
+            Learn Smarter, Grow Faster with our AI-powered personalized learning platform
+          </p>
+
+          {/* Buttons — fade + slide in from below after typing done */}
+          <div
+            className="flex flex-col sm:flex-row gap-4 mt-8"
+            style={{
+              opacity: heroReady ? 1 : 0,
+              transform: heroReady ? 'translateY(0)' : 'translateY(28px)',
+              transition: 'opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s',
+            }}
+          >
+            <button
+              className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
+              onClick={() => navigate('/assessment')}
+            >
+              Skill Assessment →
+            </button>
+            <button
+              className="backdrop-blur-lg bg-white/5 text-white px-8 py-4 rounded-xl font-bold border border-white/15 hover:bg-white/10 hover:border-white/30 hover:scale-105 transition-all duration-300 cursor-pointer"
+              onClick={() => navigate('/services')}
+            >
+              Explore EduPath
+            </button>
+          </div>
         </div>
       </section>
 
@@ -210,15 +211,15 @@ const Home = () => {
         <div className="absolute -left-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-6xl mx-auto text-center">
-          
+
           <h2 data-animate className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
-          <p data-animate style={{transitionDelay: '0.1s'}} className="text-slate-500 mb-16">Three simple steps to transform your career</p>
+          <p data-animate style={{ transitionDelay: '0.1s' }} className="text-slate-500 mb-16">Three simple steps to transform your career</p>
 
           {/* Grid Container for 3 Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
+
             {/* Card 1 */}
-            <div data-animate style={{transitionDelay: '0s'}} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-blue-500/50 shadow-2xl hover:shadow-blue-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+            <div data-animate style={{ transitionDelay: '0s' }} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-blue-500/50 shadow-2xl hover:shadow-blue-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
               <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">1</div>
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               <div className="relative z-10">
@@ -229,7 +230,7 @@ const Home = () => {
             </div>
 
             {/* Card 2 */}
-            <div data-animate style={{transitionDelay: '0.15s'}} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-emerald-500/50 shadow-2xl hover:shadow-emerald-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+            <div data-animate style={{ transitionDelay: '0.15s' }} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-emerald-500/50 shadow-2xl hover:shadow-emerald-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
               <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">2</div>
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               <div className="relative z-10">
@@ -240,7 +241,7 @@ const Home = () => {
             </div>
 
             {/* Card 3 */}
-            <div data-animate style={{transitionDelay: '0.3s'}} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
+            <div data-animate style={{ transitionDelay: '0.3s' }} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
               <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">3</div>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               <div className="relative z-10">
@@ -262,21 +263,21 @@ const Home = () => {
         <div className="max-w-6xl mx-auto">
           {/* Heading */}
           <div className="text-center mb-14">
-            <div data-animate className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-widest uppercase mb-5" style={{backdropFilter:'blur(8px)'}}>
+            <div data-animate className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-widest uppercase mb-5" style={{ backdropFilter: 'blur(8px)' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">Explore Features</span>
             </div>
-            <h2 data-animate style={{transitionDelay:'0.05s'}} className="text-3xl md:text-5xl font-bold text-white mb-4">
+            <h2 data-animate style={{ transitionDelay: '0.05s' }} className="text-3xl md:text-5xl font-bold text-white mb-4">
               Everything You Need to
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400"> Grow Faster</span>
             </h2>
-            <p data-animate style={{transitionDelay:'0.1s'}} className="text-slate-500 max-w-xl mx-auto">
+            <p data-animate style={{ transitionDelay: '0.1s' }} className="text-slate-500 max-w-xl mx-auto">
               Click a feature to see it in action
             </p>
           </div>
 
           {/* Two-column layout */}
-          <div data-animate style={{transitionDelay:'0.15s'}} className="flex flex-col lg:flex-row gap-6 items-start">
+          <div data-animate style={{ transitionDelay: '0.15s' }} className="flex flex-col lg:flex-row gap-6 items-start">
 
             {/* Left — Feature List */}
             <div className="flex flex-col gap-3 lg:w-[340px] w-full flex-shrink-0">
@@ -287,22 +288,19 @@ const Home = () => {
                   <button
                     key={f.id}
                     onClick={() => handleFeatureClick(f.id)}
-                    className={`text-left w-full rounded-2xl border p-5 transition-all duration-300 backdrop-blur-lg ${
-                      active
-                        ? `${c.bg} ${c.border} shadow-xl ${c.glow}`
-                        : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/8'
-                    }`}
+                    className={`text-left w-full rounded-2xl border p-5 transition-all duration-300 backdrop-blur-lg ${active
+                      ? `${c.bg} ${c.border} shadow-xl ${c.glow}`
+                      : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/8'
+                      }`}
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`mt-0.5 w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                        active ? c.icon : 'bg-white/10 border-white/20 text-gray-400'
-                      }`}>
+                      <div className={`mt-0.5 w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${active ? c.icon : 'bg-white/10 border-white/20 text-gray-400'
+                        }`}>
                         {f.icon}
                       </div>
                       <div>
-                        <div className={`font-semibold text-base transition-colors duration-300 ${
-                          active ? c.title : 'text-white'
-                        }`}>{f.title}</div>
+                        <div className={`font-semibold text-base transition-colors duration-300 ${active ? c.title : 'text-white'
+                          }`}>{f.title}</div>
                         <div className="text-gray-400 text-sm mt-1 leading-relaxed">{f.desc}</div>
                       </div>
                     </div>
@@ -362,7 +360,7 @@ const Home = () => {
                       <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
 
                         {/* Grid pattern */}
-                        <div className="absolute inset-0 opacity-[0.07]" style={{backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '40px 40px'}} />
+                        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
                         {/* Cyan glow blobs */}
                         <div className="absolute top-1/4 left-1/4 w-56 h-56 rounded-full blur-3xl opacity-10 bg-cyan-400" />
@@ -387,16 +385,16 @@ const Home = () => {
 
                           {/* Roadmap steps */}
                           {[
-                            { label: 'HTML & CSS Basics',     pct: 100, done: true  },
+                            { label: 'HTML & CSS Basics', pct: 100, done: true },
                             { label: 'JavaScript Fundamentals', pct: 72, done: false },
                             { label: 'React & Component Design', pct: 30, done: false },
-                            { label: 'Node.js & REST APIs',    pct: 0,  done: false },
+                            { label: 'Node.js & REST APIs', pct: 0, done: false },
                           ].map((step, i) => (
                             <div key={i} className="flex items-center gap-3">
                               {/* dot + line */}
                               <div className="flex flex-col items-center flex-shrink-0">
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${step.done ? 'bg-cyan-500 border-cyan-400' : step.pct > 0 ? 'bg-cyan-500/20 border-cyan-500/60' : 'bg-slate-700 border-slate-600'}`}>
-                                  {step.done && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>}
+                                  {step.done && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                                 </div>
                                 {i < 3 && <div className={`w-px h-5 mt-0.5 ${step.done ? 'bg-cyan-500/50' : 'bg-slate-700'}`} />}
                               </div>
@@ -409,7 +407,7 @@ const Home = () => {
                                 <div className="h-1 rounded-full bg-slate-700/60 overflow-hidden">
                                   <div
                                     className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-400"
-                                    style={{width: `${step.pct}%`, opacity: step.pct === 0 ? 0.2 : 1}}
+                                    style={{ width: `${step.pct}%`, opacity: step.pct === 0 ? 0.2 : 1 }}
                                   />
                                 </div>
                               </div>
@@ -429,45 +427,8 @@ const Home = () => {
         </div>
       </section>
 
-      <section data-section="3" className="py-20 px-6 relative z-10 bg-black overflow-hidden">
-        {/* Glow blobs */}
-        <div className="absolute top-1/4 -left-16 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 -right-16 w-64 h-64 bg-pink-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 data-animate className="text-3xl md:text-4xl font-bold mb-4">How Your Career Journey Works</h2>
-          <p data-animate style={{transitionDelay: '0.1s'}} className="text-slate-500 max-w-2xl mx-auto mb-12">
-            Our AI-powered career engine creates a personalized roadmap based on your current skills, interests, and market demand.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {[
-              { title: "Skills Assessment", desc: "Take our comprehensive assessment to understand your level.", icon: "◎", color: "blue" },
-              { title: "Personalized Path", desc: "Get a custom roadmap with courses, projects, and milestones.", icon: "📊", color: "emerald" },
-              { title: "Learn & Build", desc: "Complete verified courses and build portfolio projects.", icon: "⟨⟩", color: "purple" },
-              { title: "Get Hired", desc: "Connect with hiring partners and showcase your skills.", icon: "👥", color: "pink" }
-            ].map((item, idx) => (
-              <div key={idx} data-animate style={{transitionDelay: `${idx * 0.12}s`}} className="flex flex-col items-center group">
-                <div className={`w-16 h-16 backdrop-blur-lg rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-xl transition-all duration-300 hover:scale-110
-                  ${item.color === 'blue' ? 'bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-300 border border-blue-500/30 hover:border-blue-500/60 hover:shadow-blue-500/50 hover:from-blue-500/30 hover:to-blue-600/30' : ''}
-                  ${item.color === 'emerald' ? 'bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-emerald-500/50 hover:from-emerald-500/30 hover:to-emerald-600/30' : ''}
-                  ${item.color === 'purple' ? 'bg-gradient-to-br from-purple-500/20 to-purple-600/20 text-purple-300 border border-purple-500/30 hover:border-purple-500/60 hover:shadow-purple-500/50 hover:from-purple-500/30 hover:to-purple-600/30' : ''}
-                  ${item.color === 'pink' ? 'bg-gradient-to-br from-pink-500/20 to-pink-600/20 text-pink-300 border border-pink-500/30 hover:border-pink-500/60 hover:shadow-pink-500/50 hover:from-pink-500/30 hover:to-pink-600/30' : ''}
-                `}>
-                  {item.icon}
-                </div>
-                <h3 className={`font-bold text-lg mb-2 text-white transition-all duration-300
-                  ${item.color === 'blue' ? 'group-hover:text-blue-400' : ''}
-                  ${item.color === 'emerald' ? 'group-hover:text-emerald-400' : ''}
-                  ${item.color === 'purple' ? 'group-hover:text-purple-400' : ''}
-                  ${item.color === 'pink' ? 'group-hover:text-pink-400' : ''}
-                `}>{item.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
+      {/* Glowing Path Section replaces the old static "How Your Career Journey Works" */}
+      <GlowingPathSection />
 
       <section data-section="4" className="py-20 px-6 relative z-10 bg-black overflow-hidden">
         {/* Glow blobs */}
@@ -479,8 +440,8 @@ const Home = () => {
             <div className="relative z-10">
               <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">Still have questions?</h2>
               <p className="text-slate-200 mb-6 max-w-xl mx-auto leading-relaxed">Can't find the answer you're looking for? Our support team is here to help you every step of the way.</p>
-              
-              <button 
+
+              <button
                 onClick={() => navigate('/contact')}
                 className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
               >
@@ -493,25 +454,25 @@ const Home = () => {
 
           {/* Stats Bar */}
           <div data-animate className="text-center mb-12">
-             <span className="text-emerald-500 font-bold bg-emerald-50 px-4 py-1 rounded-full text-xs uppercase tracking-widest">Community Success</span>
-             <h2 className="text-3xl font-bold mt-4"><span className="text-emerald-500">Real Stories</span> from Our Community</h2>
-             <p className="text-slate-500 mt-2 max-w-2xl mx-auto text-sm">Join thousands of learners who have transformed their careers with LearnPath.</p>
+            <span className="text-emerald-500 font-bold bg-emerald-50 px-4 py-1 rounded-full text-xs uppercase tracking-widest">Community Success</span>
+            <h2 className="text-3xl font-bold mt-4"><span className="text-emerald-500">Real Stories</span> from Our Community</h2>
+            <p className="text-slate-500 mt-2 max-w-2xl mx-auto text-sm">Join thousands of learners who have transformed their careers with LearnPath.</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div data-animate style={{transitionDelay: '0s'}}>
+            <div data-animate style={{ transitionDelay: '0s' }}>
               <div className="text-3xl font-black mb-1">10,000+</div>
               <div className="text-slate-400 text-sm">Success Stories</div>
             </div>
-            <div data-animate style={{transitionDelay: '0.1s'}}>
+            <div data-animate style={{ transitionDelay: '0.1s' }}>
               <div className="text-3xl font-black mb-1">85%</div>
               <div className="text-slate-400 text-sm">Career Transitions</div>
             </div>
-            <div data-animate style={{transitionDelay: '0.2s'}}>
+            <div data-animate style={{ transitionDelay: '0.2s' }}>
               <div className="text-3xl font-black mb-1">160%</div>
               <div className="text-slate-400 text-sm">Avg Salary Increase</div>
             </div>
-            <div data-animate style={{transitionDelay: '0.3s'}}>
+            <div data-animate style={{ transitionDelay: '0.3s' }}>
               <div className="text-3xl font-black mb-1">6 months</div>
               <div className="text-slate-400 text-sm">Avg Learning Time</div>
             </div>
