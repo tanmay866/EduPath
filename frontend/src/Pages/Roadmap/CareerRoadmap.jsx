@@ -196,7 +196,7 @@ const CareerRoadmap = () => {
               Generate My Roadmap <ArrowRight size={16} />
             </button>
             <button
-              onClick={() => navigate('/roadmap/generate')}
+              onClick={() => navigate('/roadmap/generate', { state: { openHistory: true } })}
               className="px-8 py-3.5 rounded-xl font-bold bg-white/5 border border-white/15 hover:bg-white/10 hover:border-white/30 hover:scale-105 transition-all duration-300 cursor-pointer"
             >
               View History

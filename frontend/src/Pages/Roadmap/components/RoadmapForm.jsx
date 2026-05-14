@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, Plus, X, Zap } from 'lucide-react';
+import { Loader2, Plus, X, Zap, Target, Brain, Clock, BookOpen } from 'lucide-react';
 
 const initialForm = {
   targetRole: '',
@@ -9,55 +9,57 @@ const initialForm = {
   learningStyle: '',
 };
 
-const inputBase =
-  'w-full px-4 py-3 rounded-xl bg-slate-900 border border-white/10 text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 focus:border-indigo-500/50 transition-all duration-200';
+const inputCls =
+  'w-full px-4 py-3 rounded-xl bg-[#0a0a0a] border border-white/8 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/40 transition-all duration-200';
+
+const labelCls = 'block text-[11px] font-black uppercase tracking-widest text-slate-500 mb-2';
 
 const RoadmapForm = ({ isGenerating, onGenerate }) => {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm]           = useState(initialForm);
   const [skillInput, setSkillInput] = useState('');
 
   const addSkill = () => {
     const value = skillInput.trim();
     if (!value) return;
     if (form.skills.includes(value)) { setSkillInput(''); return; }
-    setForm((prev) => ({ ...prev, skills: [...prev.skills, value] }));
+    setForm(prev => ({ ...prev, skills: [...prev.skills, value] }));
     setSkillInput('');
   };
 
-  const removeSkill = (skill) => {
-    setForm((prev) => ({ ...prev, skills: prev.skills.filter((item) => item !== skill) }));
+  const removeSkill = skill =>
+    setForm(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = e => {
+    e.preventDefault();
     onGenerate(form, () => { setForm(initialForm); setSkillInput(''); });
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-3xl p-7 md:p-8 shadow-2xl shadow-black/40 space-y-6"
-    >
-      {/* Form header */}
-      <div className="pb-4 border-b border-white/8">
-        <div className="flex items-center gap-2.5 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center">
-            <Zap size={14} className="text-indigo-400" />
+    <form onSubmit={handleSubmit} className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-7 md:p-8 space-y-6">
+
+      {/* Header */}
+      <div className="pb-5 border-b border-white/5">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
+            <Zap size={15} className="text-indigo-400" />
           </div>
-          <h2 className="text-lg font-bold text-white">Roadmap Inputs</h2>
+          <div>
+            <h2 className="text-base font-black text-white tracking-tight">Roadmap Inputs</h2>
+            <p className="text-[11px] text-slate-500">Fill in the details to generate your personalised path.</p>
+          </div>
         </div>
-        <p className="text-sm text-slate-500 ml-10">Fill in the details to generate your personalised path.</p>
       </div>
 
       {/* Target Role */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">
-          Target Role <span className="text-indigo-400">*</span>
+      <div>
+        <label className={labelCls}>
+          <Target size={9} className="inline mr-1.5 text-indigo-400" />
+          Target Role <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
         </label>
         <input
           type="text"
@@ -65,102 +67,111 @@ const RoadmapForm = ({ isGenerating, onGenerate }) => {
           value={form.targetRole}
           onChange={handleChange}
           placeholder="e.g. MERN Developer, AI/ML Engineer…"
-          className={inputBase}
+          className={inputCls}
         />
-        <p className="text-xs text-slate-600">Supported: MERN Developer · AI/ML Engineer · Data Science Engineer · DevOps · Mobile · Cybersecurity</p>
+        <p className="text-[10px] text-slate-700 mt-1.5">
+          Supported: MERN Developer · AI/ML Engineer · Data Science · DevOps · Mobile · Cybersecurity
+        </p>
       </div>
 
       {/* Experience Level */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">
-          Experience Level <span className="text-indigo-400">*</span>
+      <div>
+        <label className={labelCls}>
+          <Brain size={9} className="inline mr-1.5 text-indigo-400" />
+          Experience Level <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
         </label>
         <select
           name="experienceLevel"
           value={form.experienceLevel}
           onChange={handleChange}
-          className={`${inputBase} appearance-none cursor-pointer`}
+          className={`${inputCls} appearance-none cursor-pointer`}
         >
-          <option value="" className="bg-slate-900">Select your level</option>
-          <option value="beginner" className="bg-slate-900">Beginner — just starting out</option>
-          <option value="intermediate" className="bg-slate-900">Intermediate — some experience</option>
-          <option value="advanced" className="bg-slate-900">Advanced — seasoned professional</option>
+          <option value="" className="bg-[#0a0a0a]">Select your level</option>
+          <option value="beginner"     className="bg-[#0a0a0a]">Beginner — just starting out</option>
+          <option value="intermediate" className="bg-[#0a0a0a]">Intermediate — some experience</option>
+          <option value="advanced"     className="bg-[#0a0a0a]">Advanced — seasoned professional</option>
         </select>
       </div>
 
       {/* Current Skills */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">
-          Current Skills <span className="text-indigo-400">*</span>
+      <div>
+        <label className={labelCls}>
+          <BookOpen size={9} className="inline mr-1.5 text-indigo-400" />
+          Current Skills <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
         </label>
         <div className="flex gap-2">
           <input
             type="text"
             value={skillInput}
-            onChange={(e) => setSkillInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
+            onChange={e => setSkillInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
             placeholder="Add a skill and press Enter…"
-            className={`${inputBase} flex-1`}
+            className={`${inputCls} flex-1`}
           />
           <button
             type="button"
             onClick={addSkill}
-            className="px-4 rounded-xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 hover:bg-indigo-500/30 hover:border-indigo-400/60 transition-all duration-200 shrink-0"
+            className="px-4 rounded-xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 hover:bg-indigo-500/25 hover:border-indigo-400/50 hover:text-indigo-200 transition-all duration-200 shrink-0"
           >
             <Plus size={16} />
           </button>
         </div>
 
         {form.skills.length > 0 && (
-          <div className="pt-1 flex flex-wrap gap-2">
-            {form.skills.map((skill) => (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {form.skills.map(skill => (
               <span
                 key={skill}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 border border-indigo-400/30 text-indigo-200"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-indigo-500/15 border border-indigo-500/25 text-indigo-300"
               >
                 {skill}
-                <button type="button" onClick={() => removeSkill(skill)} className="text-indigo-300 hover:text-white transition-colors">
-                  <X size={11} />
+                <button
+                  type="button"
+                  onClick={() => removeSkill(skill)}
+                  className="text-indigo-400 hover:text-white transition-colors"
+                >
+                  <X size={10} />
                 </button>
               </span>
             ))}
           </div>
         )}
-        <p className="text-xs text-slate-600">e.g. HTML, CSS, Python, Git — press Enter to add each one quickly.</p>
+        <p className="text-[10px] text-slate-700 mt-1.5">e.g. HTML, Python, Git — press Enter to add each one.</p>
       </div>
 
-      {/* Hours & Learning Style — 2-col on md+ */}
+      {/* Hours & Style — 2 col */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-300">
-            Hours per week <span className="text-indigo-400">*</span>
+        <div>
+          <label className={labelCls}>
+            <Clock size={9} className="inline mr-1.5 text-indigo-400" />
+            Hours per Week <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
           </label>
           <input
             type="number"
-            min="1"
-            max="80"
+            min="1" max="80"
             name="hoursPerWeek"
             value={form.hoursPerWeek}
             onChange={handleChange}
             placeholder="e.g. 10"
-            className={inputBase}
+            className={inputCls}
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-300">
-            Learning Style <span className="text-indigo-400">*</span>
+        <div>
+          <label className={labelCls}>
+            <Zap size={9} className="inline mr-1.5 text-indigo-400" />
+            Learning Style <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
           </label>
           <select
             name="learningStyle"
             value={form.learningStyle}
             onChange={handleChange}
-            className={`${inputBase} appearance-none cursor-pointer`}
+            className={`${inputCls} appearance-none cursor-pointer`}
           >
-            <option value="" className="bg-slate-900">Select style</option>
-            <option value="visual" className="bg-slate-900">Visual — videos & diagrams</option>
-            <option value="practical" className="bg-slate-900">Practical — projects & coding</option>
-            <option value="mixed" className="bg-slate-900">Mixed — blend of both</option>
+            <option value=""          className="bg-[#0a0a0a]">Select style</option>
+            <option value="visual"    className="bg-[#0a0a0a]">Visual — videos & diagrams</option>
+            <option value="practical" className="bg-[#0a0a0a]">Practical — projects & coding</option>
+            <option value="mixed"     className="bg-[#0a0a0a]">Mixed — blend of both</option>
           </select>
         </div>
       </div>
@@ -169,7 +180,7 @@ const RoadmapForm = ({ isGenerating, onGenerate }) => {
       <button
         type="submit"
         disabled={isGenerating}
-        className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-400 hover:to-violet-400 hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
+        className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl text-sm font-black text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
       >
         {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
         {isGenerating ? 'Generating Your Roadmap…' : 'Generate My Roadmap'}

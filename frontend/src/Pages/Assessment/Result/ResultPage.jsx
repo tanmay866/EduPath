@@ -2,32 +2,55 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getQuizResult, retryQuiz } from "../../Services/assessmentService";
 import BackToHomeButton from "../../../component/Assessment/BackToHomeButton";
+import {
+  CheckCircle2, XCircle, RotateCcw, LayoutDashboard, Download,
+  BarChart2, Brain, Calendar, Clock, Target, ChevronDown, Lightbulb,
+  Loader2,
+} from "lucide-react";
+
+/* ── Circular Score SVG ─────────────────────────────────────────── */
+const ScoreRing = ({ percentage, passed }) => {
+  const r   = 54;
+  const circ = 2 * Math.PI * r;
+  const dash = (percentage / 100) * circ;
+  const color = passed ? '#34d399' : '#fb7185';
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: 148, height: 148 }}>
+      <svg width="148" height="148" viewBox="0 0 148 148" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx="74" cy="74" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10" />
+        <circle
+          cx="74" cy="74" r={r} fill="none"
+          stroke={color} strokeWidth="10"
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${circ}`}
+          style={{ filter: `drop-shadow(0 0 8px ${color}80)`, transition: 'stroke-dasharray 1s ease' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-3xl font-black" style={{ color }}>{percentage}%</span>
+        <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-0.5">Score</span>
+      </div>
+    </div>
+  );
+};
 
 const ResultPage = () => {
   const { resultId } = useParams();
-  const navigate = useNavigate();
+  const navigate     = useNavigate();
   const [showReview, setShowReview] = useState(false);
   const [resultData, setResultData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [retrying, setRetrying] = useState(false);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState(null);
+  const [retrying,   setRetrying]   = useState(false);
 
-  // Check authentication on component mount
   useEffect(() => {
     const token = sessionStorage.getItem('token');
-    if (!token) {
-      navigate('/signin');
-      return;
-    }
+    if (!token) { navigate('/signin'); return; }
   }, [navigate]);
 
-  // Fetch result data from API
   useEffect(() => {
-    if (resultId) {
-      fetchResultData();
-    } else {
-      navigate("/assessment");
-    }
+    if (resultId) fetchResultData();
+    else navigate("/assessment");
   }, [resultId]);
 
   const fetchResultData = async () => {
@@ -46,10 +69,9 @@ const ResultPage = () => {
   const handleRetry = async () => {
     try {
       setRetrying(true);
-      const response = await retryQuiz(resultId);
+      const response   = await retryQuiz(resultId);
       const sessionData = response.data?.data;
-
-      if (sessionData && sessionData.sessionId) {
+      if (sessionData?.sessionId) {
         localStorage.setItem('sessionId', sessionData.sessionId);
         localStorage.setItem('startTime', Date.now());
         navigate("/assessment/quiz");
@@ -62,498 +84,339 @@ const ResultPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen bg-black items-center justify-center">
-        <div className="text-white text-xl flex items-center gap-3">
-          <svg className="animate-spin h-8 w-8" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Loading results...
+  /* ── Loading ── */
+  if (loading) return (
+    <div className="flex min-h-screen bg-black items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
+          <Loader2 size={28} className="text-indigo-400 animate-spin" />
         </div>
+        <p className="text-slate-500 text-sm font-semibold">Loading your results…</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  if (error || !resultData) {
-    return (
-      <div className="flex min-h-screen bg-black items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">{error || "Result not found"}</div>
-          <button
-            onClick={() => navigate("/assessment")}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-          >
-            Back to Assessments
-          </button>
-        </div>
+  /* ── Error ── */
+  if (error || !resultData) return (
+    <div className="flex min-h-screen bg-black items-center justify-center">
+      <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-rose-500/20 shadow-2xl p-10 text-center max-w-md">
+        <XCircle size={40} className="text-rose-400 mx-auto mb-4" />
+        <p className="text-rose-400 font-black text-lg mb-2">{error || "Result not found"}</p>
+        <button onClick={() => navigate("/assessment")} className="mt-4 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-xl transition-colors">
+          Back to Assessments
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
 
-  // Transform API data to match component structure
-  const calculatedPercentage = resultData.percentage || Math.round((resultData.score / resultData.totalQuestions) * 100);
-  const passingScore = 70;
-  
-  const result = {
-    score: resultData.score,
-    totalQuestions: resultData.totalQuestions,
-    percentage: calculatedPercentage,
-    passed: calculatedPercentage >= passingScore,
-    correctAnswers: resultData.correctAnswers,
-    wrongAnswers: resultData.incorrectAnswers || (resultData.totalQuestions - resultData.correctAnswers),
-    unanswered: 0,
-    passingScore: passingScore,
-    skill: resultData.topic?.name || "Unknown",
-    topicIcon: resultData.topic?.icon || "📚",
-    assessmentTitle: `${resultData.topic?.name || 'Assessment'} - ${resultData.difficulty}`,
-    attemptDate: new Date(resultData.completedAt).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }),
-    timeTaken: `${Math.floor(resultData.timeTaken / 60)} min ${resultData.timeTaken % 60} sec`,
-    questionReview: resultData.detailedAnswers?.map((answer, index) => ({
-      id: index + 1,
-      question: answer.question,
-      selectedAnswer: answer.userAnswer,
-      correctAnswer: answer.correctAnswer,
-      isCorrect: answer.isCorrect,
-      explanation: answer.explanation,
-      options: [] // Options not included in API response
-    })) || [],
-    performanceMessage: resultData.performance?.message || "",
-    performanceLevel: resultData.performance?.level || "",
-  };
+  /* ── Data transform ── */
+  const percentage      = resultData.percentage || Math.round((resultData.score / resultData.totalQuestions) * 100);
+  const passed          = percentage >= 70;
+  const correctAnswers  = resultData.correctAnswers;
+  const wrongAnswers    = resultData.incorrectAnswers || (resultData.totalQuestions - correctAnswers);
+  const skill           = resultData.topic?.name || "Unknown";
+  const assessmentTitle = `${resultData.topic?.name || 'Assessment'} — ${resultData.difficulty}`;
+  const attemptDate     = new Date(resultData.completedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeTaken       = `${Math.floor(resultData.timeTaken / 60)} min ${resultData.timeTaken % 60} sec`;
+  const questionReview  = resultData.detailedAnswers?.map((a, i) => ({
+    id: i + 1, question: a.question, selectedAnswer: a.userAnswer,
+    correctAnswer: a.correctAnswer, isCorrect: a.isCorrect, explanation: a.explanation,
+  })) || [];
 
-  // Destructure result properties
-  const {
-    score,
-    totalQuestions,
-    percentage,
-    passed,
-    correctAnswers,
-    wrongAnswers,
-    unanswered = 0,
-    passingScore: resultPassingScore,
-    skill,
-    topicIcon,
-    assessmentTitle,
-    attemptDate,
-    timeTaken,
-    questionReview,
-    performanceMessage,
-    performanceLevel
-  } = result;
-
-  // 🧠 Dynamic Performance Insight
-  const getPerformanceInsight = () => {
-    if (performanceMessage) {
-      return {
-        message: performanceMessage,
-        color: passed ? "text-green-400" : "text-red-400"
-      };
-    }
-    
-    if (passed) {
-      const aboveAverage = percentage >= 80;
-      return {
-        message: aboveAverage 
-          ? "🌟 Excellent! You performed above average and demonstrated strong knowledge." 
-          : "✅ Great job! You passed the assessment successfully.",
-        color: "text-green-400"
-      };
-    } else {
-      const needed = Math.ceil((passingScore / 100) * totalQuestions) - correctAnswers;
-      return {
-        message: `📚 You need ${needed} more correct answer${needed > 1 ? 's' : ''} to pass. Keep practicing and try again!`,
-        color: "text-red-400"
-      };
-    }
-  };
-
-  const insight = getPerformanceInsight();
+  const insightMsg = resultData.performance?.message ||
+    (passed
+      ? percentage >= 80
+        ? "🌟 Excellent! You performed above average and demonstrated strong knowledge."
+        : "✅ Great job! You passed the assessment successfully."
+      : `📚 You need ${Math.ceil((70 / 100) * resultData.totalQuestions) - correctAnswers} more correct answer(s) to pass. Keep practicing!`);
 
   return (
-    <div className="min-h-screen bg-black relative">
-      <div className="p-4 overflow-auto relative z-10">
-        <div className="max-w-6xl mx-auto space-y-4">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+
+      {/* ── Background ── */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.08) 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+        }} />
+        <div style={{
+          position: 'absolute', top: '3%', left: '8%', width: 500, height: 500, borderRadius: '50%',
+          background: `radial-gradient(circle, ${passed ? 'rgba(52,211,153,0.05)' : 'rgba(251,113,133,0.05)'}, transparent 70%)`,
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '8%', right: '6%', width: 380, height: 380, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)',
+        }} />
+      </div>
+
+      <div className="relative z-10 pt-8 pb-20 px-4 md:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto space-y-6">
+
+          {/* Back button */}
           <div className="flex justify-end">
             <BackToHomeButton />
           </div>
 
-          {/* 1️⃣ SCORE SUMMARY CARD - Main Focus */}
-          <div className="backdrop-blur-xl bg-slate-900/60 shadow-2xl rounded-xl p-5 border-2 border-white/20">
-            
-            <div className="text-center mb-4">
-              <h1 className="text-2xl font-bold text-white mb-1">Assessment Results</h1>
-              <p className="text-gray-400 text-sm">{assessmentTitle}</p>
-            </div>
+          {/* ── 1. SCORE SUMMARY ── */}
+          <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl overflow-hidden">
+            {/* Pass/Fail glow strip */}
+            <div className="h-1 w-full" style={{
+              background: passed
+                ? 'linear-gradient(90deg, #34d399, #059669)'
+                : 'linear-gradient(90deg, #fb7185, #e11d48)',
+            }} />
 
-            <div className="grid md:grid-cols-2 gap-5">
-              
-              {/* Left: Score Display */}
-              <div className="flex flex-col items-center justify-center backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
-                
-                {/* Big Score Badge */}
-                <div className="relative mb-3">
-                  <div className={`w-32 h-32 rounded-full flex items-center justify-center border-6 ${
-                    passed ? 'border-green-500 bg-green-900/30' : 'border-red-500 bg-red-900/30'
+            <div className="p-8">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-4">
+                  <Brain size={10} /> Assessment Results
+                </div>
+                <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-1">Assessment Results</h1>
+                <p className="text-slate-500 text-sm">{assessmentTitle}</p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Score circle */}
+                <div className="flex flex-col items-center justify-center backdrop-blur-xl bg-white/3 rounded-2xl border border-white/5 p-8 gap-5">
+                  <ScoreRing percentage={percentage} passed={passed} />
+
+                  <div className="text-center">
+                    <p className="text-3xl font-black text-white tracking-tight">
+                      {resultData.score}
+                      <span className="text-slate-600 font-normal text-xl"> / {resultData.totalQuestions}</span>
+                    </p>
+                    <p className="text-[11px] text-slate-600 uppercase tracking-widest font-bold mt-1">Questions Answered</p>
+                  </div>
+
+                  <span className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-black border ${
+                    passed
+                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 shadow-[0_0_20px_rgba(52,211,153,0.15)]'
+                      : 'bg-rose-500/15 text-rose-300 border-rose-500/30 shadow-[0_0_20px_rgba(251,113,133,0.15)]'
                   }`}>
-                    <div className="text-center">
-                      <div className={`text-4xl font-bold ${passed ? 'text-green-400' : 'text-red-400'}`}>
-                        {percentage}%
+                    {passed ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
+                    {passed ? 'PASSED' : 'FAILED'}
+                  </span>
+                </div>
+
+                {/* Meta info */}
+                <div className="flex flex-col gap-3 justify-center">
+                  {[
+                    { icon: Target,   label: 'Skill Assessed', value: skill,       color: 'text-indigo-400', bg: 'bg-indigo-500/15 border-indigo-500/25' },
+                    { icon: Calendar, label: 'Attempt Date',   value: attemptDate, color: 'text-blue-400',   bg: 'bg-blue-500/15 border-blue-500/25'   },
+                    { icon: Clock,    label: 'Time Taken',      value: timeTaken,   color: 'text-violet-400', bg: 'bg-violet-500/15 border-violet-500/25' },
+                  ].map(({ icon: Icon, label, value, color, bg }) => (
+                    <div key={label} className="backdrop-blur-xl bg-white/3 rounded-2xl border border-white/5 p-4 flex items-center gap-3">
+                      <div className={`p-2.5 rounded-xl border ${bg} ${color} shrink-0`}>
+                        <Icon size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">{label}</p>
+                        <p className="text-white font-black text-base mt-0.5">{value}</p>
                       </div>
                     </div>
-                  </div>
-                  {passed && (
-                    <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  )}
+                  ))}
                 </div>
+              </div>
+            </div>
+          </div>
 
-                {/* Score Fraction */}
-                <div className="text-3xl font-bold text-white mb-2">
-                  {score} <span className="text-gray-500">/</span> {totalQuestions}
+          {/* ── 2. BREAKDOWN + INSIGHT ── */}
+          <div className="grid md:grid-cols-2 gap-6">
+
+            {/* Performance Breakdown */}
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/25">
+                  <BarChart2 size={13} className="text-indigo-400" />
                 </div>
-
-                {/* Status Badge */}
-                <div className={`px-4 py-1.5 rounded-full font-bold text-base ${
-                  passed 
-                    ? 'bg-green-600 text-white' 
-                    : 'bg-red-600 text-white'
-                }`}>
-                  {passed ? '✓ PASSED' : '✗ FAILED'}
-                </div>
-
+                <h2 className="text-[11px] font-black uppercase tracking-widest text-indigo-400">Performance Breakdown</h2>
               </div>
 
-              {/* Right: Details */}
               <div className="space-y-3">
-                
-                <div className="bg-slate-700 rounded-lg p-3 border border-white/10">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-indigo-500/20 p-2 rounded-lg border border-indigo-500/30">
-                      <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Skill Assessed</p>
-                      <p className="text-white font-semibold text-base">{skill}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-700 rounded-lg p-3 border border-white/10">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-blue-500/20 p-2 rounded-lg border border-blue-500/30">
-                      <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Attempt Date</p>
-                      <p className="text-white font-semibold text-sm">{attemptDate}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-700 rounded-lg p-3 border border-white/10">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-purple-500/20 p-2 rounded-lg border border-purple-500/30">
-                      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Time Taken</p>
-                      <p className="text-white font-semibold text-sm">{timeTaken}</p>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-
-            {/* 2️⃣ PERFORMANCE BREAKDOWN */}
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
-              
-              <h2 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-                <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Performance Breakdown
-              </h2>
-
-              <div className="space-y-2">
-                
-                <div className="flex justify-between items-center p-2.5 bg-slate-700 rounded-lg border border-white/10">
-                  <span className="text-gray-300 font-medium text-sm">Total Questions</span>
-                  <span className="text-white font-bold text-base">{totalQuestions}</span>
-                </div>
-
-                <div className="flex justify-between items-center p-2.5 bg-green-500/20 rounded-lg border border-green-500/30">
-                  <span className="text-green-300 font-medium text-sm flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Correct Answers
-                  </span>
-                  <span className="text-green-400 font-bold text-base">{correctAnswers}</span>
-                </div>
-
-                <div className="flex justify-between items-center p-2.5 bg-red-500/20 rounded-lg border border-red-500/30">
-                  <span className="text-red-300 font-medium text-sm flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                    Incorrect Answers
-                  </span>
-                  <span className="text-red-400 font-bold text-base">{wrongAnswers}</span>
-                </div>
-
-                {unanswered > 0 && (
-                  <div className="flex justify-between items-center p-2.5 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
-                    <span className="text-yellow-300 font-medium text-sm flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      Unanswered
+                {[
+                  { label: 'Total Questions',     value: resultData.totalQuestions, color: 'text-white',       bg: 'bg-white/4 border-white/8'              },
+                  { label: 'Correct Answers',     value: correctAnswers,            color: 'text-emerald-400', bg: 'bg-emerald-500/8 border-emerald-500/20', icon: <CheckCircle2 size={13} className="text-emerald-400" /> },
+                  { label: 'Incorrect Answers',   value: wrongAnswers,              color: 'text-rose-400',    bg: 'bg-rose-500/8 border-rose-500/20',       icon: <XCircle size={13} className="text-rose-400" /> },
+                  { label: 'Passing Score',       value: '70%',                     color: 'text-indigo-400',  bg: 'bg-indigo-500/8 border-indigo-500/20'   },
+                ].map(({ label, value, color, bg, icon }) => (
+                  <div key={label} className={`flex items-center justify-between p-3.5 rounded-xl border ${bg}`}>
+                    <span className="text-slate-300 text-sm font-semibold flex items-center gap-2">
+                      {icon}{label}
                     </span>
-                    <span className="text-yellow-400 font-bold text-base">{unanswered}</span>
+                    <span className={`text-xl font-black ${color}`}>{value}</span>
                   </div>
-                )}
-
-                <div className="flex justify-between items-center p-2.5 bg-indigo-500/20 rounded-lg border border-indigo-500/30">
-                  <span className="text-indigo-300 font-medium text-sm">Passing Score Required</span>
-                  <span className="text-indigo-400 font-bold text-base">{passingScore}%</span>
-                </div>
-
+                ))}
               </div>
-
             </div>
 
-            {/* 3️⃣ PERFORMANCE INSIGHT */}
-            <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-6 border border-white/10">
-              
-              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                Performance Insight
-              </h2>
+            {/* Performance Insight */}
+            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 rounded-lg bg-amber-500/15 border border-amber-500/25">
+                  <Lightbulb size={13} className="text-amber-400" />
+                </div>
+                <h2 className="text-[11px] font-black uppercase tracking-widest text-amber-400">Performance Insight</h2>
+              </div>
 
-              <div className={`p-4 rounded-lg border ${
-                passed ? 'bg-green-500/20 border-green-500/30' : 'bg-red-500/20 border-red-500/30'
+              {/* Insight message */}
+              <div className={`p-4 rounded-2xl border mb-5 ${
+                passed
+                  ? 'bg-emerald-500/8 border-emerald-500/20'
+                  : 'bg-rose-500/8 border-rose-500/20'
               }`}>
-                <p className={`text-lg font-semibold ${insight.color} mb-4`}>
-                  {insight.message}
+                <p className={`text-sm font-semibold leading-relaxed ${passed ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  {insightMsg}
                 </p>
               </div>
 
-              {/* Progress Visualization */}
-              <div className="mt-4 space-y-3">
-                <div>
-                  <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-                    <span>Accuracy Rate</span>
-                    <span className="font-semibold text-white">{percentage}%</span>
-                  </div>
-                  <div className="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all ${
-                        passed ? 'bg-linear-to-r from-green-500 to-green-400' : 'bg-linear-to-r from-red-500 to-red-400'
-                      }`}
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
+              {/* Accuracy bar */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Accuracy Rate</span>
+                  <span className={`text-sm font-black ${passed ? 'text-emerald-400' : 'text-rose-400'}`}>{percentage}%</span>
                 </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="bg-slate-700 border border-white/10 rounded-lg p-2.5 text-center">
-                    <div className="text-xl font-bold text-green-400">{correctAnswers}</div>
-                    <div className="text-xs text-gray-400">Correct</div>
-                  </div>
-                  <div className="bg-slate-700 border border-white/10 rounded-lg p-2.5 text-center">
-                    <div className="text-xl font-bold text-red-400">{wrongAnswers}</div>
-                    <div className="text-xs text-gray-400">Incorrect</div>
-                  </div>
+                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${percentage}%`,
+                      background: passed
+                        ? 'linear-gradient(90deg, #34d399, #059669)'
+                        : 'linear-gradient(90deg, #fb7185, #e11d48)',
+                      transition: 'width 1s ease',
+                    }}
+                  />
                 </div>
               </div>
 
-              {/* Recommendations */}
-              <div className="mt-4 p-3 bg-indigo-500/20 border border-indigo-500/30 rounded-lg">
-                <h3 className="text-xs font-bold text-indigo-300 mb-1.5">💡 Recommendation</h3>
-                <p className="text-gray-300 text-xs">
-                  {passed 
+              {/* Mini stats */}
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                {[
+                  { label: 'Correct',   value: correctAnswers, color: 'text-emerald-400', bg: 'bg-emerald-500/8 border-emerald-500/20' },
+                  { label: 'Incorrect', value: wrongAnswers,   color: 'text-rose-400',    bg: 'bg-rose-500/8 border-rose-500/20'       },
+                ].map(({ label, value, color, bg }) => (
+                  <div key={label} className={`rounded-2xl border ${bg} p-4 text-center`}>
+                    <p className={`text-3xl font-black ${color}`}>{value}</p>
+                    <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold mt-1">{label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Recommendation */}
+              <div className="p-4 rounded-2xl bg-indigo-500/8 border border-indigo-500/20">
+                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1.5">💡 Recommendation</p>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  {passed
                     ? "Continue practicing to maintain your skills. Try more advanced assessments to challenge yourself."
-                    : "Review the incorrect answers below and strengthen your understanding of those concepts before retaking."}
+                    : "Review the incorrect answers below and strengthen your understanding before retaking."}
                 </p>
               </div>
-
             </div>
-
           </div>
 
-          {/* 4️⃣ QUESTION REVIEW SECTION */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
-            
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Question Review
-              </h2>
-              
+          {/* ── 3. QUESTION REVIEW ── */}
+          <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-blue-500/15 border border-blue-500/25">
+                  <Target size={13} className="text-blue-400" />
+                </div>
+                <h2 className="text-[11px] font-black uppercase tracking-widest text-blue-400">Question Review</h2>
+              </div>
               <button
                 onClick={() => setShowReview(!showReview)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/40 border-2 border-indigo-400/50 text-white rounded-lg hover:bg-indigo-500/50 hover:scale-105 transition-all font-semibold text-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-xs font-black hover:bg-indigo-500/25 transition-all duration-200"
               >
                 {showReview ? 'Hide' : 'Show'} Review
-                <svg className={`w-3.5 h-3.5 transition-transform ${showReview ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDown size={13} className={`transition-transform duration-300 ${showReview ? 'rotate-180' : ''}`} />
               </button>
             </div>
+            <p className="text-slate-600 text-xs mb-5 ml-8">
+              {questionReview.length} questions — {correctAnswers} correct, {wrongAnswers} incorrect
+            </p>
 
             {showReview && (
-              <div className="space-y-3">
-                {questionReview.map((q, index) => (
-                  <div 
+              <div className="space-y-4">
+                {questionReview.map((q, idx) => (
+                  <div
                     key={q.id}
-                    className={`p-4 rounded-lg border-2 ${
-                      q.isCorrect 
-                        ? 'bg-green-900/10 border-green-700' 
-                        : q.selectedAnswer 
-                        ? 'bg-red-900/10 border-red-700' 
-                        : 'bg-yellow-900/10 border-yellow-700'
+                    className={`rounded-2xl border p-5 ${
+                      q.isCorrect
+                        ? 'bg-emerald-500/5 border-emerald-500/20'
+                        : q.selectedAnswer
+                        ? 'bg-rose-500/5 border-rose-500/20'
+                        : 'bg-amber-500/5 border-amber-500/20'
                     }`}
                   >
-                    
-                    {/* Question Header */}
-                    <div className="flex items-start gap-2.5 mb-2.5">
-                      <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm ${
-                        q.isCorrect 
-                          ? 'bg-green-600 text-white' 
-                          : q.selectedAnswer 
-                          ? 'bg-red-600 text-white' 
-                          : 'bg-yellow-600 text-gray-900'
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${
+                        q.isCorrect
+                          ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300'
+                          : q.selectedAnswer
+                          ? 'bg-rose-500/20 border border-rose-500/30 text-rose-300'
+                          : 'bg-amber-500/20 border border-amber-500/30 text-amber-300'
                       }`}>
                         {q.isCorrect ? '✓' : q.selectedAnswer ? '✗' : '?'}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-white font-semibold text-base mb-0.5">
-                          Q{index + 1}. {q.question}
-                        </h3>
-                      </div>
+                      <h3 className="text-white font-bold text-sm leading-relaxed">
+                        Q{idx + 1}. {q.question}
+                      </h3>
                     </div>
 
-                    {/* Answers */}
-                    <div className="ml-9 space-y-1.5">
-                      
+                    <div className="ml-11 space-y-2">
                       {q.selectedAnswer && (
-                        <div className={`p-2.5 rounded-lg ${
-                          q.isCorrect ? 'bg-green-900/30' : 'bg-red-900/30'
-                        }`}>
-                          <span className={`text-xs font-semibold ${
-                            q.isCorrect ? 'text-green-300' : 'text-red-300'
-                          }`}>
-                            Your Answer:
-                          </span>
-                          <p className="text-white text-sm mt-0.5">{q.selectedAnswer}</p>
+                        <div className={`p-3 rounded-xl ${q.isCorrect ? 'bg-emerald-500/8' : 'bg-rose-500/8'}`}>
+                          <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${q.isCorrect ? 'text-emerald-500' : 'text-rose-500'}`}>Your Answer</p>
+                          <p className="text-white text-sm">{q.selectedAnswer}</p>
                         </div>
                       )}
-
                       {!q.isCorrect && (
-                        <div className="p-2.5 rounded-lg bg-green-900/30">
-                          <span className="text-xs font-semibold text-green-300">
-                            Correct Answer:
-                          </span>
-                          <p className="text-white text-sm mt-0.5">{q.correctAnswer}</p>
+                        <div className="p-3 rounded-xl bg-emerald-500/8">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-1">Correct Answer</p>
+                          <p className="text-white text-sm">{q.correctAnswer}</p>
                         </div>
                       )}
-
                     </div>
-
                   </div>
                 ))}
               </div>
             )}
-
           </div>
 
-          {/* 5️⃣ ACTION BUTTONS */}
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-xl p-4 border border-white/10">
-            
-            <div className="grid md:grid-cols-4 gap-3">
-              
+          {/* ── 4. ACTION BUTTONS ── */}
+          <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <button
                 onClick={handleRetry}
                 disabled={retrying}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500/40 border-2 border-green-400/50 text-white text-sm rounded-lg font-bold hover:bg-green-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 py-3.5 bg-emerald-500/15 border border-emerald-500/25 text-emerald-300 text-xs font-black rounded-xl hover:bg-emerald-500/25 hover:scale-[1.03] hover:shadow-lg hover:shadow-emerald-500/15 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {retrying ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Starting...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Retry Quiz
-                  </>
-                )}
+                {retrying ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+                {retrying ? 'Starting…' : 'Retry Quiz'}
               </button>
 
               <button
                 onClick={() => navigate("/assessment")}
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-500/40 border-2 border-indigo-400/50 text-white text-sm rounded-lg font-bold hover:bg-indigo-500/50 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
+                className="flex items-center justify-center gap-2 px-4 py-3.5 bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-xs font-black rounded-xl hover:bg-indigo-500/25 hover:scale-[1.03] hover:shadow-lg hover:shadow-indigo-500/15 transition-all duration-200"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                Back to Dashboard
+                <LayoutDashboard size={14} /> Dashboard
               </button>
 
               <button
                 disabled
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 border border-white/20 text-gray-400 text-sm rounded-lg font-bold cursor-not-allowed opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-3.5 bg-white/4 border border-white/8 text-slate-600 text-xs font-black rounded-xl cursor-not-allowed opacity-50"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Download Certificate
-                <span className="text-xs">(Soon)</span>
+                <Download size={14} /> Certificate <span className="text-[10px] text-slate-700">(Soon)</span>
               </button>
 
               <button
                 disabled
-                className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-700 border border-white/20 text-gray-400 text-sm rounded-lg font-bold cursor-not-allowed opacity-50"
+                className="flex items-center justify-center gap-2 px-4 py-3.5 bg-white/4 border border-white/8 text-slate-600 text-xs font-black rounded-xl cursor-not-allowed opacity-50"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Detailed Analytics
-                <span className="text-xs">(Soon)</span>
+                <BarChart2 size={14} /> Analytics <span className="text-[10px] text-slate-700">(Soon)</span>
               </button>
-
             </div>
-
           </div>
 
         </div>

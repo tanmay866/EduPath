@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Map, Zap, ArrowLeft, Clock } from 'lucide-react';
 import {
@@ -67,6 +67,7 @@ const QUICK_TIPS = [
 /* ── component ───────────────────────────────────────────────────── */
 const RoadmapPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [history,          setHistory]         = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -76,6 +77,16 @@ const RoadmapPage = () => {
   const [roadmapData,      setRoadmapData]      = useState(null);
   const [updatingSkill,    setUpdatingSkill]    = useState('');
   const [showHistory,      setShowHistory]      = useState(false);
+
+  // Auto-open history if navigated from "View History" button
+  useEffect(() => {
+    if (location.state?.openHistory) {
+      handleOpenHistory();
+      // Clear the state so refresh doesn't re-trigger
+      window.history.replaceState({}, '');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const summary = useMemo(() => {
     const skills    = roadmapData?.skills || [];
@@ -171,64 +182,124 @@ const RoadmapPage = () => {
   if (showHistory || showRoadmapView) {
     return (
       <div className="min-h-screen bg-black text-white font-sans pt-32 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
+
+        {/* ── Animated background ── */}
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.08) 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
+          }} />
+          <div style={{
+            position: 'absolute', top: '4%', left: '8%',
+            width: 520, height: 520, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%)',
+          }} />
+          <div style={{
+            position: 'absolute', bottom: '8%', right: '6%',
+            width: 380, height: 380, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.05), transparent 70%)',
+          }} />
+        </div>
+
+        <style>{`
+          .stat-card { transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease; }
+          .stat-card:hover { transform: translateY(-3px); }
+          .stat-card.emerald:hover { border-color: rgba(52,211,153,0.3) !important; box-shadow: 0 0 28px -8px rgba(52,211,153,0.2); }
+          .stat-card.amber:hover   { border-color: rgba(251,191,36,0.3)  !important; box-shadow: 0 0 28px -8px rgba(251,191,36,0.2);  }
+          .stat-card.indigo:hover  { border-color: rgba(99,102,241,0.3)  !important; box-shadow: 0 0 28px -8px rgba(99,102,241,0.2);  }
+          .stat-card.white:hover   { border-color: rgba(255,255,255,0.12) !important; box-shadow: 0 0 28px -8px rgba(255,255,255,0.08); }
+          .hdr-btn { transition: all 0.25s ease; }
+          .hdr-btn:hover { transform: translateY(-1px); }
+        `}</style>
 
         <div className="relative z-10 max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+
+          {/* ── Header ── */}
+          <div className="flex items-start justify-between mb-10 pb-8 border-b border-white/5">
             <div>
-              <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 mb-3">
-                Career Roadmap
-              </span>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-4">
+                <Map size={10} /> Career Roadmap
+              </div>
+              <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
                 {showHistory ? 'Roadmap History' : 'Your Generated Roadmap'}
               </h1>
-              <p className="text-slate-400 text-sm mt-1">
-                {showHistory ? 'Browse and switch between your saved roadmaps.' : 'Follow each step and track your progress below.'}
+              <p className="text-slate-500 text-sm mt-1.5">
+                {showHistory
+                  ? 'Browse and switch between your saved roadmaps.'
+                  : 'Follow each step and track your progress below.'}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+
+            <div className="flex items-center gap-3 shrink-0">
               {showRoadmapView && !showHistory && (
-                <button onClick={handleOpenHistory} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-white/5 border border-white/15 hover:bg-white/10 hover:border-white/30 transition-all duration-200 flex items-center gap-1.5">
-                  <Clock size={14} /> History
+                <button
+                  onClick={handleOpenHistory}
+                  className="hdr-btn px-4 py-2.5 rounded-xl text-xs font-black backdrop-blur-3xl bg-[#090b14]/70 border border-white/8 hover:border-indigo-500/30 hover:bg-indigo-500/8 text-slate-300 hover:text-indigo-300 flex items-center gap-2 shadow-lg"
+                >
+                  <Clock size={13} /> History
                 </button>
               )}
-              <button onClick={handleBackToForm} className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-500/15 border border-indigo-400/30 hover:bg-indigo-500/25 text-indigo-300 transition-all duration-200 flex items-center gap-1.5">
-                <Zap size={14} /> New Roadmap
+              <button
+                onClick={handleBackToForm}
+                className="hdr-btn px-4 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white flex items-center gap-2 shadow-lg shadow-indigo-500/25"
+              >
+                <Zap size={13} /> New Roadmap
               </button>
             </div>
           </div>
 
-          {/* Summary strip */}
+          {/* ── Summary stat cards ── */}
           {hasRoadmap && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
               {[
-                { label: 'Total Skills',  value: summary.total,     color: 'text-white' },
-                { label: 'Completed',     value: summary.completed, color: 'text-emerald-400' },
-                { label: 'Remaining',     value: summary.pending,   color: 'text-amber-400' },
-                { label: 'Est. Weeks',    value: summary.duration || '—', color: 'text-indigo-400' },
+                { label: 'Total Skills', value: summary.total,           color: 'text-white',        accent: 'white',   orb: 'rgba(255,255,255,0.04)' },
+                { label: 'Completed',   value: summary.completed,        color: 'text-emerald-400',  accent: 'emerald', orb: 'rgba(52,211,153,0.06)' },
+                { label: 'Remaining',   value: summary.pending,          color: 'text-amber-400',    accent: 'amber',   orb: 'rgba(251,191,36,0.06)' },
+                { label: 'Est. Weeks',  value: summary.duration || '—',  color: 'text-indigo-400',   accent: 'indigo',  orb: 'rgba(99,102,241,0.06)' },
               ].map(s => (
-                <div key={s.label} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-5 py-4 text-center">
-                  <p className={`text-3xl font-black ${s.color}`}>{s.value}</p>
-                  <p className="text-xs text-slate-500 mt-1">{s.label}</p>
+                <div
+                  key={s.label}
+                  className={`stat-card ${s.accent} backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl px-6 py-5 text-center relative overflow-hidden`}
+                >
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: `radial-gradient(circle at 50% 100%, ${s.orb}, transparent 70%)`,
+                  }} />
+                  <p className={`text-4xl font-black tracking-tight relative z-10 ${s.color}`}>{s.value}</p>
+                  <p className="text-[11px] text-slate-600 uppercase tracking-widest font-bold mt-2 relative z-10">{s.label}</p>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Content */}
+          {/* ── Content ── */}
           {showHistory ? (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
               <div className="xl:col-span-3">
-                <HistorySidebar history={history} selectedRoadmapId={selectedRoadmapId} onSelectRoadmap={loadRoadmapById} isLoading={isHistoryLoading} />
+                <HistorySidebar
+                  history={history}
+                  selectedRoadmapId={selectedRoadmapId}
+                  onSelectRoadmap={loadRoadmapById}
+                  isLoading={isHistoryLoading}
+                />
               </div>
               <div className="xl:col-span-9">
-                <RoadmapTimeline roadmapData={roadmapData} isRoadmapLoading={isRoadmapLoading} updatingSkill={updatingSkill} onMarkCompleted={handleMarkCompleted} />
+                <RoadmapTimeline
+                  roadmapData={roadmapData}
+                  isRoadmapLoading={isRoadmapLoading}
+                  updatingSkill={updatingSkill}
+                  onMarkCompleted={handleMarkCompleted}
+                />
               </div>
             </div>
           ) : (
-            <RoadmapTimeline roadmapData={roadmapData} isRoadmapLoading={isRoadmapLoading} updatingSkill={updatingSkill} onMarkCompleted={handleMarkCompleted} />
+            <RoadmapTimeline
+              roadmapData={roadmapData}
+              isRoadmapLoading={isRoadmapLoading}
+              updatingSkill={updatingSkill}
+              onMarkCompleted={handleMarkCompleted}
+            />
           )}
         </div>
       </div>
@@ -238,35 +309,73 @@ const RoadmapPage = () => {
   /* ── Generator form view ─────────────────────────────────────── */
   return (
     <div className="min-h-screen bg-black text-white font-sans pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background blobs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-72 h-72 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
+
+      {/* ── Animated background ── */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        {/* dot grid */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.08) 1px, transparent 1px)',
+          backgroundSize: '36px 36px',
+        }} />
+        {/* orbs */}
+        <div style={{
+          position: 'absolute', top: '5%', left: '10%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%)',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '10%', right: '8%',
+          width: 380, height: 380, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.05), transparent 70%)',
+        }} />
+      </div>
+
+      <style>{`
+        .info-card {
+          transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .info-card:hover {
+          border-color: rgba(99,102,241,0.25) !important;
+          box-shadow: 0 0 32px -8px rgba(99,102,241,0.15);
+          transform: translateY(-2px);
+        }
+        .history-cta {
+          transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, transform 0.3s ease;
+        }
+        .history-cta:hover {
+          border-color: rgba(99,102,241,0.35) !important;
+          background: rgba(99,102,241,0.08) !important;
+          box-shadow: 0 0 32px -8px rgba(99,102,241,0.2);
+          transform: translateY(-2px);
+        }
+      `}</style>
 
       <div className="relative z-10 max-w-6xl mx-auto">
 
-        {/* Page header */}
-        <div className="mb-10">
-          <button
-            onClick={() => navigate('/roadmap')}
-            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-6"
-          >
-            <ArrowLeft size={14} /> Back to Roadmap Overview
-          </button>
+        {/* Back link */}
+        <button
+          onClick={() => navigate('/roadmap')}
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-indigo-400 transition-colors mb-10 group"
+        >
+          <ArrowLeft size={13} className="group-hover:-translate-x-0.5 transition-transform duration-200" />
+          Back to Roadmap Overview
+        </button>
 
-          <div className="text-center">
-            <span className="inline-block text-xs font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/25 text-violet-300 mb-4">
-              Generator
-            </span>
-            <h1 className="text-3xl md:text-4xl font-black text-white mb-3">
-              Generate Your{' '}
-              <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
-                Career Roadmap
-              </span>
-            </h1>
-            <p className="text-slate-400 max-w-xl mx-auto text-sm leading-relaxed">
-              Fill in the details below. Our AI will build a personalised, week-by-week learning path tailored to your goals and schedule.
-            </p>
+        {/* Page header */}
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[11px] font-black uppercase tracking-widest mb-5">
+            <Map size={11} /> Generator
           </div>
+          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+            Generate Your{' '}
+            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
+              Career Roadmap
+            </span>
+          </h1>
+          <p className="text-slate-400 max-w-xl mx-auto text-sm leading-relaxed">
+            Fill in the details below. Our AI will build a personalised, week-by-week learning path tailored to your goals and schedule.
+          </p>
         </div>
 
         {/* Main 7 / 5 grid */}
@@ -280,14 +389,17 @@ const RoadmapPage = () => {
           {/* Right info panel — 5 cols */}
           <div className="lg:col-span-5 flex flex-col gap-5">
 
-            {/* Quick tips */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6">
-              <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
-                <Zap size={15} className="text-indigo-400" /> Quick Tips
-              </h3>
-              <ul className="space-y-3">
+            {/* Quick Tips */}
+            <div className="info-card backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 rounded-lg bg-amber-500/15 border border-amber-500/25">
+                  <Zap size={13} className="text-amber-400" />
+                </div>
+                <h3 className="text-[11px] font-black uppercase tracking-widest text-amber-400">Quick Tips</h3>
+              </div>
+              <ul className="space-y-3.5">
                 {QUICK_TIPS.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-slate-400">
+                  <li key={i} className="flex items-start gap-3 text-[13px] text-slate-400 leading-relaxed">
                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
                     {tip}
                   </li>
@@ -295,31 +407,43 @@ const RoadmapPage = () => {
               </ul>
             </div>
 
-            {/* Supported roles */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6">
-              <h3 className="text-white font-bold text-sm mb-4 flex items-center gap-2">
-                <Map size={15} className="text-violet-400" /> Supported Roles
-              </h3>
+            {/* Supported Roles */}
+            <div className="info-card backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
+              <div className="flex items-center gap-2.5 mb-5">
+                <div className="p-1.5 rounded-lg bg-violet-500/15 border border-violet-500/25">
+                  <Map size={13} className="text-violet-400" />
+                </div>
+                <h3 className="text-[11px] font-black uppercase tracking-widest text-violet-400">Supported Roles</h3>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {SUPPORTED_ROLES.map(role => (
-                  <span key={role.label} className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${role.bg} ${role.color}`}>
+                  <span
+                    key={role.label}
+                    className={`text-[11px] font-bold px-3 py-1.5 rounded-full border ${role.bg} ${role.color} transition-all duration-200 hover:scale-105`}
+                  >
                     {role.label}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* History CTA */}
+            {/* View History CTA */}
             <button
               onClick={handleOpenHistory}
-              className="w-full rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 backdrop-blur-md p-5 text-left flex items-center justify-between group transition-all duration-200"
+              className="history-cta w-full backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6 text-left flex items-center justify-between group"
             >
               <div>
-                <p className="text-white font-semibold text-sm">View Past Roadmaps</p>
-                <p className="text-slate-500 text-xs mt-1">Browse your previously generated career paths.</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock size={14} className="text-indigo-400" />
+                  <p className="text-white font-black text-sm">View Past Roadmaps</p>
+                </div>
+                <p className="text-slate-500 text-[12px] ml-6">Browse your previously generated career paths.</p>
               </div>
-              <span className="text-slate-500 group-hover:text-white group-hover:translate-x-1 transition-all duration-200">→</span>
+              <span className="w-8 h-8 rounded-full bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-400 group-hover:text-white group-hover:bg-indigo-500/30 group-hover:translate-x-0.5 transition-all duration-200 shrink-0">
+                →
+              </span>
             </button>
+
           </div>
         </div>
       </div>
@@ -328,3 +452,4 @@ const RoadmapPage = () => {
 };
 
 export default RoadmapPage;
+
