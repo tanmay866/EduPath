@@ -43,7 +43,7 @@ const Signup = () => {
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       console.log(values);
       try {
-        const response = await axios.post('http://localhost:4000/api/auth/signup', values);
+        const response = await axios.post('' + import.meta.env.VITE_API_URL + '/api/auth/signup', values);
         console.log("user created");
 
         console.log('Signup response:', response.data);

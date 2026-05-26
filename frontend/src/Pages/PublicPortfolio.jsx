@@ -31,8 +31,8 @@ export default function PublicPortfolio() {
         // Determine if this is a /p/:portfolioId route or /:username route
         const isIdRoute = location.pathname.startsWith('/p/');
         const apiUrl = isIdRoute
-          ? `http://localhost:4000/api/portfolio/${portfolioId}`
-          : `http://localhost:4000/api/portfolio/u/${username}`;
+          ? `' + import.meta.env.VITE_API_URL + '/api/portfolio/${portfolioId}`
+          : `' + import.meta.env.VITE_API_URL + '/api/portfolio/u/${username}`;
 
         const res = await fetch(apiUrl);
         const result = await res.json();

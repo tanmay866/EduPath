@@ -801,7 +801,7 @@ function ResumeBuilder() {
 
       // Always generate DOCX from backend first
       setMessage('Generating resume...');
-      const response = await fetch('http://localhost:4000/api/resume-generator/generate', {
+      const response = await fetch('' + import.meta.env.VITE_API_URL + '/api/resume-generator/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
