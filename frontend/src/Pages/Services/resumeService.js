@@ -1,4 +1,4 @@
-const API_URL = `${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/resume`;
+const API_URL = 'http://localhost:4000/api/resume';
 
 export const uploadResume = async (resumeData, onProgress) => {
   return new Promise((resolve, reject) => {
@@ -65,7 +65,7 @@ export const getResumes = async () => {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch resumes');
     }
@@ -88,7 +88,7 @@ export const deleteResume = async (resumeId) => {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Failed to delete resume');
     }

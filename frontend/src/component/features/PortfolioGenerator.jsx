@@ -25,7 +25,7 @@ const TEMPLATE_META = [
   { key: 'template10', name: 'Indigo Violet', desc: 'Creative tech-savvy', gradient: 'from-indigo-600 to-violet-600', ring: 'ring-indigo-200 border-indigo-500', letter: 'J', letterColor: 'text-indigo-600' }
 ];
 
-const API_BASE = `${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/portfolio`;
+const API_BASE = 'http://localhost:4000/api/portfolio';
 
 function PortfolioGenerator() {
   const navigate = useNavigate();
@@ -268,13 +268,12 @@ function PortfolioGenerator() {
               if (i + 1 < currentStep) setCurrentStep(i + 1);
             }}
             disabled={i + 1 >= currentStep}
-            className={`px-6 py-3 rounded-xl font-medium border transition-all duration-200 ${
-              currentStep === i + 1
+            className={`px-6 py-3 rounded-xl font-medium border transition-all duration-200 ${currentStep === i + 1
                 ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400/50 text-cyan-400'
                 : currentStep > i + 1
-                ? 'bg-white/5 border-emerald-500/50 text-emerald-400 cursor-pointer hover:border-emerald-400'
-                : 'bg-white/5 border-white/10 text-gray-400'
-            }`}
+                  ? 'bg-white/5 border-emerald-500/50 text-emerald-400 cursor-pointer hover:border-emerald-400'
+                  : 'bg-white/5 border-white/10 text-gray-400'
+              }`}
           >
             <div className="flex items-center gap-2">
               {currentStep > i + 1 ? (
@@ -314,16 +313,16 @@ function PortfolioGenerator() {
   if (view === 'home') {
     return (
       <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
-        <div style={{ position: 'absolute', top: '8%', left: '10%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)', animation: 'settingOrb1 18s ease-in-out infinite alternate' }} />
-        <div style={{ position: 'absolute', bottom: '10%', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)', animation: 'settingOrb2 22s ease-in-out infinite alternate' }} />
-      </div>
-      <style>{`
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
+          <div style={{ position: 'absolute', top: '8%', left: '10%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)', animation: 'settingOrb1 18s ease-in-out infinite alternate' }} />
+          <div style={{ position: 'absolute', bottom: '10%', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)', animation: 'settingOrb2 22s ease-in-out infinite alternate' }} />
+        </div>
+        <style>{`
         @keyframes settingOrb1 { from { transform: translate(0, 0) scale(1); } to { transform: translate(40px, 30px) scale(1.08); } }
         @keyframes settingOrb2 { from { transform: translate(0, 0) scale(1); } to { transform: translate(-35px, -25px) scale(1.06); } }
       `}</style>
-      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
+        <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-start gap-4">
@@ -412,9 +411,8 @@ function PortfolioGenerator() {
                             <div className="flex-1">
                               <div className="flex items-center gap-3 mb-2">
                                 <h3 className="text-lg font-bold text-white">{p.personalInfo?.name || 'Unnamed'}</h3>
-                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                  p.vercelDeployment?.url ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/5 text-gray-400 border border-white/10'
-                                }`}>
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${p.vercelDeployment?.url ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/5 text-gray-400 border border-white/10'
+                                  }`}>
                                   {p.vercelDeployment?.url ? '● Live on Vercel' : '● Local Only'}
                                 </span>
                               </div>
@@ -477,16 +475,16 @@ function PortfolioGenerator() {
   if (view === 'deployed') {
     return (
       <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
-        <div style={{ position: 'absolute', top: '8%', left: '10%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)', animation: 'settingOrb1 18s ease-in-out infinite alternate' }} />
-        <div style={{ position: 'absolute', bottom: '10%', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)', animation: 'settingOrb2 22s ease-in-out infinite alternate' }} />
-      </div>
-      <style>{`
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)', backgroundSize: '36px 36px' }} />
+          <div style={{ position: 'absolute', top: '8%', left: '10%', width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)', animation: 'settingOrb1 18s ease-in-out infinite alternate' }} />
+          <div style={{ position: 'absolute', bottom: '10%', right: '8%', width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)', animation: 'settingOrb2 22s ease-in-out infinite alternate' }} />
+        </div>
+        <style>{`
         @keyframes settingOrb1 { from { transform: translate(0, 0) scale(1); } to { transform: translate(40px, 30px) scale(1.08); } }
         @keyframes settingOrb2 { from { transform: translate(0, 0) scale(1); } to { transform: translate(-35px, -25px) scale(1.06); } }
       `}</style>
-      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
+        <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
           <button onClick={() => setView('home')} className="inline-flex items-center gap-2 p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             <span className="text-white font-medium">Back to Portfolios</span>
@@ -841,14 +839,14 @@ function PortfolioGenerator() {
               </SectionCard>
 
               <button onClick={() => {
-                  if (!portfolioData.name || !portfolioData.title) {
-                    setError('Please fill in Name and Title before continuing');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    return;
-                  }
-                  setError('');
-                  setCurrentStep(3);
-                }}
+                if (!portfolioData.name || !portfolioData.title) {
+                  setError('Please fill in Name and Title before continuing');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  return;
+                }
+                setError('');
+                setCurrentStep(3);
+              }}
                 className="w-full mt-6 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40">
                 Continue to Template Selection →
               </button>
@@ -872,9 +870,8 @@ function PortfolioGenerator() {
                   const isSelected = selectedTemplate === tmpl.key;
                   return (
                     <div key={tmpl.key} onClick={() => setSelectedTemplate(tmpl.key)}
-                      className={`relative backdrop-blur-lg bg-[#0a0a0a] border rounded-xl cursor-pointer overflow-hidden transition-all duration-200 ${
-                        isSelected ? 'border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] scale-105' : 'border-white/10 hover:border-cyan-400/50 hover:scale-105'
-                      }`}>
+                      className={`relative backdrop-blur-lg bg-[#0a0a0a] border rounded-xl cursor-pointer overflow-hidden transition-all duration-200 ${isSelected ? 'border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)] scale-105' : 'border-white/10 hover:border-cyan-400/50 hover:scale-105'
+                        }`}>
                       <div className={`bg-gradient-to-br ${tmpl.gradient} h-32 flex items-end p-3 text-white relative`}>
                         {/* Mock layout lines */}
                         <div className="absolute inset-0 p-3 flex flex-col items-center justify-center opacity-80">
@@ -967,9 +964,8 @@ function InputField({ label, value, onChange, placeholder, type = 'text', requir
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       <input type={type} value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className={`w-full px-4 py-3 bg-[#0a0a0a] border rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors ${
-          required && !value ? 'border-amber-500/50' : 'border-white/10'
-        }`} />
+        className={`w-full px-4 py-3 bg-[#0a0a0a] border rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors ${required && !value ? 'border-amber-500/50' : 'border-white/10'
+          }`} />
     </div>
   );
 }

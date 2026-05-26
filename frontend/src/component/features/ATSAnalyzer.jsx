@@ -77,7 +77,7 @@ function ATSAnalyzer() {
       formData.append('resume', resumeFile);
       formData.append('jobDescription', jobDescription);
 
-      const response = await fetch(`${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/ats/analyze`, {
+      const response = await fetch('http://localhost:4000/api/ats/analyze', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -124,7 +124,7 @@ function ATSAnalyzer() {
         throw new Error('Please login to download reports');
       }
 
-      const response = await fetch(`${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/ats/generate-report`, {
+      const response = await fetch('http://localhost:4000/api/ats/generate-report', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -223,7 +223,7 @@ function ATSAnalyzer() {
             className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
           <div>
@@ -294,13 +294,12 @@ Include:
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-                  dragActive
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${dragActive
                     ? 'border-emerald-500 bg-emerald-500/10'
                     : resumeFile
-                    ? 'border-emerald-500/50 bg-emerald-500/5'
-                    : 'border-white/10 bg-[#0a0a0a]/50 hover:border-emerald-500/50 hover:bg-[#0a0a0a]'
-                }`}
+                      ? 'border-emerald-500/50 bg-emerald-500/5'
+                      : 'border-white/10 bg-[#0a0a0a]/50 hover:border-emerald-500/50 hover:bg-[#0a0a0a]'
+                  }`}
               >
                 {resumeFile ? (
                   <div className="space-y-4">
@@ -433,11 +432,10 @@ Include:
                       {/* Progress circle */}
                       <circle
                         cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round"
-                        className={`transition-all duration-1000 ease-out ${
-                          results.score >= 80 ? 'text-emerald-400' :
-                          results.score >= 60 ? 'text-cyan-400' :
-                          results.score >= 40 ? 'text-amber-400' : 'text-red-400'
-                        }`}
+                        className={`transition-all duration-1000 ease-out ${results.score >= 80 ? 'text-emerald-400' :
+                            results.score >= 60 ? 'text-cyan-400' :
+                              results.score >= 40 ? 'text-amber-400' : 'text-red-400'
+                          }`}
                         strokeDasharray={`${(results.score || 0) * 5.03} 503`}
                         strokeDashoffset="0"
                       />
@@ -445,11 +443,10 @@ Include:
                     {/* Score text */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <div className={`text-6xl font-bold ${
-                          results.score >= 80 ? 'text-emerald-400' :
-                          results.score >= 60 ? 'text-cyan-400' :
-                          results.score >= 40 ? 'text-amber-400' : 'text-red-400'
-                        }`}>
+                        <div className={`text-6xl font-bold ${results.score >= 80 ? 'text-emerald-400' :
+                            results.score >= 60 ? 'text-cyan-400' :
+                              results.score >= 40 ? 'text-amber-400' : 'text-red-400'
+                          }`}>
                           {results.score ? Math.round(results.score) : 0}%
                         </div>
                         <div className="text-gray-400 text-lg font-medium">ATS Score</div>
@@ -462,12 +459,11 @@ Include:
                 <div className="flex-1 space-y-6">
                   {/* Status */}
                   <div className="text-center lg:text-left">
-                    <div className={`inline-block px-6 py-3 rounded-full text-lg font-bold mb-4 ${
-                      results.score >= 80 ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/40' :
-                      results.score >= 60 ? 'bg-cyan-500/20 text-cyan-300 border-2 border-cyan-500/40' :
-                      results.score >= 40 ? 'bg-amber-500/20 text-amber-300 border-2 border-amber-500/40' :
-                      'bg-red-500/20 text-red-300 border-2 border-red-500/40'
-                    }`}>
+                    <div className={`inline-block px-6 py-3 rounded-full text-lg font-bold mb-4 ${results.score >= 80 ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/40' :
+                        results.score >= 60 ? 'bg-cyan-500/20 text-cyan-300 border-2 border-cyan-500/40' :
+                          results.score >= 40 ? 'bg-amber-500/20 text-amber-300 border-2 border-amber-500/40' :
+                            'bg-red-500/20 text-red-300 border-2 border-red-500/40'
+                      }`}>
                       {results.status || 'No Status'}
                     </div>
                     <p className="text-gray-300 text-lg leading-relaxed max-w-lg">
@@ -482,14 +478,13 @@ Include:
                       <div className="text-sm text-gray-400">Similarity Score</div>
                     </div>
                     <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
-                      <div className={`text-2xl font-bold ${
-                        results.score >= 80 ? 'text-emerald-400' :
-                        results.score >= 60 ? 'text-cyan-400' :
-                        results.score >= 40 ? 'text-amber-400' : 'text-red-400'
-                      }`}>
+                      <div className={`text-2xl font-bold ${results.score >= 80 ? 'text-emerald-400' :
+                          results.score >= 60 ? 'text-cyan-400' :
+                            results.score >= 40 ? 'text-amber-400' : 'text-red-400'
+                        }`}>
                         {results.score >= 80 ? 'Excellent' :
-                         results.score >= 60 ? 'Good' :
-                         results.score >= 40 ? 'Fair' : 'Needs Work'}
+                          results.score >= 60 ? 'Good' :
+                            results.score >= 40 ? 'Fair' : 'Needs Work'}
                       </div>
                       <div className="text-sm text-gray-400">Match Level</div>
                     </div>
