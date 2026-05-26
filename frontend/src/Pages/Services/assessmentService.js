@@ -12,6 +12,9 @@ const API = axios.create({
   baseURL: API_BASE_URL,
 });
 
+// 🔥 Wake up Render backend on app load (free tier sleeps after inactivity)
+fetch(`${API_BASE_URL.replace('/api', '')}/health`).catch(() => {});
+
 API.interceptors.request.use((req) => {
   const token = sessionStorage.getItem("token");
 
