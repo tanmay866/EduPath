@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuiz } from "../../context/QuizContext";
+import { useQuiz } from "../../Context/QuizContext";
 import { useNavigate } from "react-router-dom";
 import { startQuiz } from "../../Services/assessmentService";
 import BackToHomeButton from "../../../component/Assessment/BackToHomeButton";

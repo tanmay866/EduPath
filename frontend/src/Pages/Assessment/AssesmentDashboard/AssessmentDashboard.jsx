@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchQuizTopics, getQuizStats, getQuizHistory } from "../../Services/assessmentService";
-import { useQuiz } from "../../context/QuizContext";
+import { useQuiz } from "../../Context/QuizContext";
 import BackToHomeButton from "../../../component/Assessment/BackToHomeButton";
 import DashboardHeader from "./components/DashboardHeader";
 import PerformanceCards from "./components/PerformanceCards";

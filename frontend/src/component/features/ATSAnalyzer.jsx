@@ -77,7 +77,7 @@ function ATSAnalyzer() {
       formData.append('resume', resumeFile);
       formData.append('jobDescription', jobDescription);
 
-      const response = await fetch('http://localhost:4000/api/ats/analyze', {
+      const response = await fetch(`${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/ats/analyze`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -124,7 +124,7 @@ function ATSAnalyzer() {
         throw new Error('Please login to download reports');
       }
 
-      const response = await fetch('http://localhost:4000/api/ats/generate-report', {
+      const response = await fetch(`${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/ats/generate-report`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -18,6 +18,8 @@ const TEMPLATES = {
   template10: Template10,
 };
 
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '');
+
 export default function PublicPortfolio() {
   const { portfolioId, username } = useParams();
   const location = useLocation();
@@ -31,8 +33,8 @@ export default function PublicPortfolio() {
         // Determine if this is a /p/:portfolioId route or /:username route
         const isIdRoute = location.pathname.startsWith('/p/');
         const apiUrl = isIdRoute
-          ? `http://localhost:4000/api/portfolio/${portfolioId}`
-          : `http://localhost:4000/api/portfolio/u/${username}`;
+          ? `${API_BASE}/api/portfolio/${portfolioId}`
+          : `${API_BASE}/api/portfolio/u/${username}`;
 
         const res = await fetch(apiUrl);
         const result = await res.json();

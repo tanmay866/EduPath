@@ -25,7 +25,7 @@ const TEMPLATE_META = [
   { key: 'template10', name: 'Indigo Violet', desc: 'Creative tech-savvy', gradient: 'from-indigo-600 to-violet-600', ring: 'ring-indigo-200 border-indigo-500', letter: 'J', letterColor: 'text-indigo-600' }
 ];
 
-const API_BASE = 'http://localhost:4000/api/portfolio';
+const API_BASE = `${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/portfolio`;
 
 function PortfolioGenerator() {
   const navigate = useNavigate();

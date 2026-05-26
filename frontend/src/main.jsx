@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, useNavigate, useLocation } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
-import { QuizProvider } from './Pages/context/QuizContext'
+import { QuizProvider } from './Pages/Context/QuizContext'
 
 // Component to fix double slash URLs
 const URLNormalizer = ({ children }) => {

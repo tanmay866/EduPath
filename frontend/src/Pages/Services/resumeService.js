@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:4000/api/resume';
+const API_URL = `${(import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '')}/api/resume`;
 
 export const uploadResume = async (resumeData, onProgress) => {
   return new Promise((resolve, reject) => {
