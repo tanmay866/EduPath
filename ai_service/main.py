@@ -24,18 +24,6 @@ except ImportError as e:
     print(f"Error: FastAPI is not installed. Please run: pip install fastapi uvicorn pydantic")
     sys.exit(1)
 
-try:
-    from resume_parser import get_parser
-except ImportError as e:
-    print(f"Error: resume_parser module not found. {e}")
-    sys.exit(1)
-
-try:
-    from agents.roadmap_generator import RoadmapGeneratorAgent
-except ImportError as e:
-    print(f"Warning: Roadmap generator module not found. Feature disabled. {e}")
-    RoadmapGeneratorAgent = None
-
 # Import new modules for Skill Assessment with CrewAI
 try:
     from config.settings import settings
@@ -66,7 +54,7 @@ async def startup_event():
     print("\n" + "="*60)
     print("🚀 EduPath AI Service Starting...")
     print("="*60)
-    
+
     if SKILL_ASSESSMENT_ENABLED:
         try:
             await init_db()
@@ -74,7 +62,7 @@ async def startup_event():
         except Exception as e:
             print(f"⚠️  MongoDB connection failed: {e}")
             print("⚠️  Continuing without database persistence")
-    
+
     print("="*60)
     print("✅ AI Service Ready")
     print("="*60 + "\n")
@@ -84,20 +72,20 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on shutdown"""
     print("\n🛑 Shutting down AI Service...")
-    
+
     if SKILL_ASSESSMENT_ENABLED:
         try:
             await close_db()
             print("✅ Database connections closed")
         except Exception as e:
             print(f"⚠️  Error closing database: {e}")
-    
+
     print("👋 Goodbye!\n")
 
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure based on your frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -108,16 +96,13 @@ app.add_middleware(
 async def log_requests(request: Request, call_next):
     """Log all incoming requests"""
     start_time = time.time()
-    
     print(f"\n📨 {request.method} {request.url.path}")
-    
     response = await call_next(request)
-    
     process_time = time.time() - start_time
     print(f"Completed in {process_time:.3f}s")
-    
     response.headers["X-Process-Time"] = str(process_time)
     return response
+
 
 class SkillMatchRequest(BaseModel):
     """Request model for skill matching endpoint"""
@@ -154,9 +139,6 @@ class AdaptRoadmapRequest(BaseModel):
     roadmap_id: str
     progress_data: dict
     adaptation_reason: str = "slow_progress"
-
-
-roadmap_agent = RoadmapGeneratorAgent() if RoadmapGeneratorAgent else None
 
 
 @app.get("/")
@@ -205,10 +187,15 @@ async def health_check():
 async def parse_resume(file: UploadFile = File(...)):
     """
     Parse uploaded resume using Surya OCR
-
     Accepts: PDF, DOCX, JPG, PNG, TIFF (max 10MB)
     Returns: Structured resume data with skills, experience, education
     """
+
+    # ✅ LAZY IMPORT — loads surya-ocr/torch only when this endpoint is called
+    try:
+        from resume_parser import get_parser
+    except ImportError as e:
+        raise HTTPException(status_code=500, detail=f"Resume parser not available: {e}")
 
     # Validate file type
     allowed_extensions = ['.pdf', '.docx', '.doc', '.jpg', '.jpeg', '.png', '.tiff']
@@ -228,14 +215,12 @@ async def parse_resume(file: UploadFile = File(...)):
     tmp_file_path = None
 
     try:
-        # Save uploaded file temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
             tmp_file.write(file_content)
             tmp_file_path = tmp_file.name
 
         print(f"📄 Processing: {file.filename}")
 
-        # Parse resume
         parser = get_parser()
         parsed_data = parser.parse_resume(tmp_file_path, file_ext[1:])
 
@@ -246,7 +231,6 @@ async def parse_resume(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Error parsing resume: {str(e)}")
 
     finally:
-        # Clean up temp file
         if tmp_file_path and os.path.exists(tmp_file_path):
             os.unlink(tmp_file_path)
 
@@ -255,9 +239,7 @@ async def parse_resume(file: UploadFile = File(...)):
 async def match_skills(request: SkillMatchRequest):
     """
     Match extracted skills with database skills using fuzzy matching
-
     Uses 70% similarity threshold for matching.
-    Returns matched and unmatched skills with confidence scores.
     """
 
     try:
@@ -274,7 +256,7 @@ async def match_skills(request: SkillMatchRequest):
                     best_score = score
                     best_match = db_skill
 
-            if best_score > 0.7:  # 70% similarity threshold
+            if best_score > 0.7:
                 matched.append({
                     "extracted": ext_skill,
                     "database_match": best_match,
@@ -327,7 +309,12 @@ async def generate_roadmap(request: RoadmapGenerateRequest):
     Core roadmap generation endpoint.
     Called by Node.js backend after skill gap analysis is available.
     """
-    if not roadmap_agent:
+
+    # ✅ LAZY IMPORT — loads transformers only when this endpoint is called
+    try:
+        from agents.roadmap_generator import RoadmapGeneratorAgent
+        roadmap_agent = RoadmapGeneratorAgent()
+    except ImportError as e:
         raise HTTPException(status_code=503, detail="Roadmap generation module unavailable")
 
     try:
@@ -355,7 +342,6 @@ async def generate_roadmap(request: RoadmapGenerateRequest):
 async def adapt_roadmap(request: AdaptRoadmapRequest):
     """
     Autonomous adaptation endpoint.
-    Placeholder for future AdaptationAgent implementation.
     """
     return {
         "success": True,
@@ -363,7 +349,8 @@ async def adapt_roadmap(request: AdaptRoadmapRequest):
         "roadmap_id": request.roadmap_id,
         "adaptation_reason": request.adaptation_reason,
     }
-    
+
+
 if SKILL_ASSESSMENT_ENABLED:
     @app.post(
         "/api/ai/assess-skill",
@@ -373,16 +360,10 @@ if SKILL_ASSESSMENT_ENABLED:
     async def assess_skill(request: SkillAssessmentRequest):
         """
         Analyze skill assessment results using AI
-
-        Returns comprehensive analysis including:
-        - Skill strength score
-        - Weak areas and recommendations
-        - Next steps and progression timeline
         """
         try:
             start_time = time.time()
 
-            # Convert request to dict format
             difficulty_breakdown = {
                 'beginner': request.difficulty_breakdown.beginner.dict(),
                 'intermediate': request.difficulty_breakdown.intermediate.dict(),
@@ -391,7 +372,6 @@ if SKILL_ASSESSMENT_ENABLED:
 
             answers = [answer.dict() for answer in request.answers]
 
-            # Call the AI Skill Assessment
             analysis_result = await skill_assessment_service.assess_skill(
                 skill_name=request.skill_name,
                 normalized_score=request.normalized_score,
@@ -449,14 +429,13 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 if __name__ == "__main__":
     import uvicorn
-    
+    port = int(os.environ.get("PORT", 8000))
     print("🚀 Starting EduPath AI Service...")
-    print("📡 Server will run on http://localhost:8000")
-    print("📖 API docs: http://localhost:8000/docs")
-    
+    print(f"📡 Server will run on http://0.0.0.0:{port}")
+    print(f"📖 API docs: http://0.0.0.0:{port}/docs")
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=8000,
+        port=port,
         log_level="info"
     )
