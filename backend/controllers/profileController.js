@@ -134,7 +134,18 @@ export const getProfile = async (req, res) => {
 // @access  Private
 export const updateProfile = async (req, res) => {
   try {
-    const { firstName, lastName, phone, skills, role } = req.body;
+    const {
+      firstName,
+      lastName,
+      phone,
+      skills,
+      role,
+      target_role,
+      experience_level,
+      hours_per_week,
+      learning_style,
+      current_skills,
+    } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -162,10 +173,33 @@ export const updateProfile = async (req, res) => {
       });
     }
 
+    // These are reported in the response below, so accept them here too. They
+    // used to be dropped silently while the endpoint still answered 200, which
+    // made a failed update indistinguishable from a successful one.
+    const validExperienceLevels = ['beginner', 'intermediate', 'advanced'];
+    if (experience_level !== undefined && !validExperienceLevels.includes(experience_level)) {
+      return res.status(400).json({
+        success: false,
+        message: `Experience level must be one of: ${validExperienceLevels.join(', ')}`
+      });
+    }
+
+    if (hours_per_week !== undefined && (!Number.isFinite(Number(hours_per_week)) || Number(hours_per_week) < 1)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Hours per week must be a number of at least 1'
+      });
+    }
+
     // Update root level fields
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
     if (role !== undefined) user.role = role;
+    if (target_role !== undefined) user.target_role = target_role;
+    if (experience_level !== undefined) user.experience_level = experience_level;
+    if (hours_per_week !== undefined) user.hours_per_week = Number(hours_per_week);
+    if (learning_style !== undefined) user.learning_style = learning_style;
+    if (current_skills !== undefined) user.current_skills = current_skills;
 
     // Update profile nested fields
     if (!user.profile) {

@@ -13,8 +13,18 @@ const __dirname = path.dirname(__filename);
  */
 export const generateResume = async (req, res) => {
   try {
-    const { resumeData } = req.body;
+    const { resumeData, format } = req.body;
     const userId = req.user.id;
+
+    // This endpoint only produces DOCX; the client converts to PDF afterwards.
+    // It used to accept any format and return DOCX regardless, so a caller
+    // asking for PDF got a .docx file and no indication anything was wrong.
+    if (format !== undefined && String(format).toLowerCase() !== 'docx') {
+      return res.status(400).json({
+        success: false,
+        message: `Unsupported format '${format}'. This endpoint generates DOCX only.`
+      });
+    }
 
     // Validate resume data structure
     const validation = ResumeValidator.validate(resumeData);
