@@ -71,6 +71,8 @@ function ResumeBuilder() {
   const [message, setMessage] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [generatedResumeUrl, setGeneratedResumeUrl] = useState('');
+  // The backend converts by filename so it can scope the lookup to this user.
+  const [generatedFilename, setGeneratedFilename] = useState('');
   const [errors, setErrors] = useState({});
 
   // Check authentication on component mount
@@ -532,171 +534,26 @@ function ResumeBuilder() {
     });
   };
 
-  const convertWordToPDF = async (docxUrl) => {
-    const FREECONVERT_API_KEY = 'api_production_466ce2af843ae6fd3f26b420cf5b772f2b71055ac7805f46be45f277835e701b.697b1099142a194b36479c9e.697b10cca22aa85dd562b2ce';
-    
-    try {
-      // Step 1: Download the DOCX file from our server
-      console.log('Downloading DOCX file from:', docxUrl);
-      const fileResponse = await fetch(docxUrl);
-      const fileBlob = await fileResponse.blob();
-      console.log('File downloaded, size:', fileBlob.size, 'bytes');
-      
-      // Step 2: Create a job with all tasks
-      console.log('Creating conversion job...');
-      const jobResponse = await fetch('https://api.freeconvert.com/v1/process/jobs', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${FREECONVERT_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          tasks: {
-            'upload-my-file': {
-              operation: 'import/upload'
-            },
-            'convert-to-pdf': {
-              operation: 'convert',
-              input: 'upload-my-file',
-              output_format: 'pdf'
-            },
-            'export-pdf': {
-              operation: 'export/url',
-              input: 'convert-to-pdf'
-            }
-          }
-        })
-      });
+  const convertWordToPDF = async (filename) => {
+    // Conversion runs on the backend: the FreeConvert API key used to be inlined
+    // here, which shipped it to every browser that loaded this bundle.
+    const token = sessionStorage.getItem('token');
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/resume-generator/convert-to-pdf`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ filename })
+    });
 
-      if (!jobResponse.ok) {
-        const errorData = await jobResponse.json();
-        console.error('Job creation failed:', errorData);
-        throw new Error(errorData.message || 'Failed to create conversion job');
-      }
+    const data = await response.json();
 
-      const jobData = await jobResponse.json();
-      console.log('Job created:', jobData);
-
-      // Step 3: Find the upload task ID
-      let uploadTaskId = null;
-      
-      // Check if tasks is an array or object
-      if (Array.isArray(jobData.tasks)) {
-        const uploadTask = jobData.tasks.find(t => t.name === 'upload-my-file' || t.operation === 'import/upload');
-        uploadTaskId = uploadTask?.id;
-      } else if (typeof jobData.tasks === 'object') {
-        const uploadTask = Object.values(jobData.tasks).find(t => t.name === 'upload-my-file' || t.operation === 'import/upload');
-        uploadTaskId = uploadTask?.id;
-      }
-
-      if (!uploadTaskId) {
-        console.error('Upload task not found in job data:', jobData);
-        throw new Error('Upload task not found in job response');
-      }
-
-      console.log('Upload task ID:', uploadTaskId);
-
-      // Step 4: Get the full upload task details to find the correct upload URL
-      console.log('Getting upload task details...');
-      const taskDetailsResponse = await fetch(`https://api.freeconvert.com/v1/process/tasks/${uploadTaskId}`, {
-        headers: {
-          'Authorization': `Bearer ${FREECONVERT_API_KEY}`
-        }
-      });
-
-      if (!taskDetailsResponse.ok) {
-        console.error('Failed to get task details');
-        throw new Error('Failed to get upload task details');
-      }
-
-      const taskDetails = await taskDetailsResponse.json();
-      console.log('Upload task details:', taskDetails);
-
-      // Check if task has a form with parameters
-      if (!taskDetails.result || !taskDetails.result.form) {
-        throw new Error('Upload form not found in task details');
-      }
-
-      const uploadForm = taskDetails.result.form;
-      console.log('Upload form:', uploadForm);
-
-      // Step 5: Upload the file using the form parameters
-      console.log('Uploading file...');
-      const formData = new FormData();
-      
-      // Add all form parameters from the task details
-      if (uploadForm.parameters) {
-        Object.entries(uploadForm.parameters).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
-      }
-      
-      // Add the file last
-      formData.append('file', fileBlob, 'resume.docx');
-
-      const uploadResponse = await fetch(uploadForm.url, {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error('Upload failed. Status:', uploadResponse.status, 'Response:', errorText);
-        throw new Error('Failed to upload file');
-      }
-
-      console.log('File uploaded successfully');
-
-      // Step 5: Poll for job completion
-      console.log('Waiting for conversion to complete...');
-      let attempts = 0;
-      const maxAttempts = 60; // 3 minutes timeout
-      
-      while (attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
-        
-        const statusResponse = await fetch(`https://api.freeconvert.com/v1/process/jobs/${jobData.id}`, {
-          headers: {
-            'Authorization': `Bearer ${FREECONVERT_API_KEY}`
-          }
-        });
-
-        if (!statusResponse.ok) {
-          console.error('Failed to get job status');
-          attempts++;
-          continue;
-        }
-
-        const statusData = await statusResponse.json();
-        console.log('Job status:', statusData.status, 'Attempt:', attempts + 1);
-        
-        if (statusData.status === 'completed') {
-          // Find the export task
-          let exportTask = null;
-          if (Array.isArray(statusData.tasks)) {
-            exportTask = statusData.tasks.find(t => t.name === 'export-pdf' || t.operation === 'export/url');
-          } else if (typeof statusData.tasks === 'object') {
-            exportTask = Object.values(statusData.tasks).find(t => t.name === 'export-pdf' || t.operation === 'export/url');
-          }
-
-          if (exportTask && exportTask.result && exportTask.result.url) {
-            console.log('Conversion successful! PDF URL:', exportTask.result.url);
-            return exportTask.result.url;
-          }
-          throw new Error('PDF URL not found in export task result');
-        } else if (statusData.status === 'error' || statusData.status === 'failed') {
-          console.error('Conversion failed:', statusData);
-          throw new Error('Conversion failed: ' + (statusData.message || statusData.status));
-        }
-        
-        attempts++;
-      }
-      
-      throw new Error('Conversion timeout - please try again');
-    } catch (error) {
-      console.error('Conversion error:', error);
-      throw new Error(`PDF conversion failed: ${error.message}`);
+    if (!response.ok) {
+      throw new Error(data.message || 'PDF conversion failed');
     }
+
+    return data.data.pdfUrl;
   };
 
   const validateForm = () => {
@@ -819,6 +676,7 @@ function ResumeBuilder() {
       // Now downloadUrl is a full Cloudinary URL, no need to prepend localhost
       const docxUrl = data.data.downloadUrl;
       setGeneratedResumeUrl(docxUrl);
+      setGeneratedFilename(data.data.filename);
 
       setShowPreview(true);
       setMessage('Resume generated successfully! Review your information and download when ready.');
@@ -839,7 +697,7 @@ function ResumeBuilder() {
 
       if (format === 'pdf') {
         setMessage('Converting to PDF... This may take a moment.');
-        const pdfUrl = await convertWordToPDF(generatedResumeUrl);
+        const pdfUrl = await convertWordToPDF(generatedFilename);
 
         const pdfResponse = await fetch(pdfUrl);
         const pdfBlob = await pdfResponse.blob();
@@ -868,6 +726,7 @@ function ResumeBuilder() {
   const handleEditResume = () => {
     setShowPreview(false);
     setGeneratedResumeUrl('');
+    setGeneratedFilename('');
     setMessage('');
   };
 
