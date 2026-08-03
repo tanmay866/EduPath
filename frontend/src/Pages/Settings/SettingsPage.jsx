@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings as SettingsIcon, ArrowLeft, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { changePassword } from '../Services/profileService';
+import { getPasswordError, getApiErrorMessage } from '../../utils/passwordPolicy';
+import PasswordRequirements from '../../component/Ui/PasswordRequirements';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -64,8 +66,9 @@ const SettingsPage = () => {
       return;
     }
 
-    if (passwordData.newPassword.length < 3) {
-      setPasswordError('New password must be at least 3 characters');
+    const newPasswordError = getPasswordError(passwordData.newPassword);
+    if (newPasswordError) {
+      setPasswordError(newPasswordError);
       setTimeout(() => setPasswordError(''), 3000);
       setPasswordLoading(false);
       return;
@@ -90,7 +93,7 @@ const SettingsPage = () => {
         setTimeout(() => setPasswordMessage(''), 3000);
       }
     } catch (err) {
-      setPasswordError(err.message || 'Failed to change password');
+      setPasswordError(getApiErrorMessage(err, 'Failed to change password'));
       setTimeout(() => setPasswordError(''), 3000);
     } finally {
       setPasswordLoading(false);
@@ -267,6 +270,10 @@ const SettingsPage = () => {
                   {showNewPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              <PasswordRequirements
+                value={passwordData.newPassword}
+                show={Boolean(passwordData.newPassword)}
+              />
             </div>
 
             <div className="p-0.5">
