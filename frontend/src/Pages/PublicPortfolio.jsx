@@ -42,7 +42,7 @@ export default function PublicPortfolio() {
         } else {
           setPortfolio(result.portfolio);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load portfolio. Please try again.');
       } finally {
         setLoading(false);

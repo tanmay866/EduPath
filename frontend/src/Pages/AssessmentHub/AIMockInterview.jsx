@@ -21,9 +21,7 @@ import {
 import {
   speakInterviewQuestion,
   speakFeedback,
-  stopSpeaking as stopVoice,
-  isSpeaking as checkSpeaking,
-  getCurrentVoice
+  stopSpeaking as stopVoice
 } from '../../utils/voiceService';
 
 const API_URL = import.meta.env.VITE_API_URL || '' + import.meta.env.VITE_API_URL + '';

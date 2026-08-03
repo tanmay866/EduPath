@@ -20,14 +20,14 @@ export const uploadResume = async (resumeData, onProgress) => {
           try {
             const data = JSON.parse(xhr.responseText);
             resolve(data);
-          } catch (err) {
+          } catch {
             reject(new Error('Failed to parse response'));
           }
         } else {
           try {
             const data = JSON.parse(xhr.responseText);
             reject(new Error(data.message || 'Failed to upload resume'));
-          } catch (err) {
+          } catch {
             reject(new Error('Failed to upload resume'));
           }
         }
@@ -54,47 +54,39 @@ export const uploadResume = async (resumeData, onProgress) => {
 };
 
 export const getResumes = async () => {
-  try {
-    const token = sessionStorage.getItem('token');
-    const response = await fetch(API_URL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch resumes');
+  const token = sessionStorage.getItem('token');
+  const response = await fetch(API_URL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
+  });
 
-    return data;
-  } catch (error) {
-    throw error;
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to fetch resumes');
   }
+
+  return data;
 };
 
 export const deleteResume = async (resumeId) => {
-  try {
-    const token = sessionStorage.getItem('token');
-    const response = await fetch(`${API_URL}/${resumeId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to delete resume');
+  const token = sessionStorage.getItem('token');
+  const response = await fetch(`${API_URL}/${resumeId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     }
+  });
 
-    return data;
-  } catch (error) {
-    throw error;
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to delete resume');
   }
+
+  return data;
 };

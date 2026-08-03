@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // InputField component moved outside to prevent recreation on every render
@@ -152,7 +152,7 @@ function ResumeBuilder() {
   };
 
   const validatePhone = (phone) => {
-    const phoneRegex = /^[+]?[\d\s\-\(\)]{10,20}$/;
+    const phoneRegex = /^[+]?[\d\s\-()]{10,20}$/;
     if (!phone) return 'Phone number is required';
     if (!phoneRegex.test(phone)) return 'Please enter a valid phone number';
     return '';
@@ -216,7 +216,7 @@ function ResumeBuilder() {
   };
 
   const formatPhoneInput = (value) => {
-    return value.replace(/[^\d\s+\-\(\)]/g, '').slice(0, 20);
+    return value.replace(/[^\d\s+\-()]/g, '').slice(0, 20);
   };
 
   const formatLocationInput = (value) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { getProfile, updateProfile } from '../../Pages/Services/profileService';
+import { updateProfile } from '../../Pages/Services/profileService';
 
 const Profile = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({

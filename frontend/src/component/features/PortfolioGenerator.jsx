@@ -123,7 +123,7 @@ function PortfolioGenerator() {
       } else {
         setError(result.message || 'Failed to parse resume');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to process resume. Please try again.');
     } finally {
       setLoading(false);
@@ -184,7 +184,7 @@ function PortfolioGenerator() {
       } else {
         setError(result.message || 'Deployment failed');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to deploy. Please try again.');
     } finally {
       setLoading(false);
@@ -208,7 +208,7 @@ function PortfolioGenerator() {
       } else {
         setError(result.message || 'Vercel deployment failed');
       }
-    } catch (err) {
+    } catch {
       setError('Vercel deployment failed. Please try again.');
     } finally {
       setVercelDeploying(false);
@@ -228,7 +228,7 @@ function PortfolioGenerator() {
         setSuccessMsg('Portfolio deleted');
         fetchMyPortfolios();
       }
-    } catch (err) {
+    } catch {
       setError('Failed to delete portfolio');
     }
   };

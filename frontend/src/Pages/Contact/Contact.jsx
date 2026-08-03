@@ -86,7 +86,7 @@ const Contact = () => {
           setTimeout(() => setError(''), 3000);
         }
       }, 900);
-    } catch (err) {
+    } catch {
       setTimeout(() => {
         setPlaneFlying(false);
         setLoading(false);
