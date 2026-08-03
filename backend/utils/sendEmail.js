@@ -1,4 +1,4 @@
-import createTransporter from '../config/mailConfig.js';
+import { deliver, isApiTransportConfigured } from '../services/emailProvider.js';
 
 /**
  * Send email utility function
@@ -11,17 +11,13 @@ import createTransporter from '../config/mailConfig.js';
  */
 const sendEmail = async (options) => {
   try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: process.env.EMAIL_FROM,
+    await deliver({
       to: options.email,
       subject: options.subject,
       html: options.html,
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent to ${options.email}`);
+    console.log(`✅ Email sent to ${options.email} via ${isApiTransportConfigured() ? 'Brevo' : 'SMTP'}`);
     return true;
   } catch (error) {
     console.error(`❌ Email sending failed: ${error.message}`);

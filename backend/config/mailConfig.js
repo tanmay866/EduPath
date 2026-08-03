@@ -21,6 +21,14 @@ const createTransporter = () => {
 
 // Verify email configuration
 export const verifyEmailConfig = async () => {
+  // When Brevo is configured, mail goes over HTTPS and this SMTP handshake
+  // proves nothing — it would just stall for the connection timeout on every
+  // boot in environments that block outbound SMTP.
+  if (process.env.BREVO_API_KEY) {
+    console.log('Email transport: Brevo (HTTPS API)');
+    return true;
+  }
+
   try {
     const transporter = createTransporter();
     await transporter.verify();
