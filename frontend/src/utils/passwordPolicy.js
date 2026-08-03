@@ -15,6 +15,20 @@ export const PASSWORD_MIN_LENGTH = 6;
 const HAS_UPPER_LOWER_DIGIT = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
 
 /**
+ * The rules broken out individually, so a form can show which ones are still
+ * outstanding rather than only reporting the first failure on submit.
+ *
+ * @param {string} value - candidate password
+ * @returns {{label: string, met: boolean}[]}
+ */
+export const getPasswordRules = (value = '') => [
+  { label: `At least ${PASSWORD_MIN_LENGTH} characters`, met: value.length >= PASSWORD_MIN_LENGTH },
+  { label: 'One uppercase letter (A-Z)', met: /[A-Z]/.test(value) },
+  { label: 'One lowercase letter (a-z)', met: /[a-z]/.test(value) },
+  { label: 'One number (0-9)', met: /\d/.test(value) },
+];
+
+/**
  * @param {string} value - candidate password
  * @returns {string|null} message describing the first unmet rule, or null if valid
  */

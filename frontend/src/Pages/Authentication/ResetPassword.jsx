@@ -5,6 +5,7 @@ import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { resetPassword } from '../Services/profileService';
 import { getPasswordError, getApiErrorMessage } from '../../utils/passwordPolicy';
+import PasswordRequirements from '../../component/Ui/PasswordRequirements';
 import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const ResetPassword = () => {
@@ -122,6 +123,7 @@ const ResetPassword = () => {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
+                            <PasswordRequirements value={formData.password} />
                         </div>
 
                         {/* Confirm Password */}

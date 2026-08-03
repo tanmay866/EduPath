@@ -7,6 +7,7 @@ import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { getPasswordError, getApiErrorMessage } from '../../utils/passwordPolicy';
+import PasswordRequirements from '../../component/Ui/PasswordRequirements';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -256,11 +257,17 @@ const Signup = () => {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {formik.touched.password && formik.errors.password && (
+              {formik.touched.password && !formik.values.password && (
                 <p className="mt-1 text-sm text-red-500">
                   {formik.errors.password}
                 </p>
               )}
+              {/* Once there is something to check, the live list is clearer than
+                  repeating one failure at a time. */}
+              <PasswordRequirements
+                value={formik.values.password}
+                show={Boolean(formik.values.password) || formik.touched.password}
+              />
             </div>
           </div>
 
