@@ -1,5 +1,5 @@
 export const huggingFaceConfig = {
-    apiKey: process.env.HF_TOKEN || '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',
+    apiKey: process.env.HF_TOKEN,
     apiUrl: 'https://router.huggingface.co/v1/chat/completions',
     model: 'Qwen/Qwen2.5-7B-Instruct',
     generationConfig: {
