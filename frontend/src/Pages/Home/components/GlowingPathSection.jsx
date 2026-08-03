@@ -1,6 +1,72 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
+// One milestone node. This is its own component because the useTransform calls
+// below used to run inside a .map() callback — a hooks-rules violation that only
+// held together because the milestones array never changes length. Rendering a
+// different number of nodes would have shifted React's hook order and crashed.
+const MilestoneNode = ({ item, index, scrollYProgress }) => {
+  // Total height is roughly divided into 4 segments; each node pops open as the
+  // orb reaches it.
+  const threshold = index * 0.25 + 0.1;
+  const opacity = useTransform(scrollYProgress, [threshold - 0.1, threshold], [0, 1]);
+  const scale = useTransform(scrollYProgress, [threshold - 0.1, threshold], [0.8, 1]);
+  const y = useTransform(scrollYProgress, [threshold - 0.1, threshold], [50, 0]);
+
+  const isLeft = item.align === 'left';
+
+  return (
+    <div className="relative w-full flex md:justify-center items-center my-12 md:my-0 h-32">
+
+      {/* Desktop Layout */}
+      <div className={`hidden md:flex w-full ${isLeft ? 'justify-start' : 'justify-end'} relative`}>
+
+        {/* Node Connector Dot */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0a0a0a] border-2 border-slate-600 z-10" />
+
+        <motion.div
+          style={{ opacity, scale, y }}
+          className={`w-5/12 ${isLeft ? 'pr-12 text-right flex flex-col items-end' : 'pl-12 text-left flex flex-col items-start'}`}
+        >
+          <div className={`w-14 h-14 backdrop-blur-lg rounded-2xl flex items-center justify-center text-xl mb-4 shadow-xl border
+            ${item.color === 'blue' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-blue-500/20' : ''}
+            ${item.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-emerald-500/20' : ''}
+            ${item.color === 'purple' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30 shadow-purple-500/20' : ''}
+            ${item.color === 'pink' ? 'bg-pink-500/10 text-pink-400 border-pink-500/30 shadow-pink-500/20' : ''}
+          `}>
+            {item.icon}
+          </div>
+          <h3 className="font-bold text-2xl mb-2 text-white">{item.title}</h3>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-sm">{item.desc}</p>
+        </motion.div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="flex md:hidden w-full pl-16 relative">
+        {/* Node Connector Dot */}
+        <div className="absolute left-8 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0a0a0a] border-2 border-slate-600 z-10" />
+
+        <motion.div
+          style={{ opacity, scale, y }}
+          className="w-full text-left flex flex-col items-start bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl"
+        >
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg mb-3 border
+            ${item.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border-blue-500/40' : ''}
+            ${item.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : ''}
+            ${item.color === 'purple' ? 'bg-purple-500/20 text-purple-400 border-purple-500/40' : ''}
+            ${item.color === 'pink' ? 'bg-pink-500/20 text-pink-400 border-pink-500/40' : ''}
+          `}>
+            {item.icon}
+          </div>
+          <h3 className="font-bold text-xl mb-1 text-white">{item.title}</h3>
+          <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+        </motion.div>
+      </div>
+
+    </div>
+  );
+};
+
 const GlowingPathSection = () => {
   const containerRef = useRef(null);
 
@@ -94,69 +160,14 @@ const GlowingPathSection = () => {
         </motion.div>
 
         {/* Nodes */}
-        {milestones.map((item, index) => {
-          // Calculate when this specific node should appear based on its vertical position
-          // Total height is roughly divided into 4 segments
-          const threshold = index * 0.25 + 0.1; 
-
-          // Map the opacity and scale of the card so it pops open when the orb reaches it
-          const opacity = useTransform(scrollYProgress, [threshold - 0.1, threshold], [0, 1]);
-          const scale = useTransform(scrollYProgress, [threshold - 0.1, threshold], [0.8, 1]);
-          const y = useTransform(scrollYProgress, [threshold - 0.1, threshold], [50, 0]);
-
-          const isLeft = item.align === 'left';
-
-          return (
-            <div key={index} className="relative w-full flex md:justify-center items-center my-12 md:my-0 h-32">
-              
-              {/* Desktop Layout */}
-              <div className={`hidden md:flex w-full ${isLeft ? 'justify-start' : 'justify-end'} relative`}>
-                
-                {/* Node Connector Dot */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0a0a0a] border-2 border-slate-600 z-10" />
-
-                <motion.div 
-                  style={{ opacity, scale, y }}
-                  className={`w-5/12 ${isLeft ? 'pr-12 text-right flex flex-col items-end' : 'pl-12 text-left flex flex-col items-start'}`}
-                >
-                  <div className={`w-14 h-14 backdrop-blur-lg rounded-2xl flex items-center justify-center text-xl mb-4 shadow-xl border
-                    ${item.color === 'blue' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-blue-500/20' : ''}
-                    ${item.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-emerald-500/20' : ''}
-                    ${item.color === 'purple' ? 'bg-purple-500/10 text-purple-400 border-purple-500/30 shadow-purple-500/20' : ''}
-                    ${item.color === 'pink' ? 'bg-pink-500/10 text-pink-400 border-pink-500/30 shadow-pink-500/20' : ''}
-                  `}>
-                    {item.icon}
-                  </div>
-                  <h3 className="font-bold text-2xl mb-2 text-white">{item.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed max-w-sm">{item.desc}</p>
-                </motion.div>
-              </div>
-
-              {/* Mobile Layout */}
-              <div className="flex md:hidden w-full pl-16 relative">
-                {/* Node Connector Dot */}
-                <div className="absolute left-8 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0a0a0a] border-2 border-slate-600 z-10" />
-
-                <motion.div 
-                  style={{ opacity, scale, y }}
-                  className="w-full text-left flex flex-col items-start bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl"
-                >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg mb-3 border
-                    ${item.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border-blue-500/40' : ''}
-                    ${item.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : ''}
-                    ${item.color === 'purple' ? 'bg-purple-500/20 text-purple-400 border-purple-500/40' : ''}
-                    ${item.color === 'pink' ? 'bg-pink-500/20 text-pink-400 border-pink-500/40' : ''}
-                  `}>
-                    {item.icon}
-                  </div>
-                  <h3 className="font-bold text-xl mb-1 text-white">{item.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
-                </motion.div>
-              </div>
-
-            </div>
-          );
-        })}
+        {milestones.map((item, index) => (
+          <MilestoneNode
+            key={index}
+            item={item}
+            index={index}
+            scrollYProgress={scrollYProgress}
+          />
+        ))}
       </div>
     </section>
   );
