@@ -19,7 +19,7 @@ try:
     from fastapi import FastAPI, File, UploadFile, HTTPException, Request
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import JSONResponse
-    from pydantic import BaseModel
+    from pydantic import BaseModel, Field
 except ImportError as e:
     print(f"Error: FastAPI is not installed. Please run: pip install fastapi uvicorn pydantic")
     sys.exit(1)
@@ -127,7 +127,9 @@ class RoadmapGenerateRequest(BaseModel):
     user_id: str
     target_role: str
     experience_level: str = "beginner"
-    hours_per_week: int = 10
+    # Bounded rather than clamped: hours_per_week=0 used to fall back to 1 and
+    # return a 489-week (9+ year) plan instead of rejecting the input.
+    hours_per_week: int = Field(default=10, ge=1, le=168)
     learning_style: str = "mixed"
     skill_gaps: List[SkillGapItem] = []
     skill_scores: dict = {}
