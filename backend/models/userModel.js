@@ -27,8 +27,12 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      // The old pattern capped each label at 3 characters, which rejected every
+      // TLD longer than that (.tech, .info, .online, .store, .email). Those
+      // addresses passed the express-validator isEmail() check on the route and
+      // then failed here, so signup broke with no useful explanation.
       match: [
-        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        /^[\w.+-]+@[\w-]+(\.[\w-]+)*\.[A-Za-z]{2,}$/,
         'Please provide a valid email address',
       ],
     },
