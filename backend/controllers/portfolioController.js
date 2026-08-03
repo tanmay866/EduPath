@@ -1,4 +1,4 @@
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import { extractTextFromPDF } from '../utils/pdfText.js';
 import mammoth from 'mammoth';
 import { v4 as uuidv4 } from 'uuid';
 import { v2 as cloudinary } from 'cloudinary';
@@ -6,18 +6,6 @@ import Portfolio from '../models/Portfolio.js';
 import User from '../models/userModel.js';
 import { parseResumeWithGroq, mapToPortfolioSchema } from '../services/groqResumeParser.js';
 import { generateTemplateHTML } from '../templates/portfolioTemplates.js';
-
-/**
- * Extract text from PDF file
- */
-const extractTextFromPDF = async (buffer) => {
-  try {
-    const data = await pdfParse(buffer);
-    return data.text;
-  } catch (error) {
-    throw new Error(`PDF extraction failed: ${error.message}`);
-  }
-};
 
 /**
  * Extract text from DOCX file

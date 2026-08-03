@@ -1,24 +1,12 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import { extractTextFromPDF } from '../utils/pdfText.js';
 import mammoth from 'mammoth';
 import { generateATSReport, generateReportFilename } from '../services/pdfReportGenerator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-/**
- * Extract text from PDF file
- */
-const extractTextFromPDF = async (buffer) => {
-  try {
-    const data = await pdfParse(buffer);
-    return data.text;
-  } catch (error) {
-    throw new Error(`PDF extraction failed: ${error.message}`);
-  }
-};
 
 /**
  * Extract text from DOCX file
