@@ -14,7 +14,7 @@ const router = express.Router();
 router.post('/generate', protect, generateResume);
 
 // Download generated resume file
-router.get('/download/:filename', downloadResume);
+router.get('/download/:filename', protect, downloadResume);
 
 // Get resume version history for logged-in user
 router.get('/history', protect, getResumeHistory);

@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import connectDB from './config/db.js';
 import { verifyEmailConfig } from './config/mailConfig.js';
 
@@ -25,6 +27,11 @@ dotenv.config();
 
 // Create Express app
 const app = express();
+
+// Render terminates TLS at its proxy, so req.ip is the proxy's address unless we
+// trust one hop. Rate limiting keys on req.ip — without this every request looks
+// like it came from the same client and the limits apply to everyone at once.
+app.set('trust proxy', 1);
 
 const configuredFrontendOrigin = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -67,6 +74,16 @@ app.use(
   })
 );
 
+// Security headers. This service only ever returns JSON, so CSP protects nothing
+// here and is disabled to avoid surprises; CORP has to be cross-origin because the
+// frontend is served from a different origin than this API.
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -78,6 +95,45 @@ if (process.env.NODE_ENV === 'development') {
     next();
   });
 }
+
+// Rate limiting
+const rateLimitResponse = (message) => ({ success: false, message });
+
+// Broad ceiling for the whole API. Generous enough that normal use never sees it.
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: rateLimitResponse('Too many requests. Please try again in a few minutes.'),
+});
+
+// Brute-force guard. skipSuccessfulRequests means only failed logins count, so a
+// legitimate user is never locked out by their own successful sign-ins.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: rateLimitResponse('Too many failed login attempts. Please try again in 15 minutes.'),
+});
+
+// Endpoints that send email or create accounts — abuse here costs real money and
+// inbox reputation, so successful requests count too.
+const sensitiveLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: rateLimitResponse('Too many requests for this action. Please try again in an hour.'),
+});
+
+app.use('/api', apiLimiter);
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/signup', sensitiveLimiter);
+app.use('/api/auth/forgot-password', sensitiveLimiter);
+app.use('/api/contact/send', sensitiveLimiter);
 
 // API Routes
 app.use('/api/auth', authRoutes);
