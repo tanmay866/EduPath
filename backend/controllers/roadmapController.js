@@ -163,9 +163,11 @@ export const generateRoadmap = async (req, res) => {
             status: "active",
             metadata: {
                 generated_at: new Date(),
-                generation_method: "hybrid",
-                ai_model_used:
-                    aiResult.model_used || "gpt-4o-mini",
+                // Record what the AI service actually reports. The old default
+                // labelled roadmaps "gpt-4o-mini" even though no OpenAI client
+                // exists anywhere in this project, so stored provenance was wrong.
+                generation_method: aiResult.model_used || "unknown",
+                ai_model_used: aiResult.model_used || "unknown",
             },
         });
 
