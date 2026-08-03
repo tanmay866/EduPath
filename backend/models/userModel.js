@@ -435,20 +435,25 @@ userSchema.methods.hasRoadmapProfile = function () {
   );
 };
 
-// Static method to get the next serial number for user ID generation
+// Static method to get the next serial number for user ID generation.
+//
+// Sorting by loginId used to pick the alphabetically largest id, which is the
+// highest *name prefix* rather than the highest serial — ZZZZ2026001 outranked
+// AAAA2026999 — so this returned a serial that was already taken. The serial is
+// now extracted and compared as a number.
+//
+// This still races: two concurrent signups can read the same maximum. The unique
+// index on loginId is what actually guarantees uniqueness, and callers retry on
+// the resulting duplicate-key error.
 userSchema.statics.getNextSerialNumber = async function (year) {
-  const lastUser = await this.findOne({
-    loginId: new RegExp(`^[A-Z]{4}${year}`),
-  })
-    .sort({ loginId: -1 })
-    .select('loginId');
+  const [highest] = await this.aggregate([
+    { $match: { loginId: new RegExp(`^[A-Z]{4}${year}\\d+$`) } },
+    { $project: { serial: { $toInt: { $substrBytes: ['$loginId', 8, 10] } } } },
+    { $sort: { serial: -1 } },
+    { $limit: 1 },
+  ]);
 
-  if (!lastUser) {
-    return 1;
-  }
-
-  const lastSerial = parseInt(lastUser.loginId.slice(-3));
-  return lastSerial + 1;
+  return (highest?.serial ?? 0) + 1;
 };
 
 // Static method to get top performers

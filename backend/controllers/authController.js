@@ -2,7 +2,7 @@ import User from '../models/userModel.js';
 import { asyncHandler } from '../middlewares/errorMiddleware.js';
 import { AppError } from '../middlewares/errorMiddleware.js';
 import { generateToken, generateResetToken, hashResetToken, createTokenResponse } from '../utils/tokenUtils.js';
-import generateUserId from '../utils/generateUserId.js';
+import generateUserId, { isDuplicateLoginIdError } from '../utils/generateUserId.js';
 import { sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangeEmail } from '../utils/sendEmail.js';
 
 /**
@@ -19,18 +19,33 @@ export const signup = asyncHandler(async (req, res, next) => {
         return next(new AppError('User with this email already exists', 400));
     }
 
-    // Generate unique login ID
-    const loginId = await generateUserId(firstName, lastName);
+    // Generate the login ID and create the user, stepping to the next serial if
+    // a concurrent signup claimed this one. The unique index is the real
+    // guarantee; without this retry that race surfaced to the user as
+    // "LoginId 'XXXX2026006' already exists" and the signup simply failed.
+    const MAX_LOGIN_ID_ATTEMPTS = 5;
+    let user;
+    let loginId;
 
-    // Create user
-    const user = await User.create({
-        firstName,
-        lastName,
-        email: email.toLowerCase(),
-        password,
-        loginId,
-        role,
-    });
+    for (let attempt = 0; attempt < MAX_LOGIN_ID_ATTEMPTS; attempt++) {
+        loginId = await generateUserId(firstName, lastName, attempt);
+
+        try {
+            user = await User.create({
+                firstName,
+                lastName,
+                email: email.toLowerCase(),
+                password,
+                loginId,
+                role,
+            });
+            break;
+        } catch (error) {
+            if (!isDuplicateLoginIdError(error) || attempt === MAX_LOGIN_ID_ATTEMPTS - 1) {
+                throw error;
+            }
+        }
+    }
 
     // Send welcome email with credentials
     try {
