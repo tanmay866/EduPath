@@ -5,7 +5,9 @@
 # Core Framework
 fastapi==0.115.0
 uvicorn[standard]==0.32.0
-pydantic==2.10.0
+# pydantic 2.10.x cannot build a schema for spaCy 3.8's config models
+# (PydanticSchemaGenerationError on `Exception`); 2.11+ fixes it.
+pydantic>=2.11,<3
 pydantic-settings==2.6.0
 python-multipart==0.0.12
 
@@ -32,6 +34,8 @@ python-docx==1.1.0
 
 # NLP & Text Processing
 spacy>=3.7.2
+# Installed separately (the `spacy download` CLI is broken by weasel/pydantic):
+#   pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 datefinder==0.7.3
 
 # Data Processing
