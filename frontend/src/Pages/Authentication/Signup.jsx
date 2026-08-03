@@ -6,6 +6,7 @@ import { useFormik } from 'formik';
 import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { getPasswordError, getApiErrorMessage } from '../../utils/passwordPolicy';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -33,10 +34,9 @@ const Signup = () => {
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
         errors.email = 'Invalid email address';
       }
-      if (!values.password) {
-        errors.password = 'Password is required';
-      } else if (values.password.length < 6) {
-        errors.password = 'Password must be at least 6 characters';
+      const passwordError = getPasswordError(values.password);
+      if (passwordError) {
+        errors.password = passwordError;
       }
       return errors;
     },
@@ -52,7 +52,7 @@ const Signup = () => {
         navigate('/signin');
       } catch (error) {
         console.error('Signup error:', error);
-        toast.error(error.response?.data?.message || 'Signup failed. Please try again.');
+        toast.error(getApiErrorMessage(error.response?.data, 'Signup failed. Please try again.'));
       } finally {
         setSubmitting(false);
       }

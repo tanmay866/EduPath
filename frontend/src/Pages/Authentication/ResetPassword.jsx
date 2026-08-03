@@ -4,6 +4,7 @@ import { HiArrowLeft } from 'react-icons/hi';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { resetPassword } from '../Services/profileService';
+import { getPasswordError, getApiErrorMessage } from '../../utils/passwordPolicy';
 import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation';
 
 const ResetPassword = () => {
@@ -33,8 +34,9 @@ const ResetPassword = () => {
             return;
         }
 
-        if (formData.password.length < 6) {
-            toast.error('Password must be at least 6 characters');
+        const passwordError = getPasswordError(formData.password);
+        if (passwordError) {
+            toast.error(passwordError);
             setLoading(false);
             return;
         }
@@ -62,7 +64,7 @@ const ResetPassword = () => {
                 }, 2000);
             }
         } catch (error) {
-            toast.error(error.message || 'Failed to reset password. Link may be expired.');
+            toast.error(getApiErrorMessage(error, 'Failed to reset password. Link may be expired.'));
         } finally {
             setLoading(false);
         }
