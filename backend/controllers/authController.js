@@ -47,15 +47,6 @@ export const signup = asyncHandler(async (req, res, next) => {
         }
     }
 
-    // Send welcome email with credentials
-    try {
-        await sendWelcomeEmail(user, password);
-        console.log('✅ Welcome email sent to:', user.email);
-    } catch (emailError) {
-        console.error('❌ Failed to send welcome email:', emailError.message);
-        // Don't fail registration if email fails, just log it
-    }
-    
     console.log('✅ User created - Login ID:', loginId);
 
     // Generate JWT token
@@ -75,6 +66,15 @@ export const signup = asyncHandler(async (req, res, next) => {
             role: user.role,
         },
     });
+
+    // Send the welcome email after responding. It used to be awaited here, and
+    // SMTP delivery can stall for minutes on hosts that throttle outbound port
+    // 587 — so a signup that had already succeeded looked like a timeout to the
+    // caller, and their retry then failed with "email already exists".
+    // The account exists either way; delivery is not worth blocking on.
+    sendWelcomeEmail(user, password)
+        .then(() => console.log('✅ Welcome email sent to:', user.email))
+        .catch((emailError) => console.error('❌ Failed to send welcome email:', emailError.message));
 });
 
 /**

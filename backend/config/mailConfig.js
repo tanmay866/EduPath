@@ -10,6 +10,12 @@ const createTransporter = () => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
     },
+    // Without these, nodemailer waits indefinitely. Hosts that throttle or block
+    // outbound port 587 leave the socket open rather than refusing it, so a send
+    // could hang for minutes instead of failing and letting the caller move on.
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
   });
 };
 
