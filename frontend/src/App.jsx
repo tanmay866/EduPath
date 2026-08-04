@@ -37,9 +37,7 @@ import AptitudeTest from './Pages/AssessmentHub/AptitudeTest'
 import CSFundamentals from './Pages/AssessmentHub/CSFundamentals'
 import AIMockInterview from './Pages/AssessmentHub/AIMockInterview'
 
-// Admin Components
-import AdminNavbar from './Admin/component/AdminNavbar'
-import AdminSidebar from './Admin/component/AdminSidebar'
+// Admin Components — the sidebar and header now come from AdminShell.
 import AdminDashboard from './Admin/pages/AdminDashboard'
 import ManageUsers from './Admin/pages/ManageUsers'
 import QuizAttempts from './Admin/pages/QuizAttempts'
@@ -78,13 +76,13 @@ const App = () => {
 
         <ScrollToTop />
         <Routes>
-          <Route path="/*" element={<PageTransition><AdminDashboard /></PageTransition>} />
-          <Route path="/admin/*" element={<PageTransition><AdminDashboard /></PageTransition>} />
-          <Route path="/admin/users" element={<PageTransition><ManageUsers /></PageTransition>} />
-          <Route path="/admin/quiz-attempts" element={<PageTransition><QuizAttempts /></PageTransition>} />
-          <Route path="/admin/roadmaps" element={<PageTransition><RoadmapHistory /></PageTransition>} />
-          <Route path="/admin/analytics" element={<PageTransition><AIAnalytics /></PageTransition>} />
-          <Route path="/admin/settings" element={<PageTransition><SystemSettings /></PageTransition>} />
+          <Route path="/*" element={<AdminDashboard />} />
+          <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<ManageUsers />} />
+          <Route path="/admin/quiz-attempts" element={<QuizAttempts />} />
+          <Route path="/admin/roadmaps" element={<RoadmapHistory />} />
+          <Route path="/admin/analytics" element={<AIAnalytics />} />
+          <Route path="/admin/settings" element={<SystemSettings />} />
         </Routes>
 
       </div>

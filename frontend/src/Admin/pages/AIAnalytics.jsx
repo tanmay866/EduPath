@@ -1,130 +1,73 @@
 import React from 'react';
-import AdminSidebar from '../component/AdminSidebar';
-import AdminNavbar from '../component/AdminNavbar';
-import StatCard from '../component/StatCard';
-import ChartCard from '../component/ChartCard';
-import { Zap, TrendingUp, ClipboardList, Map } from 'lucide-react';
-import BackgroundAnimation from '../../Pages/Assessment/AssesmentDashboard/components/BackgroundAnimation';
+import {
+  AdminShell, Card, CardHeader, StatStrip, InkPanel, LabelledBar, ShareChart, MicroLabel,
+} from '../../design';
+import { adminNav } from '../../design/nav';
+import { aiStats, requestedSkills, difficultySplit, tokenUsage } from '../mockData';
 
+/**
+ * Spec §7 Admin · AI analytics.
+ *
+ * A four-cell stat strip, then `1fr 1fr`: a four-bar normalised card on the
+ * left; on the right, stacked, a share chart and an ink panel carrying a mono
+ * label, a mono 34px figure beside a 14px unit, and a 14.5px line.
+ */
 const AIAnalytics = () => {
-  const statsData = {
-    totalRequests: 842,
-    todayRequests: 37,
-    quizGenerations: 512,
-    roadmapGenerations: 330,
-  };
-
-  const skillsData = [
-    { name: 'DSA', value: 120 },
-    { name: 'MERN', value: 95 },
-    { name: 'Java', value: 80 },
-    { name: 'Python', value: 60 },
-  ];
-
-  const difficultyData = [
-    { name: 'Easy', value: 200 },
-    { name: 'Medium', value: 150 },
-    { name: 'Hard', value: 100 },
-  ];
-
-  const tokenData = {
-    totalTokens: 125000,
-    avgTokensPerRequest: 148,
-  };
+  const peak = Math.max(...requestedSkills.map((s) => s.value), 1);
 
   return (
-    <div className="flex h-screen bg-black relative overflow-hidden">
-      <BackgroundAnimation />
+    <AdminShell items={adminNav} title="AI analytics" chip="SAMPLE DATA">
+      <StatStrip items={aiStats} />
 
-      {/* Sidebar */}
-      <AdminSidebar />
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        {/* Navbar */}
-        <AdminNavbar />
-
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Page Header */}
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-100">AI Analytics</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Monitor AI usage, generation patterns, and system activity.
-            </p>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22, alignItems: 'start' }}>
+        <Card>
+          <CardHeader
+            label="Most requested skills"
+            right={
+              <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">
+                {`PEAK ${peak}`}
+              </MicroLabel>
+            }
+          />
+          {/* Normalised against the busiest skill, so the bars compare with each
+              other rather than against an arbitrary 100. */}
+          <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {requestedSkills.map((skill) => (
+              <LabelledBar
+                key={skill.label}
+                label={skill.label}
+                value={skill.value}
+                display={skill.value}
+                max={peak}
+              />
+            ))}
           </div>
+        </Card>
 
-          {/* Section 1: AI Overview Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              title="Total AI Requests"
-              value={statsData.totalRequests}
-              icon={Zap}
-              change={15}
-              changeType="increase"
-            />
-            <StatCard
-              title="Requests Today"
-              value={statsData.todayRequests}
-              icon={TrendingUp}
-              change={8}
-              changeType="increase"
-            />
-            <StatCard
-              title="Total Quiz Generations"
-              value={statsData.quizGenerations}
-              icon={ClipboardList}
-              change={12}
-              changeType="increase"
-            />
-            <StatCard
-              title="Total Roadmap Generations"
-              value={statsData.roadmapGenerations}
-              icon={Map}
-              change={5}
-              changeType="increase"
-            />
-          </div>
-
-          {/* Section 2: Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ChartCard
-              title="Most Requested Skills"
-              subtitle="Top skills requested by users"
-              data={skillsData}
-              type="bar"
-            />
-            <ChartCard
-              title="Difficulty Distribution"
-              subtitle="Quiz difficulty breakdown"
-              data={difficultyData}
-              type="pie"
-            />
-          </div>
-
-          {/* Section 3: Token Usage Summary */}
-          <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-gray-100 mb-4">
-              Token Usage Summary
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm text-gray-400">Total Tokens Used</p>
-                <p className="text-2xl font-semibold text-gray-100 mt-1">
-                  {tokenData.totalTokens.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Average Tokens per Request</p>
-                <p className="text-2xl font-semibold text-gray-100 mt-1">
-                  {tokenData.avgTokensPerRequest}
-                </p>
-              </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+          <Card>
+            <CardHeader label="Difficulty share" />
+            <div style={{ padding: '22px 24px' }}>
+              <ShareChart data={difficultySplit.slice(0, 3)} />
             </div>
-          </div>
-        </main>
+          </Card>
+
+          <InkPanel label="Token usage">
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 10 }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 34, letterSpacing: '-0.02em', color: '#fff' }}>
+                {(tokenUsage.total / 1000).toFixed(0)}
+              </span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, color: 'var(--color-dark-text-3)' }}>
+                K TOKENS
+              </span>
+            </div>
+            <span style={{ fontSize: 14.5, lineHeight: 1.55, color: 'var(--color-dark-text-2)' }}>
+              {`About ${tokenUsage.averagePerRequest} tokens per request across every quiz and roadmap generated.`}
+            </span>
+          </InkPanel>
+        </div>
       </div>
-    </div>
+    </AdminShell>
   );
 };
 

@@ -11,7 +11,10 @@ import React from 'react';
    Header: mono 10.5px / 0.12em text-4 at 11px 20px with a line rule beneath.
    Body row: 14–15px 20px, line-soft rule, 14.5px, centred. Numeric and date
    columns are right-aligned in mono. */
-export const TableHead = ({ columns, children, style }) => (
+/* `align` gives each column's text alignment, so a numeric header lines up
+   with the mono figures beneath it. Styling the passed child does nothing —
+   TableHead wraps it, and the wrapper is the grid cell that has the width. */
+export const TableHead = ({ columns, align = [], children, style }) => (
   <div
     style={{
       display: 'grid',
@@ -32,6 +35,7 @@ export const TableHead = ({ columns, children, style }) => (
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
           color: 'var(--color-text-4)',
+          textAlign: align[i] || 'left',
         }}
       >
         {child}

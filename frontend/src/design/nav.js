@@ -10,7 +10,7 @@ export const learnerNav = [
   {
     label: 'Learn',
     items: [
-      { to: '/assessment', label: 'Overview' },
+      { to: '/assessment', label: 'Overview', end: true },
       { to: '/roadmap', label: 'Roadmap' },
       { to: '/assessment-hub', label: 'Assessments' },
     ],
@@ -33,7 +33,8 @@ export const learnerNav = [
 ];
 
 export const adminNav = [
-  { to: '/admin', label: 'Overview' },
+  // Exact match only — every other admin path sits under /admin.
+  { to: '/admin', label: 'Overview', end: true },
   { to: '/admin/users', label: 'Users' },
   { to: '/admin/quiz-attempts', label: 'Attempts' },
   { to: '/admin/roadmaps', label: 'Roadmaps' },

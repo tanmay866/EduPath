@@ -70,9 +70,12 @@ export const AuthShell = ({ quote, attribution, footLabel = 'EDUPATH', children 
    230px sidebar on surface, content on paper-warm. The 3px left border on nav
    items exists in both states — transparent when inactive — so nothing shifts
    when selection moves. */
-const NavItem = ({ to, children, dark = false }) => (
+const NavItem = ({ to, children, dark = false, end = false }) => (
   <NavLink
     to={to}
+    /* Without `end`, a parent path such as /admin stays lit on every child
+       route, so two items read as selected at once. */
+    end={end}
     style={({ isActive }) => ({
       display: 'block',
       width: '100%',
@@ -142,7 +145,7 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
               {section.label}
             </MicroLabel>
             {section.items.map((item) => (
-              <NavItem key={item.to} to={item.to}>{item.label}</NavItem>
+              <NavItem key={item.to} to={item.to} end={item.end}>{item.label}</NavItem>
             ))}
           </div>
         ))}
@@ -215,7 +218,7 @@ export const AdminShell = ({ items = [], title, chip, action, children }) => (
 
       <nav style={{ flex: 1 }}>
         {items.map((item) => (
-          <NavItem key={item.to} to={item.to} dark>{item.label}</NavItem>
+          <NavItem key={item.to} to={item.to} end={item.end} dark>{item.label}</NavItem>
         ))}
       </nav>
 
