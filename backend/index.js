@@ -19,6 +19,7 @@ import csRoutes from './routes/csRoutes.js';
 import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
 import roadmapRoutes from './routes/roadmapRoutes.js';
 import progressRoutes from './routes/progress.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 
@@ -150,6 +151,7 @@ app.use('/api/auth/verify-otp', otpLimiter);
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/contact', contactRoutes);

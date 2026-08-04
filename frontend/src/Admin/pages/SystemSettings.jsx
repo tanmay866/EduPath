@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  AdminShell, Card, CardHeader, Button, Stepper, Toggle, SegmentedFilter, MicroLabel,
+  AdminShell, Card, CardHeader, Button, Stepper, Toggle, SegmentedFilter,
+  MicroLabel, InlineMessage, Loading, Empty,
 } from '../../design';
 import { adminNav } from '../../design/nav';
+import { getSettings, updateSettings } from '../services/adminService';
+import { useAdminData } from '../useAdminData';
 
 /**
  * Spec §7 Admin · Settings.
@@ -12,6 +15,10 @@ import { adminNav } from '../../design/nav';
  * line changes with the state, then a row with a full-width mono input on
  * surface-field. The footer pairs the primary with a green confirmation note
  * that only appears after saving.
+ *
+ * These are read by the quiz controller before it builds a quiz — the question
+ * count is capped, the session expiry follows the duration, and turning AI
+ * generation off refuses the request. Without that they would be a form.
  */
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
@@ -35,48 +42,81 @@ const Row = ({ title, detail, children, last = false }) => (
 );
 
 const SystemSettings = () => {
-  const [settings, setSettings] = useState({
-    maxQuestions: 10,
-    maxDuration: 30,
-    maxModules: 8,
-    defaultLevel: 'Beginner',
-    enableAI: true,
-    basePrompt: 'Generate structured JSON output only. No explanations.',
-  });
+  const { data, loading, error, reload } = useAdminData(getSettings);
+  const [settings, setSettings] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
-  const handleInputChange = (field, value) => {
+  // The form edits a copy, so an unsaved change is not mistaken for stored state.
+  useEffect(() => { if (data) setSettings(data); }, [data]);
+
+  const change = (field, value) => {
     setSettings((prev) => ({ ...prev, [field]: value }));
     setSaved(false);
+    setSaveError('');
   };
 
-  const handleSave = () => {
-    // No endpoint exists for these yet, so the values live only in this session.
-    console.log('Settings:', settings);
-    setSaved(true);
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError('');
+    try {
+      const stored = await updateSettings({
+        maxQuestions: settings.maxQuestions,
+        maxDuration: settings.maxDuration,
+        maxModules: settings.maxModules,
+        defaultLevel: settings.defaultLevel,
+        enableAI: settings.enableAI,
+        basePrompt: settings.basePrompt,
+      });
+      setSettings(stored);
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading || (!settings && !error)) {
+    return (
+      <AdminShell items={adminNav} title="Settings">
+        <Card><Loading /></Card>
+      </AdminShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminShell items={adminNav} title="Settings">
+        <Card>
+          <Empty action={<Button onClick={reload}>Try again</Button>}>{error}</Empty>
+        </Card>
+      </AdminShell>
+    );
+  }
 
   return (
-    <AdminShell items={adminNav} title="Settings" chip="SAMPLE DATA">
+    <AdminShell items={adminNav} title="Settings">
       <div style={{ maxWidth: 780, margin: '0 auto', width: '100%' }}>
         <Card>
           <CardHeader label="Generation limits" />
 
-          <Row title="Questions per quiz" detail="Caps what the generator will return in one quiz.">
+          <Row title="Questions per quiz" detail="Caps what the generator returns, whatever a learner asks for.">
             <Stepper
               value={settings.maxQuestions}
-              onChange={(v) => handleInputChange('maxQuestions', v)}
+              onChange={(v) => change('maxQuestions', v)}
               min={1}
               max={50}
             />
           </Row>
 
-          <Row title="Quiz duration" detail="Minutes allowed before a quiz auto-submits.">
+          <Row title="Quiz duration" detail="Minutes before a session expires.">
             <Stepper
               value={settings.maxDuration}
-              onChange={(v) => handleInputChange('maxDuration', v)}
+              onChange={(v) => change('maxDuration', v)}
               min={1}
-              max={99}
+              max={180}
               suffix=" min"
             />
           </Row>
@@ -84,7 +124,7 @@ const SystemSettings = () => {
           <Row title="Modules per roadmap" detail="How many stages a generated roadmap may contain.">
             <Stepper
               value={settings.maxModules}
-              onChange={(v) => handleInputChange('maxModules', v)}
+              onChange={(v) => change('maxModules', v)}
               min={1}
               max={30}
             />
@@ -94,7 +134,7 @@ const SystemSettings = () => {
             <SegmentedFilter
               options={LEVELS}
               value={settings.defaultLevel}
-              onChange={(v) => handleInputChange('defaultLevel', v)}
+              onChange={(v) => change('defaultLevel', v)}
               size="lg"
             />
           </Row>
@@ -107,13 +147,13 @@ const SystemSettings = () => {
             title="AI generation"
             detail={
               settings.enableAI
-                ? 'Quizzes and roadmaps are generated on demand.'
-                : 'Generation is off — learners see only the seeded catalogue.'
+                ? 'Quizzes are generated on demand.'
+                : 'Off — quiz generation is refused and learners are told to try later.'
             }
           >
             <Toggle
               checked={settings.enableAI}
-              onChange={(v) => handleInputChange('enableAI', v)}
+              onChange={(v) => change('enableAI', v)}
               label="Enable AI generation"
             />
           </Row>
@@ -124,7 +164,8 @@ const SystemSettings = () => {
             </MicroLabel>
             <input
               value={settings.basePrompt}
-              onChange={(e) => handleInputChange('basePrompt', e.target.value)}
+              onChange={(e) => change('basePrompt', e.target.value)}
+              maxLength={1000}
               style={{
                 width: '100%',
                 padding: '11px 13px',
@@ -140,11 +181,13 @@ const SystemSettings = () => {
           </div>
         </Card>
 
+        {saveError && <InlineMessage tone="error" style={{ marginTop: 22 }}>{saveError}</InlineMessage>}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 22 }}>
-          <Button onClick={handleSave}>Save settings</Button>
+          <Button onClick={handleSave} loading={saving} loadingLabel="Saving…">Save settings</Button>
           {saved && (
             <span style={{ fontSize: 14, color: 'var(--color-green)' }}>
-              Saved for this session — there is no endpoint behind these yet.
+              Saved. New quizzes use these limits.
             </span>
           )}
         </div>

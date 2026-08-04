@@ -3,6 +3,7 @@ import QuizResult from '../models/QuizResult.js';
 import Topic from '../models/Topic.js';
 import huggingFaceService from '../services/huggingFaceService.js';
 import aiService from '../services/aiService.js';
+import Settings from '../models/Settings.js';
 
 
 /**
@@ -223,16 +224,24 @@ export const retryQuiz = async (req, res) => {
     console.log(`📚 Topic: ${topic.name}`);
     console.log(`📊 Difficulty: ${originalResult.difficulty}`);
 
+    const settings = await Settings.current();
+
+    if (settings.enableAI === false) {
+      return res.status(503).json({
+        error: 'Quiz generation is turned off right now. Please try again later.'
+      });
+    }
+
     // Generate new questions using same parameters
     const questions = await huggingFaceService.generateQuizQuestions({
       topic: topic.name,
       difficulty: originalResult.difficulty,
       experienceLevel: originalResult.experienceLevel,
-      questionCount: originalResult.totalQuestions,
+      questionCount: Math.min(originalResult.totalQuestions, settings.maxQuestions),
     });
 
-    // Calculate expiration time (30 minutes per question + 5 min buffer)
-    const totalTimeMinutes = (questions.length * 0.5) + 5;
+    // Expiry follows the configured maximum duration rather than a constant.
+    const totalTimeMinutes = Math.min((questions.length * 0.5) + 5, settings.maxDuration);
     const expiresAt = new Date(Date.now() + totalTimeMinutes * 60 * 1000);
 
     // Create new quiz session
@@ -353,6 +362,19 @@ export const startQuiz = async (req, res) => {
       return res.status(404).json({ error: 'Topic not found' });
     }
 
+    // Admin settings are read here rather than only displayed on the settings
+    // screen — without this the limits are a form, not a setting.
+    const settings = await Settings.current();
+
+    if (settings.enableAI === false) {
+      return res.status(503).json({
+        error: 'Quiz generation is turned off right now. Please try again later.'
+      });
+    }
+
+    const requested = parseInt(questionCount, 10) || 10;
+    const cappedCount = Math.min(requested, settings.maxQuestions);
+
     console.log(`\n${'='.repeat(60)}`);
     console.log(`🎯 Starting AI Quiz Generation`);
     console.log(`${'='.repeat(60)}`);
@@ -360,7 +382,7 @@ export const startQuiz = async (req, res) => {
     console.log(`📚 Topic: ${topic.name}`);
     console.log(`📊 Difficulty: ${difficulty}`);
     console.log(`🎓 Experience: ${experienceLevel}`);
-    console.log(`🔢 Questions: ${questionCount}`);
+    console.log(`🔢 Questions: ${cappedCount}${cappedCount < requested ? ` (capped from ${requested})` : ''}`);
     console.log(`${'='.repeat(60)}\n`);
 
     // Generate questions using Hugging Face AI
@@ -368,11 +390,11 @@ export const startQuiz = async (req, res) => {
       topic: topic.name,
       difficulty,
       experienceLevel,
-      questionCount: parseInt(questionCount),
+      questionCount: cappedCount,
     });
 
-    // Calculate expiration time (30 minutes per question + 5 min buffer)
-    const totalTimeMinutes = (questions.length * 0.5) + 5;
+    // Expiry follows the configured maximum duration rather than a constant.
+    const totalTimeMinutes = Math.min((questions.length * 0.5) + 5, settings.maxDuration);
     const expiresAt = new Date(Date.now() + totalTimeMinutes * 60 * 1000);
 
     // Create quiz session with AI-generated questions

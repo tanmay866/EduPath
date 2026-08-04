@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
   AdminShell, Card, CardHeader, CardFooterNote, TableHead, TableRow, NumCell,
-  SegmentedFilter, Input, Empty,
+  SegmentedFilter, Input, Button, Loading, Empty,
 } from '../../design';
 import { adminNav } from '../../design/nav';
-import { roadmaps as seedRoadmaps } from '../mockData';
 import { shortDate } from '../format';
+import { getRoadmaps } from '../services/adminService';
+import { useAdminData } from '../useAdminData';
 
 /**
  * Spec §7 Admin · Roadmaps.
@@ -13,6 +14,9 @@ import { shortDate } from '../format';
  * Columns `1.2fr 1.2fr 0.6fr 0.9fr 0.7fr` — learner, track, mono weeks, then a
  * progress cell holding an inline 5px bar with the percentage right-aligned in
  * a 34px mono column, and the issued date in mono on the right.
+ *
+ * Progress is counted from the roadmap's own skills, so it moves as the
+ * learner marks things done.
  */
 const COLUMNS = '1.2fr 1.2fr 0.6fr 0.9fr 0.7fr';
 const LEVELS = ['All', 'Beginner', 'Intermediate', 'Advanced'];
@@ -36,9 +40,11 @@ const ProgressCell = ({ value }) => (
 );
 
 const RoadmapHistory = () => {
-  const [roadmaps] = useState(seedRoadmaps);
+  const { data, loading, error, reload } = useAdminData(getRoadmaps);
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState('All');
+
+  const roadmaps = data || [];
 
   const filtered = roadmaps.filter((roadmap) => {
     const term = searchTerm.trim().toLowerCase();
@@ -49,7 +55,7 @@ const RoadmapHistory = () => {
   });
 
   return (
-    <AdminShell items={adminNav} title="Roadmaps" chip="SAMPLE DATA">
+    <AdminShell items={adminNav} title="Roadmaps">
       <Card>
         <CardHeader
           label={
@@ -64,33 +70,45 @@ const RoadmapHistory = () => {
           right={<SegmentedFilter options={LEVELS} value={levelFilter} onChange={setLevelFilter} />}
         />
 
-        <TableHead columns={COLUMNS} align={['left', 'left', 'right', 'left', 'right']}>
-          <span>Learner</span>
-          <span>Track</span>
-          <span>Weeks</span>
-          <span>Progress</span>
-          <span>Issued</span>
-        </TableHead>
-
-        {filtered.length === 0 ? (
-          <Empty>No roadmap matches that search.</Empty>
+        {loading ? (
+          <Loading />
+        ) : error ? (
+          <Empty action={<Button onClick={reload}>Try again</Button>}>{error}</Empty>
         ) : (
-          filtered.map((roadmap) => (
-            <TableRow key={roadmap._id} columns={COLUMNS}>
-              <span style={{ color: 'var(--color-ink)' }}>{roadmap.userName}</span>
-              <span>{roadmap.skill}</span>
-              <NumCell>{roadmap.weeks}</NumCell>
-              <ProgressCell value={roadmap.progress} />
-              <NumCell tone="var(--color-text-4)" size={12.5}>{shortDate(roadmap.createdAt)}</NumCell>
-            </TableRow>
-          ))
-        )}
+          <>
+            <TableHead columns={COLUMNS} align={['left', 'left', 'right', 'left', 'right']}>
+              <span>Learner</span>
+              <span>Track</span>
+              <span>Weeks</span>
+              <span>Progress</span>
+              <span>Issued</span>
+            </TableHead>
 
-        <CardFooterNote>
-          {levelFilter === 'All'
-            ? `${filtered.length} roadmap${filtered.length === 1 ? '' : 's'}, all levels.`
-            : `${filtered.length} of ${roadmaps.length} roadmaps, filtered to ${levelFilter.toLowerCase()}.`}
-        </CardFooterNote>
+            {filtered.length === 0 ? (
+              <Empty>
+                {roadmaps.length === 0
+                  ? 'No roadmap has been generated yet.'
+                  : 'No roadmap matches that search.'}
+              </Empty>
+            ) : (
+              filtered.map((roadmap) => (
+                <TableRow key={roadmap._id} columns={COLUMNS}>
+                  <span style={{ color: 'var(--color-ink)' }}>{roadmap.userName}</span>
+                  <span>{roadmap.skill}</span>
+                  <NumCell>{roadmap.weeks}</NumCell>
+                  <ProgressCell value={roadmap.progress} />
+                  <NumCell tone="var(--color-text-4)" size={12.5}>{shortDate(roadmap.createdAt)}</NumCell>
+                </TableRow>
+              ))
+            )}
+
+            <CardFooterNote>
+              {levelFilter === 'All'
+                ? `${filtered.length} roadmap${filtered.length === 1 ? '' : 's'}, all levels.`
+                : `${filtered.length} of ${roadmaps.length} roadmaps, filtered to ${levelFilter.toLowerCase()}.`}
+            </CardFooterNote>
+          </>
+        )}
       </Card>
     </AdminShell>
   );

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { AdminShell, Card, CardHeader, CardFooterNote, SegmentedFilter } from '../../design';
+import {
+  AdminShell, Card, CardHeader, CardFooterNote, SegmentedFilter, Button, Loading, Empty,
+} from '../../design';
 import { adminNav } from '../../design/nav';
-import { attempts } from '../mockData';
 import { DIFFICULTIES } from '../format';
+import { getAttempts } from '../services/adminService';
+import { useAdminData } from '../useAdminData';
 import AttemptsTable from '../component/AttemptsTable';
 
 /**
@@ -14,21 +17,33 @@ import AttemptsTable from '../component/AttemptsTable';
  */
 const QuizAttempts = () => {
   const [filter, setFilter] = useState('All');
+  const { data, loading, error, reload } = useAdminData(getAttempts);
+
+  const attempts = data || [];
   const rows = filter === 'All' ? attempts : attempts.filter((a) => a.difficulty === filter);
 
   return (
-    <AdminShell items={adminNav} title="Quiz attempts" chip="SAMPLE DATA">
+    <AdminShell items={adminNav} title="Quiz attempts">
       <Card>
         <CardHeader
           label="All attempts"
           right={<SegmentedFilter options={DIFFICULTIES} value={filter} onChange={setFilter} />}
         />
-        <AttemptsTable rows={rows} />
-        <CardFooterNote>
-          {filter === 'All'
-            ? `${rows.length} attempt${rows.length === 1 ? '' : 's'}, all difficulties.`
-            : `${rows.length} of ${attempts.length} attempts, filtered to ${filter.toLowerCase()}.`}
-        </CardFooterNote>
+
+        {loading ? (
+          <Loading />
+        ) : error ? (
+          <Empty action={<Button onClick={reload}>Try again</Button>}>{error}</Empty>
+        ) : (
+          <>
+            <AttemptsTable rows={rows} />
+            <CardFooterNote>
+              {filter === 'All'
+                ? `${rows.length} attempt${rows.length === 1 ? '' : 's'}, all difficulties.`
+                : `${rows.length} of ${attempts.length} attempts, filtered to ${filter.toLowerCase()}.`}
+            </CardFooterNote>
+          </>
+        )}
       </Card>
     </AdminShell>
   );

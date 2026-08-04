@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import {
   AdminShell, Card, CardHeader, CardFooterNote, TableHead, TableRow, NumCell,
-  ActionCell, SegmentedFilter, Button, Input, MicroLabel, Empty,
+  ActionCell, SegmentedFilter, Button, Input, InlineMessage, MicroLabel,
+  Modal, Loading, Empty,
 } from '../../design';
 import { adminNav } from '../../design/nav';
-import { users as seedUsers } from '../mockData';
 import { shortDate } from '../format';
+import { getUsers, toggleUserBlock, deleteUser } from '../services/adminService';
+import { useAdminData } from '../useAdminData';
 
 /**
  * Spec §7 Admin · Users.
@@ -14,19 +16,51 @@ import { shortDate } from '../format';
  * and a segmented filter. Columns `1.2fr 1.4fr 0.7fr 0.7fr 0.8fr`: a name that
  * drops to text-4 when blocked, the address in 13.5px text-2, a mono joined
  * date, a mono status, and right-aligned actions. Footer counts what is shown.
+ *
+ * Blocking flips `isActive` on the account. Deleting takes the person's quiz
+ * results and roadmaps with them, so it asks first.
  */
 const COLUMNS = '1.2fr 1.4fr 0.7fr 0.7fr 0.8fr';
 const STATUSES = ['All', 'Active', 'Blocked'];
 
 const ManageUsers = () => {
-  const [users, setUsers] = useState(seedUsers);
+  const { data, loading, error, reload, setData } = useAdminData(getUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [actionError, setActionError] = useState('');
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [busyId, setBusyId] = useState(null);
 
-  const handleDelete = (id) => setUsers(users.filter((user) => user._id !== id));
+  const users = data || [];
 
-  const handleToggleBlock = (id) =>
-    setUsers(users.map((user) => (user._id === id ? { ...user, isBlocked: !user.isBlocked } : user)));
+  const handleToggleBlock = async (user) => {
+    setActionError('');
+    setBusyId(user._id);
+    try {
+      const updated = await toggleUserBlock(user._id);
+      setData(users.map((u) => (u._id === user._id ? { ...u, isBlocked: updated.isBlocked } : u)));
+    } catch (err) {
+      setActionError(err.message);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    setActionError('');
+    setDeleting(true);
+    try {
+      await deleteUser(pendingDelete._id);
+      setData(users.filter((u) => u._id !== pendingDelete._id));
+      setPendingDelete(null);
+    } catch (err) {
+      setPendingDelete(null);
+      setActionError(err.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const filteredUsers = users.filter((user) => {
     const term = searchTerm.trim().toLowerCase();
@@ -42,7 +76,9 @@ const ManageUsers = () => {
   });
 
   return (
-    <AdminShell items={adminNav} title="Users" chip="SAMPLE DATA">
+    <AdminShell items={adminNav} title="Users">
+      {actionError && <InlineMessage tone="error">{actionError}</InlineMessage>}
+
       <Card>
         <CardHeader
           label={
@@ -57,55 +93,84 @@ const ManageUsers = () => {
           right={<SegmentedFilter options={STATUSES} value={statusFilter} onChange={setStatusFilter} />}
         />
 
-        <TableHead columns={COLUMNS} align={['left', 'left', 'right', 'left', 'right']}>
-          <span>Name</span>
-          <span>Email</span>
-          <span>Joined</span>
-          <span>Status</span>
-          <span>Actions</span>
-        </TableHead>
-
-        {filteredUsers.length === 0 ? (
-          <Empty>No user matches that search.</Empty>
+        {loading ? (
+          <Loading />
+        ) : error ? (
+          <Empty action={<Button onClick={reload}>Try again</Button>}>{error}</Empty>
         ) : (
-          filteredUsers.map((user) => (
-            <TableRow key={user._id} columns={COLUMNS}>
-              <span style={{ color: user.isBlocked ? 'var(--color-text-4)' : 'var(--color-ink)' }}>
-                {user.name}
-              </span>
-              <span style={{ fontSize: 13.5, color: 'var(--color-text-2)' }}>{user.email}</span>
-              <NumCell tone="var(--color-text-4)" size={12.5}>{shortDate(user.createdAt)}</NumCell>
-              <MicroLabel
-                size={11}
-                tracking="0.1em"
-                color={user.isBlocked ? 'var(--color-clay)' : 'var(--color-green)'}
-              >
-                {user.isBlocked ? 'Blocked' : 'Active'}
-              </MicroLabel>
-              <ActionCell>
-                <Button
-                  variant="secondary"
-                  style={{ padding: '7px 13px', fontSize: 13 }}
-                  onClick={() => handleToggleBlock(user._id)}
-                >
-                  {user.isBlocked ? 'Unblock' : 'Block'}
-                </Button>
-                <Button
-                  variant="destructive"
-                  style={{ padding: '7px 13px', fontSize: 13 }}
-                  onClick={() => handleDelete(user._id)}
-                >
-                  Delete
-                </Button>
-              </ActionCell>
-            </TableRow>
-          ))
-        )}
+          <>
+            <TableHead columns={COLUMNS} align={['left', 'left', 'right', 'left', 'right']}>
+              <span>Name</span>
+              <span>Email</span>
+              <span>Joined</span>
+              <span>Status</span>
+              <span>Actions</span>
+            </TableHead>
 
-        <CardFooterNote>
-          {`Showing ${filteredUsers.length} of ${users.length} user${users.length === 1 ? '' : 's'}.`}
-        </CardFooterNote>
+            {filteredUsers.length === 0 ? (
+              <Empty>No user matches that search.</Empty>
+            ) : (
+              filteredUsers.map((user) => (
+                <TableRow key={user._id} columns={COLUMNS}>
+                  <span style={{ color: user.isBlocked ? 'var(--color-text-4)' : 'var(--color-ink)' }}>
+                    {user.name}
+                  </span>
+                  <span style={{ fontSize: 13.5, color: 'var(--color-text-2)' }}>{user.email}</span>
+                  <NumCell tone="var(--color-text-4)" size={12.5}>{shortDate(user.createdAt)}</NumCell>
+                  <MicroLabel
+                    size={11}
+                    tracking="0.1em"
+                    color={user.isBlocked ? 'var(--color-clay)' : 'var(--color-green)'}
+                  >
+                    {user.isBlocked ? 'Blocked' : 'Active'}
+                  </MicroLabel>
+                  <ActionCell>
+                    <Button
+                      variant="secondary"
+                      style={{ padding: '7px 13px', fontSize: 13 }}
+                      loading={busyId === user._id}
+                      loadingLabel="…"
+                      onClick={() => handleToggleBlock(user)}
+                    >
+                      {user.isBlocked ? 'Unblock' : 'Block'}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      style={{ padding: '7px 13px', fontSize: 13 }}
+                      onClick={() => setPendingDelete(user)}
+                    >
+                      Delete
+                    </Button>
+                  </ActionCell>
+                </TableRow>
+              ))
+            )}
+
+            <CardFooterNote>
+              {`Showing ${filteredUsers.length} of ${users.length} user${users.length === 1 ? '' : 's'}.`}
+            </CardFooterNote>
+          </>
+        )}
       </Card>
+
+      <Modal
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        title="Delete this account?"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setPendingDelete(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} loading={deleting} loadingLabel="Deleting…">
+              Delete forever
+            </Button>
+          </>
+        }
+      >
+        {pendingDelete
+          && `${pendingDelete.name} (${pendingDelete.email}) will be removed, along with their quiz results and roadmaps. This cannot be undone.`}
+      </Modal>
     </AdminShell>
   );
 };

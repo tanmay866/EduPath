@@ -10,13 +10,13 @@ import React from 'react';
 /* ── Bar chart ────────────────────────────────────────────────────────────
    220px tall, flex-end, 10px gap. Navy, with the final bar clay when it marks
    the present. */
-export const BarChart = ({ data = [], height = 220, markLast = false, tone = 'navy' }) => {
+export const BarChart = ({ data = [], height = 220, markLast = false, tone = 'navy', maxBarWidth = 90 }) => {
   const max = Math.max(...data.map((d) => Number(d.value) || 0), 1);
   const labelled = new Set([0, Math.floor((data.length - 1) / 2), data.length - 1]);
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height, justifyContent: 'flex-start' }}>
         {data.map((d, i) => {
           const isLast = i === data.length - 1;
           const fill = markLast && isLast ? 'var(--color-clay)' : `var(--color-${tone})`;
@@ -26,6 +26,10 @@ export const BarChart = ({ data = [], height = 220, markLast = false, tone = 'na
               title={`${d.label}: ${d.value}`}
               style={{
                 flex: 1,
+                // Without a cap, one or two data points stretch into slabs the
+                // width of the card, which reads as a filled bar rather than a
+                // chart with little in it.
+                maxWidth: maxBarWidth,
                 height: `${((Number(d.value) || 0) / max) * 100}%`,
                 background: fill,
                 minHeight: 2,
@@ -40,6 +44,7 @@ export const BarChart = ({ data = [], height = 220, markLast = false, tone = 'na
             key={d.label ?? i}
             style={{
               flex: 1,
+              maxWidth: maxBarWidth,
               fontFamily: 'var(--font-mono)',
               fontSize: 10,
               color: 'var(--color-text-4)',
