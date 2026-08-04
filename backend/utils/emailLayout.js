@@ -6,17 +6,31 @@
  *
  * Everything is still inline styles on tables, which is what survives across
  * clients — Outlook renders through Word and drops <style> blocks, and Gmail
- * strips <style> when it clips a long message. The only non-inline addition
- * is a progressive-enhancement <style> block that swaps in the real Newsreader
- * / IBM Plex fonts where a client's WebKit or Gecko engine can fetch them
- * (Apple Mail, most webmail); every element still carries its fallback stack
- * inline, so a client that ignores the <style> block still gets the right
- * serif/sans/mono shape, just not the exact family.
+ * strips <style> when it clips a long message.
  *
- * The logo is built from table cells rather than an image: a linked image is
- * blocked by default in most inboxes until the user clicks "show images", so
- * the mark would be a broken square on first open. Nested tables render
- * immediately, with no network request and nothing to block.
+ * Two non-inline additions ride along in <head>:
+ *
+ * 1. A progressive-enhancement font block that swaps in the real Newsreader /
+ *    IBM Plex fonts where a client's engine can fetch them (Apple Mail, most
+ *    webmail); every element still carries its fallback stack inline, so a
+ *    client that ignores the block still gets the right serif/sans/mono shape.
+ *
+ * 2. A dark-mode override block. The Gmail Android/iOS app repaints colours it
+ *    judges "light" or "dark" on its own — regardless of the color-scheme meta
+ *    tag below, which it does not honour — and tags whatever it touched with a
+ *    data-ogsc/data-ogsb attribute. The app has no dark variant of this design,
+ *    so every colour token here is pinned back to its light value under both
+ *    that Gmail hook and the standard prefers-color-scheme media query (Apple
+ *    Mail, Outlook, other clients that ask nicely instead of repainting
+ *    unasked). This covers the card, borders, text and badges.
+ *
+ * The logo mark is the one element that block does not protect: it started
+ * as table cells (an ink bgcolor holding white bgcolor bars) with the same
+ * data-ogsc override, but the Gmail app pulled the near-black square and the
+ * near-white bars toward the same dark value regardless — either it ignores
+ * that hook or repaints after it applies. It is a hosted image now instead,
+ * since Gmail's dark mode repaints backgrounds and text but does not touch
+ * the pixels of a raster image. See the comment on logoMark() below.
  */
 
 const FONT_DISPLAY = "Georgia, 'Times New Roman', Times, serif";
@@ -30,6 +44,7 @@ const COLOR = {
   surfaceField: '#fbfaf7',
   surfaceAttn: '#faf7f0',
   ink: '#12100e',
+  white: '#ffffff',
   line: '#e3e1d9',
   lineSoft: '#efeee8',
   text2: '#4a4740',
@@ -40,16 +55,49 @@ const COLOR = {
 };
 
 /**
- * Progressive font enhancement. Every inline style still names the fallback
- * stack directly, so clients that strip this block lose nothing but the exact
- * typeface.
+ * Progressive font enhancement plus the dark-mode pin, in one block. Every
+ * inline style still names its real value directly, so a client that strips
+ * this whole block loses only the exact typeface and its dark-mode
+ * protection — never legibility, since the inline values are a complete,
+ * correct light-mode design on their own.
  */
-const FONT_ENHANCEMENT = `
+const HEAD_STYLE = `
   <style>
     @media screen {
       .ep-display { font-family: 'Newsreader', ${FONT_DISPLAY} !important; }
       .ep-sans { font-family: 'IBM Plex Sans', ${FONT_SANS} !important; }
       .ep-mono { font-family: 'IBM Plex Mono', ${FONT_MONO} !important; }
+    }
+    [data-ogsc] .ep-bg-paper, [data-ogsb] .ep-bg-paper { background-color: ${COLOR.paper} !important; }
+    [data-ogsc] .ep-bg-surface, [data-ogsb] .ep-bg-surface { background-color: ${COLOR.surface} !important; }
+    [data-ogsc] .ep-bg-surface-field, [data-ogsb] .ep-bg-surface-field { background-color: ${COLOR.surfaceField} !important; }
+    [data-ogsc] .ep-bg-surface-attn, [data-ogsb] .ep-bg-surface-attn { background-color: ${COLOR.surfaceAttn} !important; }
+    [data-ogsc] .ep-bg-ink, [data-ogsb] .ep-bg-ink { background-color: ${COLOR.ink} !important; }
+    [data-ogsc] .ep-border-line, [data-ogsb] .ep-border-line { border-color: ${COLOR.line} !important; }
+    [data-ogsc] .ep-border-line-soft, [data-ogsb] .ep-border-line-soft { border-color: ${COLOR.lineSoft} !important; }
+    [data-ogsc] .ep-text-ink { color: ${COLOR.ink} !important; }
+    [data-ogsc] .ep-text-2 { color: ${COLOR.text2} !important; }
+    [data-ogsc] .ep-text-3 { color: ${COLOR.text3} !important; }
+    [data-ogsc] .ep-text-4 { color: ${COLOR.text4} !important; }
+    [data-ogsc] .ep-text-white { color: ${COLOR.white} !important; }
+    [data-ogsc] .ep-badge-green { color: ${COLOR.green} !important; border-color: ${COLOR.green} !important; }
+    [data-ogsc] .ep-badge-clay { color: ${COLOR.clay} !important; border-color: ${COLOR.clay} !important; }
+
+    @media (prefers-color-scheme: dark) {
+      .ep-bg-paper { background-color: ${COLOR.paper} !important; }
+      .ep-bg-surface { background-color: ${COLOR.surface} !important; }
+      .ep-bg-surface-field { background-color: ${COLOR.surfaceField} !important; }
+      .ep-bg-surface-attn { background-color: ${COLOR.surfaceAttn} !important; }
+      .ep-bg-ink { background-color: ${COLOR.ink} !important; }
+      .ep-border-line { border-color: ${COLOR.line} !important; }
+      .ep-border-line-soft { border-color: ${COLOR.lineSoft} !important; }
+      .ep-text-ink { color: ${COLOR.ink} !important; }
+      .ep-text-2 { color: ${COLOR.text2} !important; }
+      .ep-text-3 { color: ${COLOR.text3} !important; }
+      .ep-text-4 { color: ${COLOR.text4} !important; }
+      .ep-text-white { color: ${COLOR.white} !important; }
+      .ep-badge-green { color: ${COLOR.green} !important; border-color: ${COLOR.green} !important; }
+      .ep-badge-clay { color: ${COLOR.clay} !important; border-color: ${COLOR.clay} !important; }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />`;
@@ -62,25 +110,27 @@ const preheaderMarkup = (text) => `
       <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${COLOR.paper};opacity:0;">${text}</div>`;
 
 /**
- * A single bar of the logo mark: a nested table whose top row is a
- * transparent spacer and whose bottom row is the coloured bar, so its visible
- * height is exact regardless of what the sibling bars in the same outer row
- * are doing. A shared <td height="7"> next to a <td height="15"> would just
- * have its background stretch to match the taller row — this is the
- * table-email workaround for that.
+ * The Logo primitive from the frontend design system, as a hosted image.
+ *
+ * This used to be nested tables: an ink <td bgcolor> holding three white
+ * <td bgcolor> bars. Gmail's Android/iOS app recolours `bgcolor` in dark
+ * mode using its own heuristic, which treats "near black" and "near white"
+ * as the two ends of the same scale — so the ink square and the white bars
+ * both got pulled toward the same dark value, and the mark disappeared.
+ * A `data-ogsc` override (the documented hook for undoing that) did not
+ * fix it in practice; whatever build of the app rendered this either
+ * ignores that hook or repaints after it applies.
+ *
+ * An image sidesteps the problem rather than fighting it: Gmail's dark mode
+ * repaints backgrounds, borders and text — it does not alter the pixels of
+ * a raster image. The one real cost is that most inboxes block images until
+ * "show images" is tapped, so the wordmark text next to it (a live span, not
+ * part of the image) is what still identifies the sender at first open.
  */
-const bar = (height, maxHeight) => `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:4px;"><tr><td width="4" height="${maxHeight - height}" style="font-size:0;line-height:0;">&nbsp;</td></tr><tr><td width="4" height="${height}" bgcolor="#ffffff" style="font-size:0;line-height:0;">&nbsp;</td></tr></table>`;
+const LOGO_URL = 'https://res.cloudinary.com/dmk1ekxzf/image/upload/v1785860464/edupath/email-assets/logo-mark.png';
 
-/** The Logo primitive from the frontend design system, reproduced in tables. */
-const logoMark = (size = 28) => `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="${size}" height="${size}" bgcolor="${COLOR.ink}" align="center" valign="middle" style="width:${size}px;height:${size}px;">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-                    <td>${bar(7, 15)}</td>
-                    <td width="3"></td>
-                    <td>${bar(11, 15)}</td>
-                    <td width="3"></td>
-                    <td>${bar(15, 15)}</td>
-                  </tr></table>
-                </td></tr></table>`;
+const logoMark = (size = 28) =>
+  `<img src="${LOGO_URL}" width="${size}" height="${size}" alt="EduPath" style="display:block;width:${size}px;height:${size}px;border:0;outline:none;" />`;
 
 /** Logo mark beside the Newsreader wordmark, exactly as it appears in the app header. */
 const wordmark = () => `            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
@@ -88,7 +138,7 @@ const wordmark = () => `            <table role="presentation" cellpadding="0" c
                 <td>${logoMark(28)}</td>
                 <td width="10"></td>
                 <td valign="middle">
-                  <span class="ep-display" style="font-family:${FONT_DISPLAY};font-size:24px;font-weight:400;letter-spacing:-0.01em;color:${COLOR.ink};">EduPath</span>
+                  <span class="ep-display ep-text-ink" style="font-family:${FONT_DISPLAY};font-size:24px;font-weight:400;letter-spacing:-0.01em;color:${COLOR.ink};">EduPath</span>
                 </td>
               </tr>
             </table>`;
@@ -108,11 +158,11 @@ export const layout = ({ preheader = '', eyebrow = '', content = '' }) => `<!DOC
   <meta name="x-apple-disable-message-reformatting" />
   <meta name="color-scheme" content="light" />
   <meta name="supported-color-schemes" content="light" />
-  <title>EduPath</title>${FONT_ENHANCEMENT}
+  <title>EduPath</title>${HEAD_STYLE}
 </head>
 <body style="margin:0;padding:0;background-color:${COLOR.paper};">
 ${preheaderMarkup(preheader)}
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${COLOR.paper};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLOR.paper}" class="ep-bg-paper" style="background-color:${COLOR.paper};">
     <tr>
       <td align="center" style="padding:48px 16px;">
 
@@ -124,8 +174,8 @@ ${wordmark()}
           </tr>
 
           <tr>
-            <td style="background-color:${COLOR.surface};border:1px solid ${COLOR.line};border-radius:0;">
-${eyebrow ? `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:13px 32px;border-bottom:1px solid ${COLOR.line};"><span class="ep-mono" style="font-family:${FONT_MONO};font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:${COLOR.text3};">${eyebrow}</span></td></tr></table>\n` : ''}              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:32px 32px 30px 32px;">
+            <td bgcolor="${COLOR.surface}" class="ep-bg-surface ep-border-line" style="background-color:${COLOR.surface};border:1px solid ${COLOR.line};border-radius:0;">
+${eyebrow ? `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td class="ep-border-line" style="padding:13px 32px;border-bottom:1px solid ${COLOR.line};"><span class="ep-mono ep-text-3" style="font-family:${FONT_MONO};font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:${COLOR.text3};">${eyebrow}</span></td></tr></table>\n` : ''}              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:32px 32px 30px 32px;">
 ${content}
               </td></tr></table>
             </td>
@@ -133,9 +183,9 @@ ${content}
 
           <tr>
             <td style="padding:26px 4px 0 4px;">
-              <span class="ep-sans" style="font-family:${FONT_SANS};font-size:12.5px;line-height:1.6;color:${COLOR.text4};">You received this message because of activity on your EduPath account.</span>
+              <span class="ep-sans ep-text-4" style="font-family:${FONT_SANS};font-size:12.5px;line-height:1.6;color:${COLOR.text4};">You received this message because of activity on your EduPath account.</span>
               <br />
-              <span class="ep-mono" style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${COLOR.text4};">&copy; ${new Date().getFullYear()} EDUPATH</span>
+              <span class="ep-mono ep-text-4" style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${COLOR.text4};">&copy; ${new Date().getFullYear()} EDUPATH</span>
             </td>
           </tr>
         </table>
@@ -148,15 +198,15 @@ ${content}
 
 /** Page heading inside the card — Newsreader, regular weight, ink. */
 export const heading = (text) =>
-  `              <h1 class="ep-display" style="margin:0 0 16px 0;font-family:${FONT_DISPLAY};font-size:26px;line-height:1.3;font-weight:400;color:${COLOR.ink};letter-spacing:-0.015em;">${text}</h1>`;
+  `              <h1 class="ep-display ep-text-ink" style="margin:0 0 16px 0;font-family:${FONT_DISPLAY};font-size:26px;line-height:1.3;font-weight:400;color:${COLOR.ink};letter-spacing:-0.015em;">${text}</h1>`;
 
 /** Body paragraph. */
 export const paragraph = (html) =>
-  `              <p class="ep-sans" style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:15px;line-height:1.65;color:${COLOR.text2};">${html}</p>`;
+  `              <p class="ep-sans ep-text-2" style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:15px;line-height:1.65;color:${COLOR.text2};">${html}</p>`;
 
 /** Smaller, quieter paragraph for caveats and expiry notes. */
 export const subtle = (html) =>
-  `              <p class="ep-sans" style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${COLOR.text4};">${html}</p>`;
+  `              <p class="ep-sans ep-text-4" style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${COLOR.text4};">${html}</p>`;
 
 /**
  * Bulletproof button, styled after the primary Button variant: ink fill,
@@ -166,8 +216,8 @@ export const subtle = (html) =>
  */
 export const button = (label, url) => `              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 26px 0;">
                 <tr>
-                  <td align="center" bgcolor="${COLOR.ink}" style="border-radius:0;">
-                    <a href="${url}" target="_blank" class="ep-sans" style="display:inline-block;padding:13px 28px;font-family:${FONT_SANS};font-size:15px;font-weight:500;color:#ffffff;text-decoration:none;border-radius:0;">${label}</a>
+                  <td align="center" bgcolor="${COLOR.ink}" class="ep-bg-ink" style="background-color:${COLOR.ink};border-radius:0;">
+                    <a href="${url}" target="_blank" class="ep-sans ep-text-white" style="display:inline-block;padding:13px 28px;font-family:${FONT_SANS};font-size:15px;font-weight:500;color:${COLOR.white};text-decoration:none;border-radius:0;">${label}</a>
                   </td>
                 </tr>
               </table>`;
@@ -175,19 +225,19 @@ export const button = (label, url) => `              <table role="presentation" 
 /** The verification code, sized to be read and retyped from a phone. */
 export const codeBlock = (code) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 22px 0;">
                 <tr>
-                  <td align="center" bgcolor="${COLOR.surfaceField}" style="border:1px solid ${COLOR.line};border-radius:0;padding:26px 16px;">
-                    <span class="ep-mono" style="font-family:${FONT_MONO};font-size:34px;font-weight:600;letter-spacing:10px;color:${COLOR.ink};">${code}</span>
+                  <td align="center" bgcolor="${COLOR.surfaceField}" class="ep-bg-surface-field ep-border-line" style="background-color:${COLOR.surfaceField};border:1px solid ${COLOR.line};border-radius:0;padding:26px 16px;">
+                    <span class="ep-mono ep-text-ink" style="font-family:${FONT_MONO};font-size:34px;font-weight:600;letter-spacing:10px;color:${COLOR.ink};">${code}</span>
                   </td>
                 </tr>
               </table>`;
 
 /** Key/value rows, matching the bordered-group Row pattern on Profile and Settings. */
-export const detailRows = (rows) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px 0;border-top:1px solid ${COLOR.lineSoft};">
+export const detailRows = (rows) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="ep-border-line-soft" style="margin:4px 0 22px 0;border-top:1px solid ${COLOR.lineSoft};">
 ${rows
     .map(
       ({ label, value }) => `                <tr>
-                  <td class="ep-sans" style="padding:13px 0;border-bottom:1px solid ${COLOR.lineSoft};font-family:${FONT_SANS};font-size:14px;color:${COLOR.text3};width:40%;">${label}</td>
-                  <td class="ep-sans" style="padding:13px 0;border-bottom:1px solid ${COLOR.lineSoft};font-family:${FONT_SANS};font-size:14px;color:${COLOR.ink};font-weight:500;">${value}</td>
+                  <td class="ep-sans ep-text-3 ep-border-line-soft" style="padding:13px 0;border-bottom:1px solid ${COLOR.lineSoft};font-family:${FONT_SANS};font-size:14px;color:${COLOR.text3};width:40%;">${label}</td>
+                  <td class="ep-sans ep-text-ink ep-border-line-soft" style="padding:13px 0;border-bottom:1px solid ${COLOR.lineSoft};font-family:${FONT_SANS};font-size:14px;color:${COLOR.ink};font-weight:500;">${value}</td>
                 </tr>`
     )
     .join('\n')}
@@ -199,13 +249,13 @@ ${rows
  */
 export const notice = (html) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 4px 0;">
                 <tr>
-                  <td class="ep-sans" bgcolor="${COLOR.surfaceAttn}" style="border:1px solid ${COLOR.line};border-radius:0;padding:15px 18px;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${COLOR.text2};">${html}</td>
+                  <td class="ep-sans ep-bg-surface-attn ep-border-line ep-text-2" bgcolor="${COLOR.surfaceAttn}" style="background-color:${COLOR.surfaceAttn};border:1px solid ${COLOR.line};border-radius:0;padding:15px 18px;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${COLOR.text2};">${html}</td>
                 </tr>
               </table>`;
 
 /** Long URL fallback for clients that will not render the button. */
-export const linkFallback = (url) => `              <p class="ep-sans" style="margin:0 0 4px 0;font-family:${FONT_SANS};font-size:12px;line-height:1.5;color:${COLOR.text4};">If the button does not work, paste this into your browser:</p>
-              <p class="ep-mono" style="margin:0 0 16px 0;font-family:${FONT_MONO};font-size:12px;line-height:1.5;color:${COLOR.text2};word-break:break-all;">${url}</p>`;
+export const linkFallback = (url) => `              <p class="ep-sans ep-text-4" style="margin:0 0 4px 0;font-family:${FONT_SANS};font-size:12px;line-height:1.5;color:${COLOR.text4};">If the button does not work, paste this into your browser:</p>
+              <p class="ep-mono ep-text-2" style="margin:0 0 16px 0;font-family:${FONT_MONO};font-size:12px;line-height:1.5;color:${COLOR.text2};word-break:break-all;">${url}</p>`;
 
 /**
  * Mono outline chip for a status word — green for a completed/positive state,
@@ -213,7 +263,8 @@ export const linkFallback = (url) => `              <p class="ep-sans" style="ma
  */
 export const badge = (label, tone = 'green') => {
   const color = tone === 'clay' ? COLOR.clay : COLOR.green;
-  return `<span class="ep-mono" style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${color};border:1px solid ${color};padding:4px 9px;display:inline-block;">${label}</span>`;
+  const cls = tone === 'clay' ? 'ep-badge-clay' : 'ep-badge-green';
+  return `<span class="ep-mono ${cls}" style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${color};border:1px solid ${color};padding:4px 9px;display:inline-block;">${label}</span>`;
 };
 
 export default { layout, heading, paragraph, subtle, button, codeBlock, detailRows, notice, linkFallback, badge };
