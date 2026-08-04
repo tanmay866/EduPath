@@ -1,140 +1,98 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Brain, ArrowLeft, CheckCircle, Clock, Target } from 'lucide-react';
+import { Card, CardHeader, CardFooterNote, Button, OrdinalRow, MicroLabel, type } from '../../design';
+
+/**
+ * A briefing page for the skills assessment — the same shape as §7
+ * Instructions: a centred 760px card, a Newsreader heading, the facts as a
+ * bordered group, the rules as clay ordinals, and the action in the footer.
+ */
+const FACTS = [
+  { label: 'Format', value: 'Multiple choice' },
+  { label: 'Length', value: '10–15 questions' },
+  { label: 'Time', value: '20–30 min' },
+  { label: 'Pass mark', value: '70%' },
+];
+
+const RULES = [
+  {
+    title: 'The questions are generated for your level',
+    detail: 'Repeating a topic rarely gives you the same set twice, so a retake is a real second attempt.',
+  },
+  {
+    title: 'You get an explanation either way',
+    detail: 'Every answer comes back with the reasoning, whether you got it right or not.',
+  },
+  {
+    title: 'The result feeds your roadmap',
+    detail: 'What you miss becomes a priority in the plan rather than a line in a report you never open.',
+  },
+];
 
 const SkillAssessment = () => {
   const navigate = useNavigate();
 
-  const features = [
-    { icon: CheckCircle, text: 'Comprehensive skill evaluation' },
-    { icon: Clock, text: '20-30 minutes duration' },
-    { icon: Target, text: 'Personalized results and recommendations' },
-  ];
-
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Background Glow Effects */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-purple-600/8 rounded-full blur-3xl pointer-events-none" />
+    <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto' }}>
+        <div style={{ marginBottom: 18 }}>
+          <Button variant="quiet" onClick={() => navigate('/assessment-hub')}>Back to the hub</Button>
+        </div>
 
-      {/* Content */}
-      <div className="relative z-10 pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader label="Skill assessment" />
 
-          {/* Back Button */}
-          <button
-            onClick={() => navigate('/assessment-hub')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group animate-fadeIn"
-          >
-            <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-            <span>Back to Assessment Hub</span>
-          </button>
-
-          {/* Main Card */}
-          <div
-            className="backdrop-blur-xl bg-white/5 rounded-3xl p-10 border border-white/10 shadow-2xl animate-fadeInUp"
-          >
-            {/* Icon */}
-            <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/40">
-              <Brain size={40} strokeWidth={2} />
-            </div>
-
-            {/* Title */}
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
-              Skill Assessment
+          <div style={{ padding: '34px 34px 26px' }}>
+            <h1 style={{ ...type.cardHeading, margin: 0, color: 'var(--color-ink)' }}>
+              Find out where your skills actually are.
             </h1>
-
-            {/* Description */}
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              Analyze your technical skills and discover your strengths and weaknesses with our comprehensive AI-powered assessment.
+            <p style={{ ...type.body, margin: '12px 0 0', maxWidth: 560 }}>
+              An adaptive set of questions across the technical domains in your track. The score is
+              less important than the breakdown — it is what the roadmap is built from.
             </p>
-
-            {/* Features */}
-            <div className="space-y-4 mb-10">
-              {features.map((feature, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 text-gray-300 animate-fadeIn"
-                  style={{ animationDelay: `${0.2 + idx * 0.1}s` }}
-                >
-                  <feature.icon className="text-indigo-400 flex-shrink-0" size={24} />
-                  <span className="text-lg">{feature.text}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Instructions */}
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 mb-8">
-              <h3 className="text-xl font-bold text-white mb-3">What to Expect:</h3>
-              <ul className="space-y-2 text-gray-300">
-                <li className="flex gap-2">
-                  <span className="text-indigo-400">•</span>
-                  <span>Multiple choice questions covering various technical domains</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-indigo-400">•</span>
-                  <span>Real-time feedback on your performance</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-indigo-400">•</span>
-                  <span>Detailed skill analysis and improvement suggestions</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => navigate('/assessment')}
-                className="flex-1 px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-indigo-500/50 hover:scale-105"
-              >
-                Start Assessment
-              </button>
-              <button
-                onClick={() => navigate('/assessment-hub')}
-                className="flex-1 px-8 py-4 backdrop-blur-lg bg-white/5 text-white font-bold rounded-xl hover:bg-white/10 transition-all duration-300 border border-white/20"
-              >
-                Maybe Later
-              </button>
-            </div>
           </div>
 
-        </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--color-line)', borderBottom: '1px solid var(--color-line)' }}>
+            {FACTS.map((fact, i) => (
+              <div
+                key={fact.label}
+                style={{ padding: '18px 22px', borderRight: i === FACTS.length - 1 ? 'none' : '1px solid var(--color-line)' }}
+              >
+                <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-3)" style={{ display: 'block', marginBottom: 8 }}>
+                  {fact.label}
+                </MicroLabel>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15, color: 'var(--color-ink)' }}>
+                  {fact.value}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ padding: '26px 34px 6px' }}>
+            <MicroLabel size={10.5} tracking="0.13em" style={{ display: 'block', marginBottom: 18 }}>
+              Before you start
+            </MicroLabel>
+
+            {RULES.map((rule, i) => (
+              <div key={rule.title} style={{ marginBottom: 20 }}>
+                <OrdinalRow ordinal={String(i + 1).padStart(2, '0')}>
+                  <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>{rule.title}</div>
+                  <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                    {rule.detail}
+                  </p>
+                </OrdinalRow>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ padding: '18px 34px', borderTop: '1px solid var(--color-line)', display: 'flex', gap: 12 }}>
+            <Button onClick={() => navigate('/assessment')}>Start the assessment</Button>
+            <Button variant="secondary" onClick={() => navigate('/assessment-hub')}>Not now</Button>
+          </div>
+
+          <CardFooterNote>You can leave and retake it as often as you like — every attempt is kept.</CardFooterNote>
+        </Card>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out forwards;
-          opacity: 0;
-        }
-
-        .animate-fadeInUp {
-          animation: fadeInUp 0.6s ease-out forwards;
-          opacity: 0;
-        }
-      `}</style>
     </div>
   );
 };

@@ -79,12 +79,16 @@ const VARIANTS = {
   },
 };
 
-/** Disabled and loading share one fill; only the cursor and label differ. */
+/** Disabled and loading share one fill; only the cursor and label differ.
+    The quiet variants have no fill to replace — painting one behind a text
+    link reads as a grey highlight — so they only lose their colour. */
 const INERT = {
   background: '#DAD7CE',
   color: 'var(--color-text-4)',
   border: 'none',
 };
+
+const INERT_QUIET = { color: 'var(--color-text-4)' };
 
 export const Button = ({
   variant = 'primary',
@@ -107,7 +111,7 @@ export const Button = ({
     ...rest_spec,
     // Full-width primaries use 12px vertical padding rather than 13px.
     ...(fullWidth ? { width: '100%', padding: spec.padding.replace('13px', '12px') } : null),
-    ...(inert ? INERT : null),
+    ...(inert ? (variant === 'quiet' || variant === 'quietClay' ? INERT_QUIET : INERT) : null),
     ...(inert ? { cursor: loading ? 'wait' : 'not-allowed' } : null),
     ...(!inert && hovered ? hover : null),
     ...style,

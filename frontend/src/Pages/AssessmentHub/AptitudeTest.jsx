@@ -1,6 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PuzzleIcon, CheckCircle, Clock, Award, XCircle, RotateCcw, Play } from 'lucide-react';
+import {
+  ConfigureStage, InstructionsStage, QuizStage, ResultStage, LoadingStage,
+} from './components/QuizStages';
+
+
+/**
+ * Aptitude test — logical reasoning drawn from a public question bank, run
+ * through the shared four-stage flow in components/QuizStages.
+ */
+const SCREEN = {
+  label: 'Aptitude',
+  title: 'Reasoning under a clock.',
+  intro:
+    'Questions come from a public aptitude bank rather than being generated, so the difficulty is fixed and the same set can come round again. It measures how you think, not what you have memorised.',
+  difficulties: [
+    { value: 'beginner', label: 'Beginner' },
+    { value: 'intermediate', label: 'Intermediate' },
+    { value: 'advanced', label: 'Advanced' },
+  ],
+  rules: [
+    'You get one minute per question. When the clock runs out the test submits itself.',
+    'You can move back and forth and change any answer until you submit.',
+    'Unanswered questions count as wrong, so guess rather than leave one blank.',
+    'Results from this test are not written to your quiz history.',
+  ],
+};
 
 const AptitudeTest = () => {
   const navigate = useNavigate();
@@ -31,6 +56,7 @@ const AptitudeTest = () => {
 
   // Result state
   const [result, setResult] = useState(null);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   // Authentication check
   useEffect(() => {
@@ -94,7 +120,7 @@ const AptitudeTest = () => {
   // Handle starting the quiz
   const handleStartQuiz = async () => {
     if (!agreedToTerms) {
-      alert('Please accept the terms and conditions');
+      setError('Please confirm you have read the rules');
       return;
     }
 
@@ -198,515 +224,94 @@ const AptitudeTest = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Configure Stage
+
+  const answeredCount = answers.filter((a) => a !== null && a !== undefined).length;
+
+  const review = questions.map((question, i) => {
+    const chosen = answers[i];
+    const chosenText = chosen === null || chosen === undefined ? null : question.options[chosen];
+    return {
+      question: question.question,
+      isCorrect: chosenText === question.answer,
+      answer: question.answer,
+    };
+  });
+
   if (stage === 'configure') {
     return (
-      <div className="min-h-screen bg-black w-full relative pt-32 pb-12 px-8 flex flex-col justify-center overflow-hidden">
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 relative z-10 items-center h-full max-h-[600px]">
-          
-          {/* Left Column: Branding (Spans 5 Columns) */}
-          <div className="lg:col-span-5 flex flex-col justify-center h-full">
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mb-6 w-max">
-              <PuzzleIcon size={16} className="animate-pulse" />
-              <span className="text-xs font-bold tracking-widest uppercase">Smart Assessment Engine</span>
-            </div>
-            
-            <h1 className="text-4xl lg:text-5xl font-black text-white mb-5 leading-[1.1] tracking-tight">
-              Evaluate Your <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Core Aptitude</span>
-            </h1>
-            
-            <p className="text-slate-400 text-lg mb-8 font-light max-w-md leading-relaxed hidden md:block">
-              Challenge yourself with our dynamic aptitude tests. Analyze your problem-solving skills and logical reasoning to prepare for your career journey.
-            </p>
-
-            <div className="space-y-4 hidden md:block">
-              {[
-                { icon: "🧠", title: "Logical Reasoning", desc: "Test your analytical thinking" },
-                { icon: "⏱️", title: "Time Management", desc: "Practice under realistic constraints" },
-                { icon: "📈", title: "Performance Stats", desc: "Detailed breakdown of your results" }
-              ].map((f, i) => (
-                <div key={i} className="flex items-center gap-4 group">
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center text-xl group-hover:bg-white/[0.05] group-hover:-translate-y-0.5 transition-all">
-                    {f.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-white font-bold text-sm tracking-wide mb-1">{f.title}</h3>
-                    <p className="text-slate-500 text-xs">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Column: Interactive Configuration (Spans 7 Columns) */}
-          <div className="lg:col-span-7 backdrop-blur-3xl bg-[#090b14]/70 rounded-[2rem] border border-white/5 shadow-2xl p-6 lg:p-8 relative flex flex-col h-full max-h-[550px] justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-8 shrink-0">
-                <h2 className="text-2xl font-bold text-white">Configure Your Quiz</h2>
-                <span className="px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 text-[11px] uppercase tracking-wider font-bold text-slate-400">
-                  Customizable
-                </span>
-              </div>
-
-              <div className="space-y-6 flex-1 pr-2">
-                {/* Difficulty Level */}
-                <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] transition-colors focus-within:border-cyan-500/30">
-                  <label className="block text-sm font-bold text-slate-300 mb-3 tracking-wide">
-                    Difficulty Level
-                  </label>
-                  <select
-                    value={quizConfig.difficulty}
-                    onChange={(e) => setQuizConfig({ ...quizConfig, difficulty: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 hover:bg-white/[0.02] transition-colors appearance-none cursor-pointer"
-                  >
-                    <option value="beginner" className="bg-[#0a0a0a] text-white">Beginner</option>
-                    <option value="intermediate" className="bg-[#0a0a0a] text-white">Intermediate</option>
-                    <option value="advanced" className="bg-[#0a0a0a] text-white">Advanced</option>
-                  </select>
-                </div>
-
-                {/* Number of Questions */}
-                <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] transition-colors focus-within:border-cyan-500/30">
-                  <label className="block text-sm font-bold text-slate-300 mb-3 tracking-wide">
-                    Number of Questions
-                  </label>
-                  <select
-                    value={quizConfig.questionCount}
-                    onChange={(e) => setQuizConfig({ ...quizConfig, questionCount: parseInt(e.target.value) })}
-                    className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50 hover:bg-white/[0.02] transition-colors appearance-none cursor-pointer"
-                  >
-                    <option value="5" className="bg-[#0a0a0a] text-white">5 Questions</option>
-                    <option value="10" className="bg-[#0a0a0a] text-white">10 Questions</option>
-                    <option value="15" className="bg-[#0a0a0a] text-white">15 Questions</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-5 mt-8 border-t border-white/5 flex gap-4 shrink-0">
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-3 rounded-xl font-bold bg-white/5 text-slate-300 hover:bg-white/10 text-sm transition-all w-28"
-              >
-                Back
-              </button>
-              <button
-                onClick={() => setStage('instructions')}
-                className="flex-1 flex items-center justify-between px-6 md:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-500 group bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/40"
-              >
-                <span className="text-sm tracking-wide flex items-center gap-2">
-                  Next Step
-                </span>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-300 bg-white/20">
-                  <Play size={14} className="fill-white text-white translate-x-0.5" />
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ConfigureStage
+        label={SCREEN.label}
+        title={SCREEN.title}
+        intro={SCREEN.intro}
+        difficulties={SCREEN.difficulties}
+        difficulty={quizConfig.difficulty}
+        onDifficultyChange={(v) => setQuizConfig({ ...quizConfig, difficulty: v })}
+        questionCount={quizConfig.questionCount}
+        onQuestionCountChange={(v) => setQuizConfig({ ...quizConfig, questionCount: v })}
+        loading={loading}
+        error={error}
+        onStart={() => { setError(null); setStage('instructions'); }}
+        onBack={() => navigate('/assessment-hub')}
+      />
     );
   }
 
-  // Instructions Stage
   if (stage === 'instructions') {
     return (
-      <div className="min-h-screen bg-black relative flex items-center justify-center pt-28 pb-8 px-4">
-        <div className="max-w-4xl w-full mx-auto relative z-10">
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-5">
-            {/* Header */}
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 bg-cyan-500/20 text-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-cyan-500/40">
-                <PuzzleIcon size={32} strokeWidth={2} />
-              </div>
-              <h1 className="text-2xl font-bold text-white mb-0.5">Aptitude Test</h1>
-              <p className="text-slate-300 text-sm">Assessment Details</p>
-            </div>
-
-            {/* Quiz Details */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-              <div className="bg-white/5 rounded-lg p-3 text-center">
-                <div className="text-xl mb-1">📝</div>
-                <div className="text-slate-400 text-xs">Questions</div>
-                <div className="text-white font-bold text-lg">{quizConfig.questionCount}</div>
-              </div>
-              <div className="bg-white/5 rounded-lg p-3 text-center">
-                <div className="text-xl mb-1">⏱️</div>
-                <div className="text-slate-400 text-xs">Duration</div>
-                <div className="text-white font-bold text-lg">{quizConfig.questionCount} min</div>
-              </div>
-              <div className="bg-white/5 rounded-lg p-3 text-center">
-                <div className="text-xl mb-1">📊</div>
-                <div className="text-slate-400 text-xs">Difficulty</div>
-                <div className="text-white font-bold text-lg capitalize">{quizConfig.difficulty}</div>
-              </div>
-            </div>
-
-            {/* Instructions */}
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4 mb-3">
-              <h2 className="text-base font-semibold text-white mb-2">Instructions</h2>
-              <ul className="space-y-1.5 text-slate-300 text-sm">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span>Read each question carefully before answering</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span>You can navigate between questions freely</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span>Once submitted, you cannot change your answers</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500">✓</span>
-                  <span>The timer will start when you click "Start Quiz"</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-yellow-500">⚠</span>
-                  <span>Do not refresh the page or the quiz will be lost</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Terms Agreement */}
-            <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 text-cyan-600 bg-slate-700 border-slate-600 rounded focus:ring-cyan-500 focus:ring-2"
-                />
-                <span className="text-slate-300 text-sm">
-                  I agree to the terms and conditions. I understand that this quiz is timed and must be completed in one session.
-                </span>
-              </label>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 p-4 bg-red-500/10 border border-red-500 rounded-lg text-red-500">
-                {error}
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <button
-                onClick={() => setStage('configure')}
-                className="flex-1 px-6 py-3 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/20 transition-colors"
-                disabled={loading}
-              >
-                Back
-              </button>
-              <button
-                onClick={handleStartQuiz}
-                disabled={!agreedToTerms || loading}
-                className={`flex-1 px-6 py-3 text-white rounded-lg font-semibold text-base transition-all transform shadow-lg ${
-                  !agreedToTerms || loading
-                    ? 'bg-slate-600 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 hover:scale-[1.02]'
-                }`}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Loading Questions...
-                  </span>
-                ) : (
-                  '🚀 Start Quiz'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <InstructionsStage
+        label={SCREEN.label}
+        title="Before you begin"
+        facts={[
+          { label: 'Questions', value: quizConfig.questionCount },
+          { label: 'Time', value: `${quizConfig.questionCount} min` },
+          { label: 'Pass mark', value: '70%' },
+        ]}
+        rules={SCREEN.rules}
+        agreed={agreedToTerms}
+        onAgreedChange={setAgreedToTerms}
+        onBegin={handleStartQuiz}
+        onBack={() => setStage('configure')}
+      />
     );
   }
 
-  // Quiz Stage
-  if (stage === 'quiz') {
-    const currentQuestion = questions[currentQuestionIndex];
-    const isLowTime = timer < 60; // Less than 1 minute
-
+  if (stage === 'quiz' && questions.length > 0) {
     return (
-      <div className="fixed inset-0 bg-black z-50 overflow-auto pt-4 pb-8 px-4">
-        <div className="max-w-6xl w-full mx-auto relative z-10">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center border border-cyan-500/40">
-                <PuzzleIcon size={20} strokeWidth={2} />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white">Aptitude Test</h1>
-                <p className="text-slate-400 text-sm">Question {currentQuestionIndex + 1} of {questions.length}</p>
-              </div>
-            </div>
-
-            {/* Timer */}
-            <div className={`px-4 py-2 rounded-lg border ${isLowTime ? 'bg-red-900/50 border-red-500/50 animate-pulse' : 'bg-slate-800/50 border-white/10'}`}>
-              <div className="flex items-center gap-2">
-                <Clock size={18} className={isLowTime ? 'text-red-400' : 'text-cyan-400'} />
-                <span className={`font-mono text-lg font-bold ${isLowTime ? 'text-red-400' : 'text-white'}`}>
-                  {formatTime(timer)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full h-2 bg-slate-800 rounded-full mb-6">
-            <div
-              className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-300"
-              style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
-            {/* Question Panel */}
-            <div className="lg:col-span-7">
-              <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6">
-                {/* Question */}
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-white leading-relaxed">
-                    {currentQuestion?.question}
-                  </h2>
-                </div>
-
-                {/* Options */}
-                <div className="space-y-3">
-                  {currentQuestion?.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSelectOption(index)}
-                      className={`w-full p-4 rounded-xl border text-left transition-all duration-200 ${
-                        selectedAnswer === index
-                          ? 'bg-cyan-600/30 border-cyan-500 text-white'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                          selectedAnswer === index
-                            ? 'bg-cyan-500 text-white'
-                            : 'bg-slate-700 text-slate-300'
-                        }`}>
-                          {String.fromCharCode(65 + index)}
-                        </div>
-                        <span className="flex-1">{option}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Navigation Buttons */}
-                <div className="flex gap-4 mt-6">
-                  <button
-                    onClick={handlePrevious}
-                    disabled={currentQuestionIndex === 0}
-                    className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
-                      currentQuestionIndex === 0
-                        ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                        : 'bg-white/10 border border-white/20 text-white hover:bg-white/20'
-                    }`}
-                  >
-                    Previous
-                  </button>
-                  {currentQuestionIndex === questions.length - 1 ? (
-                    <button
-                      onClick={handleSubmit}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-[1.02] shadow-lg"
-                    >
-                      Submit Quiz
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleNext}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all transform hover:scale-[1.02] shadow-lg"
-                    >
-                      Next
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Navigator Panel */}
-            <div className="lg:col-span-3">
-              <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-4">
-                <h3 className="text-sm font-semibold text-slate-300 mb-3">Question Navigator</h3>
-                <div className="grid grid-cols-5 gap-2">
-                  {questions.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setCurrentQuestionIndex(index);
-                        setSelectedAnswer(answers[index]);
-                      }}
-                      className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${
-                        currentQuestionIndex === index
-                          ? 'bg-cyan-500 text-white ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-900'
-                          : answers[index] !== null
-                            ? 'bg-green-600 text-white'
-                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                      }`}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Legend */}
-                <div className="mt-4 space-y-2 text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-cyan-500" />
-                    <span className="text-slate-400">Current</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-green-600" />
-                    <span className="text-slate-400">Answered</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-slate-700" />
-                    <span className="text-slate-400">Not Answered</span>
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  onClick={handleSubmit}
-                  className="w-full mt-4 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg"
-                >
-                  Submit Quiz
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <QuizStage
+        label={SCREEN.label}
+        question={questions[currentQuestionIndex]}
+        index={currentQuestionIndex}
+        total={questions.length}
+        selected={selectedAnswer}
+        onSelect={handleSelectOption}
+        clock={formatTime(timer)}
+        answers={answers}
+        answeredCount={answeredCount}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onSubmit={() => setShowSubmitModal(true)}
+        showSubmitModal={showSubmitModal}
+        onConfirmSubmit={() => { setShowSubmitModal(false); handleSubmit(); }}
+        onCancelSubmit={() => setShowSubmitModal(false)}
+        onQuestionSelect={(i) => { setCurrentQuestionIndex(i); setSelectedAnswer(answers[i]); }}
+      />
     );
   }
 
-  // Result Stage
   if (stage === 'result' && result) {
-    const getGrade = () => {
-      if (result.percentage >= 90) return { grade: 'A+', color: 'text-green-400', bg: 'bg-green-500/20' };
-      if (result.percentage >= 80) return { grade: 'A', color: 'text-green-400', bg: 'bg-green-500/20' };
-      if (result.percentage >= 70) return { grade: 'B', color: 'text-cyan-400', bg: 'bg-cyan-500/20' };
-      if (result.percentage >= 60) return { grade: 'C', color: 'text-yellow-400', bg: 'bg-yellow-500/20' };
-      if (result.percentage >= 50) return { grade: 'D', color: 'text-orange-400', bg: 'bg-orange-500/20' };
-      return { grade: 'F', color: 'text-red-400', bg: 'bg-red-500/20' };
-    };
-
-    const gradeInfo = getGrade();
-
     return (
-      <div className="min-h-screen bg-black relative flex items-center justify-center pt-28 pb-8 px-4">
-        {/* Background Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="max-w-2xl w-full mx-auto relative z-10">
-          <div className="backdrop-blur-xl bg-slate-900/60 rounded-3xl shadow-2xl border border-white/10 p-8">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div className={`w-24 h-24 ${gradeInfo.bg} rounded-full flex items-center justify-center mx-auto mb-4 border border-white/20`}>
-                <Award size={48} className={gradeInfo.color} />
-              </div>
-              <h1 className="text-3xl font-bold text-white mb-2">Quiz Completed!</h1>
-              <p className="text-slate-300">Here's how you performed</p>
-            </div>
-
-            {/* Score Circle */}
-            <div className="flex justify-center mb-8">
-              <div className={`w-40 h-40 ${gradeInfo.bg} rounded-full flex flex-col items-center justify-center border-4 ${gradeInfo.color.replace('text-', 'border-')}`}>
-                <span className={`text-5xl font-bold ${gradeInfo.color}`}>{result.percentage}%</span>
-                <span className="text-slate-400 text-sm">Accuracy</span>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
-                <div className="text-2xl font-bold text-white">{result.total}</div>
-                <div className="text-slate-400 text-sm">Total Questions</div>
-              </div>
-              <div className="bg-green-500/10 rounded-xl p-4 text-center border border-green-500/20">
-                <div className="text-2xl font-bold text-green-400 flex items-center justify-center gap-1">
-                  <CheckCircle size={20} />
-                  {result.correct}
-                </div>
-                <div className="text-slate-400 text-sm">Correct</div>
-              </div>
-              <div className="bg-red-500/10 rounded-xl p-4 text-center border border-red-500/20">
-                <div className="text-2xl font-bold text-red-400 flex items-center justify-center gap-1">
-                  <XCircle size={20} />
-                  {result.wrong}
-                </div>
-                <div className="text-slate-400 text-sm">Wrong</div>
-              </div>
-              <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
-                <div className="text-2xl font-bold text-slate-300">{result.unanswered}</div>
-                <div className="text-slate-400 text-sm">Unanswered</div>
-              </div>
-            </div>
-
-            {/* Score Summary */}
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 mb-8">
-              <h3 className="text-lg font-semibold text-white mb-4">Performance Summary</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Score</span>
-                  <span className="text-white font-bold">{result.correct} / {result.total}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Accuracy</span>
-                  <span className="text-white font-bold">{result.percentage}%</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Grade</span>
-                  <span className={`font-bold ${gradeInfo.color}`}>{gradeInfo.grade}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Time Taken</span>
-                  <span className="text-white font-bold">{Math.floor(result.timeTaken / 60)}m {result.timeTaken % 60}s</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleRestart}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all transform hover:scale-[1.02] shadow-lg"
-              >
-                <RotateCcw size={20} />
-                Try Again
-              </button>
-              <button
-                onClick={() => navigate('/assessment-hub')}
-                className="flex-1 px-6 py-4 bg-white/10 border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all"
-              >
-                Back to Hub
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ResultStage
+        label={SCREEN.label}
+        result={result}
+        review={review}
+        formatTime={formatTime}
+        onRetry={handleRestart}
+        onDone={() => navigate('/assessment-hub')}
+      />
     );
   }
 
-  // Fallback
-  return (
-    <div className="flex min-h-screen bg-black items-center justify-center">
-      <div className="text-white text-xl">Loading...</div>
-    </div>
-  );
+  return <LoadingStage label={loading ? 'Loading questions' : 'Loading'} />;
 };
 
 export default AptitudeTest;
