@@ -34,15 +34,11 @@ class HuggingFaceService {
             // Create the prompt
             const prompt = createQuizPrompt({ topic, difficulty, experienceLevel, questionCount });
 
-            // Generate content with retry logic
+            // Generate content with retry logic — validation runs inside this,
+            // so a bad set (e.g. two options marked correct) gets the same
+            // retry-with-backoff treatment as a parse or API failure instead
+            // of failing the whole request on the first attempt.
             const questions = await this.generateWithRetry(prompt, 3);
-
-            // Validate question structure
-            const validationErrors = validateQuestionStructure(questions);
-            if (validationErrors.length > 0) {
-                console.error('❌ Validation errors:', validationErrors);
-                throw new Error(`Generated questions failed validation: ${validationErrors.join(', ')}`);
-            }
 
             console.log(`✅ Successfully generated ${questions.length} valid questions`);
             return questions;
@@ -93,6 +89,13 @@ class HuggingFaceService {
 
                 // Parse JSON response
                 const questions = this.parseResponse(content);
+
+                // Validate question structure
+                const validationErrors = validateQuestionStructure(questions);
+                if (validationErrors.length > 0) {
+                    throw new Error(`Generated questions failed validation: ${validationErrors.join(', ')}`);
+                }
+
                 return questions;
 
             } catch (error) {
