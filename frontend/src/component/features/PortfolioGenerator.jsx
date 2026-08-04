@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  TemplateEditorial,
   Template1, Template2, Template3, Template4, Template5,
   Template6, Template7, Template8, Template9, Template10
 } from '../templates';
@@ -11,6 +12,7 @@ import {
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 
 const TEMPLATES_MAP = {
+  editorial: TemplateEditorial,
   template1: Template1, template2: Template2, template3: Template3,
   template4: Template4, template5: Template5, template6: Template6,
   template7: Template7, template8: Template8, template9: Template9,
@@ -18,9 +20,12 @@ const TEMPLATES_MAP = {
 };
 
 // The gradient and ring classes the picker used to render with are gone — the
-// EduPath chrome around the picker follows the spec even though the templates
+// EduPath chrome around the picker follows the spec even though the themes
 // themselves stay colourful, since a template is the user's own site.
+// Editorial leads the list and is the default: it is the published portfolio
+// the spec describes, and the ten themes remain for anyone who wants one.
 const TEMPLATE_META = [
+  { key: 'editorial', name: 'Editorial', desc: 'The EduPath house style' },
   { key: 'template1', name: 'Ocean Blue', desc: 'Professional blue' },
   { key: 'template2', name: 'Sunset Orange', desc: 'Creative warm orange' },
   { key: 'template3', name: 'Forest Green', desc: 'Natural green' },
@@ -55,7 +60,7 @@ function PortfolioGenerator() {
     experience: [], education: [], skills: [], projects: [],
     certifications: [], achievements: []
   });
-  const [selectedTemplate, setSelectedTemplate] = useState('template1');
+  const [selectedTemplate, setSelectedTemplate] = useState('editorial');
 
   // Deployed portfolio data
   const [deployedPortfolio, setDeployedPortfolio] = useState(null);
@@ -259,7 +264,7 @@ function PortfolioGenerator() {
       experience: [], education: [], skills: [], projects: [],
       certifications: [], achievements: []
     });
-    setSelectedTemplate('template1');
+    setSelectedTemplate('editorial');
     setResumeFile(null);
     setResumeParsed(false);
     setPortfolioLink('');
@@ -869,7 +874,7 @@ function PortfolioGenerator() {
                   keeps its own colours inside this frame. */}
               <div style={{ maxHeight: 560, overflowY: 'auto', borderTop: '1px solid var(--color-line)' }}>
                 {(() => {
-                  const TemplateComp = TEMPLATES_MAP[selectedTemplate] || Template1;
+                  const TemplateComp = TEMPLATES_MAP[selectedTemplate] || TemplateEditorial;
                   return <TemplateComp data={portfolioData} />;
                 })()}
               </div>
