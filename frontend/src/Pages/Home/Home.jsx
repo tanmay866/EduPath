@@ -1,499 +1,484 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom';
-import EduPathLogo from '../../component/EduPathLogo';
-import GlowingPathSection from './components/GlowingPathSection';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Card, Button, MicroLabel, StatusBox, LabelledBar, type } from '../../design';
+import { TRACKS } from './tracks';
 
-const FEATURES = [
+/**
+ * Spec §7 Marketing · landing, following the composition in
+ * design_handoff_edupath_redesign/EduPath - New Design.dc.html: a hero holding
+ * a live roadmap console, a six-track typographic index, a four-step strip, an
+ * outcomes section, an ink quote band and a closing call to action.
+ *
+ * Sections are divided by rules, never by a change of background, so the page
+ * reads as one sheet. The console is a still — it shows the roadmap screen a
+ * learner actually gets, so its numbers stay consistent with that screen
+ * rather than animating.
+ */
+
+const SectionHeading = ({ children, size = 38, style }) => (
+  <h2
+    style={{
+      fontFamily: 'var(--font-display)',
+      fontSize: size,
+      fontWeight: 400,
+      letterSpacing: '-0.025em',
+      lineHeight: 1.1,
+      margin: 0,
+      color: 'var(--color-ink)',
+      ...style,
+    }}
+  >
+    {children}
+  </h2>
+);
+
+const HeroStat = ({ value, label }) => (
+  <div>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, color: 'var(--color-ink)', lineHeight: 1 }}>
+      {value}
+    </div>
+    <div style={{ fontSize: 12.5, color: 'var(--color-text-4)', marginTop: 6 }}>{label}</div>
+  </div>
+);
+
+/* ── The roadmap console in the hero ────────────────────────────────────── */
+const CONSOLE_WEEKS = [38, 52, 44, 70, 61, 80, 47];
+const CONSOLE_TOTAL = 18;
+
+const ConsoleCell = ({ value, unit, label, tone }) => (
+  <div style={{ padding: '16px 18px', borderRight: '1px solid var(--color-line)' }}>
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 23, color: tone || 'var(--color-ink)', lineHeight: 1 }}>
+      {value}
+      {unit && <span style={{ fontSize: 13, color: 'var(--color-text-4)' }}>{unit}</span>}
+    </div>
+    <div style={{ fontSize: 11, color: 'var(--color-text-4)', marginTop: 5 }}>{label}</div>
+  </div>
+);
+
+const ConsoleRow = ({ status, title, tag, tone, current = false }) => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: current ? '12px 20px' : '11px 0',
+      margin: current ? '0 -20px' : 0,
+      background: current ? 'var(--color-surface-attn)' : 'transparent',
+      borderTop: current ? '1px solid var(--color-line)' : 'none',
+      borderBottom: `1px solid ${current ? 'var(--color-line)' : 'var(--color-line-soft)'}`,
+    }}
+  >
+    <StatusBox status={status} size={8} />
+    <span style={{ flex: 1, fontSize: 13.5, fontWeight: current ? 600 : 400, color: tone || 'var(--color-ink)' }}>
+      {title}
+    </span>
+    <MicroLabel size={11} tracking="0.06em" color={tone || 'var(--color-green)'}>{tag}</MicroLabel>
+  </div>
+);
+
+const RoadmapConsole = () => (
+  <div style={{ padding: 36, background: 'var(--color-paper)', borderLeft: '1px solid var(--color-line)' }}>
+    <Card style={{ borderColor: 'var(--color-line-btn)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          padding: '14px 20px',
+          borderBottom: '1px solid var(--color-line)',
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)">Roadmap</MicroLabel>
+          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink)' }}>
+            MERN Developer · 18 weeks
+          </span>
+        </span>
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: 'var(--color-green)',
+            border: '1px solid var(--color-green)',
+            padding: '3px 8px',
+          }}
+        >
+          ON TRACK
+        </span>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--color-line)' }}>
+        <ConsoleCell value="12" unit="/34" label="skills done" />
+        <ConsoleCell value="6.5" unit="h" label="this week" />
+        <ConsoleCell value="23" unit="d" label="streak" />
+        <ConsoleCell value="14 Jul" label="projected" tone="var(--color-green)" />
+      </div>
+
+      <div style={{ padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 88, marginBottom: 8 }}>
+          {CONSOLE_WEEKS.map((h, i) => (
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                height: `${h}%`,
+                background: i === CONSOLE_WEEKS.length - 1 ? 'var(--color-amber)' : 'var(--color-green)',
+              }}
+            />
+          ))}
+          {Array.from({ length: CONSOLE_TOTAL - CONSOLE_WEEKS.length - 4 }).map((_, i) => (
+            <div key={`e${i}`} style={{ flex: 1, height: 2, background: 'var(--color-line)' }} />
+          ))}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 10,
+            color: 'var(--color-text-4)',
+            paddingBottom: 18,
+            borderBottom: '1px solid var(--color-line)',
+          }}
+        >
+          <span>W1</span><span>W6</span><span>W12</span><span>W18</span>
+        </div>
+
+        <ConsoleRow status="done" title="JavaScript · async & modules" tag="Done" />
+        <ConsoleRow status="done" title="React · state & effects" tag="Done" />
+        <ConsoleRow
+          status="current"
+          title="Express · REST & middleware"
+          tag="Week 7 · 58%"
+          tone="var(--color-amber)"
+          current
+        />
+        <ConsoleRow status="future" title="MongoDB · schema design" tag="Week 9" tone="var(--color-text-4)" />
+        <ConsoleRow status="future" title="Auth · JWT & sessions" tag="Week 11" tone="var(--color-text-4)" />
+      </div>
+    </Card>
+
+    <p style={{ margin: '14px 0 0', fontSize: 12, lineHeight: 1.55, color: 'var(--color-text-4)' }}>
+      A roadmap at week 7 of 18 — the screen you get after the assessment, not an illustration of one.
+    </p>
+  </div>
+);
+
+/* ── Steps ──────────────────────────────────────────────────────────────── */
+const STEPS = [
   {
-    id: 0,
-    title: 'Skill Assessment',
-    desc: 'Identify your current level with our AI-powered quiz engine.',
-    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-    color: 'indigo',
-    video: 'https://res.cloudinary.com/dmk1ekxzf/video/upload/v1772564071/How_to_Give_Assesement_r8rhac.mp4',
+    kicker: '01 — Assess',
+    title: 'Four instruments',
+    body: 'An adaptive skills quiz, a timed aptitude test, CS fundamentals and a spoken AI mock interview — one honest profile.',
   },
   {
-    id: 1,
-    title: 'AI Roadmap',
-    desc: 'Get a personalised learning path generated for your goals.',
-    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>,
-    color: 'cyan',
-    video: null,
+    kicker: '02 — Plan',
+    title: 'Dependency sorted',
+    body: 'Nothing is scheduled before its prerequisite is done, and nothing is scheduled into hours you do not have.',
   },
   {
-    id: 2,
-    title: 'Resume Analysis',
-    desc: 'Upload your resume and receive AI-powered improvement tips.',
-    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
-    color: 'purple',
-    video: 'https://res.cloudinary.com/dmk1ekxzf/video/upload/v1772564129/How_to_Upload_Resume_twlaai.mp4',
+    kicker: '03 — Apply',
+    title: 'Scored, not guessed',
+    body: 'Your resume is checked against the job description you paste in, and told what is missing from it.',
   },
   {
-    id: 3,
-    title: 'Progress Tracking',
-    desc: 'Visualise your growth with scores, streaks and analytics.',
-    icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
-    color: 'emerald',
-    video: 'https://res.cloudinary.com/dmk1ekxzf/video/upload/v1772564003/Progress_Traking_wj1etg.mp4',
+    kicker: '04 — Ship',
+    title: 'A live URL',
+    body: 'Your portfolio deploys in one click, built from the projects you actually finished on the roadmap.',
   },
 ];
 
-const COLORS = {
-  indigo: { bg: 'bg-indigo-500/15', border: 'border-indigo-500/40', title: 'text-indigo-400', icon: 'bg-indigo-500/20 border border-indigo-500/40 text-indigo-400', dot: 'bg-indigo-400', glow: 'shadow-indigo-500/20' },
-  cyan: { bg: 'bg-cyan-500/15', border: 'border-cyan-500/40', title: 'text-cyan-400', icon: 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-400', dot: 'bg-cyan-400', glow: 'shadow-cyan-500/20' },
-  purple: { bg: 'bg-purple-500/15', border: 'border-purple-500/40', title: 'text-purple-400', icon: 'bg-purple-500/20 border border-purple-500/40 text-purple-400', dot: 'bg-purple-400', glow: 'shadow-purple-500/20' },
-  emerald: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', title: 'text-emerald-400', icon: 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400', dot: 'bg-emerald-400', glow: 'shadow-emerald-500/20' },
-};
+const GAP_REPORT = [
+  { label: 'Frontend', value: 88, tone: 'navy' },
+  { label: 'Backend', value: 62, tone: 'navy' },
+  { label: 'Databases', value: 31, tone: 'clay' },
+  { label: 'Testing', value: 18, tone: 'clay' },
+];
 
-const Home = () => {
-
-  const navigate = useNavigate();
-
-  const [activeFeature, setActiveFeature] = useState(0);
-  const [videoVisible, setVideoVisible] = useState(true);
-  const [typedText, setTypedText] = useState('');
-  const [cursorVisible, setCursorVisible] = useState(true);
-  const [heroReady, setHeroReady] = useState(false);
-  const videoRef = useRef(null);
-
-  const HERO_LINE1 = 'Your Personalized Path';
-  const HERO_LINE2 = 'to Success';
-  const FULL_TEXT = HERO_LINE1 + '\n' + HERO_LINE2;
-
-  // Typewriter effect on mount
-  useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setTypedText(FULL_TEXT.slice(0, i));
-      if (i >= FULL_TEXT.length) {
-        clearInterval(interval);
-        setHeroReady(true);
-      }
-    }, 48);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Blinking cursor (stops when typing finishes)
-  useEffect(() => {
-    if (heroReady) {
-      setCursorVisible(false);
-      return;
-    }
-    const id = setInterval(() => setCursorVisible(v => !v), 530);
-    return () => clearInterval(id);
-  }, [heroReady]);
-
-  const handleFeatureClick = (id) => {
-    if (id === activeFeature) return;
-    setVideoVisible(false);
-    setTimeout(() => {
-      setActiveFeature(id);
-      setVideoVisible(true);
-    }, 280);
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-    document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
-
-
-  return (
-    <div className="bg-black font-sans">
-
-      {/* SECTION 1: HERO */}
-      <section data-section="0" className="min-h-svh flex flex-col justify-center items-center px-4 text-center relative overflow-hidden">
-        {/* Glow blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-20 right-1/4 w-64 h-64 bg-violet-600/8 rounded-full blur-3xl pointer-events-none" />
-
-        {/* All hero content sits above the canvas */}
-        <div className="relative z-10 flex flex-col items-center text-center">
-          {/* EduPath logo badge — fades in with buttons after typing */}
-          <div
-            style={{
-              opacity: heroReady ? 1 : 0,
-              transform: heroReady ? 'translateY(0)' : 'translateY(24px)',
-              transition: 'opacity 0.7s ease 0.55s, transform 0.7s ease 0.55s',
-            }}
-            className="mb-8"
-          >
-            <EduPathLogo size={32} showText={true} fontSize={18} />
-          </div>
-
-          {/* Typewriter heading — Antigravity style */}
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight min-h-[3.5em] md:min-h-[2.8em]">
-            {(() => {
-              const parts = typedText.split('\n');
-              return (
-                <>
-                  <span>{parts[0]}</span>
-                  {parts[1] !== undefined && (
-                    <>
-                      <br />
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">
-                        {parts[1]}
-                      </span>
-                    </>
-                  )}
-                  {/* Blinking cursor — hidden once typing completes */}
-                  {!heroReady && (
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        width: '3px',
-                        height: '0.85em',
-                        background: 'rgb(99 102 241)',
-                        marginLeft: '4px',
-                        verticalAlign: 'middle',
-                        borderRadius: '2px',
-                        opacity: cursorVisible ? 1 : 0,
-                        transition: 'opacity 0.1s',
-                      }}
-                    />
-                  )}
-                </>
-              );
-            })()}
-          </h1>
-
-          <p
-            className="mt-6 text-lg md:text-xl text-gray-300 max-w-3xl"
-            style={{
-              opacity: heroReady ? 1 : 0,
-              transform: heroReady ? 'translateY(0)' : 'translateY(20px)',
-              transition: 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s',
-            }}
-          >
-            Learn Smarter, Grow Faster with our AI-powered personalized learning platform
-          </p>
-
-          {/* Buttons — fade + slide in from below after typing done */}
-          <div
-            className="flex flex-col sm:flex-row gap-4 mt-8"
-            style={{
-              opacity: heroReady ? 1 : 0,
-              transform: heroReady ? 'translateY(0)' : 'translateY(28px)',
-              transition: 'opacity 0.7s ease 0.35s, transform 0.7s ease 0.35s',
-            }}
-          >
-            <button
-              className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
-              onClick={() => navigate('/assessment')}
-            >
-              Skill Assessment →
-            </button>
-            <button
-              className="backdrop-blur-lg bg-white/5 text-white px-8 py-4 rounded-xl font-bold border border-white/15 hover:bg-white/10 hover:border-white/30 hover:scale-105 transition-all duration-300 cursor-pointer"
-              onClick={() => navigate('/services')}
-            >
-              Explore EduPath
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section data-section="1" className="py-20 px-6 relative z-10 bg-black overflow-hidden">
-        {/* Glow blobs */}
-        <div className="absolute -left-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -right-20 top-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-6xl mx-auto text-center">
-
-          <h2 data-animate className="text-3xl md:text-5xl font-bold text-white mb-4">How It Works</h2>
-          <p data-animate style={{ transitionDelay: '0.1s' }} className="text-slate-500 mb-16">Three simple steps to transform your career</p>
-
-          {/* Grid Container for 3 Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            {/* Card 1 */}
-            <div data-animate style={{ transitionDelay: '0s' }} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-blue-500/50 shadow-2xl hover:shadow-blue-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
-              <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">1</div>
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 text-blue-400 font-bold text-xl border border-blue-500/30 group-hover:border-blue-500/60 transition-all">◎</div>
-                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-blue-400 transition-colors">Quick Assessment</h3>
-                <p className="text-slate-300 text-sm leading-relaxed">2-5 min career assessment to identify your current skills and goals</p>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div data-animate style={{ transitionDelay: '0.15s' }} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-emerald-500/50 shadow-2xl hover:shadow-emerald-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
-              <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">2</div>
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 text-emerald-400 font-bold text-xl border border-emerald-500/30 group-hover:border-emerald-500/60 transition-all">↗</div>
-                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-emerald-400 transition-colors">Personalized Path</h3>
-                <p className="text-slate-300 text-sm leading-relaxed">Get a custom learning roadmap with skills timeline and milestones</p>
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div data-animate style={{ transitionDelay: '0.3s' }} className="relative backdrop-blur-lg bg-white/5 p-8 rounded-2xl border border-white/10 hover:border-indigo-500/50 shadow-2xl hover:shadow-indigo-500/30 text-left transition-all duration-300 hover:transform hover:scale-105 group">
-              <div className="absolute -top-4 -left-4 w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-xl z-20">3</div>
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-indigo-600/20 backdrop-blur-sm rounded-lg flex items-center justify-center mb-6 text-indigo-400 font-bold text-xl border border-indigo-500/30 group-hover:border-indigo-500/60 transition-all">🛡</div>
-                <h3 className="text-xl font-bold mb-2 text-white group-hover:text-indigo-400 transition-colors">Verified Providers</h3>
-                <p className="text-slate-300 text-sm leading-relaxed">Access courses from trusted platforms with transparent policies</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION: Feature Showcase */}
-      <section data-section="2" className="py-24 px-6 relative z-10 bg-black overflow-hidden">
-        {/* Glow blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] bg-cyan-600/8 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-indigo-600/8 rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-6xl mx-auto">
-          {/* Heading */}
-          <div className="text-center mb-14">
-            <div data-animate className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-semibold tracking-widest uppercase mb-5" style={{ backdropFilter: 'blur(8px)' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400">Explore Features</span>
-            </div>
-            <h2 data-animate style={{ transitionDelay: '0.05s' }} className="text-3xl md:text-5xl font-bold text-white mb-4">
-              Everything You Need to
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-400 to-emerald-400"> Grow Faster</span>
-            </h2>
-            <p data-animate style={{ transitionDelay: '0.1s' }} className="text-slate-500 max-w-xl mx-auto">
-              Click a feature to see it in action
-            </p>
-          </div>
-
-          {/* Two-column layout */}
-          <div data-animate style={{ transitionDelay: '0.15s' }} className="flex flex-col lg:flex-row gap-6 items-start">
-
-            {/* Left — Feature List */}
-            <div className="flex flex-col gap-3 lg:w-[340px] w-full flex-shrink-0">
-              {FEATURES.map((f) => {
-                const active = activeFeature === f.id;
-                const c = COLORS[f.color];
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => handleFeatureClick(f.id)}
-                    className={`text-left w-full rounded-2xl border p-5 transition-all duration-300 backdrop-blur-lg ${active
-                      ? `${c.bg} ${c.border} shadow-xl ${c.glow}`
-                      : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/8'
-                      }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={`mt-0.5 w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${active ? c.icon : 'bg-white/10 border-white/20 text-gray-400'
-                        }`}>
-                        {f.icon}
-                      </div>
-                      <div>
-                        <div className={`font-semibold text-base transition-colors duration-300 ${active ? c.title : 'text-white'
-                          }`}>{f.title}</div>
-                        <div className="text-gray-400 text-sm mt-1 leading-relaxed">{f.desc}</div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Right — Video Preview */}
-            <div className="flex-1 w-full">
-              {/* Device frame */}
-              <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-slate-900/60 backdrop-blur-xl shadow-2xl">
-                {/* Browser bar */}
-                <div className="flex items-center gap-2 px-4 py-3 bg-slate-900/80 border-b border-white/10">
-                  <span className="w-3 h-3 rounded-full bg-red-500/70"></span>
-                  <span className="w-3 h-3 rounded-full bg-yellow-500/70"></span>
-                  <span className="w-3 h-3 rounded-full bg-green-500/70"></span>
-                  <div className="ml-3 flex-1 bg-white/5 border border-white/10 rounded-md px-3 py-1 text-xs text-gray-500">
-                    localhost:5173 — {FEATURES[activeFeature].title}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-400 border border-white/10 rounded-full px-2.5 py-1">
-                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${COLORS[FEATURES[activeFeature].color].dot}`}></span>
-                    Live Demo
-                  </div>
-                </div>
-
-                {/* Video */}
-                <div className="relative aspect-video overflow-hidden">
-                  <div
-                    style={{
-                      opacity: videoVisible ? 1 : 0,
-                      transform: videoVisible ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(8px)',
-                      transition: 'opacity 0.3s ease, transform 0.3s ease',
-                      width: '100%',
-                      height: '100%',
-                    }}
-                  >
-                    {FEATURES[activeFeature].video ? (
-                      <>
-                        <video
-                          ref={videoRef}
-                          key={FEATURES[activeFeature].video}
-                          src={FEATURES[activeFeature].video}
-                          autoPlay
-                          muted
-                          loop
-                          playsInline
-                          disablePictureInPicture
-                          className="w-full h-full object-cover pointer-events-none"
-                        />
-                        <div className={`absolute bottom-3 left-3 text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-md border flex items-center gap-2 ${COLORS[FEATURES[activeFeature].color].bg} ${COLORS[FEATURES[activeFeature].color].border} ${COLORS[FEATURES[activeFeature].color].title}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${COLORS[FEATURES[activeFeature].color].dot}`} />
-                          <span>{FEATURES[activeFeature].title}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
-
-                        {/* Grid pattern */}
-                        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-
-                        {/* Cyan glow blobs */}
-                        <div className="absolute top-1/4 left-1/4 w-56 h-56 rounded-full blur-3xl opacity-10 bg-cyan-400" />
-                        <div className="absolute bottom-1/4 right-1/4 w-40 h-40 rounded-full blur-3xl opacity-10 bg-indigo-500" />
-
-                        {/* Fake roadmap UI preview */}
-                        <div className="relative z-10 w-full max-w-sm px-6 flex flex-col gap-3">
-
-                          {/* Title row */}
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400">
-                                {FEATURES[activeFeature].icon}
-                              </div>
-                              <span className="text-white font-semibold text-sm">Your AI Roadmap</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                              Coming Soon
-                            </div>
-                          </div>
-
-                          {/* Roadmap steps */}
-                          {[
-                            { label: 'HTML & CSS Basics', pct: 100, done: true },
-                            { label: 'JavaScript Fundamentals', pct: 72, done: false },
-                            { label: 'React & Component Design', pct: 30, done: false },
-                            { label: 'Node.js & REST APIs', pct: 0, done: false },
-                          ].map((step, i) => (
-                            <div key={i} className="flex items-center gap-3">
-                              {/* dot + line */}
-                              <div className="flex flex-col items-center flex-shrink-0">
-                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${step.done ? 'bg-cyan-500 border-cyan-400' : step.pct > 0 ? 'bg-cyan-500/20 border-cyan-500/60' : 'bg-slate-700 border-slate-600'}`}>
-                                  {step.done && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                                </div>
-                                {i < 3 && <div className={`w-px h-5 mt-0.5 ${step.done ? 'bg-cyan-500/50' : 'bg-slate-700'}`} />}
-                              </div>
-                              {/* content */}
-                              <div className="flex-1 pb-2">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className={`text-xs font-medium ${step.done ? 'text-cyan-400' : step.pct > 0 ? 'text-white' : 'text-slate-500'}`}>{step.label}</span>
-                                  <span className={`text-[10px] font-bold ${step.done ? 'text-cyan-400' : step.pct > 0 ? 'text-slate-300' : 'text-slate-600'}`}>{step.pct}%</span>
-                                </div>
-                                <div className="h-1 rounded-full bg-slate-700/60 overflow-hidden">
-                                  <div
-                                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-400"
-                                    style={{ width: `${step.pct}%`, opacity: step.pct === 0 ? 0.2 : 1 }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-
-                          {/* Bottom hint */}
-                          <p className="text-center text-slate-600 text-[11px] mt-1">🚀 Full demo dropping soon</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Glowing Path Section replaces the old static "How Your Career Journey Works" */}
-      <GlowingPathSection />
-
-      <section data-section="4" className="py-20 px-6 relative z-10 bg-black overflow-hidden">
-        {/* Glow blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[480px] h-[220px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-56 h-56 bg-emerald-600/8 rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-4xl mx-auto">
-          {/* Contact Support Box */}
-          <div data-animate className="relative backdrop-blur-lg bg-white/5 rounded-2xl p-8 md:p-12 text-center mb-20 border border-white/10 shadow-2xl transition-all duration-300">
-            <div className="relative z-10">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">Still have questions?</h2>
-              <p className="text-slate-200 mb-6 max-w-xl mx-auto leading-relaxed">Can't find the answer you're looking for? Our support team is here to help you every step of the way.</p>
-
-              <button
-                onClick={() => navigate('/contact')}
-                className="backdrop-blur-lg bg-indigo-500/20 text-white px-8 py-4 rounded-xl font-bold border border-indigo-400/30 hover:bg-indigo-500/30 hover:border-indigo-400/50 hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/50 transition-all duration-300 cursor-pointer"
-              >
-                Contact Support →
-              </button>
-
-              <p className="text-sm text-slate-300 italic mt-5">Average response time: <span className="text-emerald-400 font-semibold">under 24 hours</span></p>
-            </div>
-          </div>
-
-          {/* Stats Bar */}
-          <div data-animate className="text-center mb-12">
-            <span className="text-emerald-500 font-bold bg-emerald-50 px-4 py-1 rounded-full text-xs uppercase tracking-widest">Community Success</span>
-            <h2 className="text-3xl font-bold mt-4"><span className="text-emerald-500">Real Stories</span> from Our Community</h2>
-            <p className="text-slate-500 mt-2 max-w-2xl mx-auto text-sm">Join thousands of learners who have transformed their careers with LearnPath.</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div data-animate style={{ transitionDelay: '0s' }}>
-              <div className="text-3xl font-black mb-1">10,000+</div>
-              <div className="text-slate-400 text-sm">Success Stories</div>
-            </div>
-            <div data-animate style={{ transitionDelay: '0.1s' }}>
-              <div className="text-3xl font-black mb-1">85%</div>
-              <div className="text-slate-400 text-sm">Career Transitions</div>
-            </div>
-            <div data-animate style={{ transitionDelay: '0.2s' }}>
-              <div className="text-3xl font-black mb-1">160%</div>
-              <div className="text-slate-400 text-sm">Avg Salary Increase</div>
-            </div>
-            <div data-animate style={{ transitionDelay: '0.3s' }}>
-              <div className="text-3xl font-black mb-1">6 months</div>
-              <div className="text-slate-400 text-sm">Avg Learning Time</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Glow Text Section */}
-      <section data-section="5" className="py-32 px-6 overflow-hidden relative z-10 bg-black">
-        {/* Glow blobs */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] bg-indigo-600/12 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative flex items-center justify-center min-h-[400px]">
-          <h1 data-animate className="text-[120px] md:text-[180px] lg:text-[240px] font-black tracking-tighter leading-none uppercase text-white">
-            EDUPATH
-          </h1>
-        </div>
-      </section>
-
+const OutcomeCard = ({ label, children, note }) => (
+  <Card style={{ borderColor: 'var(--color-line-btn)' }}>
+    <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--color-line)' }}>
+      <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)">{label}</MicroLabel>
     </div>
-  )
-}
+    <div style={{ padding: '22px 20px' }}>
+      {children}
+      <p style={{ margin: '16px 0 0', fontSize: 13, lineHeight: 1.6, color: 'var(--color-text-2)' }}>{note}</p>
+    </div>
+  </Card>
+);
 
-export default Home
+const Home = () => (
+  <div style={{ background: 'var(--color-surface)' }}>
+    {/* ── Hero ── */}
+    <section style={{ display: 'grid', gridTemplateColumns: '1fr 620px', borderBottom: '1px solid var(--color-ink)' }}>
+      <div style={{ padding: '76px 44px 68px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <MicroLabel size={11} tracking="0.14em" color="var(--color-clay)" style={{ display: 'block', marginBottom: 24 }}>
+          Assess · Plan · Apply · Ship
+        </MicroLabel>
+
+        <h1
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 62,
+            fontWeight: 300,
+            lineHeight: 1.04,
+            letterSpacing: '-0.03em',
+            color: 'var(--color-ink)',
+            margin: '0 0 24px',
+          }}
+        >
+          Your skills, measured.<br />Your path, scheduled.
+        </h1>
+
+        <p style={{ margin: '0 0 34px', fontSize: 17, lineHeight: 1.65, color: 'var(--color-text-2)', maxWidth: 460 }}>
+          One assessment produces a dated plan, a gap report and an ATS-scored resume. Everything
+          reschedules itself as you finish work.
+        </p>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <Link to="/assessment-hub" style={{ textDecoration: 'none' }}>
+            <Button style={{ padding: '15px 26px', fontSize: 14.5 }}>Take the assessment</Button>
+          </Link>
+          <Link to="/roadmap" style={{ textDecoration: 'none' }}>
+            <Button variant="secondary" style={{ padding: '14px 24px', fontSize: 14.5 }}>See a sample roadmap</Button>
+          </Link>
+        </div>
+
+        <div style={{ marginTop: 44, paddingTop: 26, borderTop: '1px solid var(--color-line)', display: 'flex', gap: 52 }}>
+          <HeroStat value="6" label="role tracks" />
+          <HeroStat value="4" label="assessment instruments" />
+          <HeroStat value="1" label="click to publish a portfolio" />
+        </div>
+      </div>
+
+      <RoadmapConsole />
+    </section>
+
+    {/* ── Track index ── */}
+    <section>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '52px 44px 26px', gap: 32 }}>
+        <SectionHeading>Six roles. Pick a destination.</SectionHeading>
+        <span style={{ fontSize: 13.5, color: 'var(--color-text-2)', maxWidth: 380, textAlign: 'right' }}>
+          Not sure? The assessment tells you which two you are closest to today.
+        </span>
+      </div>
+
+      <div style={{ borderTop: '1px solid var(--color-ink)' }}>
+        {TRACKS.map((track, i) => (
+          <Link
+            key={track.name}
+            to="/services"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 32,
+              padding: '24px 44px',
+              borderBottom: i === TRACKS.length - 1 ? '1px solid var(--color-ink)' : '1px solid var(--color-line)',
+              textDecoration: 'none',
+            }}
+          >
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-4)', width: 28 }}>
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <span
+              style={{
+                flex: 1,
+                fontFamily: 'var(--font-display)',
+                fontSize: 32,
+                fontWeight: 400,
+                letterSpacing: '-0.02em',
+                color: 'var(--color-ink)',
+              }}
+            >
+              {track.name}
+            </span>
+            <span style={{ fontSize: 13.5, color: 'var(--color-text-2)', width: 300 }}>{track.stack}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-2)', width: 70, textAlign: 'right' }}>
+              {`${track.weeks} wks`}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-2)', width: 70, textAlign: 'right' }}>
+              {`${track.nodes} nodes`}
+            </span>
+            <span style={{ fontSize: 18, color: 'var(--color-clay)' }}>→</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+
+    {/* ── Four steps ── */}
+    <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--color-line)' }}>
+      {STEPS.map((step, i) => (
+        <div
+          key={step.kicker}
+          style={{ padding: '40px 32px', borderRight: i === STEPS.length - 1 ? 'none' : '1px solid var(--color-line)' }}
+        >
+          <MicroLabel size={11} tracking="0.12em" color="var(--color-clay)" style={{ display: 'block', marginBottom: 16 }}>
+            {step.kicker}
+          </MicroLabel>
+          <h3
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 23,
+              fontWeight: 400,
+              letterSpacing: '-0.02em',
+              color: 'var(--color-ink)',
+              margin: '0 0 10px',
+            }}
+          >
+            {step.title}
+          </h3>
+          <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.65, color: 'var(--color-text-2)' }}>{step.body}</p>
+        </div>
+      ))}
+    </section>
+
+    {/* ── What you leave with ── */}
+    <section style={{ padding: '56px 44px', background: 'var(--color-paper)' }}>
+      <SectionHeading style={{ marginBottom: 8 }}>What you leave with</SectionHeading>
+      <p style={{ margin: '0 0 32px', fontSize: 15, color: 'var(--color-text-2)', maxWidth: 520 }}>
+        Three artefacts, all generated from work you completed — not from a template you filled in.
+      </p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+        <OutcomeCard
+          label="01 · Resume"
+          note="Scored against the description you paste in, so you can see what the parser sees before a person does."
+        >
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 }}>
+            <span style={{ ...type.heroMetric, fontSize: 44, color: 'var(--color-ink)', lineHeight: 1 }}>85</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-green)' }}>↑ from 71</span>
+          </div>
+        </OutcomeCard>
+
+        <OutcomeCard
+          label="02 · Portfolio"
+          note="Parsed from your resume, filled with the projects you shipped, deployed to Vercel in one click."
+        >
+          <div style={{ border: '1px solid var(--color-line)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 7,
+                padding: '8px 10px',
+                borderBottom: '1px solid var(--color-line)',
+                background: 'var(--color-surface-current)',
+              }}
+            >
+              <StatusBox status="done" size={6} />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--color-text-2)' }}>
+                edupath.dev/you
+              </span>
+            </div>
+            <div style={{ padding: '14px 12px' }}>
+              <div style={{ height: 8, width: '52%', background: 'var(--color-ink)', marginBottom: 8 }} />
+              <div style={{ height: 5, width: '78%', background: 'var(--color-line)', marginBottom: 5 }} />
+              <div style={{ height: 5, width: '64%', background: 'var(--color-line)', marginBottom: 12 }} />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                <div style={{ height: 30, background: 'var(--color-paper)' }} />
+                <div style={{ height: 30, background: 'var(--color-paper)' }} />
+                <div style={{ height: 30, background: 'var(--color-paper)' }} />
+              </div>
+            </div>
+          </div>
+        </OutcomeCard>
+
+        <OutcomeCard
+          label="03 · Gap report"
+          note="Where you stand against the role today, updated every time you finish a node."
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+            {GAP_REPORT.map((row) => (
+              <LabelledBar
+                key={row.label}
+                label={row.label}
+                value={row.value}
+                display={`${row.value}%`}
+                max={100}
+                tone={row.tone}
+              />
+            ))}
+          </div>
+        </OutcomeCard>
+      </div>
+    </section>
+
+    {/* ── Quote band ── */}
+    <section
+      style={{
+        background: 'var(--color-ink)',
+        padding: '64px 44px',
+        display: 'grid',
+        gridTemplateColumns: '1fr 340px',
+        gap: 64,
+        alignItems: 'center',
+      }}
+    >
+      <div>
+        <p
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 38,
+            fontWeight: 300,
+            color: '#fff',
+            lineHeight: 1.25,
+            letterSpacing: '-0.02em',
+            margin: 0,
+          }}
+        >
+          “I stopped guessing what to study on Sunday nights. It tells me the one thing that is due,
+          and why it comes before the next one.”
+        </p>
+        <p style={{ fontSize: 13.5, color: 'var(--color-dark-text-3)', marginTop: 22, marginBottom: 0 }}>
+          A learner on the Data Science Engineer track, week 14 of 20.
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, borderLeft: '1px solid #2A2822', paddingLeft: 32 }}>
+        {[
+          { value: '18', label: 'weeks in the MERN track' },
+          { value: '34', label: 'nodes, dependency sorted' },
+          { value: '10', label: 'portfolio templates' },
+        ].map((stat) => (
+          <div key={stat.label}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 30, color: '#fff', lineHeight: 1 }}>{stat.value}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--color-dark-text-3)', marginTop: 6 }}>{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {/* ── Closing ── */}
+    <section
+      style={{
+        padding: '72px 44px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 48,
+      }}
+    >
+      <div>
+        <SectionHeading size={44} style={{ fontWeight: 300, letterSpacing: '-0.03em', marginBottom: 12 }}>
+          Start with the assessment.
+        </SectionHeading>
+        <p style={{ margin: 0, fontSize: 16, color: 'var(--color-text-2)' }}>
+          Your first roadmap appears on the next screen, and it is free.
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+        <Link to="/signup" style={{ textDecoration: 'none' }}>
+          <Button style={{ padding: '16px 30px', fontSize: 14.5 }}>Begin assessment</Button>
+        </Link>
+        <Link to="/services" style={{ textDecoration: 'none' }}>
+          <Button variant="secondary" style={{ padding: '15px 26px', fontSize: 14.5 }}>Browse tracks</Button>
+        </Link>
+      </div>
+    </section>
+  </div>
+);
+
+export default Home;
