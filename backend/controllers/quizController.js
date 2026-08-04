@@ -108,7 +108,7 @@ export const getQuizResult = async (req, res) => {
         correctAnswers: result.correctAnswers,
         totalQuestions: result.totalQuestions,
         timeTaken: result.timeTaken,
-        performance: getPerformanceLevel(result.score),
+        performance: getPerformanceLevel(result.percentage),
         detailedAnswers: result.answers,
         completedAt: result.createdAt,
       },
@@ -733,7 +733,10 @@ export const getQuizStats = async (req, res) => {
         $group: {
           _id: null,
           totalQuizzes: { $sum: 1 },
-          averageScore: { $avg: '$score' },
+          // averageScore is rendered as a percentage ("N/100") — score is
+          // raw marks out of totalMarks, not 0-100, so averaging it directly
+          // showed e.g. 2/100 for a quiz whose real result was 40/100.
+          averageScore: { $avg: '$percentage' },
           totalQuestions: { $sum: '$totalQuestions' },
           totalCorrect: { $sum: '$correctAnswers' },
         },
@@ -746,8 +749,8 @@ export const getQuizStats = async (req, res) => {
         $group: {
           _id: '$topicId',
           quizCount: { $sum: 1 },
-          averageScore: { $avg: '$score' },
-          bestScore: { $max: '$score' },
+          averageScore: { $avg: '$percentage' },
+          bestScore: { $max: '$percentage' },
         },
       },
       {

@@ -90,7 +90,7 @@ const AssessmentInstructions = () => {
   const stats = [
     { label: 'Questions', value: quizConfig.questionCount },
     { label: 'Time limit', value: `${quizConfig.questionCount} min` },
-    { label: 'To pass', value: '60%' },
+    { label: 'To pass', value: '70%' },
   ];
 
   const rules = [

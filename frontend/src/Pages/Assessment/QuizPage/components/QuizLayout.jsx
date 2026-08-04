@@ -90,13 +90,15 @@ const QuizLayout = ({
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}>
                 {(currentQuestion?.options || []).map((option, index) => {
                   const value = option?.text ?? option;
-                  const selected = selectedAnswer === value || selectedAnswer === index;
+                  // selectedAnswer is the stored { questionIndex, selectedOptionIndex }
+                  // for the current question (or undefined) — not the option itself.
+                  const selected = selectedAnswer?.selectedOptionIndex === index;
 
                   return (
                     <button
                       key={value ?? index}
                       type="button"
-                      onClick={() => onSelectOption(option, index)}
+                      onClick={() => onSelectOption(currentQuestionIndex, index)}
                       style={{
                         width: '100%',
                         textAlign: 'left',
@@ -161,7 +163,11 @@ const QuizLayout = ({
             <CardHeader label={`${answeredCount} of ${total}`} right={<MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">Answered</MicroLabel>} />
             <div style={{ padding: '18px 20px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {questions.map((q, i) => {
-                const answered = Boolean(answers?.[i]);
+                // answers is keyed by questionIndex, not array position — it
+                // fills in the order questions were first answered, which
+                // isn't necessarily question order once Previous or the grid
+                // below is used to jump around.
+                const answered = answers?.some((a) => a.questionIndex === i);
                 const marked = markedForReview?.includes?.(i);
                 const current = i === currentQuestionIndex;
 
