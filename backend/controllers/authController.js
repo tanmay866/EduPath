@@ -208,6 +208,8 @@ export const verifyOtp = asyncHandler(async (req, res, next) => {
 
     const token = generateToken(user._id, user.role);
 
+    // Same shape as the login response: the client stores these straight into
+    // the session, and a missing field would leave the user half logged in.
     res.status(200).json({
         success: true,
         message: 'Email verified. Welcome to EduPath!',
@@ -219,6 +221,8 @@ export const verifyOtp = asyncHandler(async (req, res, next) => {
             email: user.email,
             loginId: user.loginId,
             role: user.role,
+            phone: user.profile?.phone || '',
+            skills: user.profile?.skills || '',
         },
     });
 

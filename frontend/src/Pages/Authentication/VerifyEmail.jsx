@@ -5,6 +5,7 @@ import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { getApiErrorMessage } from '../../utils/passwordPolicy';
+import { storeSession } from '../../utils/session';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -75,13 +76,14 @@ const VerifyEmail = () => {
     try {
       const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, { email, otp });
 
+      // Same session keys sign-in writes, so the app treats them as fully
+      // logged in and they are not bounced back to /signin.
       if (data.token) {
-        sessionStorage.setItem('token', data.token);
-        sessionStorage.setItem('role', data.user?.role || 'student');
+        storeSession(data.token, data.user);
       }
 
       toast.success(data.message || 'Email verified!');
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (error) {
       toast.error(getApiErrorMessage(error.response?.data, 'Verification failed. Please try again.'));
     } finally {

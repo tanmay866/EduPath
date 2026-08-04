@@ -7,6 +7,7 @@ import { motion, useMotionValue, useMotionTemplate } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { forgotPassword } from '../Services/profileService';
 import API from '../Services/assessmentService';
+import { storeSession } from '../../utils/session';
 
 const Signin = () => {
   const navigate = useNavigate();
@@ -50,26 +51,7 @@ const Signin = () => {
 
         const res = await API.post('/auth/login', payload);
         console.log(res);
-        sessionStorage.setItem("token", res.data.token);
-        sessionStorage.setItem("userId", res.data.user.id);
-        sessionStorage.setItem("email", res.data.user.email);
-        sessionStorage.setItem("loginId", res.data.user.loginId);
-        sessionStorage.setItem("role", res.data.user.role);
-        sessionStorage.setItem("firstName", res.data.user.firstName);
-        sessionStorage.setItem("lastName", res.data.user.lastName);
-        sessionStorage.setItem("phone", res.data.user.phone || '');
-        sessionStorage.setItem("skills", res.data.user.skills || '');
-
-        // Profile picture is stored ONLY in Cloudinary, construct URL from userId
-        // Check sessionStorage first, then construct from Cloudinary
-        const storedPicture = sessionStorage.getItem("profilePicture");
-        if (!storedPicture && res.data.user.id) {
-          const cloudinaryUrl = `https://res.cloudinary.com/dmk1ekxzf/image/upload/w_300,h_300,c_fill,g_face,q_auto/edupath/profile-pictures/${res.data.user.id}`;
-          sessionStorage.setItem("profilePicture", cloudinaryUrl);
-        }
-
-        // Notify other components that sessionStorage has been updated
-        window.dispatchEvent(new Event('sessionStorageUpdated'));
+        storeSession(res.data.token, res.data.user);
 
         toast.success('Signin successful!');
         resetForm();
