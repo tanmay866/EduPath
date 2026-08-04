@@ -207,115 +207,119 @@ export const QuizStage = ({
   const progress = total ? ((index + 1) / total) * 100 : 0;
 
   return (
-    <Page>
-      <Card>
-        <CardHeader
-          label={`Question ${index + 1} of ${total}`}
-          right={
-            <span style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <MicroLabel size={11} tracking="0.1em" color="var(--color-text-3)">{clock}</MicroLabel>
-              <MicroLabel size={11} tracking="0.1em" color="var(--color-clay)">{label}</MicroLabel>
-            </span>
-          }
-        />
+    <Page width={1160}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 22, alignItems: 'start' }}>
+        <Card>
+          <CardHeader
+            label={`Question ${index + 1} of ${total}`}
+            right={
+              <span style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <MicroLabel size={11} tracking="0.1em" color="var(--color-text-3)">{clock}</MicroLabel>
+                <MicroLabel size={11} tracking="0.1em" color="var(--color-clay)">{label}</MicroLabel>
+              </span>
+            }
+          />
 
-        <div style={{ height: 4, background: 'var(--color-bar-empty)' }}>
-          <div style={{ height: 4, width: `${progress}%`, background: 'var(--color-navy)' }} />
-        </div>
+          <div style={{ height: 4, background: 'var(--color-bar-empty)' }}>
+            <div style={{ height: 4, width: `${progress}%`, background: 'var(--color-navy)' }} />
+          </div>
 
-        <div style={{ padding: '32px 34px 34px' }}>
-          <h1 style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>{question?.question}</h1>
+          <div style={{ padding: '32px 34px 34px' }}>
+            <h1 style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>{question?.question}</h1>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}>
-            {(question?.options || []).map((option, i) => {
-              const isSelected = selected === i;
-              return (
-                <button
-                  key={option ?? i}
-                  type="button"
-                  onClick={() => onSelect(i)}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '15px 18px',
-                    border: `1px solid ${isSelected ? 'var(--color-ink)' : 'var(--color-line-opt)'}`,
-                    background: isSelected ? 'var(--color-surface-active)' : 'var(--color-surface)',
-                    fontSize: 15.5,
-                    fontFamily: 'var(--font-sans)',
-                    color: 'var(--color-ink)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    borderRadius: 0,
-                    transition: 'background-color 120ms ease, border-color 120ms ease',
-                  }}
-                >
-                  <span
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}>
+              {(question?.options || []).map((option, i) => {
+                const isSelected = selected === i;
+                return (
+                  <button
+                    key={option ?? i}
+                    type="button"
+                    onClick={() => onSelect(i)}
                     style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: 12,
-                      marginRight: 16,
-                      color: isSelected ? 'var(--color-clay)' : 'var(--color-text-4)',
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '15px 18px',
+                      border: `1px solid ${isSelected ? 'var(--color-ink)' : 'var(--color-line-opt)'}`,
+                      background: isSelected ? 'var(--color-surface-active)' : 'var(--color-surface)',
+                      fontSize: 15.5,
+                      fontFamily: 'var(--font-sans)',
+                      color: 'var(--color-ink)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'baseline',
+                      borderRadius: 0,
+                      transition: 'background-color 120ms ease, border-color 120ms ease',
                     }}
                   >
-                    {LETTERS[i]}
-                  </span>
-                  <span>{option}</span>
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 12,
+                        marginRight: 16,
+                        color: isSelected ? 'var(--color-clay)' : 'var(--color-text-4)',
+                      }}
+                    >
+                      {LETTERS[i]}
+                    </span>
+                    <span>{option}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 28 }}>
+              <Button variant="quiet" onClick={onPrevious} disabled={index === 0}>Previous</Button>
+              {isLast ? (
+                <Button onClick={onSubmit}>Submit</Button>
+              ) : (
+                <Button onClick={onNext}>Next question</Button>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* Sits beside the question rather than under it, so the answered
+            count and Submit are visible without scrolling past the card. */}
+        <Card style={{ position: 'sticky', top: 22 }}>
+          <CardHeader label={`${answeredCount} of ${total}`} right={<MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">Answered</MicroLabel>} />
+          <div style={{ padding: '18px 20px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {Array.from({ length: total }).map((_, i) => {
+              const answered = answers[i] !== null && answers[i] !== undefined;
+              const current = i === index;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => onQuestionSelect?.(i)}
+                  title={`Question ${i + 1}`}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    border: `1px solid ${current ? 'var(--color-ink)' : 'var(--color-line)'}`,
+                    background: current ? 'var(--color-surface-active)' : 'var(--color-surface)',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    color: 'var(--color-text-2)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 4,
+                    padding: 0,
+                    borderRadius: 0,
+                  }}
+                >
+                  {String(i + 1).padStart(2, '0')}
+                  {answered && <StatusBox status="done" size={5} />}
                 </button>
               );
             })}
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 28 }}>
-            <Button variant="quiet" onClick={onPrevious} disabled={index === 0}>Previous</Button>
-            {isLast ? (
-              <Button onClick={onSubmit}>Submit</Button>
-            ) : (
-              <Button onClick={onNext}>Next question</Button>
-            )}
+          <div style={{ padding: '18px 20px', borderTop: '1px solid var(--color-line)' }}>
+            <Button fullWidth onClick={onSubmit}>Submit now</Button>
           </div>
-        </div>
-      </Card>
-
-      <Card style={{ marginTop: 22 }}>
-        <CardHeader
-          label={`${answeredCount} of ${total} answered`}
-          right={<Button variant="quiet" onClick={onSubmit}>Submit now</Button>}
-        />
-        <div style={{ padding: '18px 20px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {Array.from({ length: total }).map((_, i) => {
-            const answered = answers[i] !== null && answers[i] !== undefined;
-            const current = i === index;
-            return (
-              <button
-                key={i}
-                type="button"
-                onClick={() => onQuestionSelect?.(i)}
-                title={`Question ${i + 1}`}
-                style={{
-                  width: 34,
-                  height: 34,
-                  border: `1px solid ${current ? 'var(--color-ink)' : 'var(--color-line)'}`,
-                  background: current ? 'var(--color-surface-active)' : 'var(--color-surface)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 12,
-                  color: 'var(--color-text-2)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 4,
-                  padding: 0,
-                  borderRadius: 0,
-                }}
-              >
-                {String(i + 1).padStart(2, '0')}
-                {answered && <StatusBox status="done" size={5} />}
-              </button>
-            );
-          })}
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       <Modal
         open={showSubmitModal}

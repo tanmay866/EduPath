@@ -62,141 +62,144 @@ const QuizLayout = ({
 
   return (
     <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
-      <div style={{ maxWidth: 760, margin: '0 auto' }}>
-        <Card>
-          <CardHeader
-            label={`Question ${currentQuestionIndex + 1} of ${total}`}
-            right={
-              <span style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <MicroLabel size={11} tracking="0.1em" color="var(--color-text-3)">{clock}</MicroLabel>
-                <MicroLabel size={11} tracking="0.1em" color="var(--color-clay)">
-                  {assessment?.difficulty || 'Beginner'}
-                </MicroLabel>
-              </span>
-            }
-          />
+      <div style={{ maxWidth: 1160, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 22, alignItems: 'start' }}>
+          <Card>
+            <CardHeader
+              label={`Question ${currentQuestionIndex + 1} of ${total}`}
+              right={
+                <span style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <MicroLabel size={11} tracking="0.1em" color="var(--color-text-3)">{clock}</MicroLabel>
+                  <MicroLabel size={11} tracking="0.1em" color="var(--color-clay)">
+                    {assessment?.difficulty || 'Beginner'}
+                  </MicroLabel>
+                </span>
+              }
+            />
 
-          {/* 4px navy bar directly beneath the header strip. */}
-          <div style={{ height: 4, background: 'var(--color-bar-empty)' }}>
-            <div style={{ height: 4, width: `${progress}%`, background: 'var(--color-navy)' }} />
-          </div>
+            {/* 4px navy bar directly beneath the header strip. */}
+            <div style={{ height: 4, background: 'var(--color-bar-empty)' }}>
+              <div style={{ height: 4, width: `${progress}%`, background: 'var(--color-navy)' }} />
+            </div>
 
-          <div style={{ padding: '32px 34px 34px' }}>
-            <h1 style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>
-              {currentQuestion?.question}
-            </h1>
+            <div style={{ padding: '32px 34px 34px' }}>
+              <h1 style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>
+                {currentQuestion?.question}
+              </h1>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}>
-              {(currentQuestion?.options || []).map((option, index) => {
-                const value = option?.text ?? option;
-                const selected = selectedAnswer === value || selectedAnswer === index;
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}>
+                {(currentQuestion?.options || []).map((option, index) => {
+                  const value = option?.text ?? option;
+                  const selected = selectedAnswer === value || selectedAnswer === index;
+
+                  return (
+                    <button
+                      key={value ?? index}
+                      type="button"
+                      onClick={() => onSelectOption(option, index)}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '15px 18px',
+                        border: `1px solid ${selected ? 'var(--color-ink)' : 'var(--color-line-opt)'}`,
+                        background: selected ? 'var(--color-surface-active)' : 'var(--color-surface)',
+                        fontSize: 15.5,
+                        fontFamily: 'var(--font-sans)',
+                        color: 'var(--color-ink)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        transition: 'background-color 120ms ease, border-color 120ms ease',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 12,
+                          marginRight: 16,
+                          color: selected ? 'var(--color-clay)' : 'var(--color-text-4)',
+                        }}
+                      >
+                        {LETTERS[index]}
+                      </span>
+                      <span>{value}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  marginTop: 28,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+                  <Button variant="quiet" onClick={onPrevious} disabled={currentQuestionIndex === 0}>
+                    Previous
+                  </Button>
+                  <Button variant="quiet" onClick={onMarkForReview}>
+                    {isMarked ? 'Unmark' : 'Mark for review'}
+                  </Button>
+                </div>
+
+                {isLast ? (
+                  <Button onClick={onSubmitClick} disabled={!selectedAnswer && !allAnswered}>Submit</Button>
+                ) : (
+                  <Button onClick={onNext} disabled={!selectedAnswer}>Next question</Button>
+                )}
+              </div>
+            </div>
+          </Card>
+
+          {/* Sits beside the question rather than under it, so the answered
+              count and Submit are visible without scrolling past the card. */}
+          <Card style={{ position: 'sticky', top: 22 }}>
+            <CardHeader label={`${answeredCount} of ${total}`} right={<MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">Answered</MicroLabel>} />
+            <div style={{ padding: '18px 20px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {questions.map((q, i) => {
+                const answered = Boolean(answers?.[i]);
+                const marked = markedForReview?.includes?.(i);
+                const current = i === currentQuestionIndex;
 
                 return (
                   <button
-                    key={value ?? index}
+                    key={q?._id ?? i}
                     type="button"
-                    onClick={() => onSelectOption(option, index)}
+                    onClick={() => onQuestionSelect(i)}
+                    title={`Question ${i + 1}`}
                     style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '15px 18px',
-                      border: `1px solid ${selected ? 'var(--color-ink)' : 'var(--color-line-opt)'}`,
-                      background: selected ? 'var(--color-surface-active)' : 'var(--color-surface)',
-                      fontSize: 15.5,
-                      fontFamily: 'var(--font-sans)',
-                      color: 'var(--color-ink)',
+                      width: 34,
+                      height: 34,
+                      border: `1px solid ${current ? 'var(--color-ink)' : 'var(--color-line)'}`,
+                      background: current ? 'var(--color-surface-active)' : 'var(--color-surface)',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: 'var(--color-text-2)',
                       cursor: 'pointer',
                       display: 'flex',
-                      alignItems: 'baseline',
-                      transition: 'background-color 120ms ease, border-color 120ms ease',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 4,
+                      padding: 0,
                     }}
                   >
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        marginRight: 16,
-                        color: selected ? 'var(--color-clay)' : 'var(--color-text-4)',
-                      }}
-                    >
-                      {LETTERS[index]}
-                    </span>
-                    <span>{value}</span>
+                    {String(i + 1).padStart(2, '0')}
+                    {(answered || marked) && (
+                      <StatusBox status={marked ? 'current' : 'done'} size={5} />
+                    )}
                   </button>
                 );
               })}
             </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 16,
-                marginTop: 28,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-                <Button variant="quiet" onClick={onPrevious} disabled={currentQuestionIndex === 0}>
-                  Previous
-                </Button>
-                <Button variant="quiet" onClick={onMarkForReview}>
-                  {isMarked ? 'Unmark' : 'Mark for review'}
-                </Button>
-              </div>
-
-              {isLast ? (
-                <Button onClick={onSubmitClick} disabled={!selectedAnswer && !allAnswered}>Submit</Button>
-              ) : (
-                <Button onClick={onNext} disabled={!selectedAnswer}>Next question</Button>
-              )}
+            <div style={{ padding: '18px 20px', borderTop: '1px solid var(--color-line)' }}>
+              <Button fullWidth onClick={onSubmitClick}>Submit now</Button>
             </div>
-          </div>
-        </Card>
-
-        {/* Navigator: one status box per question, replacing the old panel. */}
-        <Card style={{ marginTop: 22 }}>
-          <CardHeader
-            label={`${answeredCount} of ${total} answered`}
-            right={<Button variant="quiet" onClick={onSubmitClick}>Submit now</Button>}
-          />
-          <div style={{ padding: '18px 20px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {questions.map((q, i) => {
-              const answered = Boolean(answers?.[i]);
-              const marked = markedForReview?.includes?.(i);
-              const current = i === currentQuestionIndex;
-
-              return (
-                <button
-                  key={q?._id ?? i}
-                  type="button"
-                  onClick={() => onQuestionSelect(i)}
-                  title={`Question ${i + 1}`}
-                  style={{
-                    width: 34,
-                    height: 34,
-                    border: `1px solid ${current ? 'var(--color-ink)' : 'var(--color-line)'}`,
-                    background: current ? 'var(--color-surface-active)' : 'var(--color-surface)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
-                    color: 'var(--color-text-2)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 4,
-                    padding: 0,
-                  }}
-                >
-                  {String(i + 1).padStart(2, '0')}
-                  {(answered || marked) && (
-                    <StatusBox status={marked ? 'current' : 'done'} size={5} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
 
       <Modal
