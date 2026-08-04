@@ -38,7 +38,6 @@ const QuizPage = () => {
   const [stage, setStage] = useState('configure');
 
   const [quizStarted, setQuizStarted] = useState(false);
-  const [showStartModal, setShowStartModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -56,9 +55,6 @@ const QuizPage = () => {
     experienceLevel: 'beginner',
     questionCount: 10
   });
-
-  // Terms agreement
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const {
     assessment: contextAssessment,
@@ -107,18 +103,14 @@ const QuizPage = () => {
 
   const handleConfigureNext = () => {
     if (!quizConfig.topicId) {
-      alert('Please select a topic');
+      setError('Please choose a topic first');
       return;
     }
+    setError(null);
     setStage('instructions');
   };
 
   const handleStartQuizFromInstructions = async () => {
-    if (!agreedToTerms) {
-      alert('Please accept the terms and conditions');
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
@@ -169,9 +161,6 @@ const QuizPage = () => {
     selectedAnswer,
     handleMarkForReview,
     isMarked,
-    handleStartQuizClick,
-    handleConfirmStart,
-    handleCancelStart,
     handleSubmitQuizClick,
     handleConfirmSubmit,
     handleTimeUp,
@@ -187,8 +176,6 @@ const QuizPage = () => {
     markedForReview,
     setMarkedForReview,
     quizStarted,
-    setQuizStarted,
-    setShowStartModal,
     setShowSubmitModal,
     navigate,
   });
@@ -308,7 +295,7 @@ const QuizPage = () => {
                 {[
                   { label: 'Questions', value: quizConfig.questionCount },
                   { label: 'Time limit', value: `${quizConfig.questionCount} min` },
-                  { label: 'To pass', value: '60%' },
+                  { label: 'To pass', value: '70%' },
                 ].map((s) => (
                   <div key={s.label}>
                     <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 8 }}>{s.label}</MicroLabel>

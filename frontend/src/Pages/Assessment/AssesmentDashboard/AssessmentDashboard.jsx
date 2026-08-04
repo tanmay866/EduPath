@@ -16,7 +16,7 @@ import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../
 const AssessmentDashboard = () => {
   const navigate = useNavigate();
 
-  const [topics, setTopics] = useState([]);
+  const [topicCount, setTopicCount] = useState(0);
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ const AssessmentDashboard = () => {
         getQuizStats().catch(() => ({ data: { data: { overall: { totalQuizzes: 0, averageScore: 0 }, topicPerformance: [] } } })),
         getQuizHistory().catch(() => ({ data: { data: { results: [] } } })),
       ]);
-      setTopics(topicsRes.data?.data || []);
+      setTopicCount((topicsRes.data?.data || []).length);
       setStats(statsRes.data?.data || null);
       setHistory(historyRes.data?.data?.results || []);
     } catch (err) {
@@ -56,7 +56,8 @@ const AssessmentDashboard = () => {
   const statItems = [
     { label: 'Attempts', value: attempts },
     { label: 'Average score', value: average, suffix: '/100' },
-    { label: 'Topics covered', value: covered },
+    // The catalogue size gives the count a denominator to mean something against.
+    { label: 'Topics covered', value: covered, suffix: topicCount ? `/${topicCount}` : undefined },
     { label: 'Last result', value: last ? Math.round(last.percentage) : '—', suffix: last ? '/100' : undefined },
   ];
 

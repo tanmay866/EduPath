@@ -26,7 +26,6 @@ const QuizLayout = ({
   timer,
   setTimer,
   answers,
-  visitedQuestions,
   markedForReview,
   allAnswered,
   showSubmitModal,

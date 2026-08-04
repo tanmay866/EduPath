@@ -6,13 +6,10 @@ export const useQuizLogic = ({
   questions,
   answers,
   setAnswers,
-  currentQuestion,
   currentQuestionIndex,
   markedForReview,
   setMarkedForReview,
   quizStarted,
-  setQuizStarted,
-  setShowStartModal,
   setShowSubmitModal,
   navigate,
 }) => {
@@ -43,21 +40,6 @@ export const useQuizLogic = ({
   };
 
   const isMarked = currentQuestionIndex !== undefined && markedForReview && markedForReview.includes(currentQuestionIndex);
-
-  const handleStartQuizClick = () => {
-    setShowStartModal(true);
-  };
-
-  const handleConfirmStart = () => {
-    setShowStartModal(false);
-    setQuizStarted(true);
-    toast.success("Quiz started! Good luck!");
-  };
-
-  const handleCancelStart = () => {
-    setShowStartModal(false);
-    toast.info("Quiz start cancelled");
-  };
 
   const handleSubmitQuizClick = () => {
     setShowSubmitModal(true);
@@ -132,9 +114,6 @@ export const useQuizLogic = ({
     selectedAnswer,
     handleMarkForReview,
     isMarked,
-    handleStartQuizClick,
-    handleConfirmStart,
-    handleCancelStart,
     handleSubmitQuizClick,
     handleConfirmSubmit,
     handleTimeUp,
