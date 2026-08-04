@@ -139,9 +139,9 @@ const App = () => {
           <Route path="/assessment-hub/mock-interview" element={<PageTransition><Navbar /><AIMockInterview /></PageTransition>} />
 
           {/* New Feature Routes */}
-          <Route path="/resume-builder" element={<PageTransition><Navbar /><ResumeBuilder /></PageTransition>} />
+          <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/portfolio-generator" element={<PageTransition><Navbar /><PortfolioGenerator /></PageTransition>} />
-          <Route path="/ats-analyzer" element={<PageTransition><Navbar /><ATSAnalyzer /></PageTransition>} />
+          <Route path="/ats-analyzer" element={<ATSAnalyzer />} />
 
           {/* Public Portfolio Routes */}
           <Route path="/p/:portfolioId" element={<PublicPortfolio />} />

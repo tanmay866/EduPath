@@ -1,67 +1,248 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  LearnerShell, Card, CardHeader, CardFooterNote, Button, Field, Input,
+  InlineMessage, MicroLabel, type,
+} from '../../design';
+import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 
-// InputField component moved outside to prevent recreation on every render
+/**
+ * Spec §7 Resume & ATS — the resume half.
+ *
+ * `1.5fr 1fr`: the form on the left, the document card on the right —
+ * Newsreader 26px name, a 13px text-3 contact line, then sections under a
+ * `1px solid ink` rule, each a mono 10px / 0.13em label above 13–13.5px
+ * content. Experience entries are a 13.5px/600 role with a mono year
+ * right-aligned, then bullets. Below the card, a two-up primary + secondary.
+ *
+ * The document card renders from `resumeData` rather than only after a
+ * generate call, so the right column shows the resume being written instead of
+ * sitting blank until the DOCX comes back.
+ */
+
+// Kept outside the component so typing does not remount the input each render.
 const InputField = ({
   label,
-  type = "text",
+  type = 'text',
   value,
   onChange,
   placeholder,
   required = false,
-  error = "",
-  helperText = "",
+  error = '',
+  helperText = '',
   maxLength = null,
   textarea = false,
   multiline = false,
   rows = 3,
-  className = "",
-  showLabel = true
+  showLabel = true,
 }) => (
-  <div className={`p-0.5 ${className}`}>
-    {showLabel && label && (
-      <label className="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-wider uppercase ml-1">
-        {label} {required && <span className="text-red-400">*</span>}
-      </label>
+  <Field
+    label={showLabel && label ? `${label}${required ? ' *' : ''}` : undefined}
+    error={error}
+    help={!error && helperText ? helperText : undefined}
+    labelRight={
+      maxLength ? (
+        <MicroLabel size={10.5} color="var(--color-text-4)">
+          {`${(value || '').length}/${maxLength}`}
+        </MicroLabel>
+      ) : undefined
+    }
+  >
+    {textarea || multiline ? (
+      <textarea
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        style={{
+          width: '100%',
+          padding: '13px 14px',
+          fontSize: 15,
+          fontFamily: 'var(--font-sans)',
+          lineHeight: 1.55,
+          color: 'var(--color-ink)',
+          background: '#fff',
+          border: `1px solid ${error ? 'var(--color-clay)' : 'var(--color-line-input)'}`,
+          borderRadius: 0,
+          outline: 'none',
+          resize: 'vertical',
+        }}
+      />
+    ) : (
+      <Input
+        type={type}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={maxLength}
+        placeholder={placeholder}
+        error={Boolean(error)}
+      />
     )}
-    <div className="relative">
-      {(textarea || multiline) ? (
-        <textarea
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          rows={rows}
-          maxLength={maxLength}
-          className={`w-full px-4 py-3 bg-[#0a0a0a] border rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors text-sm resize-y ${
-            error ? 'border-red-500/50' : 'border-white/10'
-          }`}
-          placeholder={placeholder}
-        />
-      ) : (
-        <input
-          type={type}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          maxLength={maxLength}
-          className={`w-full px-4 py-3 bg-[#0a0a0a] border rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500/50 hover:bg-white/[0.02] transition-colors text-sm ${
-            error ? 'border-red-500/50' : 'border-white/10'
-          }`}
-          placeholder={placeholder}
-        />
-      )}
-    </div>
-    {(error || helperText) && (
-      <div className="mt-1 text-xs ml-1">
-        {error && <p className="text-red-400">{error}</p>}
-        {!error && helperText && <p className="text-slate-500">{helperText}</p>}
-      </div>
-    )}
-    {maxLength && (
-      <div className="mt-1 text-xs text-slate-500 text-right mr-1">
-        {(value || '').length}/{maxLength}
-      </div>
-    )}
+  </Field>
+);
+
+/* ── Document card ────────────────────────────────────────────────────────
+   The spec's right column. Sections only appear once they hold something, so
+   an empty resume shows the name block rather than seven empty headings. */
+const DocSection = ({ label, children }) => (
+  <div style={{ borderTop: '1px solid var(--color-ink)', paddingTop: 14, marginTop: 22 }}>
+    <MicroLabel size={10} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10 }}>
+      {label}
+    </MicroLabel>
+    <div style={{ fontSize: 13.5, lineHeight: 1.55, color: 'var(--color-text-2)' }}>{children}</div>
   </div>
 );
+
+const DocEntry = ({ title, meta, year, lines = [] }) => (
+  <div style={{ marginBottom: 14 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+      <span style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-ink)' }}>{title}</span>
+      {year && (
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, color: 'var(--color-text-4)', whiteSpace: 'nowrap' }}>
+          {year}
+        </span>
+      )}
+    </div>
+    {meta && <div style={{ fontSize: 13, color: 'var(--color-text-3)', marginTop: 2 }}>{meta}</div>}
+    {lines.filter(Boolean).map((line, i) => (
+      <div key={i} style={{ display: 'flex', gap: 8, marginTop: 5 }}>
+        <span style={{ color: 'var(--color-text-4)' }}>·</span>
+        <span style={{ fontSize: 13 }}>{line}</span>
+      </div>
+    ))}
+  </div>
+);
+
+const dateRange = (start, end) => [start, end].filter(Boolean).join('–');
+const clean = (list = []) => list.filter((v) => String(v || '').trim());
+
+const ResumeDocument = ({ data }) => {
+  const p = data.personalInfo || {};
+  const contact = clean([p.email, p.phone, p.location]).join('  ·  ');
+  const links = clean([p.linkedin, p.github, p.website]).join('  ·  ');
+
+  const education = (data.education || []).filter((e) => e.degree || e.institution);
+  const experience = (data.experience || []).filter((e) => e.position || e.company);
+  const projects = (data.projects || []).filter((e) => e.title || e.description);
+  const technical = clean(data.skills?.technical);
+  const soft = clean(data.skills?.soft);
+  const certifications = (data.certifications || []).filter((c) => c.name);
+  const achievements = clean(data.achievements);
+
+  return (
+    <div style={{ padding: 26 }}>
+      <div
+        style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: 26,
+          fontWeight: 400,
+          letterSpacing: '-0.015em',
+          lineHeight: 1.15,
+          color: 'var(--color-ink)',
+        }}
+      >
+        {p.name || 'Your name'}
+      </div>
+      {contact && <div style={{ fontSize: 13, color: 'var(--color-text-3)', marginTop: 8 }}>{contact}</div>}
+      {links && <div style={{ fontSize: 13, color: 'var(--color-text-3)', marginTop: 3 }}>{links}</div>}
+
+      {experience.length > 0 && (
+        <DocSection label="Experience">
+          {experience.map((exp, i) => (
+            <DocEntry
+              key={i}
+              title={exp.position || 'Role'}
+              meta={clean([exp.company, exp.location]).join(' · ')}
+              year={dateRange(exp.startDate, exp.endDate)}
+              lines={exp.responsibilities}
+            />
+          ))}
+        </DocSection>
+      )}
+
+      {education.length > 0 && (
+        <DocSection label="Education">
+          {education.map((edu, i) => (
+            <DocEntry
+              key={i}
+              title={edu.degree || 'Degree'}
+              meta={clean([edu.institution, edu.cgpa && `CGPA ${edu.cgpa}`]).join(' · ')}
+              year={dateRange(edu.startDate, edu.endDate)}
+            />
+          ))}
+        </DocSection>
+      )}
+
+      {projects.length > 0 && (
+        <DocSection label="Projects">
+          {projects.map((proj, i) => (
+            <DocEntry
+              key={i}
+              title={proj.title || 'Project'}
+              meta={clean(proj.technologies).join(' · ')}
+              lines={[proj.description]}
+            />
+          ))}
+        </DocSection>
+      )}
+
+      {(technical.length > 0 || soft.length > 0) && (
+        <DocSection label="Skills">
+          {technical.length > 0 && <div>{technical.join(' · ')}</div>}
+          {soft.length > 0 && (
+            <div style={{ marginTop: technical.length ? 6 : 0, color: 'var(--color-text-3)' }}>{soft.join(' · ')}</div>
+          )}
+        </DocSection>
+      )}
+
+      {certifications.length > 0 && (
+        <DocSection label="Certifications">
+          {certifications.map((cert, i) => (
+            <DocEntry key={i} title={cert.name} meta={cert.issuer} year={cert.date} />
+          ))}
+        </DocSection>
+      )}
+
+      {achievements.length > 0 && (
+        <DocSection label="Achievements">
+          {achievements.map((a, i) => (
+            <div key={i} style={{ display: 'flex', gap: 8, marginTop: i ? 5 : 0 }}>
+              <span style={{ color: 'var(--color-text-4)' }}>·</span>
+              <span>{a}</span>
+            </div>
+          ))}
+        </DocSection>
+      )}
+    </div>
+  );
+};
+
+/* A form section: the card chrome plus its optional "add another" action. */
+const Section = ({ label, onAdd, addLabel, children }) => (
+  <Card>
+    <CardHeader
+      label={label}
+      right={onAdd && <Button variant="quietClay" onClick={onAdd}>{addLabel}</Button>}
+    />
+    <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>{children}</div>
+  </Card>
+);
+
+/* One repeated entry inside a section, with its own remove control. */
+const Entry = ({ ordinal, onRemove, children }) => (
+  <div style={{ borderTop: ordinal > 1 ? '1px solid var(--color-line-soft)' : 'none', paddingTop: ordinal > 1 ? 20 : 0 }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+      <MicroLabel size={10.5} tracking="0.13em" color="var(--color-clay)">
+        {String(ordinal).padStart(2, '0')}
+      </MicroLabel>
+      {onRemove && <Button variant="quiet" onClick={onRemove}>Remove</Button>}
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>{children}</div>
+  </div>
+);
+
+const TWO_UP = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 };
 
 function ResumeBuilder() {
   const navigate = useNavigate();
@@ -730,928 +911,438 @@ function ResumeBuilder() {
     setMessage('');
   };
 
+  const isError = /fail|error|fix the errors|not |unable/i.test(message);
+
   return (
-    <div className="min-h-screen bg-black pt-24 pb-12 px-8 relative overflow-hidden flex flex-col justify-center">
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px)',
-          backgroundSize: '36px 36px',
-        }} />
-        <div style={{
-          position: 'absolute', top: '8%', left: '10%',
-          width: 420, height: 420,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%)',
-          animation: 'settingOrb1 18s ease-in-out infinite alternate',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '10%', right: '8%',
-          width: 360, height: 360,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.04), transparent 70%)',
-          animation: 'settingOrb2 22s ease-in-out infinite alternate',
-        }} />
-        <div style={{
-          position: 'absolute', top: '45%', right: '20%',
-          width: 260, height: 260,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(56,189,248,0.03), transparent 70%)',
-          animation: 'settingOrb1 26s ease-in-out infinite alternate-reverse',
-        }} />
-      </div>
-      <style>{`
-        @keyframes settingOrb1 {
-          from { transform: translate(0, 0) scale(1); }
-          to   { transform: translate(40px, 30px) scale(1.08); }
-        }
-        @keyframes settingOrb2 {
-          from { transform: translate(0, 0) scale(1); }
-          to   { transform: translate(-35px, -25px) scale(1.06); }
-        }
-      `}</style>
+    <LearnerShell
+      sections={learnerNav}
+      eyebrow="Build"
+      title={showPreview ? 'Resume preview' : 'Resume'}
+      note={sessionName()}
+      initials={sessionInitials()}
+      footLabel={sessionLoginId()}
+    >
+      {message && (
+        <InlineMessage tone={isError ? 'error' : 'success'}>{message}</InlineMessage>
+      )}
 
-      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-8 mt-12">
-        {/* Header with Back Button */}
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={() => showPreview ? handleEditResume() : window.history.back()}
-            className="p-2.5 backdrop-blur-lg bg-white/[0.03] hover:bg-white/[0.1] rounded-xl transition-all border border-white/5"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-          </button>
-          <div>
-            <h1 className="text-3xl font-black text-white leading-none tracking-tight">
-              {showPreview ? 'Resume Preview' : 'Resume Builder'}
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              {showPreview ? 'Review your resume before downloading' : 'Create your professional resume with ease'}
-            </p>
-          </div>
-        </div>
-
-        {/* Success/Error Message */}
-        {message && (
-          <div className={`p-4 rounded-xl border ${message.includes('success') || message.includes('Success') ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300' : 'bg-amber-500/20 border-amber-500/30 text-amber-300'}`}>
-            {message}
-          </div>
-        )}
-
-        {/* Preview Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 22, alignItems: 'start' }}>
+        {/* Left — the form, or the download controls once a file exists. */}
         {showPreview ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Panel - Controls */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Resume Info Card */}
-              <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
-                    <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">Resume Ready!</h3>
-                    <p className="text-gray-400 text-sm">Successfully generated</p>
-                  </div>
+          <Card>
+            <CardHeader label="Ready to download" />
+            <div style={{ padding: '22px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <p style={{ ...type.body, margin: 0 }}>
+                Your resume has been generated. Check the document on the right, then choose a
+                format and download it.
+              </p>
+
+              <Field label="Format">
+                <select
+                  value={format}
+                  onChange={(e) => setFormat(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '13px 14px',
+                    fontSize: 15,
+                    fontFamily: 'var(--font-sans)',
+                    color: 'var(--color-ink)',
+                    background: '#fff',
+                    border: '1px solid var(--color-line-input)',
+                    borderRadius: 0,
+                    outline: 'none',
+                  }}
+                >
+                  <option value="pdf">PDF</option>
+                  <option value="docx">DOCX</option>
+                </select>
+              </Field>
+
+              {generatedFilename && (
+                <div style={{ borderTop: '1px solid var(--color-line-soft)', paddingTop: 14 }}>
+                  <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 6 }}>
+                    File
+                  </MicroLabel>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, color: 'var(--color-text-2)', wordBreak: 'break-all' }}>
+                    {generatedFilename}
+                  </span>
                 </div>
-
-                <div className="space-y-4">
-                  {/* Format Selector */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Download Format</label>
-                    <select
-                      value={format}
-                      onChange={(e) => setFormat(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 text-white rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                    >
-                      <option value="pdf">PDF Format</option>
-                      <option value="docx">DOCX Format</option>
-                    </select>
-                  </div>
-
-                  {/* Download Button */}
-                  <button
-                    onClick={handleDownload}
-                    disabled={loading}
-                    className="w-full px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Download {format.toUpperCase()}
-                      </>
-                    )}
-                  </button>
-
-                  {/* Edit Button */}
-                  <button
-                    onClick={handleEditResume}
-                    className="w-full px-6 py-3.5 backdrop-blur-lg bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 hover:border-white/20 font-semibold transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Edit Resume
-                  </button>
-                </div>
-              </div>
-
-              {/* Info Box */}
-              <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                  <h4 className="text-sm font-semibold text-white">Preview Tips</h4>
-                </div>
-                <ul className="space-y-2 text-sm text-gray-400">
-                  <li className="flex items-start gap-2">
-                    <span className="text-cyan-400 mt-0.5">•</span>
-                    <span>Review all sections carefully</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-cyan-400 mt-0.5">•</span>
-                    <span>Check for typos and formatting</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-cyan-400 mt-0.5">•</span>
-                    <span>Download when satisfied</span>
-                  </li>
-                </ul>
-              </div>
+              )}
             </div>
 
-            {/* Right Panel - Resume Summary */}
-            <div className="lg:col-span-3">
-              <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <h3 className="text-lg font-semibold text-white">Resume Summary</h3>
-                </div>
-
-                {/* Resume Content Summary */}
-                <div className="bg-[#0a0a0a] border border-white/5 rounded-xl p-6 max-h-[calc(100vh-280px)] overflow-y-auto space-y-6">
-                  {/* Personal Info */}
-                  <div>
-                    <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Personal Information
-                    </h4>
-                    <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4 space-y-2 text-sm">
-                      <p className="text-white font-medium text-lg">{resumeData.personalInfo.name || 'Not provided'}</p>
-                      {resumeData.personalInfo.email && <p className="text-gray-300">{resumeData.personalInfo.email}</p>}
-                      {resumeData.personalInfo.phone && <p className="text-gray-300">{resumeData.personalInfo.phone}</p>}
-                      {resumeData.personalInfo.location && <p className="text-gray-300">{resumeData.personalInfo.location}</p>}
-                      <div className="flex flex-wrap gap-3 text-cyan-400 pt-2">
-                        {resumeData.personalInfo.linkedin && <span>LinkedIn</span>}
-                        {resumeData.personalInfo.github && <span>GitHub</span>}
-                        {resumeData.personalInfo.website && <span>Website</span>}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Education */}
-                  {resumeData.education.some(edu => edu.degree || edu.institution) && (
-                    <div>
-                      <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                        </svg>
-                        Education ({resumeData.education.filter(e => e.degree || e.institution).length})
-                      </h4>
-                      <div className="space-y-3">
-                        {resumeData.education.map((edu, index) => (
-                          (edu.degree || edu.institution) && (
-                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
-                              <p className="text-white font-medium">{edu.degree || 'Degree not specified'}</p>
-                              <p className="text-gray-300 text-sm">{edu.institution}</p>
-                              {(edu.startDate || edu.endDate) && (
-                                <p className="text-gray-400 text-xs mt-1">{edu.startDate} - {edu.endDate}</p>
-                              )}
-                              {edu.cgpa && <p className="text-cyan-400 text-xs mt-1">CGPA: {edu.cgpa}</p>}
-                            </div>
-                          )
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Experience */}
-                  {resumeData.experience.some(exp => exp.company || exp.position) && (
-                    <div>
-                      <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Work Experience ({resumeData.experience.filter(e => e.company || e.position).length})
-                      </h4>
-                      <div className="space-y-3">
-                        {resumeData.experience.map((exp, index) => (
-                          (exp.company || exp.position) && (
-                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
-                              <p className="text-white font-medium">{exp.position || 'Position not specified'}</p>
-                              <p className="text-gray-300 text-sm">{exp.company}{exp.location && `, ${exp.location}`}</p>
-                              {(exp.startDate || exp.endDate) && (
-                                <p className="text-gray-400 text-xs mt-1">{exp.startDate} - {exp.endDate}</p>
-                              )}
-                              {exp.responsibilities.filter(r => r).length > 0 && (
-                                <p className="text-gray-400 text-xs mt-2">{exp.responsibilities.filter(r => r).length} responsibilities listed</p>
-                              )}
-                            </div>
-                          )
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Projects */}
-                  {resumeData.projects.some(proj => proj.title) && (
-                    <div>
-                      <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                        Projects ({resumeData.projects.filter(p => p.title).length})
-                      </h4>
-                      <div className="space-y-3">
-                        {resumeData.projects.map((proj, index) => (
-                          proj.title && (
-                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4">
-                              <p className="text-white font-medium">{proj.title}</p>
-                              {proj.description && <p className="text-gray-300 text-sm mt-1">{proj.description}</p>}
-                              {proj.technologies.filter(t => t).length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                  {proj.technologies.filter(t => t).slice(0, 5).map((tech, idx) => (
-                                    <span key={idx} className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded">
-                                      {tech}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Skills */}
-                  {(resumeData.skills.technical.some(s => s) || resumeData.skills.soft.some(s => s)) && (
-                    <div>
-                      <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                        </svg>
-                        Skills
-                      </h4>
-                      <div className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-4 space-y-3">
-                        {resumeData.skills.technical.filter(s => s).length > 0 && (
-                          <div>
-                            <p className="text-white text-sm font-medium mb-2">Technical Skills</p>
-                            <div className="flex flex-wrap gap-2">
-                              {resumeData.skills.technical.filter(s => s).map((skill, idx) => (
-                                <span key={idx} className="px-2 py-1 bg-indigo-500/20 text-indigo-400 text-xs rounded">
-                                  {skill}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {resumeData.skills.soft.filter(s => s).length > 0 && (
-                          <div>
-                            <p className="text-white text-sm font-medium mb-2">Soft Skills</p>
-                            <div className="flex flex-wrap gap-2">
-                              {resumeData.skills.soft.filter(s => s).map((skill, idx) => (
-                                <span key={idx} className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">
-                                  {skill}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Certifications */}
-                  {resumeData.certifications.some(cert => cert.name) && (
-                    <div>
-                      <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        Certifications ({resumeData.certifications.filter(c => c.name).length})
-                      </h4>
-                      <div className="space-y-2">
-                        {resumeData.certifications.map((cert, index) => (
-                          cert.name && (
-                            <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-3">
-                              <p className="text-white text-sm font-medium">{cert.name}</p>
-                              {cert.issuer && <p className="text-gray-300 text-xs">{cert.issuer}</p>}
-                              {cert.date && <p className="text-gray-400 text-xs">{cert.date}</p>}
-                            </div>
-                          )
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Achievements */}
-                  {resumeData.achievements.some(a => a) && (
-                    <div>
-                      <h4 className="text-cyan-400 font-semibold mb-3 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                        Achievements ({resumeData.achievements.filter(a => a).length})
-                      </h4>
-                      <div className="space-y-2">
-                        {resumeData.achievements.filter(a => a).map((achievement, index) => (
-                          <div key={index} className="bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg p-3">
-                            <p className="text-gray-300 text-sm">{achievement}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div style={{ padding: '18px 24px', borderTop: '1px solid var(--color-line)', display: 'flex', gap: 12 }}>
+              <Button onClick={handleDownload} loading={loading} loadingLabel="Preparing…">
+                {`Download ${format.toUpperCase()}`}
+              </Button>
+              <Button variant="secondary" onClick={handleEditResume}>Keep editing</Button>
             </div>
-          </div>
+
+            <CardFooterNote>
+              PDF is converted from the DOCX, so it can take a few seconds longer.
+            </CardFooterNote>
+          </Card>
         ) : (
-          /* Form Section */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Form Panel */}
-          <div className="lg:col-span-2 space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+            {/* Personal information */}
+            <Section label="Personal information">
+              <InputField
+                label="Full name"
+                required
+                value={resumeData.personalInfo.name}
+                onChange={(v) => handlePersonalInfoChange('name', v)}
+                error={getFieldError('personalInfo', 'name')}
+                placeholder="Tanmay Patel"
+                maxLength={60}
+              />
 
-            {/* Personal Information */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField
-                  className="md:col-span-2"
-                  label="Full Name"
-                  value={resumeData.personalInfo.name}
-                  onChange={(value) => handlePersonalInfoChange('name', value)}
-                  placeholder="John Doe"
-                  required
-                  error={getFieldError('personalInfo', 'name')}
-                  helperText="Only letters, spaces, dots, hyphens and apostrophes allowed"
-                  maxLength={50}
-                />
-
+              <div style={TWO_UP}>
                 <InputField
                   label="Email"
                   type="email"
-                  value={resumeData.personalInfo.email}
-                  onChange={(value) => handlePersonalInfoChange('email', value)}
-                  placeholder="john@example.com"
                   required
+                  value={resumeData.personalInfo.email}
+                  onChange={(v) => handlePersonalInfoChange('email', v)}
                   error={getFieldError('personalInfo', 'email')}
-                  maxLength={100}
+                  placeholder="you@example.com"
                 />
-
                 <InputField
                   label="Phone"
-                  value={resumeData.personalInfo.phone}
-                  onChange={(value) => handlePersonalInfoChange('phone', value)}
-                  placeholder="+1 234 567 890"
                   required
+                  value={resumeData.personalInfo.phone}
+                  onChange={(v) => handlePersonalInfoChange('phone', v)}
                   error={getFieldError('personalInfo', 'phone')}
-                  helperText="Numbers, +, -, (), and spaces only"
-                  maxLength={20}
+                  placeholder="9313928398"
                 />
+              </div>
 
-                <InputField
-                  label="Location"
-                  value={resumeData.personalInfo.location}
-                  onChange={(value) => handlePersonalInfoChange('location', value)}
-                  placeholder="City, State"
-                  error={getFieldError('personalInfo', 'location')}
-                  maxLength={100}
-                />
+              <InputField
+                label="Location"
+                value={resumeData.personalInfo.location}
+                onChange={(v) => handlePersonalInfoChange('location', v)}
+                error={getFieldError('personalInfo', 'location')}
+                placeholder="Ahmedabad, Gujarat"
+              />
 
+              <div style={TWO_UP}>
                 <InputField
                   label="LinkedIn"
                   value={resumeData.personalInfo.linkedin}
-                  onChange={(value) => handlePersonalInfoChange('linkedin', value)}
-                  placeholder="https://linkedin.com/in/username"
+                  onChange={(v) => handlePersonalInfoChange('linkedin', v)}
                   error={getFieldError('personalInfo', 'linkedin')}
-                  helperText="Must include linkedin.com"
-                  maxLength={200}
+                  placeholder="linkedin.com/in/you"
                 />
-
                 <InputField
                   label="GitHub"
                   value={resumeData.personalInfo.github}
-                  onChange={(value) => handlePersonalInfoChange('github', value)}
-                  placeholder="https://github.com/username"
+                  onChange={(v) => handlePersonalInfoChange('github', v)}
                   error={getFieldError('personalInfo', 'github')}
-                  helperText="Must include github.com"
-                  maxLength={200}
-                />
-
-                <InputField
-                  label="Website"
-                  value={resumeData.personalInfo.website}
-                  onChange={(value) => handlePersonalInfoChange('website', value)}
-                  placeholder="https://yourwebsite.com"
-                  error={getFieldError('personalInfo', 'website')}
-                  maxLength={200}
+                  placeholder="github.com/you"
                 />
               </div>
-            </div>
+
+              <InputField
+                label="Website"
+                value={resumeData.personalInfo.website}
+                onChange={(v) => handlePersonalInfoChange('website', v)}
+                error={getFieldError('personalInfo', 'website')}
+                placeholder="yoursite.com"
+              />
+            </Section>
 
             {/* Education */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Education</h3>
-                <button
-                  onClick={addEducation}
-                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
-                >
-                  + Add Education
-                </button>
-              </div>
+            <Section label="Education" onAdd={addEducation} addLabel="Add education">
               {resumeData.education.map((edu, index) => (
-                <div key={index} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-white">Education {index + 1}</h4>
-                    {resumeData.education.length > 1 && (
-                      <button
-                        onClick={() => removeEducation(index)}
-                        className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Entry
+                  key={index}
+                  ordinal={index + 1}
+                  onRemove={resumeData.education.length > 1 ? () => removeEducation(index) : undefined}
+                >
+                  <InputField
+                    label="Degree"
+                    value={edu.degree}
+                    onChange={(v) => handleEducationChange(index, 'degree', v)}
+                    error={getFieldError('education', 'degree', index)}
+                    placeholder="B.E. Computer Engineering"
+                  />
+                  <InputField
+                    label="Institution"
+                    value={edu.institution}
+                    onChange={(v) => handleEducationChange(index, 'institution', v)}
+                    error={getFieldError('education', 'institution', index)}
+                    placeholder="Gujarat Technological University"
+                  />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
                     <InputField
-                      className="md:col-span-2"
-                      label="Degree"
-                      value={edu.degree}
-                      onChange={(value) => handleEducationChange(index, 'degree', value)}
-                      placeholder="Bachelor of Science in Computer Science"
-                      required
-                      error={getFieldError('education', 'degree', index)}
-                      maxLength={200}
-                    />
-
-                    <InputField
-                      className="md:col-span-2"
-                      label="Institution"
-                      value={edu.institution}
-                      onChange={(value) => handleEducationChange(index, 'institution', value)}
-                      placeholder="University Name"
-                      required
-                      error={getFieldError('education', 'institution', index)}
-                      maxLength={200}
-                    />
-
-                    <InputField
-                      label="Start Date"
+                      label="Start year"
                       value={edu.startDate}
-                      onChange={(value) => handleEducationChange(index, 'startDate', value)}
-                      placeholder="2018 or Sep 2018"
+                      onChange={(v) => handleEducationChange(index, 'startDate', v)}
                       error={getFieldError('education', 'startDate', index)}
-                      helperText="Year or Month Year format"
-                      maxLength={20}
+                      placeholder="2022"
                     />
-
                     <InputField
-                      label="End Date"
+                      label="End year"
                       value={edu.endDate}
-                      onChange={(value) => handleEducationChange(index, 'endDate', value)}
-                      placeholder="2022 or Present"
+                      onChange={(v) => handleEducationChange(index, 'endDate', v)}
                       error={getFieldError('education', 'endDate', index)}
-                      helperText="Year, Month Year, or Present"
-                      maxLength={20}
+                      placeholder="2026"
                     />
-
                     <InputField
-                      label="CGPA/GPA"
+                      label="CGPA"
                       value={edu.cgpa}
-                      onChange={(value) => handleEducationChange(index, 'cgpa', value)}
-                      placeholder="3.8"
+                      onChange={(v) => handleEducationChange(index, 'cgpa', v)}
                       error={getFieldError('education', 'cgpa', index)}
-                      helperText="Numbers only (0-10)"
-                      maxLength={5}
+                      placeholder="8.4"
                     />
                   </div>
-                </div>
+                </Entry>
               ))}
-            </div>
+            </Section>
 
             {/* Experience */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Experience</h3>
-                <button
-                  onClick={addExperience}
-                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
+            <Section label="Experience" onAdd={addExperience} addLabel="Add experience">
+              {resumeData.experience.map((exp, index) => (
+                <Entry
+                  key={index}
+                  ordinal={index + 1}
+                  onRemove={resumeData.experience.length > 1 ? () => removeExperience(index) : undefined}
                 >
-                  + Add Experience
-                </button>
-              </div>
-              {resumeData.experience.map((exp, expIndex) => (
-                <div key={expIndex} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-white">Experience {expIndex + 1}</h4>
-                    {resumeData.experience.length > 1 && (
-                      <button
-                        onClick={() => removeExperience(expIndex)}
-                        className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div style={TWO_UP}>
                     <InputField
                       label="Position"
                       value={exp.position}
-                      onChange={(value) => handleExperienceChange(expIndex, 'position', value)}
-                      placeholder="Software Engineer"
-                      required
-                      error={getFieldError('experience', 'position', expIndex)}
-                      maxLength={100}
+                      onChange={(v) => handleExperienceChange(index, 'position', v)}
+                      error={getFieldError('experience', 'position', index)}
+                      placeholder="Full Stack Developer"
                     />
-
                     <InputField
                       label="Company"
                       value={exp.company}
-                      onChange={(value) => handleExperienceChange(expIndex, 'company', value)}
-                      placeholder="Company Name"
-                      required
-                      error={getFieldError('experience', 'company', expIndex)}
-                      maxLength={100}
+                      onChange={(v) => handleExperienceChange(index, 'company', v)}
+                      error={getFieldError('experience', 'company', index)}
+                      placeholder="Acme Ltd"
                     />
-
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
                     <InputField
                       label="Location"
                       value={exp.location}
-                      onChange={(value) => handleExperienceChange(expIndex, 'location', value)}
-                      placeholder="City, State"
-                      error={getFieldError('experience', 'location', expIndex)}
-                      helperText="City, State format"
-                      maxLength={100}
+                      onChange={(v) => handleExperienceChange(index, 'location', v)}
+                      error={getFieldError('experience', 'location', index)}
+                      placeholder="Ahmedabad"
                     />
-
                     <InputField
-                      label="Start Date"
+                      label="Start year"
                       value={exp.startDate}
-                      onChange={(value) => handleExperienceChange(expIndex, 'startDate', value)}
-                      placeholder="Jan 2020"
-                      error={getFieldError('experience', 'startDate', expIndex)}
-                      helperText="Month Year format"
-                      maxLength={20}
+                      onChange={(v) => handleExperienceChange(index, 'startDate', v)}
+                      error={getFieldError('experience', 'startDate', index)}
+                      placeholder="2024"
                     />
-
                     <InputField
-                      label="End Date"
+                      label="End year"
                       value={exp.endDate}
-                      onChange={(value) => handleExperienceChange(expIndex, 'endDate', value)}
-                      placeholder="Present"
-                      error={getFieldError('experience', 'endDate', expIndex)}
-                      helperText="Month Year or 'Present'"
-                      maxLength={20}
+                      onChange={(v) => handleExperienceChange(index, 'endDate', v)}
+                      error={getFieldError('experience', 'endDate', index)}
+                      placeholder="2026"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">Responsibilities</label>
-                    {exp.responsibilities.map((resp, respIndex) => (
-                      <div key={respIndex} className="mb-2">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <MicroLabel size={11} tracking="0.12em">Responsibilities</MicroLabel>
+                      <Button variant="quietClay" onClick={() => addResponsibility(index)}>Add line</Button>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {exp.responsibilities.map((resp, respIndex) => (
                         <InputField
+                          key={respIndex}
+                          showLabel={false}
+                          textarea
+                          rows={2}
                           value={resp}
-                          onChange={(value) => handleResponsibilityChange(expIndex, respIndex, value)}
-                          placeholder="Describe your responsibility"
-                          error={getFieldError('experience', 'responsibilities', expIndex, respIndex)}
-                          helperText="Minimum 5 characters"
-                          maxLength={300}
+                          onChange={(v) => handleResponsibilityChange(index, respIndex, v)}
+                          error={getFieldError('experience', 'responsibilities', index, respIndex)}
+                          placeholder="What you did, and what changed because of it"
                         />
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => addResponsibility(expIndex)}
-                      className="text-sm text-cyan-400 hover:text-cyan-300 font-medium mt-2 transition-colors"
-                    >
-                      + Add Responsibility
-                    </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </Entry>
               ))}
-            </div>
+            </Section>
 
             {/* Projects */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Projects</h3>
-                <button
-                  onClick={addProject}
-                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
+            <Section label="Projects" onAdd={addProject} addLabel="Add project">
+              {resumeData.projects.map((proj, index) => (
+                <Entry
+                  key={index}
+                  ordinal={index + 1}
+                  onRemove={resumeData.projects.length > 1 ? () => removeProject(index) : undefined}
                 >
-                  + Add Project
-                </button>
-              </div>
-              {resumeData.projects.map((project, projIndex) => (
-                <div key={projIndex} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-white">Project {projIndex + 1}</h4>
-                    {resumeData.projects.length > 1 && (
-                      <button
-                        onClick={() => removeProject(projIndex)}
-                        className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    <InputField
-                      label="Project Title"
-                      value={project.title}
-                      onChange={(value) => handleProjectChange(projIndex, 'title', value)}
-                      placeholder="Project Name"
-                      required
-                      error={getFieldError('projects', 'title', projIndex)}
-                      maxLength={100}
-                    />
+                  <InputField
+                    label="Title"
+                    value={proj.title}
+                    onChange={(v) => handleProjectChange(index, 'title', v)}
+                    error={getFieldError('projects', 'title', index)}
+                    placeholder="EduPath"
+                  />
+                  <InputField
+                    label="Description"
+                    textarea
+                    rows={3}
+                    maxLength={500}
+                    value={proj.description}
+                    onChange={(v) => handleProjectChange(index, 'description', v)}
+                    error={getFieldError('projects', 'description', index)}
+                    placeholder="What it does and what you built"
+                  />
 
-                    <InputField
-                      label="Description"
-                      value={project.description}
-                      onChange={(value) => handleProjectChange(projIndex, 'description', value)}
-                      placeholder="Brief description of the project"
-                      error={getFieldError('projects', 'description', projIndex)}
-                      maxLength={500}
-                      textarea={true}
-                      rows={3}
-                    />
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-2">Technologies</label>
-                      {project.technologies.map((tech, techIndex) => (
-                        <div key={techIndex} className="mb-2">
-                          <InputField
-                            value={tech}
-                            onChange={(value) => handleTechnologyChange(projIndex, techIndex, value)}
-                            placeholder="e.g., React, Node.js"
-                            error={getFieldError('projects', 'technologies', projIndex, techIndex)}
-                            helperText="Technology name only"
-                            maxLength={50}
-                          />
-                        </div>
-                      ))}
-                      <button
-                        onClick={() => addTechnology(projIndex)}
-                        className="text-sm text-cyan-400 hover:text-cyan-300 font-medium mt-2 transition-colors"
-                      >
-                        + Add Technology
-                      </button>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <MicroLabel size={11} tracking="0.12em">Technologies</MicroLabel>
+                      <Button variant="quietClay" onClick={() => addTechnology(index)}>Add one</Button>
                     </div>
-
-                    <InputField
-                      label="Project Link"
-                      value={project.link}
-                      onChange={(value) => handleProjectChange(projIndex, 'link', value)}
-                      placeholder="https://github.com/username/project"
-                      error={getFieldError('projects', 'link', projIndex)}
-                      helperText="Must be a valid URL"
-                      maxLength={200}
-                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {proj.technologies.map((tech, techIndex) => (
+                        <InputField
+                          key={techIndex}
+                          showLabel={false}
+                          value={tech}
+                          onChange={(v) => handleTechnologyChange(index, techIndex, v)}
+                          placeholder="React"
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
+
+                  <InputField
+                    label="Link"
+                    value={proj.link}
+                    onChange={(v) => handleProjectChange(index, 'link', v)}
+                    error={getFieldError('projects', 'link', index)}
+                    placeholder="github.com/you/edupath"
+                  />
+                </Entry>
               ))}
-            </div>
+            </Section>
 
             {/* Skills */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Skills</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Technical Skills</label>
-                  {resumeData.skills.technical.map((skill, index) => (
-                    <div key={index} className="mb-2">
-                      <InputField
-                        value={skill}
-                        onChange={(value) => handleSkillChange('technical', index, value)}
-                        placeholder="e.g., JavaScript, Python, React"
-                        error={getFieldError('skills', 'technical', index)}
-                        helperText="Enter one technical skill"
-                        maxLength={50}
-                      />
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => addSkill('technical')}
-                    className="text-sm text-cyan-400 hover:text-cyan-300 font-medium mt-2 transition-colors"
-                  >
-                    + Add Technical Skill
-                  </button>
+            <Section label="Skills">
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <MicroLabel size={11} tracking="0.12em">Technical</MicroLabel>
+                  <Button variant="quietClay" onClick={() => addSkill('technical')}>Add one</Button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Soft Skills</label>
-                  {resumeData.skills.soft.map((skill, index) => (
-                    <div key={index} className="mb-2">
-                      <InputField
-                        value={skill}
-                        onChange={(value) => handleSkillChange('soft', index, value)}
-                        placeholder="e.g., Leadership, Communication"
-                        error={getFieldError('skills', 'soft', index)}
-                        helperText="Enter one soft skill"
-                        maxLength={50}
-                      />
-                    </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {resumeData.skills.technical.map((skill, index) => (
+                    <InputField
+                      key={index}
+                      showLabel={false}
+                      value={skill}
+                      onChange={(v) => handleSkillChange('technical', index, v)}
+                      placeholder="JavaScript"
+                    />
                   ))}
-                  <button
-                    onClick={() => addSkill('soft')}
-                    className="text-sm text-cyan-400 hover:text-cyan-300 font-medium mt-2 transition-colors"
-                  >
-                    + Add Soft Skill
-                  </button>
                 </div>
               </div>
-            </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <MicroLabel size={11} tracking="0.12em">Soft</MicroLabel>
+                  <Button variant="quietClay" onClick={() => addSkill('soft')}>Add one</Button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {resumeData.skills.soft.map((skill, index) => (
+                    <InputField
+                      key={index}
+                      showLabel={false}
+                      value={skill}
+                      onChange={(v) => handleSkillChange('soft', index, v)}
+                      placeholder="Communication"
+                    />
+                  ))}
+                </div>
+              </div>
+            </Section>
 
             {/* Certifications */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Certifications</h3>
-                <button
-                  onClick={addCertification}
-                  className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40"
-                >
-                  + Add Certification
-                </button>
-              </div>
+            <Section label="Certifications" onAdd={addCertification} addLabel="Add certification">
               {resumeData.certifications.map((cert, index) => (
-                <div key={index} className="mb-6 p-4 bg-[#0a0a0a] border border-white/5 rounded-xl shadow-lg">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-semibold text-white">Certification {index + 1}</h4>
-                    {resumeData.certifications.length > 1 && (
-                      <button
-                        onClick={() => removeCertification(index)}
-                        className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                      >
-                        Remove
-                      </button>
-                    )}
+                <Entry
+                  key={index}
+                  ordinal={index + 1}
+                  onRemove={resumeData.certifications.length > 1 ? () => removeCertification(index) : undefined}
+                >
+                  <InputField
+                    label="Name"
+                    value={cert.name}
+                    onChange={(v) => handleCertificationChange(index, 'name', v)}
+                    error={getFieldError('certifications', 'name', index)}
+                    placeholder="AWS Certified Cloud Practitioner"
+                  />
+                  <div style={TWO_UP}>
+                    <InputField
+                      label="Issuer"
+                      value={cert.issuer}
+                      onChange={(v) => handleCertificationChange(index, 'issuer', v)}
+                      error={getFieldError('certifications', 'issuer', index)}
+                      placeholder="Amazon Web Services"
+                    />
+                    <InputField
+                      label="Year"
+                      value={cert.date}
+                      onChange={(v) => handleCertificationChange(index, 'date', v)}
+                      error={getFieldError('certifications', 'date', index)}
+                      placeholder="2026"
+                    />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <InputField
-                        label="Certification Name"
-                        value={cert.name}
-                        onChange={(value) => handleCertificationChange(index, 'name', value)}
-                        placeholder="AWS Certified Solutions Architect"
-                        required
-                        error={getFieldError('certifications', 'name', index)}
-                        maxLength={100}
-                      />
-                    </div>
-                    <div>
-                      <InputField
-                        label="Issuer"
-                        value={cert.issuer}
-                        onChange={(value) => handleCertificationChange(index, 'issuer', value)}
-                        placeholder="Amazon Web Services"
-                        required
-                        error={getFieldError('certifications', 'issuer', index)}
-                        maxLength={100}
-                      />
-                    </div>
-                    <div>
-                      <InputField
-                        label="Date"
-                        value={cert.date}
-                        onChange={(value) => handleCertificationChange(index, 'date', value)}
-                        placeholder="Jan 2023"
-                        error={getFieldError('certifications', 'date', index)}
-                        helperText="Month and year"
-                        maxLength={20}
-                      />
-                    </div>
-                  </div>
-                </div>
+                </Entry>
               ))}
-            </div>
+            </Section>
 
             {/* Achievements */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Achievements</h3>
+            <Section label="Achievements" onAdd={addAchievement} addLabel="Add achievement">
               {resumeData.achievements.map((achievement, index) => (
-                <div key={index} className="mb-2">
-                  <InputField
-                    value={achievement}
-                    onChange={(value) => handleAchievementChange(index, value)}
-                    placeholder="Describe your achievement"
-                    error={getFieldError('achievements', 'achievement', index)}
-                    helperText="Minimum 5 characters"
-                    maxLength={200}
-                  />
-                </div>
+                <InputField
+                  key={index}
+                  showLabel={false}
+                  value={achievement}
+                  onChange={(v) => handleAchievementChange(index, v)}
+                  placeholder="Won the 2026 university hackathon"
+                />
               ))}
-              <button
-                onClick={addAchievement}
-                className="text-sm text-cyan-400 hover:text-cyan-300 font-medium mt-2 transition-colors"
-              >
-                + Add Achievement
-              </button>
-            </div>
+            </Section>
           </div>
-
-          {/* Sidebar Actions */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Quick Actions */}
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-6 sticky top-28 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent mb-4">Generate Resume</h3>
-
-              {message && (
-                <div className={`mb-4 p-3 rounded-xl text-sm font-medium ${
-                  message.includes('success')
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    : 'bg-red-500/20 text-red-300 border border-red-500/30'
-                }`}>
-                  {message}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-3">
-                    Download Format
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => setFormat('pdf')}
-                      className={`px-4 py-3 rounded-xl font-medium border transition-all duration-200 ${
-                        format === 'pdf'
-                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400/50 text-cyan-400'
-                          : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
-                      }`}
-                    >
-                      PDF
-                    </button>
-                    <button
-                      onClick={() => setFormat('docx')}
-                      className={`px-4 py-3 rounded-xl font-medium border transition-all duration-200 ${
-                        format === 'docx'
-                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400/50 text-cyan-400'
-                          : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
-                      }`}
-                    >
-                      DOCX
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleGenerateResume}
-                  disabled={loading}
-                  className="w-full px-6 py-3.5 rounded-xl font-bold text-sm transition-all duration-500 bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Generating...
-                    </span>
-                  ) : (
-                    'Generate Resume'
-                  )}
-                </button>
-
-                <p className="text-xs text-gray-400 text-center mt-3">
-                  Fill in your information and click to generate your professional resume
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
         )}
+
+        {/* Right — the document card, then the two-up action row. */}
+        <div style={{ position: 'sticky', top: 26 }}>
+          <Card>
+            <CardHeader
+              label="Document"
+              right={
+                <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">
+                  {showPreview ? 'GENERATED' : 'DRAFT'}
+                </MicroLabel>
+              }
+            />
+            <div style={{ maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }}>
+              <ResumeDocument data={resumeData} />
+            </div>
+          </Card>
+
+          {!showPreview && (
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              <Button onClick={handleGenerateResume} loading={loading} loadingLabel="Generating…">
+                Generate resume
+              </Button>
+              <Button variant="secondary" onClick={() => navigate('/ats-analyzer')}>
+                Run ATS check
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </LearnerShell>
   );
 }
 

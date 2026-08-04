@@ -186,7 +186,8 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
               <LabelledBar
                 key={g.label}
                 label={g.label}
-                value={`${g.value}%`}
+                value={g.value}
+                display={`${g.value}%`}
                 max={100}
                 tone={g.value >= 70 ? 'green' : g.value >= 35 ? 'amber' : 'clay'}
               />

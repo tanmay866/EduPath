@@ -92,12 +92,14 @@ export const ShareChart = ({ data = [] }) => {
   );
 };
 
-/** Labelled horizontal bar — the ATS breakdown and roadmap gap report. */
-export const LabelledBar = ({ label, value, max = 100, tone = 'navy', style }) => (
+/** Labelled horizontal bar — the ATS breakdown and roadmap gap report.
+    `value` sets the fill and must stay numeric; `display` is what the mono
+    figure prints, so a caller can show "72%" without the bar reading NaN. */
+export const LabelledBar = ({ label, value, display, max = 100, tone = 'navy', style }) => (
   <div style={style}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
       <span style={{ fontSize: 13.5, color: 'var(--color-text-2)' }}>{label}</span>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, color: 'var(--color-text-3)' }}>{value}</span>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, color: 'var(--color-text-3)' }}>{display ?? value}</span>
     </div>
     <div style={{ height: 5, background: 'var(--color-bar-empty)' }}>
       <div style={{ height: 5, width: `${Math.min(100, ((Number(value) || 0) / max) * 100)}%`, background: `var(--color-${tone})` }} />
