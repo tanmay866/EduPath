@@ -73,7 +73,14 @@ export const AuthShell = ({ quote, attribution, footLabel = 'EDUPATH', children 
 
    The shell itself is pinned to 100vh with `overflow: hidden`; only <main>
    scrolls. Sidebar and header stay put on long pages instead of scrolling
-   out of view with the content. */
+   out of view with the content.
+
+   The sidebar's logo box and the header share a fixed HEADER_HEIGHT rather
+   than each sizing to its own content (24px padding around a 26px logo vs.
+   18px padding around an eyebrow + a 30px heading naturally land at
+   different heights) — otherwise their border-bottoms sit at two different
+   rows instead of forming one line across the page. */
+const HEADER_HEIGHT = 93;
 const NavItem = ({ to, children, dark = false, end = false }) => (
   <NavLink
     to={to}
@@ -140,7 +147,7 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
         overflowY: 'auto',
       }}
     >
-      <div style={{ padding: 24, borderBottom: '1px solid var(--color-line)' }}>
+      <div style={{ height: HEADER_HEIGHT, flexShrink: 0, display: 'flex', alignItems: 'center', padding: '0 24px', borderBottom: '1px solid var(--color-line)' }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
           <Wordmark size={26} labelSize={22} />
         </Link>
@@ -177,9 +184,10 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
     <div style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflow: 'hidden' }}>
       <header
         style={{
+          height: HEADER_HEIGHT,
           background: 'var(--color-surface)',
           borderBottom: '1px solid var(--color-line)',
-          padding: '18px 32px',
+          padding: '0 32px 18px',
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'space-between',
