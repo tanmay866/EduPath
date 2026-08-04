@@ -57,7 +57,7 @@ const App = () => {
 
     return (
 
-      <div className="bg-slate-950 min-h-screen">
+      <div style={{ background: 'var(--color-paper)', minHeight: '100vh' }}>
         {/* Admin Routes */}
 
         <ToastContainer
@@ -90,7 +90,7 @@ const App = () => {
 
   } else {
     return (
-      <div className="bg-slate-950 min-h-screen">
+      <div style={{ background: 'var(--color-paper)', minHeight: '100vh' }}>
 
         <ToastContainer
           position="bottom-right"
@@ -108,12 +108,12 @@ const App = () => {
 
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<PageTransition><Navbar /><Home /><Footer /></PageTransition>} />
-          <Route path="/about" element={<PageTransition><Navbar /><About /></PageTransition>} />
-          <Route path="/work" element={<PageTransition><Navbar /><Work /></PageTransition>} />
-          <Route path="/contact" element={<PageTransition><Navbar /><Contact /></PageTransition>} />
-          <Route path="/faq" element={<PageTransition><Navbar /><FAQ /></PageTransition>} />
-          <Route path="/services" element={<PageTransition><Navbar /><Services /></PageTransition>} />
+          <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
+          <Route path="/about" element={<><Navbar /><About /><Footer /></>} />
+          <Route path="/work" element={<><Navbar /><Work /><Footer /></>} />
+          <Route path="/contact" element={<><Navbar /><Contact /><Footer /></>} />
+          <Route path="/faq" element={<><Navbar /><FAQ /><Footer /></>} />
+          <Route path="/services" element={<><Navbar /><Services /><Footer /></>} />
           <Route path="/roadmap" element={<PageTransition><Navbar /><CareerRoadmap /></PageTransition>} />
           <Route path="/roadmap/generate" element={<RoadmapPage />} />
           <Route path="/signup" element={<Signup />} />
