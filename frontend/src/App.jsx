@@ -125,14 +125,14 @@ const App = () => {
           <Route path="/profile" element={<PageTransition><Navbar /><ProfilePage /></PageTransition>} />
           <Route path="/settings" element={<PageTransition><Navbar /><SettingsPage /></PageTransition>} />
           <Route path="/resume" element={<PageTransition><Navbar /><ResumePage /></PageTransition>} />
-          <Route path="/assessment" element={<PageTransition><AssessmentDashboard /></PageTransition>} />
+          <Route path="/assessment" element={<AssessmentDashboard />} />
           <Route path="/assessment/instructions" element={<PageTransition><AssessmentInstructions /></PageTransition>} />
           <Route path="/assessment/result" element={<PageTransition><AllResult /></PageTransition>} />
           <Route path="/assessment/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
           <Route path="/assessment/result/:resultId" element={<PageTransition><ResultPage /></PageTransition>} />
 
           {/* Assessment Hub Routes */}
-          <Route path="/assessment-hub" element={<PageTransition><Navbar /><AssessmentHub /></PageTransition>} />
+          <Route path="/assessment-hub" element={<AssessmentHub />} />
           <Route path="/assessment-hub/skill" element={<PageTransition><Navbar /><SkillAssessment /></PageTransition>} />
           <Route path="/assessment-hub/aptitude" element={<PageTransition><Navbar /><AptitudeTest /></PageTransition>} />
           <Route path="/assessment-hub/cs-fundamentals" element={<PageTransition><Navbar /><CSFundamentals /></PageTransition>} />

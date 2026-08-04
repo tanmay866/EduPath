@@ -114,7 +114,7 @@ const SignOut = ({ dark = false }) => {
   );
 };
 
-export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, children }) => (
+export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, footLabel, children }) => (
   <div style={{ display: 'grid', gridTemplateColumns: '230px 1fr', minHeight: '100vh' }}>
     <aside
       style={{
@@ -148,9 +148,11 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, ch
         ))}
       </nav>
 
+      {/* The label names who is signed in rather than repeating a nav section
+          heading, which would print "Account" twice in the same column. */}
       <div style={{ marginTop: 'auto', borderTop: '1px solid var(--color-line)', padding: 24 }}>
-        <MicroLabel size={10.5} tracking="0.14em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10 }}>
-          Account
+        <MicroLabel size={10.5} tracking="0.14em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10, wordBreak: 'break-all' }}>
+          {footLabel || 'Signed in'}
         </MicroLabel>
         <SignOut />
       </div>

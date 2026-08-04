@@ -1,26 +1,30 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { fetchQuizTopics, getQuizStats, getQuizHistory } from "../../Services/assessmentService";
-import { useQuiz } from "../../Context/QuizContext";
-import BackToHomeButton from "../../../component/Assessment/BackToHomeButton";
-import DashboardHeader from "./components/DashboardHeader";
-import PerformanceCards from "./components/PerformanceCards";
-import PreviousAttemptsTable from "./components/PreviousAttemptsTable";
-import { Brain, Zap } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { fetchQuizTopics, getQuizStats, getQuizHistory } from '../../Services/assessmentService';
+import {
+  LearnerShell, StatStrip, Card, CardHeader, CardFooterNote, InkPanel,
+  OrdinalRow, ListItem, Button, ProgressBar, MicroLabel, Badge, Loading, Empty, type,
+} from '../../../design';
+import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../../design/nav';
 
+/**
+ * Spec §7 Overview.
+ *
+ * Stat strip of four, then 1.4fr / 1fr: recent activity as ordinal rows on the
+ * left, the next action and an ink panel stacked on the right.
+ */
 const AssessmentDashboard = () => {
-  const { setAssessment } = useQuiz();
   const navigate = useNavigate();
 
-  const [topics,  setTopics]  = useState([]);
-  const [stats,   setStats]   = useState(null);
+  const [topics, setTopics] = useState([]);
+  const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
-    if (!token) { navigate('/signin'); return; }
+    if (!token) navigate('/signin');
   }, [navigate]);
 
   useEffect(() => { fetchDashboardData(); }, []);
@@ -31,127 +35,143 @@ const AssessmentDashboard = () => {
       const [topicsRes, statsRes, historyRes] = await Promise.all([
         fetchQuizTopics(),
         getQuizStats().catch(() => ({ data: { data: { overall: { totalQuizzes: 0, averageScore: 0 }, topicPerformance: [] } } })),
-        getQuizHistory().catch(() => ({ data: { data: { results: [] } } }))
+        getQuizHistory().catch(() => ({ data: { data: { results: [] } } })),
       ]);
       setTopics(topicsRes.data?.data || []);
       setStats(statsRes.data?.data || null);
       setHistory(historyRes.data?.data?.results || []);
     } catch (err) {
-      console.error("Failed to fetch dashboard data:", err);
-      setError("Failed to load dashboard data");
+      console.error('Failed to fetch dashboard data:', err);
+      setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
   };
 
-  const performanceCardsConfig = stats ? [
-    {
-      id: 1, label: "Total Attempts", value: stats.overall?.totalQuizzes || 0, color: "blue",
-      icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
-    },
-    {
-      id: 2, label: "Average Score", value: `${Math.round(stats.overall?.averageScore || 0)}%`, color: "purple",
-      icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
-    },
-    {
-      id: 3, label: "Topics Covered", value: stats.topicPerformance?.length || 0, color: "yellow",
-      icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
-    },
-    {
-      id: 4, label: "Last Attempt", value: history[0]?.status?.toUpperCase() || "N/A",
-      color: history[0]?.status === "pass" ? "green" : "red",
-      icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>,
-    },
-  ] : [];
+  const attempts = stats?.overall?.totalQuizzes || 0;
+  const average = Math.round(stats?.overall?.averageScore || 0);
+  const covered = stats?.topicPerformance?.length || 0;
+  const last = history[0];
 
-  const previousAttempts = history.slice(0, 5).map(attempt => ({
-    id:             attempt._id,
-    resultId:       attempt._id,
-    date:           new Date(attempt.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    score:          attempt.score,
-    totalQuestions: attempt.totalQuestions,
-    percentage:     attempt.percentage,
-    status:         attempt.percentage >= 70 ? 'Pass' : 'Fail',
-  }));
+  const statItems = [
+    { label: 'Attempts', value: attempts },
+    { label: 'Average score', value: average, suffix: '/100' },
+    { label: 'Topics covered', value: covered },
+    { label: 'Last result', value: last ? Math.round(last.percentage) : '—', suffix: last ? '/100' : undefined },
+  ];
+
+  const recent = history.slice(0, 3);
+
+  const shell = (children) => (
+    <LearnerShell
+      sections={learnerNav}
+      eyebrow="Learner"
+      title="Overview"
+      note={sessionName()}
+      initials={sessionInitials()}
+      footLabel={sessionLoginId()}
+    >
+      {children}
+    </LearnerShell>
+  );
 
   if (error) {
-    return (
-      <div className="flex min-h-screen bg-black items-center justify-center">
-        <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-rose-500/20 shadow-2xl p-10 text-center max-w-md">
-          <p className="text-rose-400 font-black text-lg mb-2">Failed to load</p>
-          <p className="text-slate-500 text-sm">{error}</p>
-        </div>
-      </div>
+    return shell(
+      <Card>
+        <Empty action={<Button onClick={fetchDashboardData}>Try again</Button>}>{error}</Empty>
+      </Card>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+  if (loading) {
+    return shell(<Card><Loading /></Card>);
+  }
 
-      {/* ── Animated background ── */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.08) 1px, transparent 1px)',
-          backgroundSize: '36px 36px',
-        }} />
-        <div style={{
-          position: 'absolute', top: '5%', left: '10%',
-          width: 520, height: 520, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%)',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '10%', right: '8%',
-          width: 380, height: 380, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.05), transparent 70%)',
-        }} />
-      </div>
+  return shell(
+    <>
+      <StatStrip items={statItems} />
 
-      <div className="relative z-10 pt-10 pb-20 px-4 md:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-
-          {/* Back to home — top right */}
-          <div className="mb-6 flex justify-end">
-            <BackToHomeButton />
-          </div>
-
-          <DashboardHeader totalAttempts={stats?.overall?.totalQuizzes || 0} />
-
-          <PerformanceCards cards={performanceCardsConfig} />
-
-          {/* ── Start Assessment CTA ── */}
-          <div className="mb-10">
-            <div className="relative backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-10 overflow-hidden text-center">
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'radial-gradient(circle at 50% 120%, rgba(99,102,241,0.1), transparent 65%)',
-                pointerEvents: 'none',
-              }} />
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center mx-auto mb-5">
-                  <Brain size={24} className="text-indigo-400" />
-                </div>
-                <h2 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
-                  Ready to Test Your Skills?
-                </h2>
-                <p className="text-slate-500 text-sm mb-8 max-w-md mx-auto">
-                  Start a new assessment and challenge yourself with AI-generated questions
-                </p>
-                <button
-                  onClick={() => navigate("/assessment/quiz")}
-                  className="inline-flex items-center gap-2.5 px-8 py-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-black rounded-xl hover:scale-105 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-300"
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
+        {/* Left — recent activity as ordinal rows */}
+        <Card>
+          <CardHeader label="Recent attempts" />
+          {recent.length === 0 ? (
+            <Empty action={<Button onClick={() => navigate('/assessment/quiz')}>Take an assessment</Button>}>
+              Your assessment results will appear here.
+            </Empty>
+          ) : (
+            recent.map((attempt, i) => {
+              const pct = Math.round(attempt.percentage);
+              const passed = pct >= 70;
+              return (
+                <div
+                  key={attempt._id}
+                  style={{ padding: '18px 20px', borderBottom: i === recent.length - 1 ? 'none' : '1px solid var(--color-line-soft)' }}
                 >
-                  <Zap size={16} />
-                  Start Skill Assessment
-                </button>
-              </div>
-            </div>
-          </div>
+                  <OrdinalRow
+                    ordinal={String(i + 1).padStart(2, '0')}
+                    right={
+                      <Button
+                        variant={i === 0 ? 'attention' : 'secondary'}
+                        style={i === 0 ? undefined : { padding: '9px 16px', fontSize: 13.5 }}
+                        onClick={() => navigate(`/assessment/result/${attempt._id}`)}
+                      >
+                        Review
+                      </Button>
+                    }
+                  >
+                    <ListItem
+                      title={attempt.topicName || attempt.topic?.name || 'Assessment'}
+                      detail={
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Badge tone={passed ? 'green' : 'clay'}>{`SCORE ${pct}`}</Badge>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, color: 'var(--color-text-4)' }}>
+                            {new Date(attempt.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </span>
+                        </span>
+                      }
+                    />
+                  </OrdinalRow>
+                </div>
+              );
+            })
+          )}
+          {recent.length > 0 && (
+            <CardFooterNote>
+              Showing the {recent.length} most recent of {history.length}.
+            </CardFooterNote>
+          )}
+        </Card>
 
-          <PreviousAttemptsTable attempts={previousAttempts} />
+        {/* Right — next action, then one ink panel */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+          <Card>
+            <CardHeader label="Next up" />
+            <div style={{ padding: '20px 22px' }}>
+              <div style={{ ...type.panelHeading, color: 'var(--color-ink)' }}>Skill assessment</div>
+              <p style={{ fontSize: 14.5, color: 'var(--color-text-2)', margin: '8px 0 18px', lineHeight: 1.55 }}>
+                {covered > 0
+                  ? `You have covered ${covered} ${covered === 1 ? 'topic' : 'topics'}. Another pass sharpens the roadmap.`
+                  : 'Take your first assessment so the roadmap knows where to start.'}
+              </p>
+
+              <ProgressBar value={average} height={6} tone="navy" />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, marginBottom: 20 }}>
+                <MicroLabel size={11} tracking="0.1em" color="var(--color-text-3)">{`${average}% AVERAGE`}</MicroLabel>
+                <MicroLabel size={11} tracking="0.1em" color="var(--color-text-4)">{`${attempts} TAKEN`}</MicroLabel>
+              </div>
+
+              <Button fullWidth onClick={() => navigate('/assessment/quiz')}>Start assessment</Button>
+            </div>
+          </Card>
+
+          <InkPanel label="Method" title="Assess, then plan.">
+            The roadmap is generated from what you actually got wrong, not from a
+            template. Each assessment you take narrows it further.
+          </InkPanel>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
