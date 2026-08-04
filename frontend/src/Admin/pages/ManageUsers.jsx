@@ -19,12 +19,18 @@ import { useAdminData } from '../useAdminData';
  *
  * Blocking flips `isActive` on the account. Deleting takes the person's quiz
  * results and roadmaps with them, so it asks first.
+ *
+ * The API refuses an admin blocking or deleting their own account, but a
+ * button that is clickable and then fails is a worse interface than one that
+ * was never clickable — Block/Delete are disabled outright on the signed-in
+ * admin's own row rather than relying on the round trip to say no.
  */
 const COLUMNS = '1.2fr 1.4fr 0.7fr 0.7fr 0.8fr';
 const STATUSES = ['All', 'Active', 'Blocked'];
 
 const ManageUsers = () => {
   const { data, loading, error, reload, setData } = useAdminData(getUsers);
+  const currentUserId = sessionStorage.getItem('userId');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [actionError, setActionError] = useState('');
@@ -110,40 +116,50 @@ const ManageUsers = () => {
             {filteredUsers.length === 0 ? (
               <Empty>No user matches that search.</Empty>
             ) : (
-              filteredUsers.map((user) => (
-                <TableRow key={user._id} columns={COLUMNS}>
-                  <span style={{ color: user.isBlocked ? 'var(--color-text-4)' : 'var(--color-ink)' }}>
-                    {user.name}
-                  </span>
-                  <span style={{ fontSize: 13.5, color: 'var(--color-text-2)' }}>{user.email}</span>
-                  <NumCell tone="var(--color-text-4)" size={12.5}>{shortDate(user.createdAt)}</NumCell>
-                  <MicroLabel
-                    size={11}
-                    tracking="0.1em"
-                    color={user.isBlocked ? 'var(--color-clay)' : 'var(--color-green)'}
-                  >
-                    {user.isBlocked ? 'Blocked' : 'Active'}
-                  </MicroLabel>
-                  <ActionCell>
-                    <Button
-                      variant="secondary"
-                      style={{ padding: '7px 13px', fontSize: 13 }}
-                      loading={busyId === user._id}
-                      loadingLabel="…"
-                      onClick={() => handleToggleBlock(user)}
+              filteredUsers.map((user) => {
+                const isSelf = user._id === currentUserId;
+                return (
+                  <TableRow key={user._id} columns={COLUMNS}>
+                    <span style={{ color: user.isBlocked ? 'var(--color-text-4)' : 'var(--color-ink)' }}>
+                      {user.name}
+                      {isSelf && (
+                        <span style={{ fontSize: 12, color: 'var(--color-text-4)' }}> (you)</span>
+                      )}
+                    </span>
+                    <span style={{ fontSize: 13.5, color: 'var(--color-text-2)' }}>{user.email}</span>
+                    <NumCell tone="var(--color-text-4)" size={12.5}>{shortDate(user.createdAt)}</NumCell>
+                    <MicroLabel
+                      size={11}
+                      tracking="0.1em"
+                      color={user.isBlocked ? 'var(--color-clay)' : 'var(--color-green)'}
                     >
-                      {user.isBlocked ? 'Unblock' : 'Block'}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      style={{ padding: '7px 13px', fontSize: 13 }}
-                      onClick={() => setPendingDelete(user)}
-                    >
-                      Delete
-                    </Button>
-                  </ActionCell>
-                </TableRow>
-              ))
+                      {user.isBlocked ? 'Blocked' : 'Active'}
+                    </MicroLabel>
+                    <ActionCell>
+                      <Button
+                        variant="secondary"
+                        style={{ padding: '7px 13px', fontSize: 13 }}
+                        loading={busyId === user._id}
+                        loadingLabel="…"
+                        disabled={isSelf}
+                        title={isSelf ? 'You cannot block your own account' : undefined}
+                        onClick={() => handleToggleBlock(user)}
+                      >
+                        {user.isBlocked ? 'Unblock' : 'Block'}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        style={{ padding: '7px 13px', fontSize: 13 }}
+                        disabled={isSelf}
+                        title={isSelf ? 'You cannot delete your own account here' : undefined}
+                        onClick={() => setPendingDelete(user)}
+                      >
+                        Delete
+                      </Button>
+                    </ActionCell>
+                  </TableRow>
+                );
+              })
             )}
 
             <CardFooterNote>
