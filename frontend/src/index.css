@@ -1,404 +1,181 @@
 @import "tailwindcss";
 
-/* Smooth Scroll Behavior */
-html {
-  scroll-behavior: smooth;
+/* ==========================================================================
+   Design tokens — design_handoff_edupath_redesign/DESIGN_SPEC.md §2, §3
+
+   Values are copied literally from the spec, which states they are final.
+   The previous stylesheet held ~400 lines of moving shapes, gradients, glass
+   toasts and arrival animations; §1 forbids all of them, so none carries over.
+   Removing the `[data-animate]` rules also means elements still carrying that
+   attribute render visible instead of waiting on an observer.
+   ========================================================================== */
+
+@theme {
+  /* Ink and paper */
+  --color-ink: #12100e;
+  --color-ink-soft: #1c1a17;
+  --color-paper: #efeeea;
+  --color-paper-warm: #f1f0ec;
+  --color-paper-light: #f8f7f3;
+
+  /* Surfaces */
+  --color-surface: #ffffff;
+  --color-surface-active: #f6f5f1;
+  --color-surface-current: #faf9f5;
+  --color-surface-attn: #faf7f0;
+  --color-surface-field: #fbfaf7;
+
+  /* Meaning — colour appears only for status, delta and severity */
+  --color-navy: #1b3a5c;
+  --color-navy-2: #2f5a80;
+  --color-clay: #b4491f;
+  --color-clay-dark: #8e3715;
+  --color-green: #2f6b45;
+  --color-amber: #b07d11;
+
+  /* Text ramp */
+  --color-text-2: #4a4740;
+  --color-text-3: #6e6b64;
+  --color-text-4: #8a867e;
+
+  /* Rules and borders */
+  --color-line: #e3e1d9;
+  --color-line-soft: #efeee8;
+  --color-line-input: #d8d5cc;
+  --color-line-btn: #c9c6bc;
+  --color-line-opt: #dad7ce;
+  --color-bar-empty: #e9e7df;
+
+  /* On ink */
+  --color-dark-text: #e9e7df;
+  --color-dark-text-2: #a8a49b;
+  --color-dark-text-3: #6e6a62;
+
+  /* Type. Every number, date, score and badge is mono; prose never is. */
+  --font-display: Newsreader, serif;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  /* Radius 0 everywhere. Overriding the scale means a stray `rounded-xl` left
+     over from the old theme renders square rather than off-spec. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
 }
 
-/* ── Page transition on route change ── */
-@keyframes pageFadeIn {
-  from {
-    opacity: 0;
-  }
+/* ==========================================================================
+   Base
+   ========================================================================== */
 
-  to {
-    opacity: 1;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-paper);
 }
 
-.page-transition {
-  animation: pageFadeIn 0.35s ease forwards;
-}
-
-/* ── Scroll-triggered entrance animations ── */
-[data-animate] {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-[data-animate].animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Respect user's reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  [data-animate] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .page-transition {
-    animation: none;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background-color: #000;
-  color: #e2e8f0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
 }
 
-/* Profile Modal Animations */
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+a {
+  color: var(--color-clay);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-clay-dark);
+  text-decoration: underline;
+}
+
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--color-navy);
+  color: #fff;
+}
+
+/* Spec §5 Button: focus ring 2px solid navy, offset 2px. */
+:focus-visible {
+  outline: 2px solid var(--color-navy);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Toasts
+
+   react-toastify is used across the app. The spec has no toast; its nearest
+   equivalent is the inline message bar (§5), so toasts borrow that treatment:
+   square, flat, white, hairline border, no shadow.
+   ========================================================================== */
+
+.Toastify__toast {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-line) !important;
+  color: var(--color-ink) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  padding: 11px 14px !important;
+  min-height: 0 !important;
+}
+
+.Toastify__toast--success {
+  border-color: var(--color-green) !important;
+  color: var(--color-green) !important;
+}
+
+.Toastify__toast--error {
+  border-color: var(--color-clay) !important;
+  color: var(--color-clay) !important;
+}
+
+.Toastify__toast--info,
+.Toastify__toast--warning {
+  border-color: var(--color-line-btn) !important;
+  color: var(--color-text-2) !important;
+}
+
+.Toastify__progress-bar {
+  display: none !important;
+}
+
+.Toastify__close-button {
+  color: var(--color-text-4) !important;
+  opacity: 1 !important;
+}
+
+/* ==========================================================================
+   Motion
+
+   Spec §5: effectively none. State changes only, ≤120ms, on background or
+   border colour. Nothing animates on arrival.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slideUp {
-  animation: slideUp 0.3s ease-out;
-}
-
-.animate-slideDown {
-  animation: slideDown 0.3s ease-out;
-}
-
-/* Custom Range Slider Styles */
-input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #4f46e5;
-  cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-  background: #6366f1;
-  transform: scale(1.1);
-}
-
-input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #4f46e5;
-  cursor: pointer;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-input[type="range"]::-moz-range-thumb:hover {
-  background: #6366f1;
-  transform: scale(1.1);
-}
-
-/* Live Moving Background Animations */
-@keyframes moveAcross {
-  0% {
-    transform: translateX(-100px) translateY(0) rotate(0deg);
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 0.6;
-  }
-
-  90% {
-    opacity: 0.6;
-  }
-
-  100% {
-    transform: translateX(calc(100vw + 100px)) translateY(-50px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-@keyframes moveAcrossReverse {
-  0% {
-    transform: translateX(calc(100vw + 100px)) translateY(0) rotate(0deg);
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 0.6;
-  }
-
-  90% {
-    opacity: 0.6;
-  }
-
-  100% {
-    transform: translateX(-100px) translateY(50px) rotate(-360deg);
-    opacity: 0;
-  }
-}
-
-@keyframes moveDiagonal {
-  0% {
-    transform: translate(-100px, 100vh) scale(0.5);
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 0.5;
-  }
-
-  90% {
-    opacity: 0.5;
-  }
-
-  100% {
-    transform: translate(calc(100vw + 100px), -100px) scale(1.2);
-    opacity: 0;
-  }
-}
-
-@keyframes floatUpDown {
-
-  0%,
-  100% {
-    transform: translateY(0) translateX(0);
-  }
-
-  25% {
-    transform: translateY(-30px) translateX(20px);
-  }
-
-  50% {
-    transform: translateY(-60px) translateX(-20px);
-  }
-
-  75% {
-    transform: translateY(-30px) translateX(20px);
-  }
-}
-
-@keyframes rotateAndScale {
-
-  0%,
-  100% {
-    transform: rotate(0deg) scale(1);
-  }
-
-  50% {
-    transform: rotate(180deg) scale(1.3);
-  }
-}
-
-.animated-bg {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-  background: #000;
-}
-
-.neural-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.moving-shape {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(40px);
-  opacity: 0;
-}
-
-.shape-1 {
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.8), transparent);
-  top: 20%;
-  animation: moveAcross 15s linear infinite;
-}
-
-.shape-2 {
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.8), transparent);
-  top: 60%;
-  animation: moveAcrossReverse 20s linear infinite 3s;
-}
-
-.shape-3 {
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.8), transparent);
-  top: 40%;
-  animation: moveAcross 18s linear infinite 7s;
-}
-
-.shape-4 {
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.8), transparent);
-  top: 80%;
-  animation: moveAcrossReverse 22s linear infinite 5s;
-}
-
-.shape-5 {
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.7), transparent);
-  animation: moveDiagonal 25s linear infinite;
-}
-
-.shape-6 {
-  width: 160px;
-  height: 160px;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.7), transparent);
-  animation: moveDiagonal 28s linear infinite 10s;
-}
-
-.shape-7 {
-  width: 140px;
-  height: 140px;
-  background: radial-gradient(circle, rgba(96, 165, 250, 0.7), transparent);
-  top: 5%;
-  animation: moveAcross 16s linear infinite 2s;
-}
-
-.shape-8 {
-  width: 110px;
-  height: 110px;
-  background: radial-gradient(circle, rgba(167, 139, 250, 0.6), transparent);
-  top: 10%;
-  animation: moveAcrossReverse 19s linear infinite 8s;
-}
-
-.floating-particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: rgba(147, 197, 253, 0.8);
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(147, 197, 253, 0.5);
-  animation: floatUpDown 6s ease-in-out infinite;
-}
-
-.rotating-gradient {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background: conic-gradient(from 0deg, transparent, rgba(99, 102, 241, 0.4), transparent);
-  border-radius: 50%;
-  filter: blur(30px);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: rotateAndScale 20s linear infinite;
-}
-
-/* Toast Glassmorphism Effect */
-.toast-glass {
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  background-color: rgba(17, 25, 40, 0.75) !important;
-  border: 1px solid rgba(255, 255, 255, 0.125) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
-}
-
-.Toastify__toast--success.toast-glass {
-  background-color: rgba(34, 197, 94, 0.2) !important;
-  border: 1px solid rgba(34, 197, 94, 0.3) !important;
-}
-
-.Toastify__toast--error.toast-glass {
-  background-color: rgba(239, 68, 68, 0.2) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
-}
-
-.Toastify__toast--info.toast-glass {
-  background-color: rgba(59, 130, 246, 0.2) !important;
-  border: 1px solid rgba(59, 130, 246, 0.3) !important;
-}
-
-.Toastify__toast--warning.toast-glass {
-  background-color: rgba(251, 146, 60, 0.2) !important;
-  border: 1px solid rgba(251, 146, 60, 0.3) !important;
-}
-
-/* Custom Scrollbar Styles */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.5);
-  border-radius: 10px;
-  transition: background 0.3s ease;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.7);
-}
-
-/* Firefox scrollbar */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(139, 92, 246, 0.5) rgba(255, 255, 255, 0.05);
-}
-
-/* Fade In Animation */
-@keyframes fadeSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
 }
