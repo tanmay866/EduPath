@@ -14,7 +14,10 @@ import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../
  * Centred 700px with a quiet Back link above the title. Card one is the
  * password change — three fields in a 20px column, the requirements checklist
  * under the new password, an inline message bar and a left-aligned primary.
- * Card two carries a clay header label and a single row: a clay title with its
+ * Card two is Session — the one row that used to live as a quiet link in the
+ * marketing header for anyone signed in; it belongs with the rest of the
+ * account actions instead of duplicated on every public page. Card three
+ * carries a clay header label and a single row: a clay title with its
  * consequence line, and a destructive button that opens the modal.
  */
 const SettingsPage = () => {
@@ -30,11 +33,23 @@ const SettingsPage = () => {
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
+  // Sign out state
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
+
   // Account deletion state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleSignOut = () => {
+    sessionStorage.clear();
+    // App.jsx picks admin vs. learner routes by reading sessionStorage
+    // directly at render time, not through React state, so a plain
+    // navigate() wouldn't re-run that check — see design/shells.jsx's
+    // SignOut for the same reasoning. A hard reload does.
+    window.location.href = '/signin';
+  };
 
   const handleDeleteAccount = async () => {
     setDeleteLoading(true);
@@ -185,7 +200,39 @@ const SettingsPage = () => {
           </form>
         </Card>
 
-        {/* Card 2 — the one destructive action on the screen */}
+        {/* Card 2 — session */}
+        <Card style={{ marginTop: 22 }}>
+          <CardHeader label="Session" />
+
+          <div
+            style={{
+              padding: '17px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 24,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>
+                Sign out
+              </div>
+              <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                Ends your session on this device. You will need your password to get back in.
+              </p>
+            </div>
+
+            <Button
+              variant="secondary"
+              style={{ flexShrink: 0, padding: '10px 20px', fontSize: 14 }}
+              onClick={() => setShowSignOutModal(true)}
+            >
+              Sign out
+            </Button>
+          </div>
+        </Card>
+
+        {/* Card 3 — the one destructive action on the screen */}
         <Card style={{ marginTop: 22 }}>
           <CardHeader
             label={
@@ -224,6 +271,20 @@ const SettingsPage = () => {
           </div>
         </Card>
       </div>
+
+      <Modal
+        open={showSignOutModal}
+        onClose={() => setShowSignOutModal(false)}
+        title="Sign out?"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setShowSignOutModal(false)}>Stay signed in</Button>
+            <Button onClick={handleSignOut}>Sign out</Button>
+          </>
+        }
+      >
+        You will need your password to get back in. Nothing you have saved is removed.
+      </Modal>
 
       {/* Two independent confirmations: the password proves it is really them,
           typing DELETE proves the click was deliberate. */}
