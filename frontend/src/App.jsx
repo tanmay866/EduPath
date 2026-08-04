@@ -1,7 +1,6 @@
 import React from 'react'
 import Navbar from './component/Navbar/Navbar'
 import { Routes, Route } from 'react-router-dom'
-import PageTransition from './component/PageTransition'
 import Home from './Pages/Home/Home'
 import About from './Pages/About/About'
 import Work from './Pages/Work/Work'
@@ -114,7 +113,7 @@ const App = () => {
           <Route path="/contact" element={<><Navbar /><Contact /><Footer /></>} />
           <Route path="/faq" element={<><Navbar /><FAQ /><Footer /></>} />
           <Route path="/services" element={<><Navbar /><Services /><Footer /></>} />
-          <Route path="/roadmap" element={<PageTransition><Navbar /><CareerRoadmap /></PageTransition>} />
+          <Route path="/roadmap" element={<><Navbar /><CareerRoadmap /><Footer /></>} />
           <Route path="/roadmap/generate" element={<RoadmapPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
@@ -122,19 +121,19 @@ const App = () => {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/resume" element={<PageTransition><Navbar /><ResumePage /></PageTransition>} />
+          <Route path="/resume" element={<ResumePage />} />
           <Route path="/assessment" element={<AssessmentDashboard />} />
-          <Route path="/assessment/instructions" element={<PageTransition><AssessmentInstructions /></PageTransition>} />
-          <Route path="/assessment/result" element={<PageTransition><AllResult /></PageTransition>} />
-          <Route path="/assessment/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
+          <Route path="/assessment/instructions" element={<AssessmentInstructions />} />
+          <Route path="/assessment/result" element={<AllResult />} />
+          <Route path="/assessment/quiz" element={<QuizPage />} />
           <Route path="/assessment/result/:resultId" element={<ResultPage />} />
 
           {/* Assessment Hub Routes */}
           <Route path="/assessment-hub" element={<AssessmentHub />} />
-          <Route path="/assessment-hub/skill" element={<PageTransition><Navbar /><SkillAssessment /></PageTransition>} />
-          <Route path="/assessment-hub/aptitude" element={<PageTransition><Navbar /><AptitudeTest /></PageTransition>} />
-          <Route path="/assessment-hub/cs-fundamentals" element={<PageTransition><Navbar /><CSFundamentals /></PageTransition>} />
-          <Route path="/assessment-hub/mock-interview" element={<PageTransition><Navbar /><AIMockInterview /></PageTransition>} />
+          <Route path="/assessment-hub/skill" element={<><Navbar /><SkillAssessment /></>} />
+          <Route path="/assessment-hub/aptitude" element={<><Navbar /><AptitudeTest /></>} />
+          <Route path="/assessment-hub/cs-fundamentals" element={<><Navbar /><CSFundamentals /></>} />
+          <Route path="/assessment-hub/mock-interview" element={<><Navbar /><AIMockInterview /></>} />
 
           {/* New Feature Routes */}
           <Route path="/resume-builder" element={<ResumeBuilder />} />
