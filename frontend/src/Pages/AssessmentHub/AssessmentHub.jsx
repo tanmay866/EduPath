@@ -29,7 +29,12 @@ const AssessmentHub = () => {
         const token = sessionStorage.getItem('token');
         if (token) {
           const response = await getQuizHistory();
-          if (response.data && response.data.history && response.data.history.length > 0) {
+          // The endpoint returns { success, data: { results, pagination } } —
+          // this was reading response.data.history, a field that has never
+          // existed, so the card sat on "NOT TAKEN" no matter how many
+          // attempts were on record.
+          const total = response.data?.data?.pagination?.total ?? 0;
+          if (total > 0) {
             setCompletedAssessments((prev) => ({ ...prev, skill: true }));
           }
         }
@@ -41,12 +46,17 @@ const AssessmentHub = () => {
     checkCompletedAssessments();
   }, []);
 
+  // Only the Skill Assessment writes attempts anywhere retrievable — the
+  // other three all say so on their own instructions screen ("Results from
+  // this test are not written to your quiz history"), so there is no
+  // results page to send a learner to for them.
   const assessments = [
     {
       kicker: 'Technical',
       title: 'Skill Assessment',
       description: 'Analyze your technical skills and discover your strengths and weaknesses.',
       path: '/assessment-hub/skill',
+      resultsPath: '/assessment',
       duration: '20 MIN',
       completed: completedAssessments.skill,
     },
@@ -55,6 +65,7 @@ const AssessmentHub = () => {
       title: 'Aptitude Test',
       description: 'Test your logical reasoning, quantitative ability, and problem-solving skills.',
       path: '/assessment-hub/aptitude',
+      resultsPath: null,
       duration: '25 MIN',
       completed: completedAssessments.aptitude,
     },
@@ -63,6 +74,7 @@ const AssessmentHub = () => {
       title: 'CS Fundamentals',
       description: 'Questions on operating systems, networks, databases and data structures.',
       path: '/assessment-hub/cs-fundamentals',
+      resultsPath: null,
       duration: '20 MIN',
       completed: completedAssessments.csFundamentals,
     },
@@ -71,6 +83,7 @@ const AssessmentHub = () => {
       title: 'AI Mock Interview',
       description: 'Answer role-specific questions and get scored feedback on each response.',
       path: '/assessment-hub/mock-interview',
+      resultsPath: null,
       duration: '30 MIN',
       completed: completedAssessments.mockInterview,
     },
@@ -134,7 +147,9 @@ const AssessmentHub = () => {
                 ) : (
                   <Button variant="attention" onClick={() => navigate(a.path)}>Start</Button>
                 )}
-                <Button variant="quiet" onClick={() => navigate('/assessment')}>See results</Button>
+                {a.completed && a.resultsPath && (
+                  <Button variant="quiet" onClick={() => navigate(a.resultsPath)}>See results</Button>
+                )}
               </div>
               <MicroLabel size={12} tracking="0.06em" color="var(--color-text-4)">{a.duration}</MicroLabel>
             </div>
