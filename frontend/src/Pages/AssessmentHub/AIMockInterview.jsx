@@ -1,23 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Mic,
-  MicOff,
-  Play,
-  Square,
-  Volume2,
-  VolumeX,
-  RotateCcw,
-  ChevronRight,
-  Award,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Sparkles,
-  User,
-  Bot
-} from 'lucide-react';
+  Card, CardHeader, CardFooterNote, Button, Toggle, MicroLabel, Loading, Empty, type,
+} from '../../design';
+
+/**
+ * AI mock interview — setup, then one question at a time with feedback after
+ * each, then a summary.
+ *
+ * §7 has no entry for this screen. The question step borrows the Quiz layout
+ * (header strip, 4px navy bar, Newsreader question) and both feedback panels
+ * borrow the Result layout (mono figure beside a verdict, then a point list).
+ */
+const Page = ({ children }) => (
+  <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
+    <div style={{ maxWidth: 760, margin: '0 auto' }}>{children}</div>
+  </div>
+);
+
+/** Interview scores run 0–10, not 0–100, so they get their own bands. */
+const scoreTone = (score) =>
+  score >= 8 ? 'var(--color-green)' : score >= 5 ? 'var(--color-amber)' : 'var(--color-clay)';
+
+const PointList = ({ label, items, tone }) => (
+  <div style={{ padding: '22px 34px', borderTop: '1px solid var(--color-line)' }}>
+    <MicroLabel size={10.5} tracking="0.13em" style={{ display: 'block', marginBottom: 12 }}>
+      {label}
+    </MicroLabel>
+    {items.map((item, i) => (
+      <div key={i} style={{ display: 'grid', gridTemplateColumns: '10px 1fr', gap: 14, marginTop: i ? 10 : 0, alignItems: 'start' }}>
+        <span style={{ width: 8, height: 8, marginTop: 7, background: tone, display: 'block' }} />
+        <span style={{ fontSize: 14.5, color: 'var(--color-text-2)', lineHeight: 1.55 }}>{item}</span>
+      </div>
+    ))}
+  </div>
+);
 import {
   speakInterviewQuestion,
   speakFeedback,
@@ -34,6 +51,7 @@ const AIMockInterview = () => {
 
   // Setup state
   const [roles, setRoles] = useState([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
   const [selectedRole, setSelectedRole] = useState(null);
 
   // Interview state
@@ -125,6 +143,7 @@ const AIMockInterview = () => {
 
   // Fetch available roles
   const fetchRoles = async () => {
+    setLoadingRoles(true);
     try {
       const response = await fetch(`${API_URL}/api/mock-interview/roles`);
       const data = await response.json();
@@ -133,6 +152,8 @@ const AIMockInterview = () => {
       }
     } catch (error) {
       console.error('Error fetching roles:', error);
+    } finally {
+      setLoadingRoles(false);
     }
   };
 
@@ -327,534 +348,325 @@ const AIMockInterview = () => {
     restartInterview();
   };
 
-  // Get score color
-  const getScoreColor = (score) => {
-    if (score >= 8) return 'text-green-400';
-    if (score >= 6) return 'text-yellow-400';
-    if (score >= 4) return 'text-orange-400';
-    return 'text-red-400';
-  };
-
-  // Get recommendation color
-  const getRecommendationColor = (rec) => {
-    switch (rec) {
-      case 'STRONG_HIRE': return 'bg-green-500/20 text-green-400 border-green-500/40';
-      case 'HIRE': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
-      case 'MAYBE': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40';
-      default: return 'bg-red-500/20 text-red-400 border-red-500/40';
-    }
-  };
-
   // Setup Stage
+  // ── Setup ──────────────────────────────────────────────────────────────
   if (stage === 'setup') {
     return (
-      <div className="min-h-screen bg-black w-full relative pt-32 pb-12 px-8 flex flex-col justify-center overflow-hidden">
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 relative z-10 items-center h-full max-h-[600px]">
-          
-          {/* Left Column: Branding (Spans 5 Columns) */}
-          <div className="lg:col-span-5 flex flex-col justify-center h-full">
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 mb-6 w-max">
-              <Mic size={16} className="animate-pulse" />
-              <span className="text-xs font-bold tracking-widest uppercase">Voice Enabled AI Engine</span>
-            </div>
-            
-            <h1 className="text-4xl lg:text-5xl font-black text-white mb-5 leading-[1.1] tracking-tight">
-              Master Your <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">Next Interview</span>
-            </h1>
-            
-            <p className="text-slate-400 text-lg mb-8 font-light max-w-md leading-relaxed hidden md:block">
-              Practice real scenarios with our AI-powered voice engine. Get instant, personalized feedback to secure your dream role.
-            </p>
+      <Page>
+        <div style={{ marginBottom: 18 }}>
+          <Button variant="quiet" onClick={() => navigate('/assessment-hub')}>Back to the hub</Button>
+        </div>
 
-            <div className="space-y-4 hidden md:block">
-              {[
-                { icon: "🎤", title: "Voice Interview", desc: "AI asks questions using natural voice" },
-                { icon: "🎯", title: "Real-time Feedback", desc: "Instant evaluation of your answers" },
-                { icon: "📊", title: "Detailed Analysis", desc: "Comprehensive performance summary" }
-              ].map((f, i) => (
-                <div key={i} className="flex items-center gap-4 group">
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center text-xl group-hover:bg-white/[0.05] group-hover:-translate-y-0.5 transition-all">
-                    {f.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-white font-bold text-sm tracking-wide mb-1">{f.title}</h3>
-                    <p className="text-slate-500 text-xs">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <Card>
+          <CardHeader
+            label="Mock interview"
+            right={
+              <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">
+                {`${TOTAL_QUESTIONS} QUESTIONS`}
+              </MicroLabel>
+            }
+          />
+
+          <div style={{ padding: '34px 34px 26px' }}>
+            <h1 style={{ ...type.cardHeading, margin: 0, color: 'var(--color-ink)' }}>
+              Say the answer out loud.
+            </h1>
+            <p style={{ ...type.body, margin: '12px 0 0', maxWidth: 560 }}>
+              Five questions for the role you pick, asked one at a time. Answer by speaking or by
+              typing, and each answer is scored with what worked and what to fix before the next one.
+            </p>
           </div>
 
-          {/* Right Column: Interactive Role Selection (Spans 7 Columns) */}
-          <div className="lg:col-span-7 backdrop-blur-3xl bg-[#090b14]/70 rounded-[2rem] border border-white/5 shadow-2xl p-6 lg:p-8 relative flex flex-col h-full max-h-[550px]">
-            
-            <div className="flex items-center justify-between mb-6 shrink-0">
-              <h2 className="text-2xl font-bold text-white">Select Your Role</h2>
-              <span className="px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 text-[11px] uppercase tracking-wider font-bold text-slate-400">
-                5 Questions
+          <div style={{ padding: '0 34px 6px' }}>
+            <MicroLabel size={10.5} tracking="0.13em" style={{ display: 'block', marginBottom: 14 }}>
+              Choose a role
+            </MicroLabel>
+          </div>
+
+          {loadingRoles ? (
+            <Loading label="Loading roles" />
+          ) : roles.length === 0 ? (
+            <Empty>No roles are available right now.</Empty>
+          ) : (
+            <div style={{ borderTop: '1px solid var(--color-line)' }}>
+              {roles.map((role, i) => {
+                const active = selectedRole?.id === role.id || selectedRole?.name === role.name;
+                return (
+                  <div
+                    key={role.id || role.name}
+                    onClick={() => setSelectedRole(role)}
+                    style={{
+                      padding: '15px 34px',
+                      borderBottom: i === roles.length - 1 ? 'none' : '1px solid var(--color-line-soft)',
+                      borderLeft: `3px solid ${active ? 'var(--color-clay)' : 'transparent'}`,
+                      background: active ? 'var(--color-surface-active)' : 'transparent',
+                      cursor: 'pointer',
+                      transition: 'background-color 120ms ease',
+                    }}
+                  >
+                    <div style={{ fontSize: 15.5, fontWeight: active ? 600 : 400, color: 'var(--color-ink)' }}>
+                      {role.name}
+                    </div>
+                    {role.description && (
+                      <div style={{ fontSize: 14, color: 'var(--color-text-3)', marginTop: 3 }}>
+                        {role.description}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div
+            style={{
+              padding: '17px 34px',
+              borderTop: '1px solid var(--color-line)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 24,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>Read questions aloud</div>
+              <div style={{ fontSize: 14, color: 'var(--color-text-3)', marginTop: 3 }}>
+                {voiceEnabled
+                  ? 'Questions and feedback are spoken as well as shown.'
+                  : 'Questions and feedback are shown only.'}
+              </div>
+            </div>
+            <Toggle checked={voiceEnabled} onChange={setVoiceEnabled} label="Read questions aloud" />
+          </div>
+
+          <div style={{ padding: '18px 34px', borderTop: '1px solid var(--color-line)' }}>
+            <Button onClick={startInterview} disabled={!selectedRole}>Start the interview</Button>
+          </div>
+
+          <CardFooterNote>
+            Speaking needs microphone access and a browser with speech recognition. Typing works
+            everywhere.
+          </CardFooterNote>
+        </Card>
+      </Page>
+    );
+  }
+
+  // ── Interview ──────────────────────────────────────────────────────────
+  if (stage === 'interview') {
+    const progress = (questionNumber / TOTAL_QUESTIONS) * 100;
+    const isLast = questionNumber >= TOTAL_QUESTIONS;
+
+    return (
+      <Page>
+        <Card>
+          <CardHeader
+            label={`Question ${questionNumber} of ${TOTAL_QUESTIONS}`}
+            right={
+              <span style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                {isSpeaking && (
+                  <Button variant="quiet" onClick={stopSpeaking}>Stop reading</Button>
+                )}
+                <MicroLabel size={11} tracking="0.1em" color="var(--color-clay)">
+                  {selectedRole?.name}
+                </MicroLabel>
+              </span>
+            }
+          />
+
+          <div style={{ height: 4, background: 'var(--color-bar-empty)' }}>
+            <div style={{ height: 4, width: `${progress}%`, background: 'var(--color-navy)' }} />
+          </div>
+
+          <div style={{ padding: '32px 34px 34px' }}>
+            {loadingQuestion ? (
+              <Loading label="Writing the question" />
+            ) : (
+              <h1 style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>{currentQuestion}</h1>
+            )}
+
+            {!currentFeedback && !loadingQuestion && (
+              <>
+                <div style={{ marginTop: 26 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <MicroLabel size={11} tracking="0.12em">Your answer</MicroLabel>
+                    <MicroLabel size={10.5} color={isRecording ? 'var(--color-clay)' : 'var(--color-text-4)'}>
+                      {isRecording ? 'LISTENING' : `${answer.trim().split(/\s+/).filter(Boolean).length} WORDS`}
+                    </MicroLabel>
+                  </div>
+
+                  <textarea
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    rows={7}
+                    placeholder="Speak, or type your answer here"
+                    style={{
+                      width: '100%',
+                      padding: '13px 14px',
+                      fontSize: 15,
+                      fontFamily: 'var(--font-sans)',
+                      lineHeight: 1.55,
+                      color: 'var(--color-ink)',
+                      background: '#fff',
+                      border: `1px solid ${isRecording ? 'var(--color-clay)' : 'var(--color-line-input)'}`,
+                      borderRadius: 0,
+                      outline: 'none',
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 20 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+                    <Button
+                      variant={isRecording ? 'attention' : 'secondary'}
+                      style={{ padding: '10px 20px', fontSize: 14 }}
+                      onClick={isRecording ? stopRecording : startRecording}
+                    >
+                      {isRecording ? 'Stop recording' : 'Record answer'}
+                    </Button>
+                    <Button variant="quiet" onClick={handleQuit}>Leave the interview</Button>
+                  </div>
+
+                  <Button
+                    onClick={submitAnswer}
+                    loading={loadingEvaluation}
+                    loadingLabel="Scoring…"
+                    disabled={!answer.trim()}
+                  >
+                    Submit answer
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+
+        {currentFeedback && (
+          <Card style={{ marginTop: 22 }}>
+            <CardHeader label="Feedback" />
+
+            <div style={{ padding: 34, display: 'flex', gap: 40, alignItems: 'flex-start' }}>
+              <div>
+                <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10 }}>
+                  Score
+                </MicroLabel>
+                <span style={{ ...type.heroMetric, color: scoreTone(currentFeedback.score), display: 'block', lineHeight: 1 }}>
+                  {currentFeedback.score}
+                  <span style={{ fontSize: 20, color: 'var(--color-text-4)' }}>/10</span>
+                </span>
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
+                  {currentFeedback.feedback}
+                </p>
+              </div>
+            </div>
+
+            {currentFeedback.strengths?.length > 0 && (
+              <PointList label="What worked" items={currentFeedback.strengths} tone="var(--color-green)" />
+            )}
+            {currentFeedback.improvements?.length > 0 && (
+              <PointList label="What to fix" items={currentFeedback.improvements} tone="var(--color-clay)" />
+            )}
+
+            <div style={{ padding: '18px 34px', borderTop: '1px solid var(--color-line)', display: 'flex', justifyContent: 'flex-end' }}>
+              <Button onClick={nextQuestion}>
+                {isLast ? 'Finish and see the summary' : 'Next question'}
+              </Button>
+            </div>
+          </Card>
+        )}
+      </Page>
+    );
+  }
+
+  // ── Result ─────────────────────────────────────────────────────────────
+  if (stage === 'result') {
+    if (loadingSummary) {
+      return <Page><Card><Loading label="Writing your summary" /></Card></Page>;
+    }
+
+    if (!summary) {
+      return (
+        <Page>
+          <Card>
+            <Empty action={<Button onClick={restartInterview}>Start over</Button>}>
+              The summary could not be generated. Your answers were still scored one by one.
+            </Empty>
+          </Card>
+        </Page>
+      );
+    }
+
+    return (
+      <Page>
+        <Card>
+          <CardHeader
+            label={selectedRole?.name || 'Mock interview'}
+            right={
+              <MicroLabel size={11} tracking="0.1em" color={scoreTone(summary.overallScore)}>
+                {String(summary.recommendation || '').replace(/_/g, ' ')}
+              </MicroLabel>
+            }
+          />
+
+          <div style={{ padding: 34, display: 'flex', gap: 40, alignItems: 'flex-start' }}>
+            <div>
+              <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10 }}>
+                Overall
+              </MicroLabel>
+              <span style={{ ...type.heroMetric, fontSize: 68, color: scoreTone(summary.overallScore), display: 'block', lineHeight: 1 }}>
+                {summary.overallScore}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 flex-1 overflow-y-auto pr-2 custom-scrollbar mask-fade-y pb-2">
-              {roles.map((role) => (
-                <button
-                  key={role.id}
-                  onClick={() => setSelectedRole(role)}
-                  className={`p-4 rounded-2xl border text-left transition-all duration-300 ease-out group flex flex-col justify-center relative overflow-hidden ${
-                    selectedRole?.id === role.id
-                      ? 'bg-gradient-to-br from-indigo-500/10 to-violet-500/10 border-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30 scale-[0.98]'
-                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
-                  }`}
-                >
-                  {selectedRole?.id === role.id && (
-                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/20 blur-xl rounded-full pointer-events-none" />
-                  )}
-                  <div className="relative z-10 w-full">
-                    <div className="text-2xl lg:text-3xl mb-2 group-hover:scale-110 group-hover:-rotate-3 transition-transform origin-left">{role.icon}</div>
-                    <h3 className="text-white font-bold text-sm lg:text-base mb-1">{role.name}</h3>
-                    <p className={`text-[10px] lg:text-[11px] font-medium leading-relaxed line-clamp-2 ${selectedRole?.id === role.id ? 'text-indigo-200' : 'text-slate-500'}`}>
-                      {role.description}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="pt-5 mt-4 border-t border-white/5 flex gap-4 shrink-0">
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-3 rounded-xl font-bold bg-white/5 text-slate-300 hover:bg-white/10 text-sm transition-all w-28"
-              >
-                Back
-              </button>
-              <button
-                onClick={startInterview}
-                disabled={!selectedRole}
-                className={`flex-1 flex items-center justify-between px-6 md:px-8 py-3 rounded-xl font-bold text-sm transition-all duration-500 group ${
-                  selectedRole
-                    ? 'bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40'
-                    : 'bg-white/5 border border-white/5 text-slate-500 cursor-not-allowed'
-                }`}
-              >
-                <span className="text-sm tracking-wide">
-                  {selectedRole ? 'Commence Interview' : 'Select a Role'}
-                </span>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-300 ${selectedRole ? 'bg-white/20' : 'bg-transparent'}`}>
-                  <Play size={14} className={`${selectedRole ? 'fill-white text-white' : 'text-slate-500'} ${selectedRole ? 'translate-x-[1px]' : ''}`} />
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Interview Stage
-  if (stage === 'interview') {
-    return (
-      <div className="min-h-screen bg-black relative pt-32 pb-12 px-6 flex flex-col items-center overflow-hidden">
-        <div className="max-w-7xl w-full mx-auto relative z-10 flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-indigo-500/10 text-indigo-400 rounded-2xl flex items-center justify-center border border-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.1)] shrink-0">
-                <Mic size={28} strokeWidth={1.5} />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight mb-1">{selectedRole?.name} Interview</h1>
-                <p className="text-indigo-400/80 text-sm font-medium">Question {questionNumber} of {TOTAL_QUESTIONS}</p>
-              </div>
-            </div>
-
-            {/* Voice Toggle and Quit Button */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  setVoiceEnabled(!voiceEnabled);
-                  if (isSpeaking) stopSpeaking();
-                }}
-                className={`p-3.5 rounded-xl transition-all duration-300 ${voiceEnabled
-                    ? 'bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]'
-                    : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10'
-                  }`}
-              >
-                {voiceEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-              </button>
-              <button
-                onClick={handleQuit}
-                className="px-5 py-3.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl hover:bg-rose-500/20 transition-colors text-sm font-bold"
-              >
-                Quit
-              </button>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
+                {summary.summary}
+              </p>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full h-1.5 bg-white/5 rounded-full mb-10 overflow-hidden backdrop-blur-sm">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out shadow-[0_0_15px_rgba(99,102,241,0.5)]"
-              style={{ width: `${(questionNumber / TOTAL_QUESTIONS) * 100}%` }}
-            />
-          </div>
+          {summary.topStrengths?.length > 0 && (
+            <PointList label="Strengths" items={summary.topStrengths} tone="var(--color-green)" />
+          )}
+          {summary.areasToImprove?.length > 0 && (
+            <PointList label="Work on" items={summary.areasToImprove} tone="var(--color-clay)" />
+          )}
 
-          {/* Split Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full items-start">
-            {/* Question Card */}
-          <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[2rem] shadow-2xl border border-white/5 p-8 mb-6 relative overflow-hidden">
-            {isSpeaking && (
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-pulse" />
-            )}
-            
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 rounded-full flex items-center justify-center">
-                <Bot size={24} className="text-indigo-400" />
-              </div>
-              <span className="text-indigo-400 font-bold uppercase tracking-widest text-xs">AI Interviewer</span>
-              {isSpeaking && (
-                <div className="flex items-center gap-1.5 ml-auto bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
-                  <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              )}
-            </div>
-
-            {loadingQuestion ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mb-4" />
-                <span className="text-slate-400 font-medium tracking-wide">Formulating next question...</span>
-              </div>
-            ) : (
-              <p className="text-white text-xl md:text-2xl leading-relaxed font-light">{currentQuestion}</p>
-            )}
-
-            {/* Speak Question Button */}
-            {currentQuestion && !isSpeaking && voiceEnabled && (
-              <button
-                onClick={() => speak(currentQuestion)}
-                className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-indigo-400 transition-colors border border-white/5 text-sm font-medium"
-              >
-                <Play size={14} />
-                <span>Replay Audio</span>
-              </button>
-            )}
-          </div>
-
-          {/* Answer Section */}
-          {!currentFeedback && (
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[2rem] shadow-2xl border border-white/5 p-8 mb-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center">
-                    <User size={24} className="text-emerald-400" />
-                  </div>
-                  <span className="text-emerald-400 font-bold uppercase tracking-widest text-xs">Your Answer</span>
-                </div>
-                {isRecording && (
-                  <div className="flex items-center gap-2 text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-full border border-rose-500/20">
-                    <div className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
-                    <span className="text-xs font-bold tracking-widest uppercase">Recording</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Answer Display */}
-              <div className={`rounded-2xl p-6 mb-8 min-h-[160px] border transition-all duration-300 ${isRecording ? 'bg-indigo-500/5 border-indigo-500/30 shadow-[inset_0_0_20px_rgba(99,102,241,0.05)]' : 'bg-black/40 border-white/5'}`}>
-                {answer ? (
-                  <p className="text-white text-lg leading-relaxed">{answer}</p>
-                ) : (
-                  <p className="text-slate-500 font-light flex items-center justify-center h-full text-center">
-                    {isRecording ? 'Listening carefully... speak your answer' : 'Click "Start Recording" when you are ready to answer'}
-                  </p>
-                )}
-              </div>
-
-              {/* Recording Controls */}
-              <div className="flex flex-wrap items-center gap-4">
-                {!isRecording ? (
-                  <button
-                    onClick={startRecording}
-                    disabled={loadingQuestion}
-                    className="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-xl font-bold shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0 w-full sm:w-auto"
-                  >
-                    <Mic size={20} />
-                    <span>Start Recording</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={stopRecording}
-                    className="flex items-center justify-center gap-3 px-8 py-4 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 shadow-xl shadow-rose-500/20 transition-all animate-pulse w-full sm:w-auto"
-                  >
-                    <Square size={20} className="fill-white" />
-                    <span>Stop Recording</span>
-                  </button>
-                )}
-
-                {answer && !isRecording && (
-                  <div className="flex gap-3 w-full sm:w-auto mt-4 sm:mt-0">
-                    <button
-                      onClick={submitAnswer}
-                      disabled={loadingEvaluation}
-                      className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl font-bold transition-all disabled:opacity-50"
-                    >
-                      {loadingEvaluation ? (
-                        <>
-                          <Loader2 size={20} className="animate-spin" />
-                          <span>Evaluating...</span>
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={20} />
-                          <span>Submit Answer</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setAnswer('')}
-                      className="px-4 py-4 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all focus:outline-none"
-                      title="Clear answer and try again"
-                    >
-                      <RotateCcw size={20} />
-                    </button>
-                  </div>
-                )}
-              </div>
+          {summary.advice && (
+            <div style={{ padding: '22px 34px', borderTop: '1px solid var(--color-line)' }}>
+              <MicroLabel size={10.5} tracking="0.13em" style={{ display: 'block', marginBottom: 10 }}>
+                Before the next one
+              </MicroLabel>
+              <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
+                {summary.advice}
+              </p>
             </div>
           )}
 
-          {/* Feedback Card */}
-          {currentFeedback && (
-            <div className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[2rem] shadow-2xl border border-white/5 p-8 mb-12">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-8 border-b border-white/5">
-                <div className="flex items-center gap-4 mb-4 md:mb-0">
-                  <div className="w-14 h-14 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(234,179,8,0.1)]">
-                    <Sparkles size={28} className="text-yellow-400" />
-                  </div>
-                  <span className="text-white text-xl font-bold tracking-tight">Feedback Analysis</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-400 font-medium text-sm">Rating</span>
-                  <div className={`px-4 py-2 rounded-xl border font-bold text-2xl ${getScoreColor(currentFeedback.score)} border-current bg-white/[0.02]`}>
-                    {currentFeedback.score}/10
-                  </div>
-                </div>
-              </div>
-
-              <div className="prose prose-invert max-w-none text-slate-300 mb-8 font-light text-lg leading-relaxed">
-                <p>{currentFeedback.feedback}</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {/* Strengths */}
-                {currentFeedback.strengths && currentFeedback.strengths.length > 0 && (
-                  <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-6">
-                    <h4 className="text-emerald-400 text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-                       <CheckCircle size={16} /> Key Strengths
-                    </h4>
-                    <ul className="space-y-3">
-                      {currentFeedback.strengths.map((s, i) => (
-                        <li key={i} className="flex gap-3 text-slate-300 text-sm items-start">
-                          <span className="text-emerald-500 mt-1">•</span> <span className="leading-relaxed">{s}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Improvements */}
-                {currentFeedback.improvements && currentFeedback.improvements.length > 0 && (
-                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-6">
-                    <h4 className="text-amber-400 text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
-                       <XCircle size={16} /> Areas to Detail
-                    </h4>
-                    <ul className="space-y-3">
-                      {currentFeedback.improvements.map((s, i) => (
-                        <li key={i} className="flex gap-3 text-slate-300 text-sm items-start">
-                          <span className="text-amber-500 mt-1">•</span> <span className="leading-relaxed">{s}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* Next Button */}
-              <button
-                onClick={nextQuestion}
-                className="w-full flex items-center justify-center gap-2 px-8 py-5 bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-xl font-bold hover:shadow-xl hover:shadow-indigo-500/25 hover:-translate-y-0.5 transition-all"
-              >
-                {questionNumber >= TOTAL_QUESTIONS ? (
-                  <>
-                    <Award size={20} />
-                    View Final Results
-                  </>
-                ) : (
-                  <>
-                    Proceed to Next Question
-                    <ChevronRight size={20} />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+          <div
+            style={{
+              padding: '18px 34px',
+              borderTop: '1px solid var(--color-line)',
+              display: 'flex',
+              gap: 12,
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Button variant="secondary" onClick={() => navigate('/assessment-hub')}>Back to the hub</Button>
+            <Button onClick={restartInterview}>Interview again</Button>
           </div>
-        </div>
-      </div>
+
+          <CardFooterNote>Mock interviews are not written to your quiz history.</CardFooterNote>
+        </Card>
+      </Page>
     );
   }
 
-  // Result Stage
-  if (stage === 'result') {
-    return (
-      <div className="min-h-screen bg-black relative pt-28 pb-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          {loadingSummary ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-16 h-16 text-purple-400 animate-spin mb-4" />
-              <p className="text-slate-400 text-lg">Analyzing your interview performance...</p>
-            </div>
-          ) : summary ? (
-            <>
-              {/* Header */}
-              <div className="text-center mb-8">
-                <div className="w-24 h-24 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-purple-500/40">
-                  <Award size={48} />
-                </div>
-                <h1 className="text-3xl font-bold text-white mb-2">Interview Complete!</h1>
-                <p className="text-slate-400">{selectedRole?.name} Interview Summary</p>
-              </div>
-
-              {/* Score Card */}
-              <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6 mb-6">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                  {/* Overall Score */}
-                  <div className="text-center">
-                    <div className={`text-6xl font-bold ${getScoreColor(summary.overallScore)}`}>
-                      {summary.overallScore}
-                    </div>
-                    <p className="text-slate-400">Overall Score</p>
-                  </div>
-
-                  {/* Recommendation Badge */}
-                  <div className={`px-6 py-3 rounded-xl border ${getRecommendationColor(summary.recommendation)}`}>
-                    <span className="text-lg font-bold">{summary.recommendation?.replace('_', ' ')}</span>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-white">{TOTAL_QUESTIONS}</div>
-                    <p className="text-slate-400">Questions Answered</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Summary */}
-              <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6 mb-6">
-                <h2 className="text-xl font-bold text-white mb-4">Performance Summary</h2>
-                <p className="text-slate-300 leading-relaxed">{summary.summary}</p>
-              </div>
-
-              {/* Strengths & Improvements */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Strengths */}
-                <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6">
-                  <h3 className="text-lg font-semibold text-green-400 mb-4 flex items-center gap-2">
-                    <CheckCircle size={20} />
-                    Top Strengths
-                  </h3>
-                  <ul className="space-y-2">
-                    {summary.topStrengths?.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2 text-slate-300">
-                        <span className="text-green-400 mt-1">•</span>
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Areas to Improve */}
-                <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6">
-                  <h3 className="text-lg font-semibold text-orange-400 mb-4 flex items-center gap-2">
-                    <XCircle size={20} />
-                    Areas to Improve
-                  </h3>
-                  <ul className="space-y-2">
-                    {summary.areasToImprove?.map((s, i) => (
-                      <li key={i} className="flex items-start gap-2 text-slate-300">
-                        <span className="text-orange-400 mt-1">•</span>
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Advice */}
-              {summary.advice && (
-                <div className="backdrop-blur-xl bg-purple-500/10 rounded-2xl shadow-2xl border border-purple-500/30 p-6 mb-6">
-                  <h3 className="text-lg font-semibold text-purple-400 mb-2 flex items-center gap-2">
-                    <Sparkles size={20} />
-                    AI Advice
-                  </h3>
-                  <p className="text-white">{summary.advice}</p>
-                </div>
-              )}
-
-              {/* Question Review */}
-              <div className="backdrop-blur-xl bg-slate-900/60 rounded-2xl shadow-2xl border border-white/10 p-6 mb-6">
-                <h2 className="text-xl font-bold text-white mb-4">Question Review</h2>
-                <div className="space-y-4">
-                  {results.map((r, i) => (
-                    <div key={i} className="bg-white/5 rounded-xl p-4 border border-white/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-slate-400 text-sm">Question {i + 1}</span>
-                        <span className={`font-bold ${getScoreColor(r.evaluation?.score || 0)}`}>
-                          {r.evaluation?.score || 0}/10
-                        </span>
-                      </div>
-                      <p className="text-white mb-2">{r.question}</p>
-                      <p className="text-slate-400 text-sm">Your answer: {r.answer}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={restartInterview}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-[1.02]"
-                >
-                  <RotateCcw size={20} />
-                  Try Another Interview
-                </button>
-                <button
-                  onClick={() => navigate('/')}
-                  className="flex-1 px-6 py-4 bg-white/10 border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all"
-                >
-                  Back to Home
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-20">
-              <p className="text-slate-400">Failed to generate summary. Please try again.</p>
-              <button
-                onClick={restartInterview}
-                className="mt-4 px-6 py-3 bg-purple-600 text-white rounded-lg"
-              >
-                Start Over
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+  return <Page><Card><Loading /></Card></Page>;
 };
 
 export default AIMockInterview;
