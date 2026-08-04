@@ -118,10 +118,10 @@ const App = () => {
           <Route path="/services" element={<PageTransition><Navbar /><Services /></PageTransition>} />
           <Route path="/roadmap" element={<PageTransition><Navbar /><CareerRoadmap /></PageTransition>} />
           <Route path="/roadmap/generate" element={<PageTransition><Navbar /><RoadmapPage /></PageTransition>} />
-          <Route path="/signup" element={<PageTransition><Navbar /><Signup /></PageTransition>} />
-          <Route path="/signin" element={<PageTransition><Navbar /><Signin /></PageTransition>} />
-          <Route path="/reset-password/:token" element={<PageTransition><Navbar /><ResetPassword /></PageTransition>} />
-          <Route path="/verify-email" element={<PageTransition><Navbar /><VerifyEmail /></PageTransition>} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/signin" element={<Signin />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/profile" element={<PageTransition><Navbar /><ProfilePage /></PageTransition>} />
           <Route path="/settings" element={<PageTransition><Navbar /><SettingsPage /></PageTransition>} />
           <Route path="/resume" element={<PageTransition><Navbar /><ResumePage /></PageTransition>} />

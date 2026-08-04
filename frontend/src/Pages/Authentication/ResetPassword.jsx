@@ -1,185 +1,116 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { HiArrowLeft } from 'react-icons/hi';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { resetPassword } from '../Services/profileService';
-import { getPasswordError, getApiErrorMessage } from '../../utils/passwordPolicy';
-import PasswordRequirements from '../../component/Ui/PasswordRequirements';
-import BackgroundAnimation from '../Assessment/AssesmentDashboard/components/BackgroundAnimation';
+import { getPasswordError, getApiErrorMessage, getPasswordRules } from '../../utils/passwordPolicy';
+import {
+  AuthShell, Field, FieldGroup, PasswordInput, PasswordRequirements, Button, InlineMessage, type,
+} from '../../design';
 
 const ResetPassword = () => {
-    const navigate = useNavigate();
-    const { token } = useParams();
-    const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        password: '',
-        confirmPassword: ''
-    });
+  const navigate = useNavigate();
+  const { token } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setMessage(null);
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-        // Validation
-        if (!formData.password || !formData.confirmPassword) {
-            toast.error('All fields are required');
-            setLoading(false);
-            return;
-        }
+    if (!formData.password || !formData.confirmPassword) {
+      setMessage({ tone: 'error', text: 'Both fields are required.' });
+      setLoading(false);
+      return;
+    }
 
-        const passwordError = getPasswordError(formData.password);
-        if (passwordError) {
-            toast.error(passwordError);
-            setLoading(false);
-            return;
-        }
+    const passwordError = getPasswordError(formData.password);
+    if (passwordError) {
+      setMessage({ tone: 'error', text: passwordError });
+      setLoading(false);
+      return;
+    }
 
-        if (formData.password !== formData.confirmPassword) {
-            toast.error('Passwords do not match');
-            setLoading(false);
-            return;
-        }
+    if (formData.password !== formData.confirmPassword) {
+      setMessage({ tone: 'error', text: 'Passwords do not match.' });
+      setLoading(false);
+      return;
+    }
 
-        try {
-            const response = await resetPassword(token, formData);
+    try {
+      const response = await resetPassword(token, formData);
 
-            if (response.success) {
-                // Save token if available
-                if (response.token) {
-                    sessionStorage.setItem('token', response.token);
-                }
+      if (response.success) {
+        if (response.token) sessionStorage.setItem('token', response.token);
+        toast.success(response.message || 'Password reset successful.');
+        setTimeout(() => navigate('/signin'), 1500);
+      }
+    } catch (error) {
+      setMessage({ tone: 'error', text: getApiErrorMessage(error, 'Failed to reset password. The link may have expired.') });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                toast.success(response.message || 'Password reset successful!');
+  return (
+    <AuthShell
+      quote="A password you had to write down was never protecting anything."
+      attribution="The EduPath method"
+      footLabel="PASSWORD RESET"
+    >
+      <h1 style={{ ...type.authHeading, margin: 0, color: 'var(--color-ink)' }}>Set a new password</h1>
 
-                // Redirect to signin after 2 seconds
-                setTimeout(() => {
-                    navigate('/signin');
-                }, 2000);
-            }
-        } catch (error) {
-            toast.error(getApiErrorMessage(error, 'Failed to reset password. Link may be expired.'));
-        } finally {
-            setLoading(false);
-        }
-    };
+      <p style={{ fontSize: 15, color: 'var(--color-text-3)', margin: '12px 0 32px' }}>
+        Remembered it? <Link to="/signin">Sign in</Link>
+      </p>
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-black pt-32 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-            <BackgroundAnimation />
+      <form onSubmit={handleSubmit} noValidate>
+        <FieldGroup>
+          <Field label="New password">
+            <PasswordInput
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              autoComplete="new-password"
+            />
+            <PasswordRequirements rules={getPasswordRules(formData.password)} />
+          </Field>
 
-            <div className="max-w-md w-full space-y-8 backdrop-blur-xl bg-slate-900/60 p-10 rounded-2xl shadow-2xl border border-white/10 relative z-10">
-                <button
-                    onClick={() => navigate('/signin')}
-                    className="absolute top-6 left-6 flex items-center gap-2 text-gray-300 hover:text-white transition-colors group"
-                >
-                    <HiArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-medium">Back to Sign In</span>
-                </button>
+          <Field label="Confirm new password">
+            <PasswordInput
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              autoComplete="new-password"
+              error={Boolean(formData.confirmPassword) && formData.confirmPassword !== formData.password}
+            />
+          </Field>
+        </FieldGroup>
 
-                <div className="text-center">
-                    <div className="mx-auto w-16 h-16 backdrop-blur-lg bg-indigo-500/30 rounded-2xl flex items-center justify-center border border-indigo-400/30 mb-4">
-                        <Lock size={32} className="text-white" />
-                    </div>
-                    <h2 className="mt-4 text-center text-4xl font-extrabold text-white">
-                        Reset Password
-                    </h2>
-                    <p className="mt-2 text-center text-sm text-gray-300">
-                        Enter your new password below
-                    </p>
-                </div>
+        {message && (
+          <InlineMessage tone={message.tone} style={{ marginTop: 22 }}>
+            {message.text}
+          </InlineMessage>
+        )}
 
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="space-y-4">
-                        {/* New Password */}
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                                New Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    required
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    className="appearance-none relative block w-full px-4 py-3 pr-11 border border-white/20 placeholder-gray-500 text-white bg-white/5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                    placeholder="Enter new password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(prev => !prev)}
-                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
-                                    tabIndex={-1}
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
-                            </div>
-                            <PasswordRequirements value={formData.password} />
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div>
-                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
-                                Confirm New Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    required
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    className="appearance-none relative block w-full px-4 py-3 pr-11 border border-white/20 placeholder-gray-500 text-white bg-white/5 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                    placeholder="Confirm new password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(prev => !prev)}
-                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
-                                    tabIndex={-1}
-                                >
-                                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Resetting Password...' : 'Reset Password'}
-                        </button>
-                    </div>
-
-                    <div className="text-center">
-                        <p className="text-sm text-gray-400">
-                            Remember your password?{' '}
-                            <button
-                                type="button"
-                                onClick={() => navigate('/signin')}
-                                className="font-medium text-indigo-400 hover:text-indigo-300"
-                            >
-                                Sign In
-                            </button>
-                        </p>
-                    </div>
-                </form>
-            </div>
+        <div style={{ marginTop: 26 }}>
+          <Button type="submit" fullWidth loading={loading} loadingLabel="Saving…">
+            Save new password
+          </Button>
         </div>
-    );
+      </form>
+
+      <p style={{ fontSize: 13, color: 'var(--color-text-4)', marginTop: 26, marginBottom: 0, lineHeight: 1.5 }}>
+        This link can be used once and expires ten minutes after it was sent.
+      </p>
+    </AuthShell>
+  );
 };
 
 export default ResetPassword;
