@@ -140,7 +140,7 @@ const App = () => {
 
           {/* New Feature Routes */}
           <Route path="/resume-builder" element={<ResumeBuilder />} />
-          <Route path="/portfolio-generator" element={<PageTransition><Navbar /><PortfolioGenerator /></PageTransition>} />
+          <Route path="/portfolio-generator" element={<PortfolioGenerator />} />
           <Route path="/ats-analyzer" element={<ATSAnalyzer />} />
 
           {/* Public Portfolio Routes */}
