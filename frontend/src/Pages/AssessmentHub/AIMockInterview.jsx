@@ -12,9 +12,9 @@ import {
  * (header strip, 4px navy bar, Newsreader question) and both feedback panels
  * borrow the Result layout (mono figure beside a verdict, then a point list).
  */
-const Page = ({ children }) => (
+const Page = ({ children, width = 760 }) => (
   <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
-    <div style={{ maxWidth: 760, margin: '0 auto' }}>{children}</div>
+    <div style={{ maxWidth: width, margin: '0 auto' }}>{children}</div>
   </div>
 );
 
@@ -359,7 +359,7 @@ const AIMockInterview = () => {
   // ── Setup ──────────────────────────────────────────────────────────────
   if (stage === 'setup') {
     return (
-      <Page>
+      <Page width={1100}>
         <div style={{ marginBottom: 18 }}>
           <Button variant="quiet" onClick={() => navigate('/assessment-hub')}>Back to the hub</Button>
         </div>
@@ -395,8 +395,19 @@ const AIMockInterview = () => {
           ) : roles.length === 0 ? (
             <Empty>No roles are available right now.</Empty>
           ) : (
-            <div style={{ borderTop: '1px solid var(--color-line)' }}>
-              {roles.map((role, i) => {
+            // Two columns rather than one long stack — six roles as a
+            // single column ran the card past the fold with paper visibly
+            // spare on both sides.
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 1,
+                background: 'var(--color-line-soft)',
+                borderTop: '1px solid var(--color-line)',
+              }}
+            >
+              {roles.map((role) => {
                 const active = selectedRole?.id === role.id || selectedRole?.name === role.name;
                 return (
                   <div
@@ -404,9 +415,8 @@ const AIMockInterview = () => {
                     onClick={() => setSelectedRole(role)}
                     style={{
                       padding: '15px 34px',
-                      borderBottom: i === roles.length - 1 ? 'none' : '1px solid var(--color-line-soft)',
                       borderLeft: `3px solid ${active ? 'var(--color-clay)' : 'transparent'}`,
-                      background: active ? 'var(--color-surface-active)' : 'transparent',
+                      background: active ? 'var(--color-surface-active)' : 'var(--color-surface)',
                       cursor: 'pointer',
                       transition: 'background-color 120ms ease',
                     }}
