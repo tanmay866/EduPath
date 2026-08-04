@@ -271,6 +271,7 @@ const AptitudeTest = () => {
         onAgreedChange={setAgreedToTerms}
         onBegin={handleStartQuiz}
         onBack={() => setStage('configure')}
+        loading={loading}
       />
     );
   }

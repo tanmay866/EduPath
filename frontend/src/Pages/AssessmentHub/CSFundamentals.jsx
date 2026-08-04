@@ -276,6 +276,7 @@ const CSFundamentals = () => {
         onAgreedChange={setAgreedToTerms}
         onBegin={handleStartQuiz}
         onBack={() => setStage('configure')}
+        loading={loading}
       />
     );
   }

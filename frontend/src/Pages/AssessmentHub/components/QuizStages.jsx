@@ -105,6 +105,7 @@ export const InstructionsStage = ({
   onAgreedChange,
   onBegin,
   onBack,
+  loading,
 }) => (
   <Page>
     <div style={{ marginBottom: 18 }}>
@@ -175,7 +176,9 @@ export const InstructionsStage = ({
       </label>
 
       <div style={{ padding: '18px 34px', borderTop: '1px solid var(--color-line)' }}>
-        <Button onClick={onBegin} disabled={!agreed}>Begin</Button>
+        <Button onClick={onBegin} disabled={!agreed} loading={loading} loadingLabel="Preparing your quiz…">
+          Begin
+        </Button>
       </div>
     </Card>
   </Page>
