@@ -122,7 +122,7 @@ const App = () => {
           <Route path="/signin" element={<Signin />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/profile" element={<PageTransition><Navbar /><ProfilePage /></PageTransition>} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<PageTransition><Navbar /><SettingsPage /></PageTransition>} />
           <Route path="/resume" element={<PageTransition><Navbar /><ResumePage /></PageTransition>} />
           <Route path="/assessment" element={<AssessmentDashboard />} />
