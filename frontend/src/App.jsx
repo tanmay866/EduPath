@@ -117,7 +117,7 @@ const App = () => {
           <Route path="/faq" element={<PageTransition><Navbar /><FAQ /></PageTransition>} />
           <Route path="/services" element={<PageTransition><Navbar /><Services /></PageTransition>} />
           <Route path="/roadmap" element={<PageTransition><Navbar /><CareerRoadmap /></PageTransition>} />
-          <Route path="/roadmap/generate" element={<PageTransition><Navbar /><RoadmapPage /></PageTransition>} />
+          <Route path="/roadmap/generate" element={<RoadmapPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -129,7 +129,7 @@ const App = () => {
           <Route path="/assessment/instructions" element={<PageTransition><AssessmentInstructions /></PageTransition>} />
           <Route path="/assessment/result" element={<PageTransition><AllResult /></PageTransition>} />
           <Route path="/assessment/quiz" element={<PageTransition><QuizPage /></PageTransition>} />
-          <Route path="/assessment/result/:resultId" element={<PageTransition><ResultPage /></PageTransition>} />
+          <Route path="/assessment/result/:resultId" element={<ResultPage />} />
 
           {/* Assessment Hub Routes */}
           <Route path="/assessment-hub" element={<AssessmentHub />} />

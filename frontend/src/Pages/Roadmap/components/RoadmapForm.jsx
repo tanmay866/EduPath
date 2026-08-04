@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Loader2, Plus, X, Zap, Target, Brain, Clock, BookOpen } from 'lucide-react';
+import {
+  Card, CardHeader, Button, Field, FieldGroup, Input, MicroLabel,
+} from '../../../design';
 
 const initialForm = {
   targetRole: '',
@@ -9,183 +11,152 @@ const initialForm = {
   learningStyle: '',
 };
 
-const inputCls =
-  'w-full px-4 py-3 rounded-xl bg-[#0a0a0a] border border-white/8 text-white text-sm placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/40 transition-all duration-200';
-
-const labelCls = 'block text-[11px] font-black uppercase tracking-widest text-slate-500 mb-2';
+// Native selects have no spec entry; they borrow the Field input treatment so
+// they line up with the text inputs beside them.
+const SELECT_STYLE = {
+  width: '100%',
+  padding: '13px 14px',
+  fontSize: 15,
+  fontFamily: 'var(--font-sans)',
+  color: 'var(--color-ink)',
+  background: '#fff',
+  border: '1px solid var(--color-line-input)',
+  borderRadius: 0,
+  outline: 'none',
+};
 
 const RoadmapForm = ({ isGenerating, onGenerate }) => {
-  const [form, setForm]           = useState(initialForm);
+  const [form, setForm] = useState(initialForm);
   const [skillInput, setSkillInput] = useState('');
 
   const addSkill = () => {
     const value = skillInput.trim();
     if (!value) return;
     if (form.skills.includes(value)) { setSkillInput(''); return; }
-    setForm(prev => ({ ...prev, skills: [...prev.skills, value] }));
+    setForm((prev) => ({ ...prev, skills: [...prev.skills, value] }));
     setSkillInput('');
   };
 
-  const removeSkill = skill =>
-    setForm(prev => ({ ...prev, skills: prev.skills.filter(s => s !== skill) }));
+  const removeSkill = (skill) =>
+    setForm((prev) => ({ ...prev, skills: prev.skills.filter((s) => s !== skill) }));
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     onGenerate(form, () => { setForm(initialForm); setSkillInput(''); });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="backdrop-blur-3xl bg-[#090b14]/70 rounded-[1.5rem] border border-white/5 shadow-2xl p-7 md:p-8 space-y-6">
+    <Card>
+      <CardHeader
+        label="Roadmap inputs"
+        right={<MicroLabel size={10.5} color="var(--color-text-4)">All fields required</MicroLabel>}
+      />
 
-      {/* Header */}
-      <div className="pb-5 border-b border-white/5">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
-            <Zap size={15} className="text-indigo-400" />
-          </div>
-          <div>
-            <h2 className="text-base font-black text-white tracking-tight">Roadmap Inputs</h2>
-            <p className="text-[11px] text-slate-500">Fill in the details to generate your personalised path.</p>
-          </div>
-        </div>
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div style={{ padding: '22px 24px' }}>
+          <FieldGroup>
+            <Field
+              label="Target role"
+              help="Supported: MERN Developer · AI/ML Engineer · Data Science · DevOps · Mobile · Cybersecurity"
+            >
+              <Input
+                name="targetRole"
+                value={form.targetRole}
+                onChange={handleChange}
+                placeholder="e.g. MERN Developer"
+              />
+            </Field>
 
-      {/* Target Role */}
-      <div>
-        <label className={labelCls}>
-          <Target size={9} className="inline mr-1.5 text-indigo-400" />
-          Target Role <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
-        </label>
-        <input
-          type="text"
-          name="targetRole"
-          value={form.targetRole}
-          onChange={handleChange}
-          placeholder="e.g. MERN Developer, AI/ML Engineer…"
-          className={inputCls}
-        />
-        <p className="text-[10px] text-slate-700 mt-1.5">
-          Supported: MERN Developer · AI/ML Engineer · Data Science · DevOps · Mobile · Cybersecurity
-        </p>
-      </div>
+            <Field label="Experience level">
+              <select name="experienceLevel" value={form.experienceLevel} onChange={handleChange} style={SELECT_STYLE}>
+                <option value="">Select your level</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </Field>
 
-      {/* Experience Level */}
-      <div>
-        <label className={labelCls}>
-          <Brain size={9} className="inline mr-1.5 text-indigo-400" />
-          Experience Level <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
-        </label>
-        <select
-          name="experienceLevel"
-          value={form.experienceLevel}
-          onChange={handleChange}
-          className={`${inputCls} appearance-none cursor-pointer`}
-        >
-          <option value="" className="bg-[#0a0a0a]">Select your level</option>
-          <option value="beginner"     className="bg-[#0a0a0a]">Beginner — just starting out</option>
-          <option value="intermediate" className="bg-[#0a0a0a]">Intermediate — some experience</option>
-          <option value="advanced"     className="bg-[#0a0a0a]">Advanced — seasoned professional</option>
-        </select>
-      </div>
+            <Field label="Current skills" help="Type a skill and press Enter to add it.">
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Input
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
+                  placeholder="e.g. HTML, Python, Git"
+                />
+                <Button variant="secondary" onClick={addSkill} style={{ padding: '13px 18px', flexShrink: 0 }}>
+                  Add
+                </Button>
+              </div>
 
-      {/* Current Skills */}
-      <div>
-        <label className={labelCls}>
-          <BookOpen size={9} className="inline mr-1.5 text-indigo-400" />
-          Current Skills <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={skillInput}
-            onChange={e => setSkillInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
-            placeholder="Add a skill and press Enter…"
-            className={`${inputCls} flex-1`}
-          />
-          <button
-            type="button"
-            onClick={addSkill}
-            className="px-4 rounded-xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 hover:bg-indigo-500/25 hover:border-indigo-400/50 hover:text-indigo-200 transition-all duration-200 shrink-0"
-          >
-            <Plus size={16} />
-          </button>
-        </div>
+              {form.skills.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+                  {form.skills.map((skill) => (
+                    <button
+                      key={skill}
+                      type="button"
+                      onClick={() => removeSkill(skill)}
+                      title="Remove"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        fontSize: 11.5,
+                        padding: '5px 9px',
+                        border: '1px solid var(--color-line-btn)',
+                        background: '#fff',
+                        color: 'var(--color-text-2)',
+                        cursor: 'pointer',
+                        borderRadius: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      {skill}
+                      <span style={{ color: 'var(--color-text-4)' }}>×</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </Field>
 
-        {form.skills.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {form.skills.map(skill => (
-              <span
-                key={skill}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-indigo-500/15 border border-indigo-500/25 text-indigo-300"
-              >
-                {skill}
-                <button
-                  type="button"
-                  onClick={() => removeSkill(skill)}
-                  className="text-indigo-400 hover:text-white transition-colors"
-                >
-                  <X size={10} />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
-        <p className="text-[10px] text-slate-700 mt-1.5">e.g. HTML, Python, Git — press Enter to add each one.</p>
-      </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <Field label="Hours per week">
+                <Input
+                  name="hoursPerWeek"
+                  type="number"
+                  min="1"
+                  max="168"
+                  value={form.hoursPerWeek}
+                  onChange={handleChange}
+                  placeholder="10"
+                />
+              </Field>
 
-      {/* Hours & Style — 2 col */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div>
-          <label className={labelCls}>
-            <Clock size={9} className="inline mr-1.5 text-indigo-400" />
-            Hours per Week <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
-          </label>
-          <input
-            type="number"
-            min="1" max="80"
-            name="hoursPerWeek"
-            value={form.hoursPerWeek}
-            onChange={handleChange}
-            placeholder="e.g. 10"
-            className={inputCls}
-          />
+              <Field label="Learning style">
+                <select name="learningStyle" value={form.learningStyle} onChange={handleChange} style={SELECT_STYLE}>
+                  <option value="">Select a style</option>
+                  <option value="video">Video</option>
+                  <option value="reading">Reading</option>
+                  <option value="project">Project-based</option>
+                  <option value="mixed">Mixed</option>
+                </select>
+              </Field>
+            </div>
+          </FieldGroup>
         </div>
 
-        <div>
-          <label className={labelCls}>
-            <Zap size={9} className="inline mr-1.5 text-indigo-400" />
-            Learning Style <span className="text-indigo-400 normal-case font-normal ml-0.5">*</span>
-          </label>
-          <select
-            name="learningStyle"
-            value={form.learningStyle}
-            onChange={handleChange}
-            className={`${inputCls} appearance-none cursor-pointer`}
-          >
-            <option value=""          className="bg-[#0a0a0a]">Select style</option>
-            <option value="visual"    className="bg-[#0a0a0a]">Visual — videos & diagrams</option>
-            <option value="practical" className="bg-[#0a0a0a]">Practical — projects & coding</option>
-            <option value="mixed"     className="bg-[#0a0a0a]">Mixed — blend of both</option>
-          </select>
+        <div style={{ padding: '18px 24px', borderTop: '1px solid var(--color-line)' }}>
+          <Button type="submit" loading={isGenerating} loadingLabel="Generating…">
+            Generate roadmap
+          </Button>
         </div>
-      </div>
-
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={isGenerating}
-        className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl text-sm font-black text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-300"
-      >
-        {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
-        {isGenerating ? 'Generating Your Roadmap…' : 'Generate My Roadmap'}
-      </button>
-    </form>
+      </form>
+    </Card>
   );
 };
 
