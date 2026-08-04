@@ -199,11 +199,31 @@ export const login = asyncHandler(async (req, res, next) => {
         return next(new AppError('Your account has been deactivated. Please contact support.', 403));
     }
 
+    // Refuse before comparing the password, so a locked account cannot be used
+    // as an oracle to keep testing guesses.
+    if (user.isLocked) {
+        const minutesLeft = Math.max(1, Math.ceil((user.lockUntil - Date.now()) / 60000));
+        return res.status(423).json({
+            success: false,
+            accountLocked: true,
+            message: `Too many failed login attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? '' : 's'}, or reset your password.`,
+        });
+    }
+
     // Check password
     const isPasswordMatch = await user.comparePassword(password);
 
     if (!isPasswordMatch) {
+        // The model locks the account once this reaches 5. The rate limiter caps
+        // attempts per IP; this caps them per account, so a distributed attack
+        // against one user still gets locked out.
+        await user.incLoginAttempts();
         return next(new AppError('Invalid credentials', 401));
+    }
+
+    // Correct password, so previous failures were this user mistyping.
+    if (user.loginAttempts > 0 || user.lockUntil) {
+        await user.resetLoginAttempts();
     }
 
     // Checked after the password so this cannot be used to discover which
@@ -345,6 +365,10 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    // Clear any lockout: the person proved control of the mailbox, and the
+    // lockout message tells them a reset is the way back in.
+    user.loginAttempts = 0;
+    user.lockUntil = undefined;
     await user.save();
 
     // Send confirmation email
