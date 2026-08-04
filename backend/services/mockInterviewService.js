@@ -109,7 +109,11 @@ Provide your evaluation in the following JSON format ONLY (no additional text):
         }
       ],
       temperature: 0.5,
-      max_tokens: 500
+      max_tokens: 500,
+      // Groq's JSON mode, same as groqResumeParser.js — constrains the
+      // model to emit valid JSON at the API level instead of trusting the
+      // prompt's "respond with valid JSON only" instruction on its own.
+      response_format: { type: 'json_object' }
     });
 
     const content = response.choices[0].message.content.trim();
@@ -185,7 +189,8 @@ Provide a comprehensive interview summary in the following JSON format ONLY:
         }
       ],
       temperature: 0.5,
-      max_tokens: 800
+      max_tokens: 800,
+      response_format: { type: 'json_object' }
     });
 
     const content = response.choices[0].message.content.trim();
