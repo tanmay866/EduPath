@@ -150,4 +150,57 @@ export const sendPasswordChangeEmail = async (user) => {
   });
 };
 
+/**
+ * Confirm that an account was deleted.
+ *
+ * Partly a courtesy, mostly a safeguard: if someone else deleted the account,
+ * this is the only notice the owner will ever get, and it has to reach an
+ * address that no longer exists in our records.
+ *
+ * @param {Object} user - snapshot taken before the record was removed
+ * @param {Object} [removed] - counts per collection, for the summary
+ * @returns {Promise<boolean>} Success status
+ */
+export const sendAccountDeletedEmail = async (user, removed = {}) => {
+  const LABELS = {
+    roadmaps: 'Roadmaps',
+    skillGaps: 'Skill assessments',
+    quizSessions: 'Quiz sessions',
+    quizResults: 'Quiz results',
+    progressLogs: 'Progress records',
+    portfolios: 'Portfolios',
+    resumes: 'Uploaded resumes',
+    generatedResumes: 'Generated resumes',
+  };
+
+  const rows = Object.entries(removed)
+    .filter(([, count]) => count > 0)
+    .map(([key, count]) => ({ label: LABELS[key] || key, value: String(count) }));
+
+  const content = [
+    heading('Your account has been deleted'),
+    paragraph(`Hi ${user.firstName}, your EduPath account has been permanently deleted, along with everything stored in it. Nothing is kept, and this cannot be undone.`),
+  ];
+
+  if (rows.length) {
+    content.push(paragraph('Removed with your account:'), detailRows(rows));
+  }
+
+  content.push(
+    subtle('Portfolio sites you deployed are hosted separately and stay online. You will need to remove those from your hosting provider yourself.'),
+    paragraph('Thank you for the time you spent building here. If you ever want to start again, you are welcome back &mdash; a new account takes a minute.'),
+    button('Create a new account', `${process.env.FRONTEND_URL}/signup`),
+    notice(`If you did not delete this account, reply to this email or contact us at ${process.env.EMAIL_USER} straight away &mdash; it would mean someone else had access to it.`)
+  );
+
+  return await sendEmail({
+    email: user.email,
+    subject: 'Your EduPath account has been deleted',
+    html: layout({
+      preheader: 'Your EduPath account and its data have been permanently removed.',
+      content: content.join('\n'),
+    }),
+  });
+};
+
 export default sendEmail;

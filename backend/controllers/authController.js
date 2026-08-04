@@ -12,7 +12,7 @@ import { asyncHandler } from '../middlewares/errorMiddleware.js';
 import { AppError } from '../middlewares/errorMiddleware.js';
 import { generateToken, generateResetToken, hashResetToken, createTokenResponse, generateOtp, hashOtp } from '../utils/tokenUtils.js';
 import generateUserId, { isDuplicateLoginIdError } from '../utils/generateUserId.js';
-import { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangeEmail } from '../utils/sendEmail.js';
+import { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangeEmail, sendAccountDeletedEmail } from '../utils/sendEmail.js';
 
 // How long a verification code stays valid. Matches the password-reset window.
 const OTP_EXPIRY_MINUTES = 10;
@@ -162,6 +162,10 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
         }
     }
 
+    // Copied before the record goes: after deleteOne there is nothing left to
+    // read an address off, and the confirmation still has to reach them.
+    const recipient = { firstName: user.firstName, email: user.email };
+
     await User.deleteOne({ _id: userId });
 
     console.log(`🗑️  Account deleted: ${user.email} (${user.loginId})`, removed);
@@ -171,6 +175,12 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
         message: 'Your account and all associated data have been permanently deleted.',
         removed,
     });
+
+    // Sent after responding, like the other mail: the account is already gone,
+    // and a slow provider should not hold up the confirmation.
+    sendAccountDeletedEmail(recipient, removed)
+        .then(() => console.log('✅ Deletion confirmation sent to:', recipient.email))
+        .catch((emailError) => console.error('❌ Failed to send deletion confirmation:', emailError.message));
 });
 
 /**
