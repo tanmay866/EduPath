@@ -194,8 +194,14 @@ const AIMockInterview = () => {
     }
   };
 
-  // Fetch new question
-  const fetchQuestion = async () => {
+  // Fetch new question. Takes the question number explicitly rather than
+  // reading the questionNumber state directly — nextQuestion calls
+  // setQuestionNumber and this in the same tick, and state updates aren't
+  // visible until the next render, so this would otherwise always send the
+  // number from before the increment (every question past the first told
+  // the backend it was still writing question 1, so difficulty never
+  // progressed like the prompt asks it to).
+  const fetchQuestion = async (qNumber = questionNumber) => {
     setLoadingQuestion(true);
     setCurrentFeedback(null);
     setAnswer('');
@@ -210,7 +216,7 @@ const AIMockInterview = () => {
         },
         body: JSON.stringify({
           role: selectedRole.name,
-          questionNumber,
+          questionNumber: qNumber,
           previousQuestions
         })
       });
@@ -281,10 +287,11 @@ const AIMockInterview = () => {
     if (questionNumber >= TOTAL_QUESTIONS) {
       generateSummary();
     } else {
-      setQuestionNumber(prev => prev + 1);
+      const next = questionNumber + 1;
+      setQuestionNumber(next);
       setCurrentFeedback(null);
       setAnswer('');
-      fetchQuestion();
+      fetchQuestion(next);
     }
   };
 
