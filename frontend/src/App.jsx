@@ -35,6 +35,8 @@ import SkillAssessment from './Pages/AssessmentHub/SkillAssessment'
 import AptitudeTest from './Pages/AssessmentHub/AptitudeTest'
 import CSFundamentals from './Pages/AssessmentHub/CSFundamentals'
 import AIMockInterview from './Pages/AssessmentHub/AIMockInterview'
+import PracticeResults from './Pages/AssessmentHub/PracticeResults'
+import PracticeResultDetail from './Pages/AssessmentHub/PracticeResultDetail'
 
 // Admin Components — the sidebar and header now come from AdminShell.
 import AdminDashboard from './Admin/pages/AdminDashboard'
@@ -132,7 +134,11 @@ const App = () => {
           <Route path="/assessment-hub" element={<AssessmentHub />} />
           <Route path="/assessment-hub/skill" element={<><Navbar /><SkillAssessment /></>} />
           <Route path="/assessment-hub/aptitude" element={<><Navbar /><AptitudeTest /></>} />
+          <Route path="/assessment-hub/aptitude/results" element={<PracticeResults type="aptitude" label="Aptitude" retakePath="/assessment-hub/aptitude" />} />
+          <Route path="/assessment-hub/aptitude/results/:resultId" element={<><Navbar /><PracticeResultDetail type="aptitude" /></>} />
           <Route path="/assessment-hub/cs-fundamentals" element={<><Navbar /><CSFundamentals /></>} />
+          <Route path="/assessment-hub/cs-fundamentals/results" element={<PracticeResults type="cs-fundamentals" label="CS fundamentals" retakePath="/assessment-hub/cs-fundamentals" />} />
+          <Route path="/assessment-hub/cs-fundamentals/results/:resultId" element={<><Navbar /><PracticeResultDetail type="cs-fundamentals" /></>} />
           <Route path="/assessment-hub/mock-interview" element={<><Navbar /><AIMockInterview /></>} />
 
           {/* New Feature Routes */}

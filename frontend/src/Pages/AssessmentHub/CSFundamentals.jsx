@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ConfigureStage, InstructionsStage, QuizStage, ResultStage, LoadingStage,
 } from './components/QuizStages';
+import { savePracticeResult } from '../Services/practiceResultService';
 
 
 const API_URL = import.meta.env.VITE_API_URL || '' + import.meta.env.VITE_API_URL + '';
@@ -25,7 +26,6 @@ const SCREEN = {
     'You get one minute per question. When the clock runs out the test submits itself.',
     'You can move back and forth and change any answer until you submit.',
     'Unanswered questions count as wrong, so guess rather than leave one blank.',
-    'Results from this test are not written to your quiz history.',
   ],
 };
 
@@ -198,15 +198,21 @@ const CSFundamentals = () => {
     const percentage = Math.round((correct / total) * 100);
     const timeTaken = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
 
-    setResult({
-      total,
-      correct,
-      wrong,
-      unanswered,
-      percentage,
-      timeTaken
-    });
+    const resultData = { total, correct, wrong, unanswered, percentage, timeTaken };
+    setResult(resultData);
     setStage('result');
+
+    const reviewData = questions.map((question, index) => ({
+      question: question.question,
+      isCorrect: answers[index] === question.correctAnswer,
+      answer: question.options[question.correctAnswer],
+    }));
+    savePracticeResult({
+      type: 'cs-fundamentals',
+      difficulty: quizConfig.difficulty,
+      review: reviewData,
+      ...resultData,
+    }).catch((err) => console.error('Failed to save CS fundamentals result:', err));
   };
 
   // Handle restart
@@ -232,15 +238,15 @@ const CSFundamentals = () => {
 
   const answeredCount = answers.filter((a) => a !== null && a !== undefined).length;
 
-  const review = questions.map((question, i) => {
-    const chosen = answers[i];
-    const chosenText = chosen === null || chosen === undefined ? null : question.options[chosen];
-    return {
-      question: question.question,
-      isCorrect: chosenText === question.answer,
-      answer: question.answer,
-    };
-  });
+  // This used to compare against question.answer, a field this shape
+  // doesn't have — the real correct answer is options[correctAnswer] — so
+  // every row showed as wrong regardless of what was actually picked, even
+  // though the score above (compared correctly) was right.
+  const review = questions.map((question, i) => ({
+    question: question.question,
+    isCorrect: answers[i] === question.correctAnswer,
+    answer: question.options[question.correctAnswer],
+  }));
 
   if (stage === 'configure') {
     return (

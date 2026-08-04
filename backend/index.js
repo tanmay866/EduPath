@@ -17,6 +17,7 @@ import portfolioRoutes from './routes/portfolioRoutes.js';
 import atsRoutes from './routes/atsRoutes.js';
 import csRoutes from './routes/csRoutes.js';
 import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
+import practiceResultRoutes from './routes/practiceResultRoutes.js';
 import roadmapRoutes from './routes/roadmapRoutes.js';
 import progressRoutes from './routes/progress.js';
 import adminRoutes from './routes/adminRoutes.js';
@@ -161,6 +162,7 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/ats', atsRoutes);
 app.use('/api/cs', csRoutes);
 app.use('/api/mock-interview', mockInterviewRoutes);
+app.use('/api/practice', practiceResultRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 app.use('/api/progress', progressRoutes);
 

@@ -438,7 +438,7 @@ export const ResultStage = ({ label, result, review = [], onRetry, onDone, forma
           <Button onClick={onRetry}>Take it again</Button>
         </div>
 
-        <CardFooterNote>Results from this test are not saved to your quiz history.</CardFooterNote>
+        <CardFooterNote>This result is saved — find it again from the hub.</CardFooterNote>
       </Card>
     </Page>
   );

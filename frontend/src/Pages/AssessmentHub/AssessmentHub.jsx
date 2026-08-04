@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getQuizHistory } from '../Services/assessmentService';
+import { getPracticeHistory } from '../Services/practiceResultService';
 import {
   LearnerShell, Card, RuledGrid, RuledCell, Button, Badge, MicroLabel, type,
 } from '../../design';
@@ -25,31 +26,45 @@ const AssessmentHub = () => {
 
   useEffect(() => {
     const checkCompletedAssessments = async () => {
+      const token = sessionStorage.getItem('token');
+      if (!token) return;
+
       try {
-        const token = sessionStorage.getItem('token');
-        if (token) {
-          const response = await getQuizHistory();
-          // The endpoint returns { success, data: { results, pagination } } —
-          // this was reading response.data.history, a field that has never
-          // existed, so the card sat on "NOT TAKEN" no matter how many
-          // attempts were on record.
-          const total = response.data?.data?.pagination?.total ?? 0;
-          if (total > 0) {
-            setCompletedAssessments((prev) => ({ ...prev, skill: true }));
-          }
+        const response = await getQuizHistory();
+        // The endpoint returns { success, data: { results, pagination } } —
+        // this was reading response.data.history, a field that has never
+        // existed, so the card sat on "NOT TAKEN" no matter how many
+        // attempts were on record.
+        const total = response.data?.data?.pagination?.total ?? 0;
+        if (total > 0) {
+          setCompletedAssessments((prev) => ({ ...prev, skill: true }));
         }
       } catch (error) {
         console.error('Error fetching quiz history:', error);
+      }
+
+      // Aptitude and CS Fundamentals now save every attempt too, so they
+      // get the same "TAKEN" check the Skill Assessment already had.
+      try {
+        const [aptitudeRes, csRes] = await Promise.all([
+          getPracticeHistory('aptitude'),
+          getPracticeHistory('cs-fundamentals'),
+        ]);
+        setCompletedAssessments((prev) => ({
+          ...prev,
+          aptitude: (aptitudeRes.data?.data?.results || []).length > 0,
+          csFundamentals: (csRes.data?.data?.results || []).length > 0,
+        }));
+      } catch (error) {
+        console.error('Error fetching practice history:', error);
       }
     };
 
     checkCompletedAssessments();
   }, []);
 
-  // Only the Skill Assessment writes attempts anywhere retrievable — the
-  // other three all say so on their own instructions screen ("Results from
-  // this test are not written to your quiz history"), so there is no
-  // results page to send a learner to for them.
+  // AI Mock Interview still isn't written anywhere, so it keeps no
+  // resultsPath — there is genuinely nowhere to send "See results" to.
   const assessments = [
     {
       kicker: 'Technical',
@@ -65,7 +80,7 @@ const AssessmentHub = () => {
       title: 'Aptitude Test',
       description: 'Test your logical reasoning, quantitative ability, and problem-solving skills.',
       path: '/assessment-hub/aptitude',
-      resultsPath: null,
+      resultsPath: '/assessment-hub/aptitude/results',
       duration: '25 MIN',
       completed: completedAssessments.aptitude,
     },
@@ -74,7 +89,7 @@ const AssessmentHub = () => {
       title: 'CS Fundamentals',
       description: 'Questions on operating systems, networks, databases and data structures.',
       path: '/assessment-hub/cs-fundamentals',
-      resultsPath: null,
+      resultsPath: '/assessment-hub/cs-fundamentals/results',
       duration: '20 MIN',
       completed: completedAssessments.csFundamentals,
     },

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ConfigureStage, InstructionsStage, QuizStage, ResultStage, LoadingStage,
 } from './components/QuizStages';
+import { savePracticeResult } from '../Services/practiceResultService';
 
 
 /**
@@ -23,7 +24,6 @@ const SCREEN = {
     'You get one minute per question. When the clock runs out the test submits itself.',
     'You can move back and forth and change any answer until you submit.',
     'Unanswered questions count as wrong, so guess rather than leave one blank.',
-    'Results from this test are not written to your quiz history.',
   ],
 };
 
@@ -193,15 +193,24 @@ const AptitudeTest = () => {
     const percentage = Math.round((correct / total) * 100);
     const timeTaken = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
 
-    setResult({
-      total,
-      correct,
-      wrong,
-      unanswered,
-      percentage,
-      timeTaken
-    });
+    const resultData = { total, correct, wrong, unanswered, percentage, timeTaken };
+    setResult(resultData);
     setStage('result');
+
+    // Fire-and-forget: the result is already on screen regardless of
+    // whether this save succeeds, so it shouldn't block or fail the stage
+    // transition — only console-log if it doesn't land.
+    const reviewData = questions.map((question, index) => {
+      const userAnswer = answers[index];
+      const chosenText = userAnswer === null || userAnswer === undefined ? null : question.options[userAnswer];
+      return { question: question.question, isCorrect: chosenText === question.answer, answer: question.answer };
+    });
+    savePracticeResult({
+      type: 'aptitude',
+      difficulty: quizConfig.difficulty,
+      review: reviewData,
+      ...resultData,
+    }).catch((err) => console.error('Failed to save aptitude result:', err));
   };
 
   // Handle restart
