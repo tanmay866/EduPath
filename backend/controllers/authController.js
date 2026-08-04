@@ -1,9 +1,26 @@
 import User from '../models/userModel.js';
 import { asyncHandler } from '../middlewares/errorMiddleware.js';
 import { AppError } from '../middlewares/errorMiddleware.js';
-import { generateToken, generateResetToken, hashResetToken, createTokenResponse } from '../utils/tokenUtils.js';
+import { generateToken, generateResetToken, hashResetToken, createTokenResponse, generateOtp, hashOtp } from '../utils/tokenUtils.js';
 import generateUserId, { isDuplicateLoginIdError } from '../utils/generateUserId.js';
-import { sendWelcomeEmail, sendPasswordResetEmail, sendPasswordChangeEmail } from '../utils/sendEmail.js';
+import { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangeEmail } from '../utils/sendEmail.js';
+
+// How long a verification code stays valid. Matches the password-reset window.
+const OTP_EXPIRY_MINUTES = 10;
+
+/**
+ * Issue a fresh verification code, store only its hash, and email the code.
+ * Used by both signup and resend so the two cannot drift apart.
+ */
+const issueVerificationCode = async (user) => {
+    const { otp, hashedOtp } = generateOtp();
+
+    user.emailVerificationToken = hashedOtp;
+    user.emailVerificationExpires = Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000;
+    await user.save({ validateBeforeSave: false });
+
+    return sendVerificationEmail(user, otp, OTP_EXPIRY_MINUTES);
+};
 
 /**
  * @desc    Register a new user
@@ -49,13 +66,65 @@ export const signup = asyncHandler(async (req, res, next) => {
 
     console.log('✅ User created - Login ID:', loginId);
 
-    // Generate JWT token
-    const token = generateToken(user._id, user.role);
-
-    // Send response
+    // No token here: the account cannot be used until the emailed code is
+    // entered, so handing out credentials now would defeat the check.
     res.status(201).json({
         success: true,
-        message: 'Account created successfully. Login credentials sent to your email.',
+        requiresVerification: true,
+        message: 'Account created. Enter the 6-digit code we emailed you to finish signing up.',
+        user: {
+            email: user.email,
+            loginId: user.loginId,
+        },
+    });
+
+    // Emailed after responding. Delivery can stall for a long time on hosts that
+    // throttle outbound SMTP, and a signup that had already succeeded looked
+    // like a timeout to the caller; their retry then failed with "email already
+    // exists". If this send fails the user can ask for a new code.
+    issueVerificationCode(user)
+        .then(() => console.log('✅ Verification code sent to:', user.email))
+        .catch((emailError) => console.error('❌ Failed to send verification code:', emailError.message));
+});
+
+/**
+ * @desc    Verify an account with the emailed 6-digit code
+ * @route   POST /api/auth/verify-otp
+ * @access  Public
+ */
+export const verifyOtp = asyncHandler(async (req, res, next) => {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email: email.toLowerCase() })
+        .select('+emailVerificationToken +emailVerificationExpires');
+
+    if (!user) {
+        return next(new AppError('Invalid or expired verification code', 400));
+    }
+
+    if (user.isEmailVerified) {
+        return next(new AppError('This account is already verified. Please log in.', 400));
+    }
+
+    const matches = user.emailVerificationToken === hashOtp(otp);
+    const stillValid = user.emailVerificationExpires && user.emailVerificationExpires > Date.now();
+
+    // One message for both cases: distinguishing them would tell an attacker
+    // whether a guessed code was right but stale.
+    if (!matches || !stillValid) {
+        return next(new AppError('Invalid or expired verification code', 400));
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    const token = generateToken(user._id, user.role);
+
+    res.status(200).json({
+        success: true,
+        message: 'Email verified. Welcome to EduPath!',
         token,
         user: {
             id: user._id,
@@ -67,14 +136,39 @@ export const signup = asyncHandler(async (req, res, next) => {
         },
     });
 
-    // Send the welcome email after responding. It used to be awaited here, and
-    // SMTP delivery can stall for minutes on hosts that throttle outbound port
-    // 587 — so a signup that had already succeeded looked like a timeout to the
-    // caller, and their retry then failed with "email already exists".
-    // The account exists either way; delivery is not worth blocking on.
-    sendWelcomeEmail(user, password)
+    sendWelcomeEmail(user)
         .then(() => console.log('✅ Welcome email sent to:', user.email))
         .catch((emailError) => console.error('❌ Failed to send welcome email:', emailError.message));
+});
+
+/**
+ * @desc    Send a fresh verification code
+ * @route   POST /api/auth/resend-otp
+ * @access  Public
+ */
+export const resendOtp = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Always answer the same way. A different response for unknown addresses
+    // would turn this into a way to test which emails have accounts.
+    const genericResponse = {
+        success: true,
+        message: 'If that account exists and is unverified, a new code is on its way.',
+    };
+
+    if (!user || user.isEmailVerified) {
+        return res.status(200).json(genericResponse);
+    }
+
+    try {
+        await issueVerificationCode(user);
+        console.log('✅ Verification code resent to:', user.email);
+    } catch (emailError) {
+        console.error('❌ Failed to resend verification code:', emailError.message);
+    }
+
+    res.status(200).json(genericResponse);
 });
 
 /**
@@ -110,6 +204,18 @@ export const login = asyncHandler(async (req, res, next) => {
 
     if (!isPasswordMatch) {
         return next(new AppError('Invalid credentials', 401));
+    }
+
+    // Checked after the password so this cannot be used to discover which
+    // addresses have accounts. requiresVerification lets the client send the
+    // user straight to the code screen instead of showing a dead end.
+    if (!user.isEmailVerified) {
+        return res.status(403).json({
+            success: false,
+            requiresVerification: true,
+            email: user.email,
+            message: 'Please verify your email before logging in. Check your inbox for the 6-digit code.',
+        });
     }
 
     // Update last login

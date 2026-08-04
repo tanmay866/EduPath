@@ -70,6 +70,37 @@ export const hashResetToken = (token) => {
 };
 
 /**
+ * Generate a 6-digit email verification code.
+ *
+ * randomInt rather than Math.random: the code is a credential, and Math.random
+ * is neither uniform nor unpredictable. Only the hash is ever stored, so a leak
+ * of the database does not hand out working codes.
+ *
+ * @returns {{otp: string, hashedOtp: string}}
+ */
+export const generateOtp = () => {
+  const otp = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+
+  return {
+    otp,
+    hashedOtp: hashOtp(otp),
+  };
+};
+
+/**
+ * Hash a verification code for comparison against the stored value.
+ *
+ * @param {string} otp - the 6-digit code
+ * @returns {string} sha256 hex digest
+ */
+export const hashOtp = (otp) => {
+  return crypto
+    .createHash('sha256')
+    .update(String(otp))
+    .digest('hex');
+};
+
+/**
  * Create token response object
  * 
  * @param {Object} user - User object

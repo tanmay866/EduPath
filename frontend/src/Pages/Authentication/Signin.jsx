@@ -85,7 +85,17 @@ const Signin = () => {
         }
       } catch (error) {
         console.error('Signin error:', error);
-        const message = error.response?.data?.message
+
+        // An unverified account is not a dead end — send them to the code step
+        // instead of just refusing, otherwise there is no route back in.
+        const data = error.response?.data;
+        if (data?.requiresVerification) {
+          toast.info(data.message || 'Please verify your email to continue.');
+          navigate('/verify-email', { state: { email: data.email || values.email } });
+          return;
+        }
+
+        const message = data?.message
           || (error.request ? 'Cannot reach the server. Please make sure the backend is running.' : 'Signin failed. Please try again.');
         toast.error(message);
       }

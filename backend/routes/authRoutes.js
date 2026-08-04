@@ -2,6 +2,8 @@ import express from 'express';
 import {
   signup,
   login,
+  verifyOtp,
+  resendOtp,
   getMe,
   forgotPassword,
   resetPassword,
@@ -12,6 +14,8 @@ import { protect } from '../middlewares/authMiddleware.js';
 import {
   signupValidation,
   loginValidation,
+  verifyOtpValidation,
+  resendOtpValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
   changePasswordValidation,
@@ -21,6 +25,8 @@ const router = express.Router();
 
 router.post('/signup', signupValidation, signup);
 router.post('/login', loginValidation, login);
+router.post('/verify-otp', verifyOtpValidation, verifyOtp);
+router.post('/resend-otp', resendOtpValidation, resendOtp);
 router.post('/forgot-password', forgotPasswordValidation, forgotPassword);
 router.post('/reset-password/:resetToken', resetPasswordValidation, resetPassword);
 router.get('/me', protect, getMe);

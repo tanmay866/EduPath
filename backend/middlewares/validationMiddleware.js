@@ -92,6 +92,39 @@ export const forgotPasswordValidation = [
   handleValidationErrors,
 ];
 
+export const verifyOtpValidation = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+
+  body('otp')
+    .trim()
+    .notEmpty()
+    .withMessage('Verification code is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Verification code must be 6 digits')
+    .isNumeric()
+    .withMessage('Verification code must be 6 digits'),
+
+  handleValidationErrors,
+];
+
+export const resendOtpValidation = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+
+  handleValidationErrors,
+];
+
 /**
  * Validation rules for reset password
  */

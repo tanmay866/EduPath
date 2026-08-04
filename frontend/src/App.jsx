@@ -9,6 +9,7 @@ import Contact from './Pages/Contact/Contact'
 import Signup from './Pages/Authentication/Signup'
 import Signin from './Pages/Authentication/Signin'
 import ResetPassword from './Pages/Authentication/ResetPassword'
+import VerifyEmail from './Pages/Authentication/VerifyEmail'
 import Footer from './component/Footer/Footer'
 import AssessmentDashboard from './Pages/Assessment/AssesmentDashboard/AssessmentDashboard'
 import AssessmentInstructions from './Pages/Assessment/AssesmentInstructions/AssessmentInstructions'
@@ -120,6 +121,7 @@ const App = () => {
           <Route path="/signup" element={<PageTransition><Navbar /><Signup /></PageTransition>} />
           <Route path="/signin" element={<PageTransition><Navbar /><Signin /></PageTransition>} />
           <Route path="/reset-password/:token" element={<PageTransition><Navbar /><ResetPassword /></PageTransition>} />
+          <Route path="/verify-email" element={<PageTransition><Navbar /><VerifyEmail /></PageTransition>} />
           <Route path="/profile" element={<PageTransition><Navbar /><ProfilePage /></PageTransition>} />
           <Route path="/settings" element={<PageTransition><Navbar /><SettingsPage /></PageTransition>} />
           <Route path="/resume" element={<PageTransition><Navbar /><ResumePage /></PageTransition>} />

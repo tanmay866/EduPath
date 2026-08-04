@@ -133,7 +133,20 @@ app.use('/api', apiLimiter);
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth/signup', sensitiveLimiter);
 app.use('/api/auth/forgot-password', sensitiveLimiter);
+app.use('/api/auth/resend-otp', sensitiveLimiter);
 app.use('/api/contact/send', sensitiveLimiter);
+
+// Guessing a 6-digit code is only hard if guesses are limited. 10 attempts per
+// 15 minutes leaves a brute-forcer needing years; a real user needs two or three.
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: rateLimitResponse('Too many verification attempts. Please try again in 15 minutes.'),
+});
+app.use('/api/auth/verify-otp', otpLimiter);
 
 // API Routes
 app.use('/api/auth', authRoutes);

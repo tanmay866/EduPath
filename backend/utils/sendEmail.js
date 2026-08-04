@@ -28,11 +28,14 @@ const sendEmail = async (options) => {
 /**
  * Send welcome email with login credentials
  * 
+ * Sent after the account is verified. It deliberately does not contain the
+ * password: mail sits unencrypted in inboxes and in the provider's logs, and
+ * the user chose the password, so there is nothing to tell them.
+ *
  * @param {Object} user - User object
- * @param {string} password - Plain text password
  * @returns {Promise<boolean>} Success status
  */
-export const sendWelcomeEmail = async (user, password) => {
+export const sendWelcomeEmail = async (user) => {
   const html = `
     <!DOCTYPE html>
     <html lang="en">
@@ -116,7 +119,7 @@ export const sendWelcomeEmail = async (user, password) => {
         <p>Congratulations! Your account has been successfully created on EduPath - Your Autonomous Learning & Career Roadmap Generator.</p>
         
         <div class="credentials">
-          <h3>📝 Your Login Credentials</h3>
+          <h3>📝 Your Account Details</h3>
           <div class="credential-item">
             <span class="credential-label">Login ID:</span>
             <span class="credential-value">${user.loginId}</span>
@@ -125,15 +128,11 @@ export const sendWelcomeEmail = async (user, password) => {
             <span class="credential-label">Email:</span>
             <span class="credential-value">${user.email}</span>
           </div>
-          <div class="credential-item">
-            <span class="credential-label">Password:</span>
-            <span class="credential-value">${password}</span>
-          </div>
         </div>
 
         <div class="warning">
           <strong>⚠️ Important Security Notice:</strong>
-          <p style="margin: 10px 0 0 0;">Please change your password after your first login for security purposes. Keep your credentials safe and do not share them with anyone.</p>
+          <p style="margin: 10px 0 0 0;">EduPath will never email you your password, and will never ask for it. If a message claims to, it did not come from us.</p>
         </div>
 
         <p><strong>What's Next?</strong></p>
@@ -159,14 +158,70 @@ export const sendWelcomeEmail = async (user, password) => {
 
   return await sendEmail({
     email: user.email,
-    subject: '🎓 Welcome to EduPath - Your Login Credentials',
+    subject: '🎓 Welcome to EduPath',
+    html,
+  });
+};
+
+/**
+ * Send the 6-digit email verification code.
+ *
+ * @param {Object} user - User object
+ * @param {string} otp - the plain 6-digit code (only the hash is stored)
+ * @param {number} expiryMinutes - how long the code stays valid
+ * @returns {Promise<boolean>} Success status
+ */
+export const sendVerificationEmail = async (user, otp, expiryMinutes = 10) => {
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+        .code { font-family: 'Courier New', monospace; font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #667eea; background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; text-align: center; margin: 25px 0; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>✉️ Verify your email</h1>
+      </div>
+      <div class="content">
+        <h2>Hello ${user.firstName},</h2>
+        <p>Enter this code on EduPath to finish setting up your account:</p>
+
+        <div class="code">${otp}</div>
+
+        <p>The code expires in <strong>${expiryMinutes} minutes</strong>.</p>
+
+        <div class="warning">
+          <strong>⚠️ Didn't sign up?</strong>
+          <p style="margin: 10px 0 0 0;">Someone may have typed your address by mistake. You can ignore this email — the account cannot be used until this code is entered.</p>
+        </div>
+
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} EduPath. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return await sendEmail({
+    email: user.email,
+    subject: `${otp} is your EduPath verification code`,
     html,
   });
 };
 
 /**
  * Send password reset email
- * 
+ *
  * @param {Object} user - User object
  * @param {string} resetToken - Reset token
  * @returns {Promise<boolean>} Success status

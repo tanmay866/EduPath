@@ -48,9 +48,11 @@ const Signup = () => {
         console.log("user created");
 
         console.log('Signup response:', response.data);
-        toast.success('Signup successful! Please sign in.');
+        // The account is not usable until the emailed code is entered, so send
+        // the user straight to that step rather than to sign-in.
+        toast.success(response.data?.message || 'Account created. Check your email for the code.');
         resetForm();
-        navigate('/signin');
+        navigate('/verify-email', { state: { email: values.email } });
       } catch (error) {
         console.error('Signup error:', error);
         toast.error(getApiErrorMessage(error.response?.data, 'Signup failed. Please try again.'));
