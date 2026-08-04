@@ -2,43 +2,28 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LearnerShell, Card, CardHeader, CardFooterNote, Button, Field, Empty,
-  InlineMessage, MicroLabel, OrdinalRow, type,
+  InlineMessage, MicroLabel, LabelledBar, OrdinalRow, type,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 
 /**
  * Spec §7 Resume & ATS — the ATS half.
  *
- * `1.5fr 1fr`, align-items start. Left: a score card split `200px 1fr`, the
- * left cell (border-right) a mono label, a mono 56px figure and a 13.5px
- * text-3 note; then the fix list — mono clay ordinals, title plus detail.
- * Right: the two inputs as a document card.
+ * `1.5fr 1fr`, align-items start. Left: a score card split `200px 1fr` — a
+ * mono label, a mono 56px figure and a 13.5px text-3 note in the left cell,
+ * four labelled bars in the right. Then the fix list: a header strip counting
+ * what remains beside a quiet clay "Mark all done", rows of mono clay ordinal
+ * plus title and detail, and a right button showing the point value in clay
+ * outline that turns green outline DONE.
  *
- * Two spec details have no data behind them. /api/ats/analyze returns only
- * score, status, similarity, method and message — there is no per-dimension
- * breakdown, so the right cell of the score card carries the verdict and the
- * real metrics instead of four labelled bars. The fix list carries the four
- * standing recommendations the screen has always shown; they are advice, not
- * edits the app can perform, so there is no point value and no "Apply all".
+ * The scorer measures each of the four dimensions and names the terms that are
+ * actually missing, so both come from the response rather than being invented
+ * here. The buttons mark a fix as handled by you — EduPath reads your document,
+ * it does not edit it — which is what the footer note says.
  */
-const RECOMMENDATIONS = [
-  {
-    title: 'Add keywords',
-    detail: 'Include specific terms and phrases from the job description so the parser can match them.',
-  },
-  {
-    title: 'Highlight skills',
-    detail: 'Name the technical and soft skills the posting asks for, in the words it uses.',
-  },
-  {
-    title: 'Show experience',
-    detail: 'Quantify achievements and tie relevant work to the responsibilities listed.',
-  },
-  {
-    title: 'Use industry terms',
-    detail: 'Spell out standard terminology and acronyms the way the posting does.',
-  },
-];
+
+/** Bars read green at 70 and above, clay below 40, navy in between. */
+const barTone = (value) => (value >= 70 ? 'green' : value < 40 ? 'clay' : 'navy');
 
 const VALID_TYPES = [
   'application/pdf',
@@ -55,6 +40,8 @@ const ATSAnalyzer = () => {
   const [error, setError] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [generatingReport, setGeneratingReport] = useState(false);
+  // Which fixes the user has ticked off. Reset with every new analysis.
+  const [applied, setApplied] = useState([]);
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
@@ -101,6 +88,7 @@ const ATSAnalyzer = () => {
     setAnalyzing(true);
     setError('');
     setResults(null);
+    setApplied([]);
 
     try {
       const token = sessionStorage.getItem('token');
@@ -130,6 +118,7 @@ const ATSAnalyzer = () => {
 
   const resetAnalysis = () => {
     setResults(null);
+    setApplied([]);
     setResumeFile(null);
     setJobDescription('');
     setError('');
@@ -187,7 +176,14 @@ const ATSAnalyzer = () => {
 
   const score = results ? Math.round(results.score || 0) : 0;
   const scoreTone = score >= 60 ? 'var(--color-green)' : score >= 40 ? 'var(--color-amber)' : 'var(--color-clay)';
-  const strongMatch = score >= 80;
+
+  // A dimension the scorer could not measure is left out rather than drawn at
+  // zero, which would read as a failing grade for something it never checked.
+  const dimensions = (results?.dimensions || []).filter((d) => typeof d.score === 'number');
+  const fixes = results?.fixes || [];
+  const remaining = fixes.filter((fix) => !applied.includes(fix.id));
+  const pointsLeft = remaining.reduce((sum, fix) => sum + (fix.points || 0), 0);
+  const markAllDone = () => setApplied(fixes.map((fix) => fix.id));
 
   return (
     <LearnerShell
@@ -231,34 +227,24 @@ const ATSAnalyzer = () => {
                 </div>
 
                 <div style={{ padding: '26px 22px' }}>
-                  <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
-                    {results.message}
-                  </p>
-
-                  <div style={{ marginTop: 18, borderTop: '1px solid var(--color-line-soft)' }}>
-                    {[
-                      { label: 'Similarity', value: results.similarity != null ? results.similarity : '—' },
-                      { label: 'Method', value: results.method === 'sentence_transformers' ? 'Semantic' : 'Keyword overlap' },
-                    ].map((row) => (
-                      <div
-                        key={row.label}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '11px 0',
-                          borderBottom: '1px solid var(--color-line-soft)',
-                          fontSize: 14,
-                          color: 'var(--color-text-2)',
-                        }}
-                      >
-                        <span>{row.label}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-ink)' }}>
-                          {row.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  {dimensions.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                      {dimensions.map((d) => (
+                        <LabelledBar
+                          key={d.key}
+                          label={d.label}
+                          value={d.score}
+                          display={`${Math.round(d.score)}%`}
+                          max={100}
+                          tone={barTone(d.score)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
+                      {results.message}
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
@@ -280,35 +266,97 @@ const ATSAnalyzer = () => {
           {results && (
             <Card>
               <CardHeader
-                label={strongMatch ? 'Nothing outstanding' : `${RECOMMENDATIONS.length} ways to improve`}
+                label={
+                  remaining.length === 0
+                    ? 'Nothing outstanding'
+                    : `${remaining.length} fix${remaining.length === 1 ? '' : 'es'} left`
+                }
+                right={
+                  remaining.length > 0 && (
+                    <Button variant="quietClay" onClick={markAllDone}>Mark all done</Button>
+                  )
+                }
               />
 
-              {strongMatch ? (
+              {fixes.length === 0 ? (
                 <Empty>
-                  Your resume already aligns closely with this posting. Send it as it stands.
+                  Nothing measurable is holding this back. Send it as it stands.
                 </Empty>
               ) : (
                 <>
-                  {RECOMMENDATIONS.map((fix, i) => (
-                    <div
-                      key={fix.title}
-                      style={{
-                        padding: '16px 20px',
-                        borderBottom: i === RECOMMENDATIONS.length - 1 ? 'none' : '1px solid var(--color-line-soft)',
-                      }}
-                    >
-                      <OrdinalRow ordinal={String(i + 1).padStart(2, '0')}>
-                        <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>
-                          {fix.title}
-                        </div>
-                        <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
-                          {fix.detail}
-                        </p>
-                      </OrdinalRow>
-                    </div>
-                  ))}
+                  {fixes.map((fix, i) => {
+                    const done = applied.includes(fix.id);
+                    return (
+                      <div
+                        key={fix.id}
+                        style={{
+                          padding: '16px 20px',
+                          borderBottom: i === fixes.length - 1 ? 'none' : '1px solid var(--color-line-soft)',
+                          background: done ? 'var(--color-surface-active)' : 'transparent',
+                          transition: 'background-color 120ms ease',
+                        }}
+                      >
+                        <OrdinalRow
+                          ordinal={String(i + 1).padStart(2, '0')}
+                          right={
+                            <button
+                              type="button"
+                              onClick={() => !done && setApplied((prev) => [...prev, fix.id])}
+                              style={{
+                                flexShrink: 0,
+                                fontFamily: 'var(--font-mono)',
+                                fontSize: 11.5,
+                                letterSpacing: '0.08em',
+                                padding: '6px 10px',
+                                borderRadius: 0,
+                                background: 'transparent',
+                                border: `1px solid ${done ? 'var(--color-green)' : 'var(--color-clay)'}`,
+                                color: done ? 'var(--color-green)' : 'var(--color-clay)',
+                                cursor: done ? 'default' : 'pointer',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {done ? 'DONE' : fix.points > 0 ? `+${fix.points} PTS` : 'NOTE'}
+                            </button>
+                          }
+                        >
+                          <div
+                            style={{
+                              fontSize: 15.5,
+                              fontWeight: 500,
+                              color: done ? 'var(--color-text-4)' : 'var(--color-ink)',
+                              textDecoration: done ? 'line-through' : 'none',
+                            }}
+                          >
+                            {fix.title}
+                          </div>
+                          <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                            {fix.detail}
+                          </p>
+
+                          {/* The scorer quotes back the user's own sentences, so
+                              the advice points at something they can find. */}
+                          {fix.examples?.length > 0 && !done && (
+                            <div style={{ marginTop: 10, borderLeft: '1px solid var(--color-line)', paddingLeft: 12 }}>
+                              {fix.examples.map((example) => (
+                                <p
+                                  key={example}
+                                  style={{ fontSize: 13, color: 'var(--color-text-4)', margin: '4px 0', lineHeight: 1.5 }}
+                                >
+                                  {example}
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                        </OrdinalRow>
+                      </div>
+                    );
+                  })}
+
                   <CardFooterNote>
-                    These are edits to make in your own document — the analyser reads it, it does not rewrite it.
+                    {pointsLeft > 0
+                      ? `Worth about ${pointsLeft} points if you do all of them. These are edits to make in your own document — EduPath reads it, it does not rewrite it.`
+                      : 'These are edits to make in your own document — EduPath reads it, it does not rewrite it.'}
                   </CardFooterNote>
                 </>
               )}
