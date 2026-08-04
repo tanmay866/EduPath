@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  Card, CardHeader, CardFooterNote, Button, MicroLabel, StatusBox, LabelledBar, Loading, Empty,
+  Card, CardHeader, CardFooterNote, Button, MicroLabel, Badge, StatusBox, LabelledBar, Loading, Empty,
 } from '../../../design';
 
 /**
@@ -8,14 +8,64 @@ import {
  *
  * Left: one row per node — status box, title, mono status tag, mono week label.
  * Done drops the title to text-2 and the tag to text-4; the current node takes
- * surface-current with a 600 title and an amber tag.
+ * surface-current with a 600 title and an amber tag. A 3px left border keyed to
+ * the same status colour runs down the column, echoing the sidebar's active-item
+ * border so the list reads as a path rather than a plain table.
  * Right: the current focus card, then a gap report of bars by category.
+ *
+ * Rows with a mini project or resources expand in place on click — the two
+ * concerns (mark complete vs. see resources) used to share one click target,
+ * which meant there was nowhere to show what a skill actually links to. The
+ * status box now owns "mark complete" on its own; the row owns "show detail."
  *
  * The old skeleton shimmer is gone — §5 asks for card chrome plus a mono
  * LOADING label instead.
  */
+const domainOf = (url) => {
+  try { return new URL(url).hostname.replace(/^www\./, ''); }
+  catch { return ''; }
+};
+
+const RESOURCE_TONE = { docs: 'muted', article: 'amber', video: 'clay', course: 'green' };
+
+const ResourceList = ({ resources }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+    {resources.map((r, i) => (
+      <a
+        key={`${r.url}-${i}`}
+        href={r.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 10,
+          textDecoration: 'none',
+        }}
+      >
+        <Badge tone={RESOURCE_TONE[r.type] || 'muted'}>{r.type || 'link'}</Badge>
+        <span style={{ fontSize: 14, color: 'var(--color-ink)', textDecoration: 'underline' }}>
+          {r.title || r.url}
+        </span>
+        {domainOf(r.url) && (
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, color: 'var(--color-text-4)' }}>
+            {domainOf(r.url)}
+          </span>
+        )}
+      </a>
+    ))}
+  </div>
+);
+
+const STATUS_BORDER = {
+  done: 'var(--color-green)',
+  current: 'var(--color-amber)',
+  future: 'transparent',
+};
+
 const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted }) => {
   const skills = roadmapData?.skills || [];
+  const [expanded, setExpanded] = useState('');
 
   if (isRoadmapLoading) {
     return <Card><Loading /></Card>;
@@ -65,65 +115,127 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
           const isDone = step.status === 'completed';
           const isCurrent = i === currentIndex;
           const busy = updatingSkill === step.skill;
+          const hasDetail = Boolean(step.resources?.length || step.mini_project);
+          const isOpen = hasDetail && expanded === step.skill;
+          const statusKey = isDone ? 'done' : isCurrent ? 'current' : 'future';
 
           return (
             <div
               key={step.skill || i}
-              onClick={() => !busy && !isDone && onMarkCompleted?.(step.skill)}
               style={{
-                padding: '14px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 16,
+                borderLeft: `3px solid ${STATUS_BORDER[statusKey]}`,
                 borderBottom: i === skills.length - 1 ? 'none' : '1px solid var(--color-line-soft)',
-                background: isCurrent ? 'var(--color-surface-current)' : 'transparent',
-                cursor: busy ? 'wait' : isDone ? 'default' : 'pointer',
-                transition: 'background-color 120ms ease',
               }}
             >
-              <StatusBox status={isDone ? 'done' : isCurrent ? 'current' : 'future'} />
-
-              <span
+              <div
+                onClick={() => hasDetail && setExpanded(isOpen ? '' : step.skill)}
                 style={{
-                  flex: 1,
-                  fontSize: 15,
-                  fontWeight: isCurrent ? 600 : 400,
-                  color: isDone ? 'var(--color-text-2)' : 'var(--color-ink)',
+                  padding: '14px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  background: isCurrent ? 'var(--color-surface-current)' : 'transparent',
+                  cursor: hasDetail ? 'pointer' : 'default',
+                  transition: 'background-color 120ms ease',
                 }}
               >
-                {step.skill}
-              </span>
+                <span
+                  onClick={(e) => { e.stopPropagation(); if (!busy && !isDone) onMarkCompleted?.(step.skill); }}
+                  title={isDone ? 'Completed' : 'Mark complete'}
+                  style={{ cursor: isDone ? 'default' : busy ? 'wait' : 'pointer', display: 'flex' }}
+                >
+                  <StatusBox status={statusKey} />
+                </span>
 
-              <MicroLabel
-                size={11}
-                tracking="0.1em"
-                color={isDone ? 'var(--color-text-4)' : isCurrent ? 'var(--color-amber)' : 'var(--color-text-3)'}
-              >
-                {busy ? 'Saving' : isDone ? 'Done' : isCurrent ? 'In progress' : 'Planned'}
-              </MicroLabel>
+                <span
+                  style={{
+                    flex: 1,
+                    fontSize: 15,
+                    fontWeight: isCurrent ? 600 : 400,
+                    color: isDone ? 'var(--color-text-2)' : 'var(--color-ink)',
+                  }}
+                >
+                  {step.skill}
+                </span>
 
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 11.5,
-                  color: 'var(--color-text-4)',
-                  width: 34,
-                  textAlign: 'right',
-                }}
-              >
-                {step.start_week ? `W${step.start_week}` : '—'}
-              </span>
+                <MicroLabel
+                  size={11}
+                  tracking="0.1em"
+                  color={isDone ? 'var(--color-text-4)' : isCurrent ? 'var(--color-amber)' : 'var(--color-text-3)'}
+                >
+                  {busy ? 'Saving' : isDone ? 'Done' : isCurrent ? 'In progress' : 'Planned'}
+                </MicroLabel>
+
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11.5,
+                    color: 'var(--color-text-4)',
+                    width: 34,
+                    textAlign: 'right',
+                  }}
+                >
+                  {step.start_week ? `W${step.start_week}` : '—'}
+                </span>
+
+                {hasDetail && (
+                  <MicroLabel
+                    size={10}
+                    tracking="0.1em"
+                    color={isOpen ? 'var(--color-ink)' : 'var(--color-text-4)'}
+                    style={{ width: 44, textAlign: 'right', flexShrink: 0 }}
+                  >
+                    {isOpen ? 'Hide' : 'Info'}
+                  </MicroLabel>
+                )}
+              </div>
+
+              {isOpen && (
+                <div style={{ padding: '2px 20px 18px 47px', background: 'var(--color-surface-current)' }}>
+                  {step.mini_project && (
+                    <div style={{ marginBottom: step.resources?.length ? 16 : 0 }}>
+                      <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 6 }}>
+                        Mini project
+                      </MicroLabel>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink)' }}>
+                        {step.mini_project.title}
+                      </div>
+                      {step.mini_project.description && (
+                        <p style={{ fontSize: 13.5, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                          {step.mini_project.description}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {step.resources?.length > 0 && (
+                    <div>
+                      <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 8 }}>
+                        Resources
+                      </MicroLabel>
+                      <ResourceList resources={step.resources} />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
 
-        <CardFooterNote>Click a row to mark that skill complete.</CardFooterNote>
+        <CardFooterNote>Click the marker to mark a skill complete, click the row for its resources.</CardFooterNote>
       </Card>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
         <Card>
           <CardHeader label="Current focus" />
           <div style={{ padding: '20px 22px' }}>
+            {currentSkill && (currentSkill.category || currentSkill.difficulty) && (
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                {currentSkill.category && <Badge tone="muted">{currentSkill.category}</Badge>}
+                {currentSkill.difficulty && <Badge tone="amber">{currentSkill.difficulty}</Badge>}
+              </div>
+            )}
+
             <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-ink)' }}>
               {currentSkill ? currentSkill.skill : 'Everything is complete'}
             </div>
@@ -175,6 +287,15 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
               >
                 Mark done
               </Button>
+            )}
+
+            {currentSkill?.resources?.length > 0 && (
+              <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid var(--color-line-soft)' }}>
+                <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10 }}>
+                  Resources
+                </MicroLabel>
+                <ResourceList resources={currentSkill.resources} />
+              </div>
             )}
           </div>
         </Card>
