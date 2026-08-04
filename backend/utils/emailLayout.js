@@ -24,13 +24,13 @@
  *    Mail, Outlook, other clients that ask nicely instead of repainting
  *    unasked). This covers the card, borders, text and badges.
  *
- * The logo mark is the one element that block does not protect: it started
- * as table cells (an ink bgcolor holding white bgcolor bars) with the same
- * data-ogsc override, but the Gmail app pulled the near-black square and the
- * near-white bars toward the same dark value regardless — either it ignores
- * that hook or repaints after it applies. It is a hosted image now instead,
- * since Gmail's dark mode repaints backgrounds and text but does not touch
- * the pixels of a raster image. See the comment on logoMark() below.
+ * The logo mark is plain table cells (an ink bgcolor holding white bgcolor
+ * bars) and is not part of that override. Two attempts at protecting it from
+ * Gmail's dark mode — the data-ogsc hook above, then swapping it for a hosted
+ * image, on the theory that Gmail repaints backgrounds and text but not a
+ * raster image's pixels — both failed to fix it in the actual Gmail app. It
+ * is back to the original table cells rather than carrying a fix that does
+ * not work.
  */
 
 const FONT_DISPLAY = "Georgia, 'Times New Roman', Times, serif";
@@ -110,27 +110,30 @@ const preheaderMarkup = (text) => `
       <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${COLOR.paper};opacity:0;">${text}</div>`;
 
 /**
- * The Logo primitive from the frontend design system, as a hosted image.
+ * The Logo primitive from the frontend design system: an ink square holding
+ * three ascending white bars, built as nested tables (no images).
  *
- * This used to be nested tables: an ink <td bgcolor> holding three white
- * <td bgcolor> bars. Gmail's Android/iOS app recolours `bgcolor` in dark
- * mode using its own heuristic, which treats "near black" and "near white"
- * as the two ends of the same scale — so the ink square and the white bars
- * both got pulled toward the same dark value, and the mark disappeared.
- * A `data-ogsc` override (the documented hook for undoing that) did not
- * fix it in practice; whatever build of the app rendered this either
- * ignores that hook or repaints after it applies.
- *
- * An image sidesteps the problem rather than fighting it: Gmail's dark mode
- * repaints backgrounds, borders and text — it does not alter the pixels of
- * a raster image. The one real cost is that most inboxes block images until
- * "show images" is tapped, so the wordmark text next to it (a live span, not
- * part of the image) is what still identifies the sender at first open.
+ * Known issue, not fixed here: the Gmail Android/iOS app repaints `bgcolor`
+ * in dark mode using its own heuristic that treats "near black" and "near
+ * white" as the two ends of the same scale, so the ink square and the white
+ * bars both get pulled toward the same dark value and the mark disappears.
+ * Neither a data-ogsc override nor swapping this for a hosted image fixed
+ * that in practice, so this is back to the plain table version rather than
+ * carrying a fix that did not work.
  */
-const LOGO_URL = 'https://res.cloudinary.com/dmk1ekxzf/image/upload/v1785860464/edupath/email-assets/logo-mark.png';
+const bar = (height, maxHeight) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:4px;"><tr><td width="4" height="${maxHeight - height}" style="font-size:0;line-height:0;">&nbsp;</td></tr><tr><td width="4" height="${height}" bgcolor="#ffffff" style="font-size:0;line-height:0;">&nbsp;</td></tr></table>`;
 
 const logoMark = (size = 28) =>
-  `<img src="${LOGO_URL}" width="${size}" height="${size}" alt="EduPath" style="display:block;width:${size}px;height:${size}px;border:0;outline:none;" />`;
+  `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="${size}" height="${size}" bgcolor="${COLOR.ink}" align="center" valign="middle" style="width:${size}px;height:${size}px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+                    <td>${bar(7, 15)}</td>
+                    <td width="3"></td>
+                    <td>${bar(11, 15)}</td>
+                    <td width="3"></td>
+                    <td>${bar(15, 15)}</td>
+                  </tr></table>
+                </td></tr></table>`;
 
 /** Logo mark beside the Newsreader wordmark, exactly as it appears in the app header. */
 const wordmark = () => `            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
