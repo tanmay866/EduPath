@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Map, Zap, ArrowLeft, Clock } from 'lucide-react';
 import {
@@ -68,7 +68,6 @@ const QUICK_TIPS = [
 
 /* ── component ───────────────────────────────────────────────────── */
 const RoadmapPage = () => {
-  const navigate = useNavigate();
   const location = useLocation();
 
   const [history,          setHistory]         = useState([]);
@@ -80,12 +79,17 @@ const RoadmapPage = () => {
   const [updatingSkill,    setUpdatingSkill]    = useState('');
   const [showHistory,      setShowHistory]      = useState(false);
 
-  // Auto-open history if navigated from "View History" button
+  // Load whatever the learner already has. Previously this only ran when
+  // arriving from "View History", so a returning user with a saved roadmap
+  // always landed on the empty generate form. loadHistory opens the most
+  // recent roadmap once the list comes back.
   useEffect(() => {
     if (location.state?.openHistory) {
       handleOpenHistory();
       // Clear the state so refresh doesn't re-trigger
       window.history.replaceState({}, '');
+    } else {
+      loadHistory();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -177,9 +181,6 @@ const RoadmapPage = () => {
 
   const handleBackToForm = () => { setRoadmapData(null); setSelectedRoadmapId(''); setShowHistory(false); };
 
-  const hasRoadmap     = Boolean(roadmapData && (roadmapData.skills || []).length > 0);
-  const showRoadmapView = hasRoadmap || isRoadmapLoading;
-
   /* ── Active roadmap / history view ───────────────────────────── */
   // One return below handles all three states: history, the form when nothing
   // is loaded, and the timeline. The dark-themed branch that used to sit here
@@ -236,7 +237,9 @@ const RoadmapPage = () => {
           selectedRoadmapId={selectedRoadmapId}
           onSelectRoadmap={loadRoadmapById}
         />
-      ) : !roadmapData && !isRoadmapLoading ? (
+      ) : !roadmapData && !isRoadmapLoading && !isHistoryLoading ? (
+        // isHistoryLoading is included so the form does not flash on mount while
+        // the saved roadmap is still being fetched.
         <RoadmapForm isGenerating={isGenerating} onGenerate={handleGenerate} />
       ) : (
         <RoadmapTimeline
