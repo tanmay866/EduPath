@@ -125,6 +125,13 @@ class HuggingFaceService {
             // Remove any leading/trailing whitespace
             cleanedText = cleanedText.trim();
 
+            // The model occasionally opens a string with ' instead of " —
+            // usually when a value needs to contain a literal " and it
+            // switches delimiter rather than escaping. JSON.parse rejects
+            // that outright, so normalize single-quoted strings to
+            // double-quoted ones before the truncation repair runs.
+            cleanedText = this.normalizeQuotes(cleanedText);
+
             // Try to fix common JSON truncation issues
             cleanedText = this.attemptJsonRepair(cleanedText);
 
@@ -145,6 +152,70 @@ class HuggingFaceService {
             console.error('📄 Response text:', responseText.substring(0, 500));
             throw new Error(`Failed to parse Hugging Face response: ${error.message}`);
         }
+    }
+
+    /**
+     * Rewrite single-quote-delimited strings as double-quote-delimited ones
+     * so JSON.parse accepts them. Walks the text character by character
+     * rather than using a regex, tracking whether the cursor is inside a
+     * double-quoted string, a single-quoted string, or neither — a regex
+     * can't tell "it's" (an apostrophe inside a valid double-quoted string,
+     * which must be left alone) from a string the model opened with ' (which
+     * must be converted), but a linear scan can.
+     */
+    normalizeQuotes(text) {
+        let result = '';
+        let state = 'outside'; // 'outside' | 'double' | 'single'
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+
+            if (state === 'outside') {
+                if (ch === '"') {
+                    state = 'double';
+                    result += ch;
+                } else if (ch === "'") {
+                    state = 'single';
+                    result += '"'; // opening delimiter, converted
+                } else {
+                    result += ch;
+                }
+                continue;
+            }
+
+            if (state === 'double') {
+                if (ch === '\\' && i + 1 < text.length) {
+                    result += ch + text[i + 1];
+                    i += 1;
+                } else if (ch === '"') {
+                    state = 'outside';
+                    result += ch;
+                } else {
+                    result += ch;
+                }
+                continue;
+            }
+
+            // state === 'single'
+            if (ch === '\\' && i + 1 < text.length) {
+                const next = text[i + 1];
+                // An escaped ' is just a literal quote once the delimiter is
+                // ", so drop the now-unnecessary escape rather than keep it.
+                result += next === "'" ? "'" : ch + next;
+                i += 1;
+            } else if (ch === '"') {
+                // A literal " inside what is becoming a "-delimited string
+                // has to be escaped, or it would prematurely close it.
+                result += '\\"';
+            } else if (ch === "'") {
+                state = 'outside';
+                result += '"'; // closing delimiter, converted
+            } else {
+                result += ch;
+            }
+        }
+
+        return result;
     }
 
     /**

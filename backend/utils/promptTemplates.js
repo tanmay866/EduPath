@@ -20,7 +20,8 @@ export const createQuizPrompt = ({ topic, difficulty, experienceLevel, questionC
 - Include concise explanation (max 2 sentences)
 - Keep questions and options brief and clear
 
-**CRITICAL: Return ONLY valid JSON, no markdown blocks, no extra text:**
+**CRITICAL: Return ONLY valid JSON, no markdown blocks, no extra text.**
+**Use double quotes for every string, never single quotes. If a string must contain a double quote, escape it as \\".**
 
 {
   "questions": [
