@@ -130,16 +130,20 @@ const App = () => {
           <Route path="/assessment/quiz" element={<QuizPage />} />
           <Route path="/assessment/result/:resultId" element={<ResultPage />} />
 
-          {/* Assessment Hub Routes */}
+          {/* Assessment Hub Routes — the actual test-taking screens (and the
+              past-result detail view, which reuses the same layout) drop the
+              marketing Navbar entirely so there's nothing to look at but the
+              test. The hub itself and the plain results-list screens keep
+              it; they're browsing, not mid-attempt. */}
           <Route path="/assessment-hub" element={<AssessmentHub />} />
-          <Route path="/assessment-hub/skill" element={<><Navbar /><SkillAssessment /></>} />
-          <Route path="/assessment-hub/aptitude" element={<><Navbar /><AptitudeTest /></>} />
+          <Route path="/assessment-hub/skill" element={<SkillAssessment />} />
+          <Route path="/assessment-hub/aptitude" element={<AptitudeTest />} />
           <Route path="/assessment-hub/aptitude/results" element={<PracticeResults type="aptitude" label="Aptitude" retakePath="/assessment-hub/aptitude" />} />
-          <Route path="/assessment-hub/aptitude/results/:resultId" element={<><Navbar /><PracticeResultDetail type="aptitude" /></>} />
-          <Route path="/assessment-hub/cs-fundamentals" element={<><Navbar /><CSFundamentals /></>} />
+          <Route path="/assessment-hub/aptitude/results/:resultId" element={<PracticeResultDetail type="aptitude" />} />
+          <Route path="/assessment-hub/cs-fundamentals" element={<CSFundamentals />} />
           <Route path="/assessment-hub/cs-fundamentals/results" element={<PracticeResults type="cs-fundamentals" label="CS fundamentals" retakePath="/assessment-hub/cs-fundamentals" />} />
-          <Route path="/assessment-hub/cs-fundamentals/results/:resultId" element={<><Navbar /><PracticeResultDetail type="cs-fundamentals" /></>} />
-          <Route path="/assessment-hub/mock-interview" element={<><Navbar /><AIMockInterview /></>} />
+          <Route path="/assessment-hub/cs-fundamentals/results/:resultId" element={<PracticeResultDetail type="cs-fundamentals" />} />
+          <Route path="/assessment-hub/mock-interview" element={<AIMockInterview />} />
 
           {/* New Feature Routes */}
           <Route path="/resume-builder" element={<ResumeBuilder />} />
