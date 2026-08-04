@@ -69,7 +69,7 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
           return (
             <div
               key={step.skill || i}
-              onClick={() => !busy && !isDone && onMarkCompleted?.(step)}
+              onClick={() => !busy && !isDone && onMarkCompleted?.(step.skill)}
               style={{
                 padding: '14px 20px',
                 display: 'flex',
@@ -169,7 +169,7 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
               <Button
                 fullWidth
                 style={{ marginTop: 20 }}
-                onClick={() => onMarkCompleted?.(currentSkill)}
+                onClick={() => onMarkCompleted?.(currentSkill.skill)}
                 loading={updatingSkill === currentSkill.skill}
                 loadingLabel="Saving…"
               >
