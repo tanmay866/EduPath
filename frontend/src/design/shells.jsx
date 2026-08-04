@@ -69,7 +69,11 @@ export const AuthShell = ({ quote, attribution, footLabel = 'EDUPATH', children 
 /* ── Learner shell ────────────────────────────────────────────────────────
    230px sidebar on surface, content on paper-warm. The 3px left border on nav
    items exists in both states — transparent when inactive — so nothing shifts
-   when selection moves. */
+   when selection moves.
+
+   The shell itself is pinned to 100vh with `overflow: hidden`; only <main>
+   scrolls. Sidebar and header stay put on long pages instead of scrolling
+   out of view with the content. */
 const NavItem = ({ to, children, dark = false, end = false }) => (
   <NavLink
     to={to}
@@ -125,13 +129,15 @@ const SignOut = ({ dark = false }) => (
 );
 
 export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, footLabel, children }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: '230px 1fr', minHeight: '100vh' }}>
+  <div style={{ display: 'grid', gridTemplateColumns: '230px 1fr', height: '100vh' }}>
     <aside
       style={{
         background: 'var(--color-surface)',
         borderRight: '1px solid var(--color-line)',
         display: 'flex',
         flexDirection: 'column',
+        height: '100vh',
+        overflowY: 'auto',
       }}
     >
       <div style={{ padding: 24, borderBottom: '1px solid var(--color-line)' }}>
@@ -168,7 +174,7 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
       </div>
     </aside>
 
-    <div style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+    <div style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflow: 'hidden' }}>
       <header
         style={{
           background: 'var(--color-surface)',
@@ -178,6 +184,7 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
           alignItems: 'flex-end',
           justifyContent: 'space-between',
           gap: 20,
+          flexShrink: 0,
         }}
       >
         <div>
@@ -206,8 +213,14 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
         </div>
       </header>
 
-      <main style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22, flex: 1, minWidth: 0 }}>
-        {children}
+      {/* main only scrolls; the flex column that lays out the page's cards is
+          a plain block child of it, not a flex item itself — a flex item
+          shrinks to fit its container by default, which was squeezing every
+          card down to nothing instead of letting main grow a scrollbar. */}
+      <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+        <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
+          {children}
+        </div>
       </main>
     </div>
   </div>
@@ -217,8 +230,8 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
    218px ink sidebar. Header carries a mono chip and a quiet action rather
    than the learner header's note and avatar. */
 export const AdminShell = ({ items = [], title, chip, action, children }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: '218px 1fr', minHeight: '100vh' }}>
-    <aside style={{ background: 'var(--color-ink)', display: 'flex', flexDirection: 'column' }}>
+  <div style={{ display: 'grid', gridTemplateColumns: '218px 1fr', height: '100vh' }}>
+    <aside style={{ background: 'var(--color-ink)', display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
       <div style={{ padding: '26px 24px' }}>
         <Wordmark dark size={26} labelSize={22} />
       </div>
@@ -234,7 +247,7 @@ export const AdminShell = ({ items = [], title, chip, action, children }) => (
       </div>
     </aside>
 
-    <div style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+    <div style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflow: 'hidden' }}>
       <header
         style={{
           background: 'var(--color-surface)',
@@ -244,6 +257,7 @@ export const AdminShell = ({ items = [], title, chip, action, children }) => (
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 20,
+          flexShrink: 0,
         }}
       >
         <h1
@@ -277,8 +291,14 @@ export const AdminShell = ({ items = [], title, chip, action, children }) => (
         </div>
       </header>
 
-      <main style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22, flex: 1, minWidth: 0 }}>
-        {children}
+      {/* main only scrolls; the flex column that lays out the page's cards is
+          a plain block child of it, not a flex item itself — a flex item
+          shrinks to fit its container by default, which was squeezing every
+          card down to nothing instead of letting main grow a scrollbar. */}
+      <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+        <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
+          {children}
+        </div>
       </main>
     </div>
   </div>
