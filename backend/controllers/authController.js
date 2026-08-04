@@ -1,4 +1,13 @@
 import User from '../models/userModel.js';
+import Roadmap from '../models/Roadmap.js';
+import SkillGap from '../models/SkillGap.js';
+import QuizSession from '../models/QuizSession.js';
+import QuizResult from '../models/QuizResult.js';
+import ProgressLog from '../models/ProgressLog.js';
+import Portfolio from '../models/Portfolio.js';
+import Resume from '../models/Resume.js';
+import GeneratedResume from '../models/GeneratedResume.js';
+import cloudinary from '../config/cloudinaryConfig.js';
 import { asyncHandler } from '../middlewares/errorMiddleware.js';
 import { AppError } from '../middlewares/errorMiddleware.js';
 import { generateToken, generateResetToken, hashResetToken, createTokenResponse, generateOtp, hashOtp } from '../utils/tokenUtils.js';
@@ -85,6 +94,83 @@ export const signup = asyncHandler(async (req, res, next) => {
     issueVerificationCode(user)
         .then(() => console.log('✅ Verification code sent to:', user.email))
         .catch((emailError) => console.error('❌ Failed to send verification code:', emailError.message));
+});
+
+/**
+ * @desc    Permanently delete the caller's account and everything they own
+ * @route   DELETE /api/auth/account
+ * @access  Private
+ */
+export const deleteAccount = asyncHandler(async (req, res, next) => {
+    const { password } = req.body;
+
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user) {
+        return next(new AppError('User not found', 404));
+    }
+
+    // Re-authenticate. A stolen session should not be enough to destroy an
+    // account, and this is the one action with nothing to undo it.
+    const isPasswordMatch = await user.comparePassword(password);
+
+    if (!isPasswordMatch) {
+        return next(new AppError('Password is incorrect', 401));
+    }
+
+    const userId = user._id;
+
+    // Remove uploaded files first: once the documents holding their public ids
+    // are gone, the assets would be orphaned in Cloudinary with no way to find
+    // them. Failures here must not abort the deletion — a leftover file is a
+    // smaller problem than an account that cannot be deleted.
+    const publicIds = [];
+    if (user.profile?.avatarPublicId) {
+        publicIds.push(user.profile.avatarPublicId);
+    }
+    for (const Model of [GeneratedResume, Resume]) {
+        const docs = await Model.find({ userId }).select('cloudinaryPublicId').lean();
+        publicIds.push(...docs.map((d) => d.cloudinaryPublicId).filter(Boolean));
+    }
+
+    for (const publicId of publicIds) {
+        try {
+            await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+            await cloudinary.uploader.destroy(publicId);
+        } catch (assetError) {
+            console.error('Could not remove asset', publicId, assetError.message);
+        }
+    }
+
+    // The schemas disagree on the field name, hence both keys.
+    const ownedBy = { $or: [{ userId }, { user_id: userId }] };
+    const removed = {};
+
+    for (const [name, Model] of Object.entries({
+        roadmaps: Roadmap,
+        skillGaps: SkillGap,
+        quizSessions: QuizSession,
+        quizResults: QuizResult,
+        progressLogs: ProgressLog,
+        portfolios: Portfolio,
+        resumes: Resume,
+        generatedResumes: GeneratedResume,
+    })) {
+        const { deletedCount } = await Model.deleteMany(ownedBy);
+        if (deletedCount) {
+            removed[name] = deletedCount;
+        }
+    }
+
+    await User.deleteOne({ _id: userId });
+
+    console.log(`🗑️  Account deleted: ${user.email} (${user.loginId})`, removed);
+
+    res.status(200).json({
+        success: true,
+        message: 'Your account and all associated data have been permanently deleted.',
+        removed,
+    });
 });
 
 /**

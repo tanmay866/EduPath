@@ -4,6 +4,7 @@ import {
   login,
   verifyOtp,
   resendOtp,
+  deleteAccount,
   getMe,
   forgotPassword,
   resetPassword,
@@ -19,6 +20,7 @@ import {
   forgotPasswordValidation,
   resetPasswordValidation,
   changePasswordValidation,
+  deleteAccountValidation,
 } from '../middlewares/validationMiddleware.js';
 
 const router = express.Router();
@@ -32,5 +34,6 @@ router.post('/reset-password/:resetToken', resetPasswordValidation, resetPasswor
 router.get('/me', protect, getMe);
 router.put('/change-password', protect, changePasswordValidation, changePassword);
 router.post('/logout', protect, logout);
+router.delete('/account', protect, deleteAccountValidation, deleteAccount);
 
 export default router;

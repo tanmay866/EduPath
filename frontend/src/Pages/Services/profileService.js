@@ -60,6 +60,16 @@ export const changePassword = async (passwordData) => {
   }
 };
 
+// Permanently delete the account. The password is re-checked server side.
+export const deleteAccount = async (password) => {
+  try {
+    const response = await API.delete('/auth/account', { data: { password } });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 // Forgot password - Send reset email
 export const forgotPassword = async (email) => {
   try {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings as SettingsIcon, ArrowLeft, Lock, Eye, EyeOff, User } from 'lucide-react';
-import { changePassword } from '../Services/profileService';
+import { Settings as SettingsIcon, ArrowLeft, Lock, Eye, EyeOff, User, AlertTriangle } from 'lucide-react';
+import { changePassword, deleteAccount } from '../Services/profileService';
 import { getPasswordError, getApiErrorMessage } from '../../utils/passwordPolicy';
 import PasswordRequirements from '../../component/Ui/PasswordRequirements';
 
@@ -20,6 +20,32 @@ const SettingsPage = () => {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
+
+  // Account deletion state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    setPasswordError('');
+
+    try {
+      await deleteAccount(deletePassword);
+
+      // The account no longer exists, so the stored token is dead. Clear it
+      // before navigating or the next protected request 404s on a ghost user.
+      sessionStorage.clear();
+      navigate('/', { replace: true });
+    } catch (err) {
+      setShowDeleteModal(false);
+      setPasswordError(getApiErrorMessage(err, 'Could not delete your account.'));
+      setTimeout(() => setPasswordError(''), 4000);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Check if user is logged in
@@ -311,8 +337,102 @@ const SettingsPage = () => {
               </button>
             </div>
           </form>
+
+          {/* Danger Zone */}
+          <div className="mt-8 pt-6 border-t border-red-500/20">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-center">
+                <AlertTriangle size={17} className="text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Delete Account</h3>
+                <p className="text-xs text-slate-400">This cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+              Permanently removes your account along with your roadmaps, quiz results, resumes and
+              portfolios. Portfolio sites you have already deployed stay online and must be removed
+              separately.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => { setShowDeleteModal(true); setDeletePassword(''); setDeleteConfirm(''); }}
+              className="px-5 py-2.5 rounded-xl font-bold text-sm bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-colors"
+            >
+              Delete my account
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Two independent confirmations: the password proves it is really them,
+          typing DELETE proves the click was deliberate. */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="max-w-md w-full bg-[#090b14] border border-red-500/25 rounded-[1.5rem] p-7 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-center">
+                <AlertTriangle size={19} className="text-red-400" />
+              </div>
+              <h3 className="text-xl font-bold text-white">Delete your account?</h3>
+            </div>
+
+            <p className="text-sm text-slate-400 mb-5 leading-relaxed">
+              Everything tied to this account will be erased immediately. There is no way to
+              recover it.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-wider uppercase">
+                  Confirm your password
+                </label>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-red-500/50 transition-colors text-sm"
+                  placeholder="Enter your password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-400 mb-1.5 tracking-wider uppercase">
+                  Type DELETE to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-red-500/50 transition-colors text-sm tracking-widest"
+                  placeholder="DELETE"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleteLoading}
+                className="flex-1 px-4 py-3 rounded-xl font-bold text-sm bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading || deleteConfirm !== 'DELETE' || !deletePassword}
+                className="flex-1 px-4 py-3 rounded-xl font-bold text-sm bg-red-600 text-white hover:bg-red-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete forever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

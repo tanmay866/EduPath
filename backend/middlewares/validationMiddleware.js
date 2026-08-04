@@ -92,6 +92,14 @@ export const forgotPasswordValidation = [
   handleValidationErrors,
 ];
 
+export const deleteAccountValidation = [
+  body('password')
+    .notEmpty()
+    .withMessage('Enter your password to confirm deletion'),
+
+  handleValidationErrors,
+];
+
 export const verifyOtpValidation = [
   body('email')
     .trim()
