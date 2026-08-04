@@ -217,9 +217,14 @@ const Contact = () => {
                 label: 'Contact No',
                 color: 'emerald',
                 content: (
-                  <a href="tel:+919512842105" className="text-slate-400 hover:text-emerald-400 transition-colors text-sm font-medium">
-                    +91 9512842105
-                  </a>
+                  <div className="flex flex-col gap-1">
+                    <a href="tel:+919313928398" className="text-slate-400 hover:text-emerald-400 transition-colors text-sm font-medium">
+                      +91 9313928398
+                    </a>
+                    <a href="tel:+919512842105" className="text-slate-400 hover:text-emerald-400 transition-colors text-sm font-medium">
+                      +91 9512842105
+                    </a>
+                  </div>
                 )
               },
               {
@@ -227,8 +232,8 @@ const Contact = () => {
                 label: 'Email',
                 color: 'cyan',
                 content: (
-                  <a href="mailto:mihirpatel2102005@gmail.com" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium break-all">
-                    mihirpatel2102005@gmail.com
+                  <a href="mailto:edupath.developers@gmail.com" className="text-slate-400 hover:text-cyan-400 transition-colors text-sm font-medium break-all">
+                    edupath.developers@gmail.com
                   </a>
                 )
               },
