@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { Logo, Wordmark, MicroLabel, Avatar } from './primitives';
 
 /**
@@ -95,27 +95,34 @@ const NavItem = ({ to, children, dark = false, end = false }) => (
   </NavLink>
 );
 
-const SignOut = ({ dark = false }) => {
-  const navigate = useNavigate();
-  return (
-    <button
-      type="button"
-      onClick={() => { sessionStorage.clear(); navigate('/signin'); }}
-      style={{
-        background: 'none',
-        border: 'none',
-        padding: 0,
-        cursor: 'pointer',
-        fontSize: 13.5,
-        textDecoration: 'underline',
-        color: dark ? 'var(--color-dark-text-2)' : 'var(--color-text-3)',
-        fontFamily: 'var(--font-sans)',
-      }}
-    >
-      Sign out
-    </button>
-  );
-};
+const SignOut = ({ dark = false }) => (
+  <button
+    type="button"
+    onClick={() => {
+      sessionStorage.clear();
+      // App.jsx decides between the admin routes and the learner routes with
+      // a plain `if` at the top of its render, read straight from
+      // sessionStorage rather than through React state. A client-side
+      // navigate() does not re-run that check, so from the admin side it
+      // leaves the admin route tree mounted — whose catch-all route matches
+      // any path, including /signin — and the screen never actually changes.
+      // The hard reload forces App to re-evaluate the (now-cleared) role.
+      window.location.href = '/signin';
+    }}
+    style={{
+      background: 'none',
+      border: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      fontSize: 13.5,
+      textDecoration: 'underline',
+      color: dark ? 'var(--color-dark-text-2)' : 'var(--color-text-3)',
+      fontFamily: 'var(--font-sans)',
+    }}
+  >
+    Sign out
+  </button>
+);
 
 export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, footLabel, children }) => (
   <div style={{ display: 'grid', gridTemplateColumns: '230px 1fr', minHeight: '100vh' }}>

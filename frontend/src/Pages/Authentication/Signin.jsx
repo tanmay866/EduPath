@@ -100,7 +100,6 @@ const Signin = () => {
     <AuthShell
       quote="A roadmap is only useful if it tells you what to do on Monday."
       attribution="The EduPath method"
-      footLabel="LEARNER ACCESS"
     >
       <h1 style={{ ...type.authHeading, margin: 0, color: 'var(--color-ink)' }}>Sign in</h1>
 
@@ -157,7 +156,7 @@ const Signin = () => {
           </InlineMessage>
         )}
 
-        <div style={{ marginTop: 26, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ marginTop: 26 }}>
           <Button
             type="submit"
             fullWidth
@@ -165,10 +164,6 @@ const Signin = () => {
             loadingLabel="Signing in…"
           >
             Sign in
-          </Button>
-
-          <Button variant="secondary" fullWidth onClick={() => navigate('/admin')}>
-            Sign in as administrator
           </Button>
         </div>
       </form>
