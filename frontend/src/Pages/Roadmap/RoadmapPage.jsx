@@ -110,6 +110,10 @@ const RoadmapPage = () => {
       const data = res?.data;
       setRoadmapData({ roadmap_id: data?.roadmap_id || id, duration: data?.total_duration_weeks || data?.duration || 0, skills: data?.skills || [], status: data?.status || 'active' });
       setSelectedRoadmapId(id);
+      // Selecting a roadmap from the history list loaded it into state just
+      // fine, but left the history list on screen — the load was invisible
+      // unless the learner also clicked "Back to roadmap" themselves.
+      setShowHistory(false);
     } catch (err) { toast.error(getErrorMessage(err, 'Failed to load roadmap.')); }
     finally       { setIsRoadmapLoading(false); }
   };
