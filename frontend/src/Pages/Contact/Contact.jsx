@@ -217,14 +217,9 @@ const Contact = () => {
                 label: 'Contact No',
                 color: 'emerald',
                 content: (
-                  <div className="flex flex-col gap-1">
-                    <a href="tel:+919313928398" className="text-slate-400 hover:text-emerald-400 transition-colors text-sm font-medium">
-                      +91 9313928398
-                    </a>
-                    <a href="tel:+919512842105" className="text-slate-400 hover:text-emerald-400 transition-colors text-sm font-medium">
-                      +91 9512842105
-                    </a>
-                  </div>
+                  <a href="tel:+919313928398" className="text-slate-400 hover:text-emerald-400 transition-colors text-sm font-medium">
+                    +91 9313928398
+                  </a>
                 )
               },
               {
