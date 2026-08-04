@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getQuizHistory } from '../../Services/assessmentService';
-import PreviousAttemptsTable from '../AssesmentDashboard/components/PreviousAttemptsTable';
-import BackToHomeButton from '../../../component/Assessment/BackToHomeButton';
+import {
+  LearnerShell, Card, CardHeader, CardFooterNote, Button, TableHead, TableRow,
+  NumCell, ActionCell, MicroLabel, Loading, Empty,
+} from '../../../design';
+import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../../design/nav';
+
+/**
+ * Every attempt, as a §5 table.
+ *
+ * §7 has no all-results screen — the Overview shows only the recent few — so
+ * this follows the table pattern: mono right-aligned score and date, a mono
+ * status in green or clay, and a footer count.
+ */
+const COLUMNS = '1.4fr 0.8fr 0.7fr 0.7fr 0.8fr';
 
 const AllResult = () => {
   const navigate = useNavigate();
@@ -10,7 +22,6 @@ const AllResult = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check authentication on component mount
   useEffect(() => {
     const token = sessionStorage.getItem('token');
     if (!token) {
@@ -27,25 +38,19 @@ const AllResult = () => {
     try {
       setLoading(true);
       const response = await getQuizHistory();
-      
-      // Access the correct nested data structure
       const results = response.data.data.results || [];
-      
-      // Format the data for the PreviousAttemptsTable component
+
       const formattedAttempts = results.map((attempt) => ({
         id: attempt._id,
         resultId: attempt._id,
-        date: new Date(attempt.completedAt || attempt.createdAt).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+        topic: attempt.topic?.name || attempt.topicName || 'Assessment',
+        date: new Date(attempt.completedAt || attempt.createdAt).toLocaleDateString('en-GB', {
+          day: '2-digit', month: 'short', year: 'numeric',
         }),
         score: attempt.score,
         totalQuestions: attempt.totalQuestions,
         percentage: attempt.percentage,
-        status: attempt.percentage >= 70 ? 'Pass' : 'Fail'
+        passed: attempt.percentage >= 70,
       }));
 
       setAttempts(formattedAttempts);
@@ -58,70 +63,78 @@ const AllResult = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black relative">
-        <div className="flex items-center justify-center relative z-10 min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
-            <p className="text-white mt-4 text-lg">Loading your quiz history...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-black relative">
-        <div className="flex items-center justify-center p-4 relative z-10 min-h-screen">
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-8 max-w-md backdrop-blur-lg">
-            <h2 className="text-2xl font-bold text-red-400 mb-4">Error</h2>
-            <p className="text-gray-300 mb-6">{error}</p>
-            <button
-              onClick={fetchQuizHistory}
-              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const passed = attempts.filter((a) => a.passed).length;
 
   return (
-    <div className="min-h-screen bg-black relative">
-      <div className="p-4 md:p-6 lg:p-8 overflow-auto relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6 flex justify-end">
-            <BackToHomeButton />
-          </div>
+    <LearnerShell
+      sections={learnerNav}
+      eyebrow="Learn"
+      title="All results"
+      note={sessionName()}
+      initials={sessionInitials()}
+      footLabel={sessionLoginId()}
+    >
+      <Card>
+        <CardHeader
+          label="Every attempt"
+          right={
+            <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">
+              {`${attempts.length} TOTAL`}
+            </MicroLabel>
+          }
+        />
 
-          {/* Page Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
-                  All Quiz Results
-                </h1>
-                <p className="text-gray-500">
-                  View your complete quiz history and track your progress
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <span className="px-4 py-2 backdrop-blur-lg bg-indigo-500/20 text-indigo-400 rounded-full font-semibold text-sm border border-indigo-500/30">
-                  {attempts.length} Total Attempts
-                </span>
-              </div>
-            </div>
-          </div>
+        {loading ? (
+          <Loading />
+        ) : error ? (
+          <Empty action={<Button onClick={fetchQuizHistory}>Try again</Button>}>{error}</Empty>
+        ) : attempts.length === 0 ? (
+          <Empty action={<Button onClick={() => navigate('/assessment-hub')}>Take one</Button>}>
+            You have not completed an assessment yet.
+          </Empty>
+        ) : (
+          <>
+            <TableHead columns={COLUMNS} align={['left', 'right', 'right', 'left', 'right']}>
+              <span>Topic</span>
+              <span>Score</span>
+              <span>Result</span>
+              <span>Status</span>
+              <span>Date</span>
+            </TableHead>
 
-          {/* Previous Attempts Table */}
-          <PreviousAttemptsTable attempts={attempts} />
-        </div>
-      </div>
-    </div>
+            {attempts.map((attempt) => (
+              <TableRow
+                key={attempt.id}
+                columns={COLUMNS}
+                onClick={() => navigate(`/assessment/result/${attempt.resultId}`)}
+              >
+                <span style={{ color: 'var(--color-ink)' }}>{attempt.topic}</span>
+                <NumCell tone="var(--color-text-3)">
+                  {`${attempt.score}/${attempt.totalQuestions}`}
+                </NumCell>
+                <NumCell tone={attempt.passed ? 'var(--color-green)' : 'var(--color-clay)'}>
+                  {`${Math.round(attempt.percentage)}%`}
+                </NumCell>
+                <MicroLabel
+                  size={11}
+                  tracking="0.1em"
+                  color={attempt.passed ? 'var(--color-green)' : 'var(--color-clay)'}
+                >
+                  {attempt.passed ? 'Passed' : 'Below 70'}
+                </MicroLabel>
+                <ActionCell>
+                  <NumCell tone="var(--color-text-4)" size={12.5}>{attempt.date}</NumCell>
+                </ActionCell>
+              </TableRow>
+            ))}
+
+            <CardFooterNote>
+              {`${passed} of ${attempts.length} at or above the 70% pass mark. Click a row to open it.`}
+            </CardFooterNote>
+          </>
+        )}
+      </Card>
+    </LearnerShell>
   );
 };
 

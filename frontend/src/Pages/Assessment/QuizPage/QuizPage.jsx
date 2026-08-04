@@ -393,8 +393,10 @@ const QuizPage = () => {
 
   // Fallback
   return (
-    <div className="flex min-h-screen bg-black items-center justify-center">
-      <div className="text-white text-xl">Loading...</div>
+    <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto' }}>
+        <Card><Loading /></Card>
+      </div>
     </div>
   );
 };
