@@ -1,47 +1,106 @@
 /**
- * Shared layout for transactional email.
+ * Shared layout for transactional email — restyled to match the frontend
+ * redesign in design_handoff_edupath_redesign/DESIGN_SPEC.md: paper and ink,
+ * a serif heading over plain sans body text, square corners, colour reserved
+ * for status, and mono reserved for labels and figures rather than prose.
  *
- * Every template used a <style> block with CSS classes. Outlook renders mail
- * through Word and drops most of that, and Gmail strips <style> when it clips a
- * long message — so the emails degraded to unstyled text for a large share of
- * recipients. Everything here is inline styles on tables, which is what
- * survives across clients.
+ * Everything is still inline styles on tables, which is what survives across
+ * clients — Outlook renders through Word and drops <style> blocks, and Gmail
+ * strips <style> when it clips a long message. The only non-inline addition
+ * is a progressive-enhancement <style> block that swaps in the real Newsreader
+ * / IBM Plex fonts where a client's WebKit or Gecko engine can fetch them
+ * (Apple Mail, most webmail); every element still carries its fallback stack
+ * inline, so a client that ignores the <style> block still gets the right
+ * serif/sans/mono shape, just not the exact family.
  *
- * The visual language is deliberately plain: one column, generous whitespace,
- * a single accent colour, no gradients or decorative emoji. That is what makes
- * a message read as a real account notification rather than marketing.
+ * The logo is built from table cells rather than an image: a linked image is
+ * blocked by default in most inboxes until the user clicks "show images", so
+ * the mark would be a broken square on first open. Nested tables render
+ * immediately, with no network request and nothing to block.
  */
 
-const FONT_STACK =
+const FONT_DISPLAY = "Georgia, 'Times New Roman', Times, serif";
+const FONT_SANS =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const FONT_MONO = "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace";
 
 const COLOR = {
-  page: '#f4f5f7',
+  paper: '#efeeea',
   surface: '#ffffff',
-  border: '#e3e5e8',
-  heading: '#16191d',
-  body: '#3c4149',
-  muted: '#6b7280',
-  accent: '#4f46e5',
-  noticeBg: '#fbfaf5',
-  noticeBorder: '#e8e2cf',
-  codeBg: '#f6f7f9',
+  surfaceField: '#fbfaf7',
+  surfaceAttn: '#faf7f0',
+  ink: '#12100e',
+  line: '#e3e1d9',
+  lineSoft: '#efeee8',
+  text2: '#4a4740',
+  text3: '#6e6b64',
+  text4: '#8a867e',
+  clay: '#b4491f',
+  green: '#2f6b45',
 };
+
+/**
+ * Progressive font enhancement. Every inline style still names the fallback
+ * stack directly, so clients that strip this block lose nothing but the exact
+ * typeface.
+ */
+const FONT_ENHANCEMENT = `
+  <style>
+    @media screen {
+      .ep-display { font-family: 'Newsreader', ${FONT_DISPLAY} !important; }
+      .ep-sans { font-family: 'IBM Plex Sans', ${FONT_SANS} !important; }
+      .ep-mono { font-family: 'IBM Plex Mono', ${FONT_MONO} !important; }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />`;
 
 /**
  * Hidden line that email clients show next to the subject in the inbox list.
  * Without it they pull the first visible words, which is usually the greeting.
  */
 const preheaderMarkup = (text) => `
-      <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${COLOR.page};opacity:0;">${text}</div>`;
+      <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:${COLOR.paper};opacity:0;">${text}</div>`;
+
+/**
+ * A single bar of the logo mark: a nested table whose top row is a
+ * transparent spacer and whose bottom row is the coloured bar, so its visible
+ * height is exact regardless of what the sibling bars in the same outer row
+ * are doing. A shared <td height="7"> next to a <td height="15"> would just
+ * have its background stretch to match the taller row — this is the
+ * table-email workaround for that.
+ */
+const bar = (height, maxHeight) => `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:4px;"><tr><td width="4" height="${maxHeight - height}" style="font-size:0;line-height:0;">&nbsp;</td></tr><tr><td width="4" height="${height}" bgcolor="#ffffff" style="font-size:0;line-height:0;">&nbsp;</td></tr></table>`;
+
+/** The Logo primitive from the frontend design system, reproduced in tables. */
+const logoMark = (size = 28) => `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="${size}" height="${size}" bgcolor="${COLOR.ink}" align="center" valign="middle" style="width:${size}px;height:${size}px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+                    <td>${bar(7, 15)}</td>
+                    <td width="3"></td>
+                    <td>${bar(11, 15)}</td>
+                    <td width="3"></td>
+                    <td>${bar(15, 15)}</td>
+                  </tr></table>
+                </td></tr></table>`;
+
+/** Logo mark beside the Newsreader wordmark, exactly as it appears in the app header. */
+const wordmark = () => `            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td>${logoMark(28)}</td>
+                <td width="10"></td>
+                <td valign="middle">
+                  <span class="ep-display" style="font-family:${FONT_DISPLAY};font-size:24px;font-weight:400;letter-spacing:-0.01em;color:${COLOR.ink};">EduPath</span>
+                </td>
+              </tr>
+            </table>`;
 
 /**
  * @param {Object} options
  * @param {string} options.preheader - inbox preview line
+ * @param {string} [options.eyebrow] - mono label in the card's header strip, e.g. "VERIFICATION"
  * @param {string} options.content - inner HTML for the card body
  * @returns {string} complete email document
  */
-export const layout = ({ preheader = '', content = '' }) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+export const layout = ({ preheader = '', eyebrow = '', content = '' }) => `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -49,31 +108,34 @@ export const layout = ({ preheader = '', content = '' }) => `<!DOCTYPE html PUBL
   <meta name="x-apple-disable-message-reformatting" />
   <meta name="color-scheme" content="light" />
   <meta name="supported-color-schemes" content="light" />
-  <title>EduPath</title>
+  <title>EduPath</title>${FONT_ENHANCEMENT}
 </head>
-<body style="margin:0;padding:0;background-color:${COLOR.page};">
+<body style="margin:0;padding:0;background-color:${COLOR.paper};">
 ${preheaderMarkup(preheader)}
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${COLOR.page};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${COLOR.paper};">
     <tr>
-      <td align="center" style="padding:40px 16px;">
+      <td align="center" style="padding:48px 16px;">
 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
           <tr>
-            <td style="padding:0 0 24px 4px;">
-              <span style="font-family:${FONT_STACK};font-size:17px;font-weight:600;color:${COLOR.heading};letter-spacing:-0.2px;">EduPath</span>
+            <td style="padding:0 0 28px 2px;">
+${wordmark()}
             </td>
           </tr>
 
           <tr>
-            <td style="background-color:${COLOR.surface};border:1px solid ${COLOR.border};border-radius:10px;padding:36px 36px 32px 36px;">
+            <td style="background-color:${COLOR.surface};border:1px solid ${COLOR.line};border-radius:0;">
+${eyebrow ? `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:13px 32px;border-bottom:1px solid ${COLOR.line};"><span class="ep-mono" style="font-family:${FONT_MONO};font-size:10.5px;letter-spacing:0.13em;text-transform:uppercase;color:${COLOR.text3};">${eyebrow}</span></td></tr></table>\n` : ''}              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding:32px 32px 30px 32px;">
 ${content}
+              </td></tr></table>
             </td>
           </tr>
 
           <tr>
-            <td style="padding:24px 4px 0 4px;font-family:${FONT_STACK};font-size:12px;line-height:1.6;color:${COLOR.muted};">
-              You received this message because of activity on your EduPath account.<br />
-              &copy; ${new Date().getFullYear()} EduPath
+            <td style="padding:26px 4px 0 4px;">
+              <span class="ep-sans" style="font-family:${FONT_SANS};font-size:12.5px;line-height:1.6;color:${COLOR.text4};">You received this message because of activity on your EduPath account.</span>
+              <br />
+              <span class="ep-mono" style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${COLOR.text4};">&copy; ${new Date().getFullYear()} EDUPATH</span>
             </td>
           </tr>
         </table>
@@ -84,60 +146,74 @@ ${content}
 </body>
 </html>`;
 
-/** Page heading inside the card. */
+/** Page heading inside the card — Newsreader, regular weight, ink. */
 export const heading = (text) =>
-  `              <h1 style="margin:0 0 16px 0;font-family:${FONT_STACK};font-size:21px;line-height:1.35;font-weight:600;color:${COLOR.heading};letter-spacing:-0.2px;">${text}</h1>`;
+  `              <h1 class="ep-display" style="margin:0 0 16px 0;font-family:${FONT_DISPLAY};font-size:26px;line-height:1.3;font-weight:400;color:${COLOR.ink};letter-spacing:-0.015em;">${text}</h1>`;
 
 /** Body paragraph. */
 export const paragraph = (html) =>
-  `              <p style="margin:0 0 16px 0;font-family:${FONT_STACK};font-size:15px;line-height:1.65;color:${COLOR.body};">${html}</p>`;
+  `              <p class="ep-sans" style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:15px;line-height:1.65;color:${COLOR.text2};">${html}</p>`;
 
 /** Smaller, quieter paragraph for caveats and expiry notes. */
 export const subtle = (html) =>
-  `              <p style="margin:0 0 16px 0;font-family:${FONT_STACK};font-size:13px;line-height:1.6;color:${COLOR.muted};">${html}</p>`;
+  `              <p class="ep-sans" style="margin:0 0 16px 0;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${COLOR.text4};">${html}</p>`;
 
 /**
- * Bulletproof button. Built as a table because Outlook ignores padding on <a>,
- * which would otherwise collapse it to a bare underlined link.
+ * Bulletproof button, styled after the primary Button variant: ink fill,
+ * white text, square corners, no shadow. Built as a table because Outlook
+ * ignores padding on <a>, which would otherwise collapse it to a bare
+ * underlined link.
  */
-export const button = (label, url) => `              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 24px 0;">
+export const button = (label, url) => `              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 26px 0;">
                 <tr>
-                  <td align="center" bgcolor="${COLOR.accent}" style="border-radius:6px;">
-                    <a href="${url}" target="_blank" style="display:inline-block;padding:12px 26px;font-family:${FONT_STACK};font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:6px;">${label}</a>
+                  <td align="center" bgcolor="${COLOR.ink}" style="border-radius:0;">
+                    <a href="${url}" target="_blank" class="ep-sans" style="display:inline-block;padding:13px 28px;font-family:${FONT_SANS};font-size:15px;font-weight:500;color:#ffffff;text-decoration:none;border-radius:0;">${label}</a>
                   </td>
                 </tr>
               </table>`;
 
 /** The verification code, sized to be read and retyped from a phone. */
-export const codeBlock = (code) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px 0;">
+export const codeBlock = (code) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 22px 0;">
                 <tr>
-                  <td align="center" style="background-color:${COLOR.codeBg};border:1px solid ${COLOR.border};border-radius:8px;padding:22px 16px;">
-                    <span style="font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:32px;font-weight:600;letter-spacing:8px;color:${COLOR.heading};">${code}</span>
+                  <td align="center" bgcolor="${COLOR.surfaceField}" style="border:1px solid ${COLOR.line};border-radius:0;padding:26px 16px;">
+                    <span class="ep-mono" style="font-family:${FONT_MONO};font-size:34px;font-weight:600;letter-spacing:10px;color:${COLOR.ink};">${code}</span>
                   </td>
                 </tr>
               </table>`;
 
-/** Key/value rows, used for account details. */
-export const detailRows = (rows) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 20px 0;border-top:1px solid ${COLOR.border};">
+/** Key/value rows, matching the bordered-group Row pattern on Profile and Settings. */
+export const detailRows = (rows) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px 0;border-top:1px solid ${COLOR.lineSoft};">
 ${rows
     .map(
       ({ label, value }) => `                <tr>
-                  <td style="padding:12px 0;border-bottom:1px solid ${COLOR.border};font-family:${FONT_STACK};font-size:14px;color:${COLOR.muted};width:38%;">${label}</td>
-                  <td style="padding:12px 0;border-bottom:1px solid ${COLOR.border};font-family:${FONT_STACK};font-size:14px;color:${COLOR.heading};font-weight:500;">${value}</td>
+                  <td class="ep-sans" style="padding:13px 0;border-bottom:1px solid ${COLOR.lineSoft};font-family:${FONT_SANS};font-size:14px;color:${COLOR.text3};width:40%;">${label}</td>
+                  <td class="ep-sans" style="padding:13px 0;border-bottom:1px solid ${COLOR.lineSoft};font-family:${FONT_SANS};font-size:14px;color:${COLOR.ink};font-weight:500;">${value}</td>
                 </tr>`
     )
     .join('\n')}
               </table>`;
 
-/** Set-apart note for security warnings and "didn't do this?" lines. */
+/**
+ * Set-apart note for security warnings and "didn't do this?" lines — the
+ * surface-attn tone the app uses for a flagged cell, not a coloured alert box.
+ */
 export const notice = (html) => `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 4px 0;">
                 <tr>
-                  <td style="background-color:${COLOR.noticeBg};border:1px solid ${COLOR.noticeBorder};border-radius:8px;padding:14px 16px;font-family:${FONT_STACK};font-size:13px;line-height:1.6;color:${COLOR.body};">${html}</td>
+                  <td class="ep-sans" bgcolor="${COLOR.surfaceAttn}" style="border:1px solid ${COLOR.line};border-radius:0;padding:15px 18px;font-family:${FONT_SANS};font-size:13px;line-height:1.6;color:${COLOR.text2};">${html}</td>
                 </tr>
               </table>`;
 
 /** Long URL fallback for clients that will not render the button. */
-export const linkFallback = (url) => `              <p style="margin:0 0 4px 0;font-family:${FONT_STACK};font-size:12px;line-height:1.5;color:${COLOR.muted};">If the button does not work, paste this into your browser:</p>
-              <p style="margin:0 0 16px 0;font-family:${FONT_STACK};font-size:12px;line-height:1.5;color:${COLOR.accent};word-break:break-all;">${url}</p>`;
+export const linkFallback = (url) => `              <p class="ep-sans" style="margin:0 0 4px 0;font-family:${FONT_SANS};font-size:12px;line-height:1.5;color:${COLOR.text4};">If the button does not work, paste this into your browser:</p>
+              <p class="ep-mono" style="margin:0 0 16px 0;font-family:${FONT_MONO};font-size:12px;line-height:1.5;color:${COLOR.text2};word-break:break-all;">${url}</p>`;
 
-export default { layout, heading, paragraph, subtle, button, codeBlock, detailRows, notice, linkFallback };
+/**
+ * Mono outline chip for a status word — green for a completed/positive state,
+ * clay for a destructive one. The email equivalent of the app's Badge.
+ */
+export const badge = (label, tone = 'green') => {
+  const color = tone === 'clay' ? COLOR.clay : COLOR.green;
+  return `<span class="ep-mono" style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${color};border:1px solid ${color};padding:4px 9px;display:inline-block;">${label}</span>`;
+};
+
+export default { layout, heading, paragraph, subtle, button, codeBlock, detailRows, notice, linkFallback, badge };

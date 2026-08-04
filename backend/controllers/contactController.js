@@ -30,6 +30,7 @@ export const sendContactMessage = async (req, res) => {
     // Email content to admin (you)
     const adminEmailHTML = layout({
       preheader: `${name} sent a message through the EduPath contact form.`,
+      eyebrow: 'Contact form',
       content: [
         heading('New contact form submission'),
         detailRows([
@@ -45,6 +46,7 @@ export const sendContactMessage = async (req, res) => {
 
     const userEmailHTML = layout({
       preheader: 'We received your message and will reply soon.',
+      eyebrow: 'Contact',
       content: [
         heading('Thanks for getting in touch'),
         paragraph(`Hi ${name}, we received your message and someone will reply within a couple of working days.`),

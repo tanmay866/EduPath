@@ -9,6 +9,7 @@ import {
   detailRows,
   notice,
   linkFallback,
+  badge,
 } from './emailLayout.js';
 
 /**
@@ -49,6 +50,7 @@ const sendEmail = async (options) => {
 export const sendWelcomeEmail = async (user) => {
   const html = layout({
     preheader: `Your EduPath account is ready, ${user.firstName}.`,
+    eyebrow: 'Welcome',
     content: [
       heading('Your account is ready'),
       paragraph(`Hi ${user.firstName}, your email is verified and your EduPath account is active.`),
@@ -80,6 +82,7 @@ export const sendWelcomeEmail = async (user) => {
 export const sendVerificationEmail = async (user, otp, expiryMinutes = 10) => {
   const html = layout({
     preheader: `${otp} is your EduPath verification code.`,
+    eyebrow: 'Verify your email',
     content: [
       heading('Verify your email address'),
       paragraph(`Hi ${user.firstName}, enter this code in EduPath to finish setting up your account.`),
@@ -108,6 +111,7 @@ export const sendPasswordResetEmail = async (user, resetToken) => {
 
   const html = layout({
     preheader: 'Reset your EduPath password. This link expires in 10 minutes.',
+    eyebrow: 'Password reset',
     content: [
       heading('Reset your password'),
       paragraph(`Hi ${user.firstName}, we received a request to reset the password for your EduPath account.`),
@@ -134,8 +138,10 @@ export const sendPasswordResetEmail = async (user, resetToken) => {
 export const sendPasswordChangeEmail = async (user) => {
   const html = layout({
     preheader: 'Your EduPath password was changed.',
+    eyebrow: 'Account security',
     content: [
       heading('Your password was changed'),
+      `              <p style="margin:0 0 18px 0;">${badge('Changed', 'green')}</p>`,
       paragraph(`Hi ${user.firstName}, the password for your EduPath account was changed successfully.`),
       subtle(`Changed on ${new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}.`),
       notice('If this was not you, reset your password immediately and contact us. Someone else may have access to your account.'),
@@ -179,6 +185,7 @@ export const sendAccountDeletedEmail = async (user, removed = {}) => {
 
   const content = [
     heading('Your account has been deleted'),
+    `              <p style="margin:0 0 18px 0;">${badge('Deleted', 'clay')}</p>`,
     paragraph(`Hi ${user.firstName}, your EduPath account has been permanently deleted, along with everything stored in it. Nothing is kept, and this cannot be undone.`),
   ];
 
@@ -198,6 +205,7 @@ export const sendAccountDeletedEmail = async (user, removed = {}) => {
     subject: 'Your EduPath account has been deleted',
     html: layout({
       preheader: 'Your EduPath account and its data have been permanently removed.',
+      eyebrow: 'Account deleted',
       content: content.join('\n'),
     }),
   });
