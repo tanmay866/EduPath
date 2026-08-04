@@ -11,14 +11,13 @@ import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../
 /**
  * Spec §7 Settings (security).
  *
- * Centred 700px with a quiet Back link above the title. Card one is the
- * password change — three fields in a 20px column, the requirements checklist
- * under the new password, an inline message bar and a left-aligned primary.
- * Card two is Session — the one row that used to live as a quiet link in the
- * marketing header for anyone signed in; it belongs with the rest of the
- * account actions instead of duplicated on every public page. Card three
- * carries a clay header label and a single row: a clay title with its
- * consequence line, and a destructive button that opens the modal.
+ * Password change sits on its own on the left — it's the one card here with
+ * real content (three fields, a requirements checklist). Session and the
+ * danger zone are both a single row apiece, so they stack on the right
+ * instead of running the page all the way down a single centred column with
+ * paper spare on both sides. Session is the row that used to live as a quiet
+ * link in the marketing header for anyone signed in; the danger zone carries
+ * a clay header label and a destructive button that opens the modal.
  */
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -144,132 +143,135 @@ const SettingsPage = () => {
       initials={sessionInitials()}
       footLabel={sessionLoginId()}
     >
-      <div style={{ maxWidth: 700, margin: '0 auto', width: '100%' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: 18 }}>
           <Button variant="quiet" onClick={() => navigate('/profile')}>Back to profile</Button>
         </div>
 
-        {/* Card 1 — change password */}
-        <Card>
-          <CardHeader label="Change password" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22, alignItems: 'start' }}>
+          {/* Left — change password, the one card here with real content */}
+          <Card>
+            <CardHeader label="Change password" />
 
-          <form onSubmit={handleChangePassword}>
-            <div style={{ padding: '22px 24px' }}>
-              <FieldGroup>
-                <Field label="Current password">
-                  <PasswordInput
-                    name="currentPassword"
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Your current password"
-                    autoComplete="current-password"
-                  />
-                </Field>
+            <form onSubmit={handleChangePassword}>
+              <div style={{ padding: '22px 24px' }}>
+                <FieldGroup>
+                  <Field label="Current password">
+                    <PasswordInput
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Your current password"
+                      autoComplete="current-password"
+                    />
+                  </Field>
 
-                <Field label="New password">
-                  <PasswordInput
-                    name="newPassword"
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Your new password"
-                    autoComplete="new-password"
-                  />
-                  <PasswordRequirements rules={getPasswordRules(passwordData.newPassword)} />
-                </Field>
+                  <Field label="New password">
+                    <PasswordInput
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Your new password"
+                      autoComplete="new-password"
+                    />
+                    <PasswordRequirements rules={getPasswordRules(passwordData.newPassword)} />
+                  </Field>
 
-                <Field label="Confirm new password">
-                  <PasswordInput
-                    name="confirmPassword"
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    placeholder="Repeat the new password"
-                    autoComplete="new-password"
-                  />
-                </Field>
+                  <Field label="Confirm new password">
+                    <PasswordInput
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Repeat the new password"
+                      autoComplete="new-password"
+                    />
+                  </Field>
 
-                {passwordError && <InlineMessage tone="error">{passwordError}</InlineMessage>}
-                {passwordMessage && <InlineMessage tone="success">{passwordMessage}</InlineMessage>}
-              </FieldGroup>
-            </div>
-
-            <div style={{ padding: '18px 24px', borderTop: '1px solid var(--color-line)' }}>
-              <Button type="submit" loading={passwordLoading} loadingLabel="Updating…">
-                Update password
-              </Button>
-            </div>
-          </form>
-        </Card>
-
-        {/* Card 2 — session */}
-        <Card style={{ marginTop: 22 }}>
-          <CardHeader label="Session" />
-
-          <div
-            style={{
-              padding: '17px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 24,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>
-                Sign out
+                  {passwordError && <InlineMessage tone="error">{passwordError}</InlineMessage>}
+                  {passwordMessage && <InlineMessage tone="success">{passwordMessage}</InlineMessage>}
+                </FieldGroup>
               </div>
-              <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
-                Ends your session on this device. You will need your password to get back in.
-              </p>
-            </div>
 
-            <Button
-              variant="secondary"
-              style={{ flexShrink: 0, padding: '10px 20px', fontSize: 14 }}
-              onClick={() => setShowSignOutModal(true)}
-            >
-              Sign out
-            </Button>
-          </div>
-        </Card>
-
-        {/* Card 3 — the one destructive action on the screen */}
-        <Card style={{ marginTop: 22 }}>
-          <CardHeader
-            label={
-              <MicroLabel size={10.5} tracking="0.13em" color="var(--color-clay)">
-                Danger zone
-              </MicroLabel>
-            }
-          />
-
-          <div
-            style={{
-              padding: '17px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 24,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-clay)' }}>
-                Delete this account
+              <div style={{ padding: '18px 24px', borderTop: '1px solid var(--color-line)' }}>
+                <Button type="submit" loading={passwordLoading} loadingLabel="Updating…">
+                  Update password
+                </Button>
               </div>
-              <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
-                Removes your roadmaps, quiz results, resumes and portfolios. Portfolio sites you have
-                already deployed stay online and must be taken down separately.
-              </p>
-            </div>
+            </form>
+          </Card>
 
-            <Button
-              variant="destructive"
-              style={{ flexShrink: 0, padding: '10px 20px', fontSize: 14 }}
-              onClick={() => { setShowDeleteModal(true); setDeletePassword(''); setDeleteConfirm(''); }}
-            >
-              Delete
-            </Button>
+          {/* Right — session and the danger zone, each a single row, stacked */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+            <Card>
+              <CardHeader label="Session" />
+
+              <div
+                style={{
+                  padding: '17px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 24,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>
+                    Sign out
+                  </div>
+                  <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                    Ends your session on this device. You will need your password to get back in.
+                  </p>
+                </div>
+
+                <Button
+                  variant="secondary"
+                  style={{ flexShrink: 0, padding: '10px 20px', fontSize: 14 }}
+                  onClick={() => setShowSignOutModal(true)}
+                >
+                  Sign out
+                </Button>
+              </div>
+            </Card>
+
+            <Card>
+              <CardHeader
+                label={
+                  <MicroLabel size={10.5} tracking="0.13em" color="var(--color-clay)">
+                    Danger zone
+                  </MicroLabel>
+                }
+              />
+
+              <div
+                style={{
+                  padding: '17px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 24,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-clay)' }}>
+                    Delete this account
+                  </div>
+                  <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                    Removes your roadmaps, quiz results, resumes and portfolios. Portfolio sites you have
+                    already deployed stay online and must be taken down separately.
+                  </p>
+                </div>
+
+                <Button
+                  variant="destructive"
+                  style={{ flexShrink: 0, padding: '10px 20px', fontSize: 14 }}
+                  onClick={() => { setShowDeleteModal(true); setDeletePassword(''); setDeleteConfirm(''); }}
+                >
+                  Delete
+                </Button>
+              </div>
+            </Card>
           </div>
-        </Card>
+        </div>
       </div>
 
       <Modal
