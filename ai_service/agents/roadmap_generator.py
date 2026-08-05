@@ -56,8 +56,9 @@ class RoadmapGeneratorAgent:
         hours_per_week: int = max(1, int(payload.get("hours_per_week", 10)))
         skill_gaps: List[dict] = payload.get("skill_gaps", [])
         skill_scores: Dict[str, float] = payload.get("skill_scores", {})
+        learning_style: str = payload.get("learning_style", "mixed")
 
-        logger.info(f"Generating roadmap for role='{target_role}' exp='{experience_level}'")
+        logger.info(f"Generating roadmap for role='{target_role}' exp='{experience_level}' style='{learning_style}'")
 
         # ── Step 1: Match role template ───────────────────────────────────
         role_template = self._get_role_template(target_role)
@@ -112,7 +113,9 @@ class RoadmapGeneratorAgent:
         skills_with_weeks = allocate_weeks(skills_with_hours, hours_per_week)
 
         # ── Step 7: Build weekly plan skeleton ────────────────────────────
-        weekly_plans = build_weekly_plan_skeleton(skills_with_weeks, hours_per_week)
+        weekly_plans = build_weekly_plan_skeleton(
+            skills_with_weeks, hours_per_week, learning_style
+        )
 
         total_weeks = (
             max(s["end_week"] for s in skills_with_weeks)

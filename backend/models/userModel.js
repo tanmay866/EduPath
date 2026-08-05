@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { CAREER_ROLES } from '../utils/careerRoles.js';
+import { LEARNING_STYLES } from '../utils/learningStyles.js';
 
 /**
  * User Model - Authentication and user management
@@ -80,8 +81,16 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // How the weekly plan is phrased. An enum because the AI service keys its
+    // task templates off these exact values and quietly falls back to mixed
+    // for anything else — so a stray value would look like the setting simply
+    // did nothing. '' is "not chosen yet".
     learning_style: {
       type: String,
+      enum: {
+        values: [...LEARNING_STYLES, ''],
+        message: '{VALUE} is not a supported learning style',
+      },
       default: '',
       trim: true,
     },

@@ -9,6 +9,48 @@ from typing import Dict, List, Optional
 from data.role_templates import DIFFICULTY_MULTIPLIER, EXPERIENCE_ADJUSTMENT
 
 
+# How a week's work is phrased for each learning style.
+#
+# The learner picks this and is told it decides "what your weekly plan leans
+# on", but it was collected, stored, sent here and then never read — every
+# style produced the same three tasks per skill.
+#
+# It changes the tasks rather than the resources on purpose: the role templates
+# only carry docs and articles, with no video or course links anywhere, so
+# filtering resources by style would hand a video learner an empty list. What
+# can honestly differ is how the week is spent.
+TASKS_BY_STYLE = {
+    "reading": [
+        "Read the documentation for {skill}",
+        "Write a short summary of {skill} in your own words",
+        "Work through the examples in the {skill} docs",
+    ],
+    "video": [
+        "Watch a walkthrough covering {skill}",
+        "Follow along and build the example yourself",
+        "Rebuild the {skill} example once without the video",
+    ],
+    "project": [
+        "Build something small that uses {skill}",
+        "Extend it with one part of {skill} you have not tried",
+        "Refactor it and note what you would do differently",
+    ],
+    "mixed": [
+        "Study core concepts of {skill}",
+        "Complete practice exercises for {skill}",
+        "Review and take notes on {skill}",
+    ],
+}
+
+DEFAULT_LEARNING_STYLE = "mixed"
+
+
+def normalize_learning_style(learning_style: Optional[str]) -> str:
+    """Anything unrecognised falls back to mixed rather than losing the week's tasks."""
+    key = str(learning_style or "").strip().lower()
+    return key if key in TASKS_BY_STYLE else DEFAULT_LEARNING_STYLE
+
+
 def estimate_skill_hours(
     skill_name: str,
     skill_data: dict,
@@ -80,6 +122,7 @@ def allocate_weeks(
 def build_weekly_plan_skeleton(
     skills_with_weeks: List[Dict],
     hours_per_week: int,
+    learning_style: Optional[str] = DEFAULT_LEARNING_STYLE,
 ) -> List[Dict]:
     """
     Groups skills by week into a weekly plan skeleton.
@@ -87,6 +130,7 @@ def build_weekly_plan_skeleton(
     Args:
         skills_with_weeks: skills with start_week and end_week
         hours_per_week: weekly hours
+        learning_style: how the week's tasks are phrased
 
     Returns:
         List of weekly plan dicts.
@@ -119,7 +163,7 @@ def build_weekly_plan_skeleton(
             {
                 "week_number": week_num,
                 "skills": active_skills,
-                "tasks": _generate_tasks_for_week(active_skills, week_num),
+                "tasks": _generate_tasks_for_week(active_skills, week_num, learning_style),
                 "estimated_hours": hours_per_week,
                 "mini_project": mini_project,
                 "status": "pending",
@@ -129,14 +173,19 @@ def build_weekly_plan_skeleton(
     return weekly_plans
 
 
-def _generate_tasks_for_week(skills: List[str], week_num: int) -> List[str]:
-    """Generates generic but relevant task descriptions for the week."""
+def _generate_tasks_for_week(
+    skills: List[str],
+    week_num: int,
+    learning_style: Optional[str] = DEFAULT_LEARNING_STYLE,
+) -> List[str]:
+    """Task descriptions for the week, phrased for how the learner prefers to work."""
+    templates = TASKS_BY_STYLE[normalize_learning_style(learning_style)]
+
     tasks = []
     for skill in skills:
-        tasks += [
-            f"Study core concepts of {skill}",
-            f"Complete practice exercises for {skill}",
-            f"Review and take notes on {skill}",
-        ]
+        tasks += [template.format(skill=skill) for template in templates]
+
+    # Every style ends the week the same way: the plan is only worth anything
+    # if what was learned gets checked.
     tasks.append(f"Weekly self-assessment quiz (Week {week_num})")
     return tasks

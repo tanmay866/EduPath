@@ -1,6 +1,7 @@
 import User from '../models/userModel.js';
 import cloudinary from '../config/cloudinaryConfig.js';
 import { CAREER_ROLES, isCareerRole } from '../utils/careerRoles.js';
+import { LEARNING_STYLES, isLearningStyle } from '../utils/learningStyles.js';
 
 const normalizeExperienceLevel = (value) => {
   if (!value) {
@@ -191,6 +192,15 @@ export const updateProfile = async (req, res) => {
     // These are reported in the response below, so accept them here too. They
     // used to be dropped silently while the endpoint still answered 200, which
     // made a failed update indistinguishable from a successful one.
+    // The AI service falls back to "mixed" for a style it does not recognise,
+    // so an unchecked value would look like the setting simply did nothing.
+    if (learning_style !== undefined && learning_style !== '' && !isLearningStyle(learning_style)) {
+      return res.status(400).json({
+        success: false,
+        message: `Learning style must be one of: ${LEARNING_STYLES.join(', ')}`
+      });
+    }
+
     const validExperienceLevels = ['beginner', 'intermediate', 'advanced'];
     if (experience_level !== undefined && !validExperienceLevels.includes(experience_level)) {
       return res.status(400).json({
@@ -495,6 +505,13 @@ export const markTourSeen = async (req, res) => {
 export const updateAvailability = async (req, res) => {
   try {
     const { hours_per_week, learning_style } = req.body;
+
+    if (learning_style !== undefined && learning_style !== '' && !isLearningStyle(learning_style)) {
+      return res.status(400).json({
+        success: false,
+        message: `Learning style must be one of: ${LEARNING_STYLES.join(', ')}`
+      });
+    }
 
     const user = await User.findById(req.user._id);
     if (!user) {
