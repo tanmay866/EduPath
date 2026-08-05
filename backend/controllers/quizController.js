@@ -7,6 +7,7 @@ import huggingFaceService from '../services/huggingFaceService.js';
 import aiService from '../services/aiService.js';
 import Settings from '../models/Settings.js';
 import { TOPIC_SKILL_MAP } from '../utils/skillTopicMap.js';
+import { topicsForRole } from '../utils/roleTopicMap.js';
 
 
 /**
@@ -312,10 +313,18 @@ export const getAllTopics = async (req, res) => {
   try {
     const topics = await Topic.getAllActiveWithStats();
 
+    // Marked, not filtered. The user's track decides what is worth assessing
+    // first, but everything stays selectable — someone should be able to test
+    // a skill outside their role without changing their profile to do it.
+    const recommended = new Set(topicsForRole(req.user?.target_role));
+
     res.status(200).json({
       success: true,
       count: topics.length,
-      data: topics,
+      data: topics.map((topic) => ({
+        ...topic,
+        recommended: recommended.has(topic.name),
+      })),
     });
   } catch (error) {
     console.error('Error fetching topics:', error);

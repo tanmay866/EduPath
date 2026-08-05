@@ -89,6 +89,11 @@ const QuizPage = () => {
     }
   };
 
+  // The API marks which topics suit the user's target role; the split is kept
+  // here so the select can group them without reordering the source list.
+  const recommendedTopics = topics.filter((t) => t.recommended);
+  const otherTopics = topics.filter((t) => !t.recommended);
+
   const handleTopicChange = (e) => {
     const selectedTopic = topics.find(t => t._id === e.target.value);
     if (selectedTopic) {
@@ -216,16 +221,34 @@ const QuizPage = () => {
                 <Loading />
               ) : (
                 <FieldGroup style={{ marginTop: 26 }}>
-                  <Field label="Topic">
+                  {/* Grouped, not filtered: the topics that matter for your
+                      track come first, but every topic stays selectable. */}
+                  <Field
+                    label="Topic"
+                    help={
+                      recommendedTopics.length > 0
+                        ? `Suggested for ${sessionStorage.getItem('targetRole')}. You can pick any topic.`
+                        : undefined
+                    }
+                  >
                     <select
                       value={quizConfig.topicId}
                       onChange={handleTopicChange}
                       style={SELECT_STYLE}
                     >
                       <option value="">Choose a topic…</option>
-                      {topics.map((topic) => (
-                        <option key={topic._id} value={topic._id}>{topic.name}</option>
-                      ))}
+                      {recommendedTopics.length > 0 && (
+                        <optgroup label="For your role">
+                          {recommendedTopics.map((topic) => (
+                            <option key={topic._id} value={topic._id}>{topic.name}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                      <optgroup label={recommendedTopics.length > 0 ? 'All other topics' : 'All topics'}>
+                        {otherTopics.map((topic) => (
+                          <option key={topic._id} value={topic._id}>{topic.name}</option>
+                        ))}
+                      </optgroup>
                     </select>
                   </Field>
 
