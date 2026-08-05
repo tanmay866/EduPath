@@ -37,15 +37,20 @@ const Contact = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'name') {
-      setFormData((prev) => ({ ...prev, [name]: value.replace(/[^a-zA-Z\s]/g, '') }));
-    } else if (name === 'phone') {
-      setFormData((prev) => ({ ...prev, [name]: value.replace(/[^0-9]/g, '') }));
-    } else if (name === 'message') {
-      if (value.length <= MAX_MESSAGE) setFormData((prev) => ({ ...prev, [name]: value }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+
+    // Only the message is constrained, and only to the length the field
+    // advertises. The name used to be stripped to [a-zA-Z\s] and the phone to
+    // digits, which deleted characters as they were typed with nothing said:
+    // O'Brien became OBrien, Anne-Marie became AnneMarie, José became Jos, and
+    // a name written in Devanagari or Chinese disappeared altogether. The API
+    // accepts all of them, so the field had no business refusing them.
+    if (name === 'message' && value.length > MAX_MESSAGE) return;
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear a validation error as soon as the field is touched, rather than
+    // leaving it on screen while it is being corrected.
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -137,7 +142,13 @@ const Contact = () => {
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field label="Your name">
-              <Input name="name" value={formData.name} onChange={handleChange} placeholder="Tanmay Patel" />
+              <Input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                autoComplete="name"
+                placeholder="Tanmay Patel"
+              />
             </Field>
 
             <Field label="Email">
@@ -146,6 +157,7 @@ const Contact = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                autoComplete="email"
                 placeholder="you@example.com"
               />
             </Field>
@@ -156,9 +168,10 @@ const Contact = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                inputMode="numeric"
-                maxLength={15}
-                placeholder="9313928398"
+                autoComplete="tel"
+                inputMode="tel"
+                maxLength={24}
+                placeholder="+91 93139 28398"
               />
             </Field>
 
@@ -175,6 +188,7 @@ const Contact = () => {
                 value={formData.message}
                 onChange={handleChange}
                 rows={8}
+                maxLength={MAX_MESSAGE}
                 placeholder="What happened, and what you expected instead"
                 style={{
                   width: '100%',
@@ -192,12 +206,16 @@ const Contact = () => {
               />
             </Field>
 
-            {error && <InlineMessage tone="error">{error}</InlineMessage>}
-            {sent && (
-              <InlineMessage tone="success">
-                Message sent. We reply to the address you gave us.
-              </InlineMessage>
-            )}
+            {/* Announced, not just shown — the outcome of a submit is the one
+                thing on this page a screen reader has to be told about. */}
+            <div role="status" aria-live="polite">
+              {error && <InlineMessage tone="error">{error}</InlineMessage>}
+              {sent && (
+                <InlineMessage tone="success">
+                  Message sent. We reply to the address you gave us, usually within a day or two.
+                </InlineMessage>
+              )}
+            </div>
 
             <Button type="submit" fullWidth loading={loading} loadingLabel="Sending…">
               Send message
