@@ -7,7 +7,7 @@ import {
   Avatar, Badge, Modal,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
-import { CAREER_ROLES } from '../../constants/careerRoles';
+import { useCareerRoles } from '../../hooks/useCareerRoles';
 
 /**
  * Spec §7 Profile.
@@ -86,6 +86,8 @@ const ProfilePage = () => {
   const imageRef = useRef(null);
 
   // Profile Data
+  const { roles: careerRoles } = useCareerRoles();
+
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
@@ -562,9 +564,12 @@ const ProfilePage = () => {
                   style={SELECT_STYLE}
                 >
                   <option value="">Not chosen yet</option>
-                  {CAREER_ROLES.map((role) => (
-                    <option key={role} value={role}>{role}</option>
-                  ))}
+                  {/* Keeps the saved value selectable while the list loads,
+                      so the field never looks empty on a slow connection. */}
+                  {(careerRoles.length ? careerRoles : [profileData.target_role].filter(Boolean))
+                    .map((role) => (
+                      <option key={role} value={role}>{role}</option>
+                    ))}
                 </select>
               </Row>
 

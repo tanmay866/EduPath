@@ -20,6 +20,7 @@ import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
 import practiceResultRoutes from './routes/practiceResultRoutes.js';
 import roadmapRoutes from './routes/roadmapRoutes.js';
 import progressRoutes from './routes/progress.js';
+import careerRoleRoutes from './routes/careerRoleRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
@@ -165,6 +166,7 @@ app.use('/api/mock-interview', mockInterviewRoutes);
 app.use('/api/practice', practiceResultRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/career-roles', careerRoleRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

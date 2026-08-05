@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { CAREER_ROLES } from '../utils/careerRoles.js';
 
 /**
  * User Model - Authentication and user management
@@ -57,8 +58,17 @@ const userSchema = new mongoose.Schema(
       default: 'student',
     },
     // Profile information
+    //
+    // The career track everything personalised is built from. It is an enum
+    // because the AI service matches these strings verbatim against its
+    // roadmap templates — a free-text role has no curriculum behind it. '' is
+    // the "not chosen yet" state.
     target_role: {
       type: String,
+      enum: {
+        values: [...CAREER_ROLES, ''],
+        message: '{VALUE} is not a supported career role',
+      },
       default: '',
       trim: true,
     },
@@ -133,23 +143,9 @@ const userSchema = new mongoose.Schema(
         default: '',
       },
       currentSkills: [String],
-      targetRole: {
-        type: String,
-        enum: [
-          'MERN',
-          'AI',
-          'Cyber',
-          'Data Science',
-          'DevOps',
-          'Mobile',
-          'MERN Developer',
-          'AI/ML Engineer',
-          'Cybersecurity Engineer',
-          'Data Science Engineer',
-          'DevOps Engineer',
-          'Mobile Developer',
-        ],
-      },
+      // profile.targetRole used to duplicate the root target_role, and the two
+      // drifted because not every write path updated both. The root field is
+      // now the only one.
       availableLearningTime: {
         type: Number,
         default: 10,
@@ -424,15 +420,6 @@ userSchema.methods.getActiveRoadmap = async function () {
     return null;
   }
   return mongoose.model('Roadmap').findById(this.activeRoadmap);
-};
-
-// Method to check if user has completed roadmap profile
-userSchema.methods.hasRoadmapProfile = function () {
-  return !!(
-    this.profile?.targetRole &&
-    this.profile?.occupation?.experienceLevel &&
-    this.profile?.availableLearningTime
-  );
 };
 
 // Static method to get the next serial number for user ID generation.

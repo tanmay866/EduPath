@@ -49,8 +49,6 @@ const normalizeCurrentSkills = (value) => {
 const syncRoadmapProfileState = (user, updates) => {
   if (updates.target_role !== undefined) {
     user.target_role = updates.target_role;
-    user.profile = user.profile || {};
-    user.profile.targetRole = updates.target_role;
   }
 
   if (updates.experience_level !== undefined) {
@@ -436,6 +434,16 @@ export const updateBasic = async (req, res) => {
 export const updateSkills = async (req, res) => {
   try {
     const { target_role, experience_level, current_skills } = req.body;
+
+    // Validated here as well as in updateProfile: this is a separate write
+    // path into the same field, and without the check an unsupported role
+    // would surface as a 500 from the model's enum rather than a 400.
+    if (target_role !== undefined && target_role !== '' && !isCareerRole(target_role)) {
+      return res.status(400).json({
+        success: false,
+        message: `Target role must be one of: ${CAREER_ROLES.join(', ')}`
+      });
+    }
 
     // Check if profile is now complete
     const user = await User.findById(req.user._id);

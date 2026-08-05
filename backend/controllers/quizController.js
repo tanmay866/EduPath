@@ -668,10 +668,10 @@ const syncSkillGap = async (userId, canonicalSkills, score) => {
 
   let skillGap = await SkillGap.findOne({ user_id: userId }).sort({ createdAt: -1 });
   if (!skillGap) {
-    const user = await User.findById(userId).select('target_role profile');
+    const user = await User.findById(userId).select('target_role');
     skillGap = new SkillGap({
       user_id: userId,
-      target_role: user?.target_role || user?.profile?.targetRole || 'Unspecified',
+      target_role: user?.target_role || 'Unspecified',
       skill_scores: new Map(),
       skill_gaps: [],
     });

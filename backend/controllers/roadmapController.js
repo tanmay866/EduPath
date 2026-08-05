@@ -19,7 +19,7 @@ const normalizeExperienceLevel = (value) => {
 };
 
 const resolveRoadmapProfile = (user) => {
-    const targetRole = user.target_role || user.profile?.targetRole || "";
+    const targetRole = user.target_role || "";
     const experienceLevel = normalizeExperienceLevel(
         user.experience_level || user.profile?.occupation?.experienceLevel
     );

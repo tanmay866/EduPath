@@ -23,28 +23,6 @@ const getErrorMessage = (error, fallback) => {
   return fallback;
 };
 
-const TARGET_ROLE_ENUMS = [
-  'MERN', 'AI', 'Cyber', 'Data Science', 'DevOps', 'Mobile',
-  'MERN Developer', 'AI/ML Engineer', 'Cybersecurity Engineer',
-  'Data Science Engineer', 'DevOps Engineer', 'Mobile Developer',
-];
-
-const normalizeTargetRole = (value) => {
-  const role = String(value || '').trim();
-  if (!role) return '';
-  if (TARGET_ROLE_ENUMS.includes(role)) return role;
-  const lower      = role.toLowerCase();
-  const normalized = lower.replace(/[^a-z0-9\s/+.-]/g, ' ').replace(/\s+/g, ' ').trim();
-  if (normalized === 'mern' || normalized.includes('full stack') || normalized.includes('fullstack')) return 'MERN Developer';
-  if (['frontend','front end','backend','back end','web developer','software developer','software engineer','javascript developer','react developer','node','express'].some(k => normalized.includes(k))) return 'MERN Developer';
-  if (['ai/ml','machine learning','ml engineer','artificial intelligence','llm','genai','prompt engineer','ai engineer','ml','ai'].some(k => normalized.includes(k))) return 'AI/ML Engineer';
-  if (['data scientist','data science','data analyst','analytics','business analyst','bi analyst'].some(k => normalized.includes(k)) || (normalized.includes('data') && normalized.includes('engineer')) || normalized.includes('data')) return 'Data Science Engineer';
-  if (['devops','site reliability','sre','platform engineer','cloud engineer','cloud architect','kubernetes','docker','infrastructure'].some(k => normalized.includes(k))) return 'DevOps Engineer';
-  if (['mobile','android','ios','react native','flutter','swift','kotlin'].some(k => normalized.includes(k))) return 'Mobile Developer';
-  if (['cyber','security engineer','information security','infosec','penetration','pentest','ethical hacker','soc analyst','network security'].some(k => normalized.includes(k))) return 'Cybersecurity Engineer';
-  return '';
-};
-
 const normalizeSkills = (skills) => {
   if (!Array.isArray(skills)) return [];
   return [...new Set(skills.map(s => String(s || '').trim()).filter(Boolean))];
@@ -144,10 +122,10 @@ const RoadmapPage = () => {
     const err = validateForm(form);
     if (err) { toast.error(err); return; }
 
-    const role   = normalizeTargetRole(form.targetRole);
+    // The role now comes from a fixed list, so there is nothing to interpret.
+    const role   = form.targetRole;
     const skills = normalizeSkills(form.skills);
 
-    if (!role)          { toast.error('Target Role not supported. Try: MERN Developer, AI/ML Engineer, Data Science Engineer, DevOps Engineer, Mobile Developer, or Cybersecurity Engineer.'); return; }
     if (!skills.length) { toast.error('Please add at least one valid skill.'); return; }
 
     setIsGenerating(true);

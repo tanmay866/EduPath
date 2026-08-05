@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Card, CardHeader, Button, Field, FieldGroup, Input, MicroLabel,
 } from '../../../design';
+import { useCareerRoles } from '../../../hooks/useCareerRoles';
 
 const initialForm = {
   targetRole: '',
@@ -26,6 +27,7 @@ const SELECT_STYLE = {
 };
 
 const RoadmapForm = ({ isGenerating, onGenerate }) => {
+  const { roles: careerRoles } = useCareerRoles();
   const [form, setForm] = useState(initialForm);
   const [skillInput, setSkillInput] = useState('');
 
@@ -60,16 +62,16 @@ const RoadmapForm = ({ isGenerating, onGenerate }) => {
       <form onSubmit={handleSubmit}>
         <div style={{ padding: '22px 24px' }}>
           <FieldGroup>
-            <Field
-              label="Target role"
-              help="Supported: MERN Developer · AI/ML Engineer · Data Science · DevOps · Mobile · Cybersecurity"
-            >
-              <Input
-                name="targetRole"
-                value={form.targetRole}
-                onChange={handleChange}
-                placeholder="e.g. MERN Developer"
-              />
+            {/* A select rather than a text box: the value has to match one of
+                the AI service's templates exactly, and guessing what a typed
+                role meant used to send "Email Marketer" to AI/ML Engineer. */}
+            <Field label="Target role" help="This is saved to your profile.">
+              <select name="targetRole" value={form.targetRole} onChange={handleChange} style={SELECT_STYLE}>
+                <option value="">Select your target role</option>
+                {careerRoles.map((role) => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
             </Field>
 
             <Field label="Experience level">
