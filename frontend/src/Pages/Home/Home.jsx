@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import StartLink from '../../component/StartLink';
 import { Card, Button, MicroLabel, StatusBox, LabelledBar, type } from '../../design';
-import { TRACKS } from './tracks';
+import { TRACKS, TRACK_PACE_HOURS, TRACK_PACE_LEVEL } from './tracks';
 
 /**
  * Spec §7 Marketing · landing, following the composition in
@@ -44,7 +44,11 @@ const HeroStat = ({ value, label }) => (
 
 /* ── The roadmap console in the hero ────────────────────────────────────── */
 const CONSOLE_WEEKS = [38, 52, 44, 70, 61, 80, 47];
-const CONSOLE_TOTAL = 18;
+// Weeks in the track, for the axis. The chart itself draws a fixed number of
+// slots rather than 55 hair-thin ones — the filled share matches progress
+// (week 21 of 55) so the picture and the figures agree.
+const CONSOLE_TOTAL = 55;
+const CONSOLE_SLOTS = 18;
 
 const ConsoleCell = ({ value, unit, label, tone }) => (
   <div style={{ padding: '16px 18px', borderRight: '1px solid var(--color-line)' }}>
@@ -93,7 +97,7 @@ const RoadmapConsole = () => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)">Roadmap</MicroLabel>
           <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink)' }}>
-            MERN Developer · 18 weeks
+            MERN Developer · 55 weeks
           </span>
         </span>
         <span
@@ -110,10 +114,14 @@ const RoadmapConsole = () => (
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--color-line)' }}>
-        <ConsoleCell value="12" unit="/34" label="skills done" />
-        <ConsoleCell value="6.5" unit="h" label="this week" />
-        <ConsoleCell value="23" unit="d" label="streak" />
-        <ConsoleCell value="14 Jul" label="projected" tone="var(--color-green)" />
+        {/* The four cells the roadmap screen actually shows. This used to
+            display hours-this-week, a day streak and a projected date, none
+            of which the product tracks — under a caption claiming it was the
+            real screen. */}
+        <ConsoleCell value="14" label="total skills" />
+        <ConsoleCell value="5" label="completed" />
+        <ConsoleCell value="9" label="remaining" tone="var(--color-amber)" />
+        <ConsoleCell value="55" label="est. weeks" />
       </div>
 
       <div style={{ padding: 20 }}>
@@ -128,7 +136,7 @@ const RoadmapConsole = () => (
               }}
             />
           ))}
-          {Array.from({ length: CONSOLE_TOTAL - CONSOLE_WEEKS.length - 4 }).map((_, i) => (
+          {Array.from({ length: CONSOLE_SLOTS - CONSOLE_WEEKS.length }).map((_, i) => (
             <div key={`e${i}`} style={{ flex: 1, height: 2, background: 'var(--color-line)' }} />
           ))}
         </div>
@@ -144,25 +152,26 @@ const RoadmapConsole = () => (
             borderBottom: '1px solid var(--color-line)',
           }}
         >
-          <span>W1</span><span>W6</span><span>W12</span><span>W18</span>
+          <span>W1</span><span>W18</span><span>W36</span><span>W55</span>
         </div>
 
-        <ConsoleRow status="done" title="JavaScript · async & modules" tag="Done" />
-        <ConsoleRow status="done" title="React · state & effects" tag="Done" />
+        {/* Skill names exactly as the MERN template defines them. */}
+        <ConsoleRow status="done" title="Async JS (Promises, async/await)" tag="Done" />
+        <ConsoleRow status="done" title="React Hooks & State Management" tag="Done" />
         <ConsoleRow
           status="current"
-          title="Express · REST & middleware"
-          tag="Week 7 · 58%"
+          title="Express.js"
+          tag="Week 21"
           tone="var(--color-amber)"
           current
         />
-        <ConsoleRow status="future" title="MongoDB · schema design" tag="Week 9" tone="var(--color-text-4)" />
-        <ConsoleRow status="future" title="Auth · JWT & sessions" tag="Week 11" tone="var(--color-text-4)" />
+        <ConsoleRow status="future" title="MongoDB & Mongoose" tag="Week 26" tone="var(--color-text-4)" />
+        <ConsoleRow status="future" title="JWT Authentication" tag="Week 36" tone="var(--color-text-4)" />
       </div>
     </Card>
 
     <p style={{ margin: '14px 0 0', fontSize: 12, lineHeight: 1.55, color: 'var(--color-text-4)' }}>
-      A roadmap at week 7 of 18 — the screen you get after the assessment, not an illustration of one.
+      A MERN roadmap part-way through, at 10 h/week. The figures are the ones this screen really shows.
     </p>
   </div>
 );
@@ -209,6 +218,8 @@ const OutcomeCard = ({ label, children, note }) => (
     </div>
   </Card>
 );
+
+const mern = TRACKS.find((t) => t.name === 'MERN Developer');
 
 const Home = () => (
   <div style={{ background: 'var(--color-surface)' }}>
@@ -263,6 +274,12 @@ const Home = () => (
         <SectionHeading>Six roles. Pick a destination.</SectionHeading>
         <span style={{ fontSize: 13.5, color: 'var(--color-text-2)', maxWidth: 380, textAlign: 'right' }}>
           Not sure? The assessment tells you which two you are closest to today.
+          {/* Weeks fall out of hours per week, so the pace is stated rather
+              than a bare number being quoted as if it were fixed. Anything
+              already known drops the count — the plan only schedules gaps. */}
+          <span style={{ display: 'block', color: 'var(--color-text-4)', marginTop: 6 }}>
+            {`Durations assume ${TRACK_PACE_HOURS} h/week from ${TRACK_PACE_LEVEL}. What you already know is not scheduled.`}
+          </span>
         </span>
       </div>
 
@@ -417,6 +434,10 @@ const Home = () => (
         alignItems: 'center',
       }}
     >
+      {/* This band carried a quote attributed to "a learner on the Data
+          Science Engineer track, week 14 of 20". There is no such learner —
+          the product has no users yet — so it was an invented review
+          presented as a real one. It says what the product does instead. */}
       <div>
         <p
           style={{
@@ -429,19 +450,18 @@ const Home = () => (
             margin: 0,
           }}
         >
-          “I stopped guessing what to study on Sunday nights. It tells me the one thing that is due,
-          and why it comes before the next one.”
+          One thing is due at a time, and the plan can say why it comes before the next one.
         </p>
         <p style={{ fontSize: 13.5, color: 'var(--color-dark-text-3)', marginTop: 22, marginBottom: 0 }}>
-          A learner on the Data Science Engineer track, week 14 of 20.
+          Nothing is scheduled before its prerequisite, so the order is arguable rather than arbitrary.
         </p>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, borderLeft: '1px solid #2A2822', paddingLeft: 32 }}>
         {[
-          { value: '18', label: 'weeks in the MERN track' },
-          { value: '34', label: 'nodes, dependency sorted' },
-          { value: '10', label: 'portfolio templates' },
+          { value: String(mern.weeks), label: `weeks in the MERN track at ${TRACK_PACE_HOURS} h/week` },
+          { value: String(mern.nodes), label: 'nodes, dependency sorted' },
+          { value: '11', label: 'portfolio templates' },
         ].map((stat) => (
           <div key={stat.label}>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 30, color: '#fff', lineHeight: 1 }}>{stat.value}</div>
