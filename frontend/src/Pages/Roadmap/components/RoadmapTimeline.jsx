@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Card, CardHeader, CardFooterNote, Button, MicroLabel, Badge, StatusBox, LabelledBar, Loading, Empty,
 } from '../../../design';
+import WeeklyPlan from './WeeklyPlan';
 
 /**
  * Spec §7 Roadmap.
@@ -101,6 +102,7 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 22, alignItems: 'start' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 22, minWidth: 0 }}>
       <Card>
         <CardHeader
           label="Learning path"
@@ -224,6 +226,9 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
 
         <CardFooterNote>Click the marker to mark a skill complete, click the row for its resources.</CardFooterNote>
       </Card>
+
+      <WeeklyPlan weeks={roadmapData?.weeklyPlans} skills={skills} />
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
         <Card>

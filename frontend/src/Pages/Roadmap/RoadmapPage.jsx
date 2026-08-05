@@ -77,7 +77,7 @@ const RoadmapPage = () => {
     try {
       const res  = await getRoadmapById(id);
       const data = res?.data;
-      setRoadmapData({ roadmap_id: data?.roadmap_id || id, duration: data?.total_duration_weeks || data?.duration || 0, skills: data?.skills || [], status: data?.status || 'active' });
+      setRoadmapData({ roadmap_id: data?.roadmap_id || id, duration: data?.total_duration_weeks || data?.duration || 0, skills: data?.skills || [], weeklyPlans: data?.weekly_plans || [], status: data?.status || 'active' });
       setSelectedRoadmapId(id);
       // Selecting a roadmap from the history list loaded it into state just
       // fine, but left the history list on screen — the load was invisible
@@ -106,7 +106,7 @@ const RoadmapPage = () => {
     try {
       const res  = await generateRoadmap();
       const data = res?.data;
-      setRoadmapData({ roadmap_id: data?.roadmap_id, duration: data?.duration || 0, skills: data?.skills || [], status: data?.status || 'active' });
+      setRoadmapData({ roadmap_id: data?.roadmap_id, duration: data?.duration || 0, skills: data?.skills || [], weeklyPlans: data?.weekly_plans || [], status: data?.status || 'active' });
       setSelectedRoadmapId(data?.roadmap_id || '');
       await loadHistory();
       if (data?.roadmap_id) await loadRoadmapById(data.roadmap_id);
