@@ -9,6 +9,13 @@ import {
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 import { useCareerRoles } from '../../hooks/useCareerRoles';
 
+/** current_skills entries are either plain strings or { skill, level } objects. */
+const toSkillList = (value) =>
+  (Array.isArray(value) ? value : [])
+    .map((item) => (typeof item === 'string' ? item : item?.skill))
+    .map((skill) => String(skill || '').trim())
+    .filter(Boolean);
+
 /**
  * Spec §7 Profile.
  *
@@ -96,6 +103,9 @@ const ProfilePage = () => {
     skills: '',
     role: 'student',
     target_role: '',
+    experience_level: '',
+    hours_per_week: '',
+    learning_style: 'mixed',
     profilePicture: ''
   });
 
@@ -130,9 +140,16 @@ const ProfilePage = () => {
           lastName: profile.lastName || '',
           email: profile.email || '',
           phone: profile.phone || '',
-          skills: profile.skills || '',
+          // These two held the same idea in different shapes and had already
+          // drifted, so the field falls back to whichever actually has data.
+          // Without this, saving a profile whose display string was empty
+          // would wipe the skills the roadmap reads.
+          skills: profile.skills || toSkillList(profile.current_skills).join(', '),
           role: profile.role || 'student',
           target_role: profile.target_role || '',
+          experience_level: profile.experience_level || '',
+          hours_per_week: profile.hours_per_week ? String(profile.hours_per_week) : '',
+          learning_style: profile.learning_style || 'mixed',
           profilePicture: profilePictureUrl
         });
 
@@ -362,13 +379,30 @@ const ProfilePage = () => {
     try {
       // `role` is deliberately not sent: it is the account's permission level,
       // not something the profile owns, and the API rejects changes to it.
-      const response = await updateProfile({
+      //
+      // `skills` and `current_skills` are the same list in two shapes — a
+      // display string and the array the roadmap reads — so both are written
+      // from the one field rather than letting them drift apart.
+      const payload = {
         firstName: profileData.firstName,
         lastName: profileData.lastName,
         phone: profileData.phone,
         skills: profileData.skills,
-        target_role: profileData.target_role
-      });
+        current_skills: profileData.skills
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+        target_role: profileData.target_role,
+        learning_style: profileData.learning_style,
+      };
+
+      // Only sent when set: the API rejects an empty experience level or a
+      // zero hours-per-week, and a profile part-way through setup should
+      // still be savable.
+      if (profileData.experience_level) payload.experience_level = profileData.experience_level;
+      if (Number(profileData.hours_per_week) > 0) payload.hours_per_week = Number(profileData.hours_per_week);
+
+      const response = await updateProfile(payload);
 
       if (response.success) {
         setMessage('Profile updated');
@@ -575,7 +609,51 @@ const ProfilePage = () => {
                 </select>
               </Row>
 
-              <Row title="Skills" detail="Comma separated." last>
+              <Row title="Experience level" detail="Sets the starting point of your plan.">
+                <select
+                  name="experience_level"
+                  value={profileData.experience_level}
+                  onChange={handleProfileChange}
+                  style={SELECT_STYLE}
+                >
+                  <option value="">Not set</option>
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </Row>
+
+              <Row title="Hours per week" detail="How fast your roadmap is paced.">
+                <Input
+                  type="number"
+                  name="hours_per_week"
+                  min="1"
+                  value={profileData.hours_per_week}
+                  onChange={handleProfileChange}
+                  placeholder="10"
+                  style={{ padding: '11px 14px' }}
+                />
+              </Row>
+
+              <Row title="Learning style" detail="What your weekly plan leans on.">
+                <select
+                  name="learning_style"
+                  value={profileData.learning_style}
+                  onChange={handleProfileChange}
+                  style={SELECT_STYLE}
+                >
+                  <option value="mixed">Mixed</option>
+                  <option value="video">Video</option>
+                  <option value="reading">Reading</option>
+                  <option value="project">Projects</option>
+                </select>
+              </Row>
+
+              {/* One skills field, not two. This used to write only the
+                  display string while the roadmap read a separate array, so
+                  editing it here had no effect on the plan. Both are now
+                  written from this one input. */}
+              <Row title="Skills you have" detail="Comma separated. Used when building your roadmap." last>
                 <Input
                   name="skills"
                   value={profileData.skills}

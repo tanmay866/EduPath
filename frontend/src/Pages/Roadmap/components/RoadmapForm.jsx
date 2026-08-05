@@ -1,163 +1,90 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Card, CardHeader, Button, Field, FieldGroup, Input, MicroLabel,
+  Card, CardHeader, CardFooterNote, Button, MicroLabel, Loading, Empty,
 } from '../../../design';
-import { useCareerRoles } from '../../../hooks/useCareerRoles';
 
-const initialForm = {
-  targetRole: '',
-  experienceLevel: '',
-  skills: [],
-  hoursPerWeek: '',
-  learningStyle: '',
-};
+/**
+ * What the roadmap will be built from, rather than a form asking for it again.
+ *
+ * Every field here already lives on the profile — role, experience, hours,
+ * style and skills — so re-collecting them was a second copy that could
+ * disagree with the first. This shows the values and sends the user to the
+ * profile to change them.
+ */
+const Line = ({ label, value, muted }) => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      gap: 20,
+      padding: '13px 24px',
+      borderTop: '1px solid var(--color-line-soft)',
+    }}
+  >
+    <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">{label}</MicroLabel>
+    <span
+      style={{
+        fontSize: 14.5,
+        color: muted ? 'var(--color-text-4)' : 'var(--color-ink)',
+        textAlign: 'right',
+      }}
+    >
+      {value}
+    </span>
+  </div>
+);
 
-// Native selects have no spec entry; they borrow the Field input treatment so
-// they line up with the text inputs beside them.
-const SELECT_STYLE = {
-  width: '100%',
-  padding: '13px 14px',
-  fontSize: 15,
-  fontFamily: 'var(--font-sans)',
-  color: 'var(--color-ink)',
-  background: '#fff',
-  border: '1px solid var(--color-line-input)',
-  borderRadius: 0,
-  outline: 'none',
-};
+const RoadmapForm = ({ isGenerating, onGenerate, profile, loadingProfile }) => {
+  const navigate = useNavigate();
 
-const RoadmapForm = ({ isGenerating, onGenerate }) => {
-  const { roles: careerRoles } = useCareerRoles();
-  const [form, setForm] = useState(initialForm);
-  const [skillInput, setSkillInput] = useState('');
+  if (loadingProfile) {
+    return <Card><Loading label="Loading your details" /></Card>;
+  }
 
-  const addSkill = () => {
-    const value = skillInput.trim();
-    if (!value) return;
-    if (form.skills.includes(value)) { setSkillInput(''); return; }
-    setForm((prev) => ({ ...prev, skills: [...prev.skills, value] }));
-    setSkillInput('');
-  };
+  const skills = Array.isArray(profile?.current_skills)
+    ? profile.current_skills.map((s) => (typeof s === 'string' ? s : s?.skill)).filter(Boolean)
+    : [];
 
-  const removeSkill = (skill) =>
-    setForm((prev) => ({ ...prev, skills: prev.skills.filter((s) => s !== skill) }));
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onGenerate(form, () => { setForm(initialForm); setSkillInput(''); });
-  };
+  const ready = Boolean(profile?.target_role && profile?.experience_level && profile?.hours_per_week);
 
   return (
     <Card>
       <CardHeader
-        label="Roadmap inputs"
-        right={<MicroLabel size={10.5} color="var(--color-text-4)">All fields required</MicroLabel>}
+        label="Built from your profile"
+        right={
+          <Button variant="quiet" onClick={() => navigate('/profile')}>Edit in profile</Button>
+        }
       />
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ padding: '22px 24px' }}>
-          <FieldGroup>
-            {/* A select rather than a text box: the value has to match one of
-                the AI service's templates exactly, and guessing what a typed
-                role meant used to send "Email Marketer" to AI/ML Engineer. */}
-            <Field label="Target role" help="This is saved to your profile.">
-              <select name="targetRole" value={form.targetRole} onChange={handleChange} style={SELECT_STYLE}>
-                <option value="">Select your target role</option>
-                {careerRoles.map((role) => (
-                  <option key={role} value={role}>{role}</option>
-                ))}
-              </select>
-            </Field>
+      {!ready ? (
+        <Empty action={<Button onClick={() => navigate('/onboarding?next=/roadmap/generate')}>Finish setup</Button>}>
+          Your target role, experience level and weekly hours are needed before a plan can be built.
+        </Empty>
+      ) : (
+        <>
+          <Line label="Target role" value={profile.target_role} />
+          <Line label="Experience" value={profile.experience_level} />
+          <Line label="Hours per week" value={profile.hours_per_week} />
+          <Line label="Learning style" value={profile.learning_style || 'mixed'} />
+          <Line
+            label="Skills you have"
+            value={skills.length ? skills.join(', ') : 'None listed'}
+            muted={!skills.length}
+          />
 
-            <Field label="Experience level">
-              <select name="experienceLevel" value={form.experienceLevel} onChange={handleChange} style={SELECT_STYLE}>
-                <option value="">Select your level</option>
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-            </Field>
+          <div style={{ padding: '18px 24px', borderTop: '1px solid var(--color-line)' }}>
+            <Button onClick={onGenerate} disabled={isGenerating}>
+              {isGenerating ? 'Generating…' : 'Generate roadmap'}
+            </Button>
+          </div>
+        </>
+      )}
 
-            <Field label="Current skills" help="Type a skill and press Enter to add it.">
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Input
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
-                  placeholder="e.g. HTML, Python, Git"
-                />
-                <Button variant="secondary" onClick={addSkill} style={{ padding: '13px 18px', flexShrink: 0 }}>
-                  Add
-                </Button>
-              </div>
-
-              {form.skills.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                  {form.skills.map((skill) => (
-                    <button
-                      key={skill}
-                      type="button"
-                      onClick={() => removeSkill(skill)}
-                      title="Remove"
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 11.5,
-                        padding: '5px 9px',
-                        border: '1px solid var(--color-line-btn)',
-                        background: '#fff',
-                        color: 'var(--color-text-2)',
-                        cursor: 'pointer',
-                        borderRadius: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                      }}
-                    >
-                      {skill}
-                      <span style={{ color: 'var(--color-text-4)' }}>×</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </Field>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-              <Field label="Hours per week">
-                <Input
-                  name="hoursPerWeek"
-                  type="number"
-                  min="1"
-                  max="168"
-                  value={form.hoursPerWeek}
-                  onChange={handleChange}
-                  placeholder="10"
-                />
-              </Field>
-
-              <Field label="Learning style">
-                <select name="learningStyle" value={form.learningStyle} onChange={handleChange} style={SELECT_STYLE}>
-                  <option value="">Select a style</option>
-                  <option value="video">Video</option>
-                  <option value="reading">Reading</option>
-                  <option value="project">Project-based</option>
-                  <option value="mixed">Mixed</option>
-                </select>
-              </Field>
-            </div>
-          </FieldGroup>
-        </div>
-
-        <div style={{ padding: '18px 24px', borderTop: '1px solid var(--color-line)' }}>
-          <Button type="submit" loading={isGenerating} loadingLabel="Generating…">
-            Generate roadmap
-          </Button>
-        </div>
-      </form>
+      <CardFooterNote>
+        Generating replaces the current plan for this role. Plans for other roles are kept.
+      </CardFooterNote>
     </Card>
   );
 };

@@ -7,9 +7,8 @@ import {
   getRoadmapById,
   getRoadmapHistory,
   updateSkillStatus,
-  updateRoadmapSkillsProfile,
-  updateRoadmapAvailability,
 } from '../Services/roadmapService';
+import { getProfile } from '../Services/profileService';
 import HistorySidebar from './components/HistorySidebar';
 import RoadmapForm    from './components/RoadmapForm';
 import RoadmapTimeline from './components/RoadmapTimeline';
@@ -23,26 +22,6 @@ const getErrorMessage = (error, fallback) => {
   return fallback;
 };
 
-const normalizeSkills = (skills) => {
-  if (!Array.isArray(skills)) return [];
-  return [...new Set(skills.map(s => String(s || '').trim()).filter(Boolean))];
-};
-
-const SUPPORTED_ROLES = [
-  { label: 'MERN Developer',        color: 'text-indigo-300',  bg: 'bg-indigo-500/10 border-indigo-500/25' },
-  { label: 'AI/ML Engineer',        color: 'text-violet-300',  bg: 'bg-violet-500/10 border-violet-500/25' },
-  { label: 'Data Science Engineer', color: 'text-cyan-300',    bg: 'bg-cyan-500/10 border-cyan-500/25' },
-  { label: 'DevOps Engineer',       color: 'text-emerald-300', bg: 'bg-emerald-500/10 border-emerald-500/25' },
-  { label: 'Mobile Developer',      color: 'text-amber-300',   bg: 'bg-amber-500/10 border-amber-500/25' },
-  { label: 'Cybersecurity Engineer',color: 'text-rose-300',    bg: 'bg-rose-500/10 border-rose-500/25' },
-];
-
-const QUICK_TIPS = [
-  'Be specific — "MERN Developer" works better than just "developer".',
-  'List technologies you already know (e.g., HTML, Python, Git).',
-  'More hours per week = shorter, denser roadmap. Be realistic.',
-  'Choose "Mixed" style if you enjoy both reading and building.',
-];
 
 /* ── component ───────────────────────────────────────────────────── */
 const RoadmapPage = () => {
@@ -56,6 +35,9 @@ const RoadmapPage = () => {
   const [roadmapData,      setRoadmapData]      = useState(null);
   const [updatingSkill,    setUpdatingSkill]    = useState('');
   const [showHistory,      setShowHistory]      = useState(false);
+  // Shown instead of a form: these values live on the profile now.
+  const [profile,          setProfile]          = useState(null);
+  const [loadingProfile,   setLoadingProfile]   = useState(true);
 
   // Load whatever the learner already has. Previously this only ran when
   // arriving from "View History", so a returning user with a saved roadmap
@@ -70,6 +52,15 @@ const RoadmapPage = () => {
       loadHistory();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Read fresh rather than from the session, so edits made in the profile are
+  // reflected here without signing in again.
+  useEffect(() => {
+    getProfile()
+      .then((response) => setProfile(response?.data || null))
+      .catch((err) => console.error('Failed to load profile for roadmap:', err))
+      .finally(() => setLoadingProfile(false));
   }, []);
 
   const summary = useMemo(() => {
@@ -108,39 +99,17 @@ const RoadmapPage = () => {
     finally       { setIsHistoryLoading(false); }
   };
 
-  /* generate */
-  const validateForm = (form) => {
-    if (!form.targetRole?.trim())                              return 'Target Role is required.';
-    if (!form.experienceLevel)                                 return 'Experience Level is required.';
-    if (!form.skills || form.skills.length === 0)              return 'At least one Current Skill is required.';
-    if (!form.hoursPerWeek || Number(form.hoursPerWeek) <= 0)  return 'Learning hours must be greater than 0.';
-    if (!form.learningStyle)                                   return 'Learning Style is required.';
-    return '';
-  };
-
-  const handleGenerate = async (form, resetForm) => {
-    const err = validateForm(form);
-    if (err) { toast.error(err); return; }
-
-    // The role now comes from a fixed list, so there is nothing to interpret.
-    const role   = form.targetRole;
-    const skills = normalizeSkills(form.skills);
-
-    if (!skills.length) { toast.error('Please add at least one valid skill.'); return; }
-
+  /* generate — the inputs are already on the profile, so there is nothing to
+     collect or save first. */
+  const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const r1 = await updateRoadmapSkillsProfile({ target_role: role, experience_level: form.experienceLevel, current_skills: skills });
-      if (!r1?.success) throw new Error('Failed to save skills profile.');
-      const r2 = await updateRoadmapAvailability({ hours_per_week: Number(form.hoursPerWeek), learning_style: form.learningStyle });
-      if (!r2?.success) throw new Error('Failed to save availability.');
       const res  = await generateRoadmap();
       const data = res?.data;
       setRoadmapData({ roadmap_id: data?.roadmap_id, duration: data?.duration || 0, skills: data?.skills || [], status: data?.status || 'active' });
       setSelectedRoadmapId(data?.roadmap_id || '');
       await loadHistory();
       if (data?.roadmap_id) await loadRoadmapById(data.roadmap_id);
-      resetForm();
       toast.success('Roadmap generated successfully!');
     } catch (err) { toast.error(getErrorMessage(err, 'Failed to generate roadmap.')); }
     finally       { setIsGenerating(false); }
@@ -222,7 +191,12 @@ const RoadmapPage = () => {
       ) : !roadmapData && !isRoadmapLoading && !isHistoryLoading ? (
         // isHistoryLoading is included so the form does not flash on mount while
         // the saved roadmap is still being fetched.
-        <RoadmapForm isGenerating={isGenerating} onGenerate={handleGenerate} />
+        <RoadmapForm
+          isGenerating={isGenerating}
+          onGenerate={handleGenerate}
+          profile={profile}
+          loadingProfile={loadingProfile}
+        />
       ) : (
         <RoadmapTimeline
           roadmapData={roadmapData}
