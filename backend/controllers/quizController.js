@@ -1,9 +1,12 @@
 import QuizSession from '../models/QuizSession.js';
 import QuizResult from '../models/QuizResult.js';
 import Topic from '../models/Topic.js';
+import SkillGap from '../models/SkillGap.js';
+import User from '../models/userModel.js';
 import huggingFaceService from '../services/huggingFaceService.js';
 import aiService from '../services/aiService.js';
 import Settings from '../models/Settings.js';
+import { TOPIC_SKILL_MAP } from '../utils/skillTopicMap.js';
 
 
 /**
@@ -543,6 +546,19 @@ export const submitQuiz = async (req, res) => {
     console.log(`📊 Score: ${percentage.toFixed(2)}%`);
     console.log(`✔️  Correct: ${correctAnswers}/${session.totalQuestions}\n`);
 
+    // Feed this result into the user's running skill-gap profile, which is
+    // what roadmap generation reads to personalize which skills it
+    // schedules. Only topics with a known mapping to the AI service's
+    // canonical skill names are written — see skillTopicMap.js.
+    const canonicalSkills = TOPIC_SKILL_MAP[session.topicId.name] || [];
+    if (canonicalSkills.length > 0) {
+      try {
+        await syncSkillGap(userId, canonicalSkills, percentage);
+      } catch (error) {
+        console.error('Failed to update skill gap profile:', error.message);
+      }
+    }
+
     // Calculate difficulty breakdown for AI assessment
     const difficultyBreakdown = calculateDifficultyBreakdown(detailedResults);
 
@@ -627,6 +643,63 @@ export const submitQuiz = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+/** Coarser bands than pass/fail — this drives how urgently the roadmap
+ *  generator schedules the skill, not just whether the quiz was passed. */
+const gapSeverity = (score) => {
+  if (score < 40) return 'critical';
+  if (score < 60) return 'high';
+  if (score < 75) return 'medium';
+  return 'low';
+};
+
+// Matches the pass/fail threshold QuizResult already uses.
+const REQUIRED_SCORE = 70;
+
+/**
+ * Upserts the user's single running SkillGap document: sets/replaces the
+ * score and gap entry for each canonical skill this topic covers, then
+ * recomputes the overall strength_score from everything on record.
+ */
+const syncSkillGap = async (userId, canonicalSkills, score) => {
+  const roundedScore = Math.round(score);
+  const severity = gapSeverity(roundedScore);
+
+  let skillGap = await SkillGap.findOne({ user_id: userId }).sort({ createdAt: -1 });
+  if (!skillGap) {
+    const user = await User.findById(userId).select('target_role profile');
+    skillGap = new SkillGap({
+      user_id: userId,
+      target_role: user?.target_role || user?.profile?.targetRole || 'Unspecified',
+      skill_scores: new Map(),
+      skill_gaps: [],
+    });
+  }
+
+  for (const skill of canonicalSkills) {
+    skillGap.skill_scores.set(skill, roundedScore);
+
+    const entry = {
+      skill,
+      gap_severity: severity,
+      current_score: roundedScore,
+      required_score: REQUIRED_SCORE,
+    };
+    const existingIndex = skillGap.skill_gaps.findIndex((g) => g.skill === skill);
+    if (existingIndex >= 0) {
+      skillGap.skill_gaps[existingIndex] = entry;
+    } else {
+      skillGap.skill_gaps.push(entry);
+    }
+  }
+
+  const scores = [...skillGap.skill_scores.values()];
+  skillGap.strength_score = scores.length
+    ? Math.round(scores.reduce((sum, s) => sum + s, 0) / scores.length)
+    : 0;
+
+  await skillGap.save();
 };
 
 /**
