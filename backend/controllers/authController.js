@@ -39,7 +39,13 @@ const issueVerificationCode = async (user) => {
  * @access  Public
  */
 export const signup = asyncHandler(async (req, res, next) => {
-    const { firstName, lastName, email, password, role = 'student' } = req.body;
+    const { firstName, lastName, email, password } = req.body;
+
+    // `role` is deliberately not read from the body. It used to be, defaulting
+    // to 'student' but accepting anything in the model's enum — which includes
+    // 'admin'. That let anyone create an administrator with a single
+    // unauthenticated request. Roles are assigned out of band
+    // (scripts/createAdmin.js), never claimed by the account being created.
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -65,7 +71,6 @@ export const signup = asyncHandler(async (req, res, next) => {
                 email: email.toLowerCase(),
                 password,
                 loginId,
-                role,
             });
             break;
         } catch (error) {
