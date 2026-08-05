@@ -24,6 +24,10 @@ const LINKS = [
   { to: '/services', label: 'Tracks' },
 ];
 
+// Colour alone marked the current page, one step of grey apart, which is easy
+// to miss and carries nothing for anyone who cannot separate the two. NavLink
+// already sets aria-current; this adds a rule under the word, the same device
+// the rest of the system uses to mark a section.
 const linkStyle = ({ isActive }) => ({
   fontSize: 13.5,
   fontWeight: 500,
@@ -31,6 +35,8 @@ const linkStyle = ({ isActive }) => ({
   textDecoration: 'none',
   color: isActive ? 'var(--color-ink)' : 'var(--color-text-2)',
   whiteSpace: 'nowrap',
+  paddingBottom: 3,
+  borderBottom: `1px solid ${isActive ? 'var(--color-ink)' : 'transparent'}`,
 });
 
 const readSession = () => ({
@@ -56,22 +62,12 @@ const Navbar = () => {
     || (session.email || '?').charAt(0).toUpperCase();
 
   return (
-    <header
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 32,
-        padding: '18px 44px',
-        background: 'var(--color-surface)',
-        borderBottom: '1px solid var(--color-line)',
-      }}
-    >
+    <header className="site-header">
       <Link to="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
         <Wordmark size={26} labelSize={21} />
       </Link>
 
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 30 }} className="max-lg:hidden">
+      <nav className="site-header__nav" aria-label="Main">
         {LINKS.map((link) => (
           <NavLink key={link.to} to={link.to} style={linkStyle}>{link.label}</NavLink>
         ))}
@@ -83,7 +79,12 @@ const Navbar = () => {
             <Link to="/assessment" style={{ textDecoration: 'none' }}>
               <Button style={{ padding: '10px 18px', fontSize: 13.5 }}>Open EduPath</Button>
             </Link>
-            <Link to="/profile" style={{ textDecoration: 'none' }} title={session.email}>
+            <Link
+              to="/profile"
+              style={{ textDecoration: 'none' }}
+              title={session.email}
+              aria-label={`Your profile${session.email ? ` (${session.email})` : ''}`}
+            >
               <Avatar initials={initials} size={32} fontSize={12} />
             </Link>
           </>

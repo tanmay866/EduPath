@@ -27,8 +27,12 @@ const PageFade = ({ children }) => {
    with attribution, a mono label pinned at the bottom. Right paper-light with
    a centred 380px column. */
 export const AuthShell = ({ quote, attribution, footLabel = 'EDUPATH', children }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '100vh' }}>
+  <div className="auth-shell" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: '100vh' }}>
+    {/* The panel is decoration; below 1024px index.css drops it so the form
+        gets the whole viewport rather than half of one. It used to carry
+        `max-lg:hidden`, which never applied — see the note in index.css. */}
     <div
+      className="auth-shell__panel"
       style={{
         background: 'var(--color-ink)',
         padding: 48,
@@ -36,7 +40,6 @@ export const AuthShell = ({ quote, attribution, footLabel = 'EDUPATH', children 
         flexDirection: 'column',
         justifyContent: 'space-between',
       }}
-      className="max-lg:hidden"
     >
       <Link to="/" style={{ textDecoration: 'none', width: 'fit-content' }}>
         <Wordmark dark size={28} labelSize={24} />
