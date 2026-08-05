@@ -196,7 +196,7 @@ const STEPS = [
   {
     kicker: '04 — Ship',
     title: 'A live URL',
-    body: 'Your portfolio deploys in one click, built from the projects you actually finished on the roadmap.',
+    body: 'Upload a resume and a portfolio site is built from it, then published at a URL you can send someone.',
   },
 ];
 
@@ -356,7 +356,7 @@ const Home = () => (
     <section style={{ padding: '56px 44px', background: 'var(--color-paper)' }}>
       <SectionHeading style={{ marginBottom: 8 }}>What you leave with</SectionHeading>
       <p style={{ margin: '0 0 32px', fontSize: 15, color: 'var(--color-text-2)', maxWidth: 520 }}>
-        Three artefacts, all generated from work you completed — not from a template you filled in.
+        Three artefacts: two you can send someone, and one that tells you whether you are ready to.
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
@@ -372,7 +372,7 @@ const Home = () => (
 
         <OutcomeCard
           label="02 · Portfolio"
-          note="Parsed from your resume, filled with the projects you shipped, deployed to Vercel in one click."
+          note="Built from your uploaded resume or filled in by hand, published at its own URL, with an optional push to Vercel."
         >
           <div style={{ border: '1px solid var(--color-line)' }}>
             <div
@@ -405,7 +405,7 @@ const Home = () => (
 
         <OutcomeCard
           label="03 · Gap report"
-          note="Where you stand against the role today, updated every time you finish a node."
+          note="Where you stand against the role today, redrawn every time you take an assessment."
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
             {GAP_REPORT.map((row) => (
