@@ -144,6 +144,7 @@ const ProfilePage = () => {
         sessionStorage.setItem('skills', profile.skills || '');
         sessionStorage.setItem('role', profile.role || 'student');
         sessionStorage.setItem('targetRole', profile.target_role || '');
+        sessionStorage.setItem('profileComplete', profile.profile_complete ? '1' : '0');
         sessionStorage.setItem('profilePicture', profilePictureUrl);
         sessionStorage.setItem('loginId', profile.loginId || '');
 
@@ -379,6 +380,7 @@ const ProfilePage = () => {
         sessionStorage.setItem('phone', updatedProfile.phone || profileData.phone);
         sessionStorage.setItem('skills', updatedProfile.skills || profileData.skills);
         sessionStorage.setItem('targetRole', updatedProfile.target_role ?? profileData.target_role);
+        sessionStorage.setItem('profileComplete', updatedProfile.profile_complete ? '1' : '0');
 
         setTimeout(() => setMessage(''), 3000);
       }

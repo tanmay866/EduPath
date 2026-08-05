@@ -63,7 +63,11 @@ const VerifyEmail = () => {
       if (data.token) storeSession(data.token, data.user);
 
       toast.success(data.message || 'Email verified.');
-      navigate('/', { replace: true });
+
+      // A brand new account has no target role yet, and almost everything
+      // personalised is built from it — so ask once, here, rather than on
+      // each screen that needs it. Skippable from the page itself.
+      navigate(data.user?.profile_complete ? '/' : '/onboarding', { replace: true });
     } catch (error) {
       setMessage({ tone: 'error', text: getApiErrorMessage(error.response?.data, 'Verification failed. Please try again.') });
     } finally {

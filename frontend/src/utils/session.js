@@ -27,6 +27,10 @@ export const storeSession = (token, user = {}) => {
   sessionStorage.setItem('lastName', user.lastName || '');
   sessionStorage.setItem('phone', user.phone || '');
   sessionStorage.setItem('skills', user.skills || '');
+  // Drives the onboarding redirect. Stored rather than re-fetched so the
+  // guard can decide synchronously and never flashes a page it is about to
+  // navigate away from.
+  sessionStorage.setItem('profileComplete', user.profile_complete ? '1' : '0');
 
   // Profile pictures live only in Cloudinary; the URL is derived from the id.
   // An existing value is kept so a freshly uploaded picture is not overwritten

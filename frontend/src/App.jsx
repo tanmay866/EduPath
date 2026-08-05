@@ -16,6 +16,8 @@ import QuizPage from './Pages/Assessment/QuizPage/QuizPage'
 import ResultPage from './Pages/Assessment/Result/ResultPage'
 import ProfilePage from './Pages/Profile/ProfilePage'
 import SettingsPage from './Pages/Settings/SettingsPage'
+import Onboarding from './Pages/Onboarding/Onboarding'
+import RequiresProfile from './component/RequiresProfile'
 import ResumePage from './Pages/Profile/ResumePage'
 import AllResult from './Pages/Assessment/Result/AllResult'
 import FAQ from './Pages/FAQ/FAQ'
@@ -118,18 +120,22 @@ const App = () => {
           <Route path="/faq" element={<><Navbar /><FAQ /><Footer /></>} />
           <Route path="/services" element={<><Navbar /><Services /><Footer /></>} />
           <Route path="/roadmap" element={<><Navbar /><CareerRoadmap /><Footer /></>} />
-          <Route path="/roadmap/generate" element={<RoadmapPage />} />
+          <Route path="/roadmap/generate" element={<RequiresProfile><RoadmapPage /></RequiresProfile>} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/resume" element={<ResumePage />} />
           <Route path="/assessment" element={<AssessmentDashboard />} />
           <Route path="/assessment/instructions" element={<AssessmentInstructions />} />
           <Route path="/assessment/result" element={<AllResult />} />
-          <Route path="/assessment/quiz" element={<QuizPage />} />
+          {/* Needs a role: results are filed against the role they were
+              earned under, so an attempt with none set is recorded where
+              nothing will read it. */}
+          <Route path="/assessment/quiz" element={<RequiresProfile><QuizPage /></RequiresProfile>} />
           <Route path="/assessment/result/:resultId" element={<ResultPage />} />
 
           {/* Assessment Hub Routes — the actual test-taking screens (and the
