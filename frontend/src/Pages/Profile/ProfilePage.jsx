@@ -4,7 +4,7 @@ import { getProfile, updateProfile, uploadProfilePicture } from '../Services/pro
 import { getProfilePictureUrl } from '../../utils/cloudinaryHelper';
 import {
   LearnerShell, Card, Button, Input, InlineMessage, MicroLabel,
-  Avatar, Badge, Modal,
+  Avatar, Badge, Modal, PhoneInput,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 import { useCareerRoles } from '../../hooks/useCareerRoles';
@@ -411,8 +411,13 @@ const ProfilePage = () => {
         const updatedProfile = response.data;
         sessionStorage.setItem('firstName', updatedProfile.firstName || profileData.firstName);
         sessionStorage.setItem('lastName', updatedProfile.lastName || profileData.lastName);
-        sessionStorage.setItem('phone', updatedProfile.phone || profileData.phone);
-        sessionStorage.setItem('skills', updatedProfile.skills || profileData.skills);
+        // `??`, not `||`: phone and skills can legitimately be cleared, and
+        // `||` treated an empty string as "nothing came back" and restored the
+        // old value. Deleting your number left it in the session, which the
+        // contact form now reads to prefill itself — you would have to delete
+        // it a second time, somewhere else.
+        sessionStorage.setItem('phone', updatedProfile.phone ?? profileData.phone);
+        sessionStorage.setItem('skills', updatedProfile.skills ?? profileData.skills);
         sessionStorage.setItem('targetRole', updatedProfile.target_role ?? profileData.target_role);
         sessionStorage.setItem('profileComplete', updatedProfile.profile_complete ? '1' : '0');
 
@@ -580,15 +585,11 @@ const ProfilePage = () => {
               </Row>
 
               <Row title="Mobile number" detail="Digits only, up to ten.">
-                <Input
-                  type="tel"
+                <PhoneInput
                   name="phone"
                   value={profileData.phone}
                   onChange={handleProfileChange}
-                  inputMode="numeric"
-                  maxLength="10"
-                  placeholder="Add a number"
-                  style={{ padding: '11px 14px' }}
+                  inputStyle={{ padding: '11px 14px' }}
                 />
               </Row>
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { API_BASE } from '../../config';
 import {
-  EditorialShell, Button, Field, FieldGroup, Input, InlineMessage, MicroLabel, type,
+  EditorialShell, Button, Field, FieldGroup, Input, PhoneInput, PHONE_COUNTRY_CODE,
+  InlineMessage, MicroLabel, type,
 } from '../../design';
 
 /**
@@ -29,11 +30,28 @@ const DETAILS = [
   },
 ];
 
+/**
+ * Whatever the account already knows, so a signed-in user is not asked to
+ * retype what they told us at sign-up. Read once on mount rather than watched:
+ * a form that rewrites the field you are editing because another tab changed
+ * something is worse than a slightly stale default.
+ */
+const sessionDefaults = () => {
+  if (!sessionStorage.getItem('token')) return { name: '', email: '', phone: '', message: '' };
+  const name = `${sessionStorage.getItem('firstName') || ''} ${sessionStorage.getItem('lastName') || ''}`.trim();
+  return {
+    name,
+    email: sessionStorage.getItem('email') || '',
+    phone: sessionStorage.getItem('phone') || '',
+    message: '',
+  };
+};
+
 const Contact = () => {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  const [formData, setFormData] = useState(sessionDefaults);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,14 +93,22 @@ const Contact = () => {
       const response = await fetch(`${API_BASE}/contact/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        // The field holds ten bare digits so the prefix cannot be edited into
+        // something wrong; the notification email wants a number someone can
+        // actually dial, so it is put back on the way out.
+        body: JSON.stringify({
+          ...formData,
+          phone: formData.phone ? `${PHONE_COUNTRY_CODE} ${formData.phone}` : '',
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
         setSent(true);
-        setFormData({ name: '', email: '', phone: '', message: '' });
+        // Only the message is cleared — retyping your own name and
+        // address to send a second note would be a chore.
+        setFormData((prev) => ({ ...prev, message: '' }));
       } else {
         setError(data.message || 'Failed to send message');
       }
@@ -163,16 +189,7 @@ const Contact = () => {
             </Field>
 
             <Field label="Phone" help="Optional — only if you would rather we called.">
-              <Input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                autoComplete="tel"
-                inputMode="tel"
-                maxLength={24}
-                placeholder="+91 93139 28398"
-              />
+              <PhoneInput name="phone" value={formData.phone} onChange={handleChange} />
             </Field>
 
             <Field

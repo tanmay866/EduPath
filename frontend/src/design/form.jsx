@@ -1,5 +1,6 @@
 import React from 'react';
 import { MicroLabel } from './primitives';
+import { PHONE_COUNTRY_CODE, normalizePhone } from './phone';
 
 /**
  * Spec §5 — Field, password visibility control, password requirements,
@@ -262,3 +263,99 @@ export default {
   Field, FieldLabel, FieldGroup, Input, PasswordInput, PasswordRequirements,
   InlineMessage, Toggle, Stepper, SegmentedFilter,
 };
+
+/**
+ * An Indian mobile number, with the country code fixed rather than typed.
+ *
+ * Every number this product stores is a ten-digit Indian mobile — the profile
+ * validates exactly that — so asking people to type "+91" was asking them to
+ * type something that could only ever be one value, and then rejecting the
+ * number if they did, because the stored form has no country code in it.
+ *
+ * The prefix is a label, not part of the value. `value` and `onChange` deal in
+ * the ten digits alone, so callers keep sending the API what it already
+ * expects. Anything that is not a digit is dropped on the way in, which is
+ * safe here in a way it was not for names: a phone number genuinely has no
+ * other characters, and a pasted "+91 93139 28398" lands as the right ten
+ * digits instead of being refused.
+ */
+// `style` lands on the bordered wrapper, so the input's own padding needs its
+// own prop — the profile rows run tighter than the default field.
+export const PhoneInput = React.forwardRef(({ value = '', onChange, error = false, style, inputStyle, ...rest }, ref) => {
+  const [focused, setFocused] = React.useState(false);
+
+  // Callers destructure `{ name, value }` off the target, so that is what is
+  // handed back — a plain object rather than a spread of the synthetic event.
+  // Spreading a DOM element copies almost nothing (its properties live on the
+  // prototype), so `{ ...e.target }` only looked like it was passing the field
+  // through.
+  const handleChange = (e) => {
+    onChange?.({ target: { name: e.target.name, value: normalizePhone(e.target.value) } });
+  };
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'stretch',
+        border: `1px solid ${error ? 'var(--color-clay)' : focused ? 'var(--color-ink)' : 'var(--color-line-input)'}`,
+        background: '#fff',
+        transition: 'border-color 120ms ease',
+        ...style,
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 12px',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 14,
+          color: 'var(--color-text-3)',
+          borderRight: '1px solid var(--color-line-input)',
+          background: 'var(--color-surface)',
+          flexShrink: 0,
+          userSelect: 'none',
+        }}
+      >
+        {PHONE_COUNTRY_CODE}
+      </span>
+
+      <input
+        ref={ref}
+        type="tel"
+        inputMode="numeric"
+        autoComplete="tel-national"
+        // Normalised on the way in as well, so a number stored before this
+        // field existed is not shown as "+91 +91 93139 28398".
+        value={normalizePhone(value)}
+        onChange={handleChange}
+        // No maxLength: it truncates a paste before the change handler can
+        // normalise it, so "+91 93139 28398" would be cut to "+91 93139 " and
+        // arrive as 9313928. The handler already caps the digits.
+        placeholder="9313928398"
+        // The country code is spoken as part of the field rather than left as
+        // decoration the label never mentions.
+        aria-label={`Mobile number, ${PHONE_COUNTRY_CODE}`}
+        style={{
+          flex: 1,
+          minWidth: 0,
+          padding: '13px 14px',
+          fontSize: 15,
+          fontFamily: 'var(--font-sans)',
+          color: 'var(--color-ink)',
+          background: 'transparent',
+          border: 'none',
+          borderRadius: 0,
+          outline: 'none',
+          ...inputStyle,
+        }}
+        {...rest}
+        onFocus={(e) => { setFocused(true); rest.onFocus?.(e); }}
+        onBlur={(e) => { setFocused(false); rest.onBlur?.(e); }}
+      />
+    </div>
+  );
+});
+PhoneInput.displayName = 'PhoneInput';
