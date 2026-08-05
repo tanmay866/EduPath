@@ -1,5 +1,6 @@
 import User from '../models/userModel.js';
 import cloudinary from '../config/cloudinaryConfig.js';
+import { CAREER_ROLES, isCareerRole } from '../utils/careerRoles.js';
 
 const normalizeExperienceLevel = (value) => {
   if (!value) {
@@ -164,12 +165,27 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Validate role if provided
-    const validRoles = ['student', 'developer', 'other', 'admin', 'teacher', 'manager', 'entrepreneur', 'instructor'];
-    if (role && !validRoles.includes(role)) {
+    // The account role is what isAdmin checks, and this endpoint is reachable
+    // by any signed-in user — so accepting `role` here let anyone hand
+    // themselves the admin dashboard by posting {"role":"admin"}. It is now
+    // read-only from the profile; changing it is an admin/seed operation.
+    //
+    // Echoing the current value back is still allowed, so older clients that
+    // send the whole profile object keep working.
+    if (role !== undefined && role !== user.role) {
+      return res.status(403).json({
+        success: false,
+        message: 'Account role cannot be changed from the profile.'
+      });
+    }
+
+    // target_role is the career track the roadmap is built from. Only the
+    // roles the AI service has a curriculum for are accepted; '' means the
+    // user has not chosen yet.
+    if (target_role !== undefined && target_role !== '' && !isCareerRole(target_role)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid role selected'
+        message: `Target role must be one of: ${CAREER_ROLES.join(', ')}`
       });
     }
 
@@ -194,7 +210,6 @@ export const updateProfile = async (req, res) => {
     // Update root level fields
     if (firstName !== undefined) user.firstName = firstName;
     if (lastName !== undefined) user.lastName = lastName;
-    if (role !== undefined) user.role = role;
     if (target_role !== undefined) user.target_role = target_role;
     if (experience_level !== undefined) user.experience_level = experience_level;
     if (hours_per_week !== undefined) user.hours_per_week = Number(hours_per_week);

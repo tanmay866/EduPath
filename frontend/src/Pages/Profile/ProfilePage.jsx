@@ -7,6 +7,7 @@ import {
   Avatar, Badge, Modal,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
+import { CAREER_ROLES } from '../../constants/careerRoles';
 
 /**
  * Spec §7 Profile.
@@ -92,6 +93,7 @@ const ProfilePage = () => {
     phone: '',
     skills: '',
     role: 'student',
+    target_role: '',
     profilePicture: ''
   });
 
@@ -128,6 +130,7 @@ const ProfilePage = () => {
           phone: profile.phone || '',
           skills: profile.skills || '',
           role: profile.role || 'student',
+          target_role: profile.target_role || '',
           profilePicture: profilePictureUrl
         });
 
@@ -138,6 +141,7 @@ const ProfilePage = () => {
         sessionStorage.setItem('phone', profile.phone || '');
         sessionStorage.setItem('skills', profile.skills || '');
         sessionStorage.setItem('role', profile.role || 'student');
+        sessionStorage.setItem('targetRole', profile.target_role || '');
         sessionStorage.setItem('profilePicture', profilePictureUrl);
         sessionStorage.setItem('loginId', profile.loginId || '');
 
@@ -153,11 +157,12 @@ const ProfilePage = () => {
       const phone = sessionStorage.getItem('phone') || '';
       const skills = sessionStorage.getItem('skills') || '';
       const role = sessionStorage.getItem('role') || 'student';
+      const target_role = sessionStorage.getItem('targetRole') || '';
       const userId = sessionStorage.getItem('userId');
       const profilePicture = sessionStorage.getItem('profilePicture') ||
                             (userId ? getProfilePictureUrl(userId) : '');
 
-      setProfileData({ firstName, lastName, email, phone, skills, role, profilePicture });
+      setProfileData({ firstName, lastName, email, phone, skills, role, target_role, profilePicture });
 
       setError('Could not load profile from server');
       setTimeout(() => setError(''), 3000);
@@ -352,12 +357,14 @@ const ProfilePage = () => {
     setMessage('');
 
     try {
+      // `role` is deliberately not sent: it is the account's permission level,
+      // not something the profile owns, and the API rejects changes to it.
       const response = await updateProfile({
         firstName: profileData.firstName,
         lastName: profileData.lastName,
         phone: profileData.phone,
         skills: profileData.skills,
-        role: profileData.role
+        target_role: profileData.target_role
       });
 
       if (response.success) {
@@ -369,7 +376,7 @@ const ProfilePage = () => {
         sessionStorage.setItem('lastName', updatedProfile.lastName || profileData.lastName);
         sessionStorage.setItem('phone', updatedProfile.phone || profileData.phone);
         sessionStorage.setItem('skills', updatedProfile.skills || profileData.skills);
-        sessionStorage.setItem('role', updatedProfile.role || profileData.role);
+        sessionStorage.setItem('targetRole', updatedProfile.target_role ?? profileData.target_role);
 
         setTimeout(() => setMessage(''), 3000);
       }
@@ -393,7 +400,7 @@ const ProfilePage = () => {
 
   const stats = [
     { label: 'Login ID', value: loginId, mono: true },
-    { label: 'Role', value: profileData.role || 'student' },
+    { label: 'Target role', value: profileData.target_role || 'Not set' },
     { label: 'Skills listed', value: skillCount },
   ];
 
@@ -547,11 +554,17 @@ const ProfilePage = () => {
                 />
               </Row>
 
-              <Row title="Primary role" detail="Shapes the roadmaps we suggest.">
-                <select name="role" value={profileData.role} onChange={handleProfileChange} style={SELECT_STYLE}>
-                  <option value="student">Student</option>
-                  <option value="developer">Developer</option>
-                  <option value="other">Other</option>
+              <Row title="Target role" detail="The track your roadmap and assessments are built from.">
+                <select
+                  name="target_role"
+                  value={profileData.target_role}
+                  onChange={handleProfileChange}
+                  style={SELECT_STYLE}
+                >
+                  <option value="">Not chosen yet</option>
+                  {CAREER_ROLES.map((role) => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
                 </select>
               </Row>
 
