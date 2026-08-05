@@ -1,5 +1,7 @@
 import User from '../models/userModel.js';
 import QuizResult from '../models/QuizResult.js';
+import PracticeResult from '../models/PracticeResult.js';
+import InterviewResult from '../models/InterviewResult.js';
 import Roadmap from '../models/Roadmap.js';
 import Topic from '../models/Topic.js';
 import Settings from '../models/Settings.js';
@@ -35,9 +37,13 @@ export const getOverview = async (req, res) => {
 
     const [
       users, usersLast30, usersPrev30,
-      attempts, attemptsLast30, attemptsPrev30,
+      quizAttempts, quizLast30, quizPrev30,
+      practiceAttempts, practiceLast30, practicePrev30,
+      interviewAttempts, interviewLast30, interviewPrev30,
       roadmaps, roadmapsLast30, roadmapsPrev30,
-      skillUsage, difficultySplit, recent,
+      skillUsage, practiceUsage, interviewUsage,
+      difficultySplit, practiceDifficultySplit,
+      recent,
     ] = await Promise.all([
       User.countDocuments({}),
       User.countDocuments({ createdAt: { $gte: last30 } }),
@@ -46,6 +52,14 @@ export const getOverview = async (req, res) => {
       QuizResult.countDocuments({}),
       QuizResult.countDocuments({ createdAt: { $gte: last30 } }),
       QuizResult.countDocuments({ createdAt: { $gte: prev30, $lt: last30 } }),
+
+      PracticeResult.countDocuments({}),
+      PracticeResult.countDocuments({ createdAt: { $gte: last30 } }),
+      PracticeResult.countDocuments({ createdAt: { $gte: prev30, $lt: last30 } }),
+
+      InterviewResult.countDocuments({}),
+      InterviewResult.countDocuments({ createdAt: { $gte: last30 } }),
+      InterviewResult.countDocuments({ createdAt: { $gte: prev30, $lt: last30 } }),
 
       Roadmap.countDocuments({}),
       Roadmap.countDocuments({ createdAt: { $gte: last30 } }),
@@ -57,17 +71,23 @@ export const getOverview = async (req, res) => {
         { $limit: 6 },
       ]),
 
+      PracticeResult.aggregate([
+        { $group: { _id: '$type', value: { $sum: 1 } } },
+      ]),
+
+      InterviewResult.countDocuments({}),
+
       QuizResult.aggregate([
         { $group: { _id: '$difficulty', value: { $sum: 1 } } },
         { $sort: { value: -1 } },
       ]),
 
-      QuizResult.find({})
-        .sort({ createdAt: -1 })
-        .limit(8)
-        .populate('userId', 'firstName lastName email')
-        .populate('topicId', 'name')
-        .lean(),
+      PracticeResult.aggregate([
+        { $match: { difficulty: { $ne: null } } },
+        { $group: { _id: '$difficulty', value: { $sum: 1 } } },
+      ]),
+
+      getRecentAttempts(8),
     ]);
 
     // Topic ids mean nothing on screen, so they are resolved to names here.
@@ -75,24 +95,45 @@ export const getOverview = async (req, res) => {
     const topics = await Topic.find({ _id: { $in: topicIds } }).select('name').lean();
     const topicName = new Map(topics.map((topic) => [String(topic._id), topic.name]));
 
+    // Aptitude/CS Fundamentals don't carry a topicId, and the mock interview
+    // isn't tied to a topic at all — each gets its own bar instead of being
+    // dropped from "attempts by topic".
+    const combinedUsage = [
+      ...skillUsage.map((row) => ({
+        label: topicName.get(String(row._id)) || 'Untagged',
+        value: row.value,
+      })),
+      ...practiceUsage.map((row) => ({
+        label: PRACTICE_TYPE_LABELS[row._id] || row._id,
+        value: row.value,
+      })),
+    ];
+    if (interviewUsage > 0) {
+      combinedUsage.push({ label: 'Mock interview', value: interviewUsage });
+    }
+    combinedUsage.sort((a, b) => b.value - a.value);
+
+    const combinedDifficulty = mergeDifficultySplits(difficultySplit, practiceDifficultySplit);
+
     return res.status(200).json({
       success: true,
       data: {
         stats: [
           { label: 'Users', value: users, delta: delta(usersLast30, usersPrev30) },
-          { label: 'Quiz attempts', value: attempts, delta: delta(attemptsLast30, attemptsPrev30) },
+          {
+            label: 'Assessment attempts',
+            value: quizAttempts + practiceAttempts + interviewAttempts,
+            delta: delta(
+              quizLast30 + practiceLast30 + interviewLast30,
+              quizPrev30 + practicePrev30 + interviewPrev30
+            ),
+          },
           { label: 'Roadmaps', value: roadmaps, delta: delta(roadmapsLast30, roadmapsPrev30) },
           { label: 'Active learners', value: await User.countDocuments({ isActive: true }), delta: null },
         ],
-        skillUsage: skillUsage.map((row) => ({
-          label: topicName.get(String(row._id)) || 'Untagged',
-          value: row.value,
-        })),
-        difficultySplit: difficultySplit.map((row) => ({
-          label: row._id ? row._id[0].toUpperCase() + row._id.slice(1) : 'Untagged',
-          value: row.value,
-        })),
-        attempts: recent.map(shapeAttempt),
+        skillUsage: combinedUsage.slice(0, 6),
+        difficultySplit: combinedDifficulty,
+        attempts: recent,
       },
     });
   } catch (error) {
@@ -101,31 +142,96 @@ export const getOverview = async (req, res) => {
   }
 };
 
-const shapeAttempt = (result) => ({
+const PRACTICE_TYPE_LABELS = { aptitude: 'Aptitude', 'cs-fundamentals': 'CS Fundamentals' };
+
+const capitalize = (value) => (value ? value[0].toUpperCase() + value.slice(1) : 'Untagged');
+
+/** Same difficulty label, whichever collection it came from, summed together. */
+const mergeDifficultySplits = (...splits) => {
+  const totals = new Map();
+  for (const split of splits) {
+    for (const row of split) {
+      const label = capitalize(row._id);
+      totals.set(label, (totals.get(label) || 0) + row.value);
+    }
+  }
+  return [...totals.entries()]
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value);
+};
+
+const shapeQuizAttempt = (result) => ({
   _id: String(result._id),
   userName: result.userId
     ? `${result.userId.firstName || ''} ${result.userId.lastName || ''}`.trim() || result.userId.email
     : 'Deleted user',
   skill: result.topicId?.name || 'Untagged',
-  difficulty: result.difficulty
-    ? result.difficulty[0].toUpperCase() + result.difficulty.slice(1)
-    : 'Untagged',
+  difficulty: capitalize(result.difficulty),
   score: result.correctAnswers ?? result.score ?? 0,
   totalQuestions: result.totalQuestions ?? 0,
   createdAt: result.completedAt || result.createdAt,
 });
 
+const shapePracticeAttempt = (result) => ({
+  _id: String(result._id),
+  userName: result.userId
+    ? `${result.userId.firstName || ''} ${result.userId.lastName || ''}`.trim() || result.userId.email
+    : 'Deleted user',
+  skill: PRACTICE_TYPE_LABELS[result.type] || result.type,
+  difficulty: capitalize(result.difficulty),
+  score: result.correct ?? 0,
+  totalQuestions: result.total ?? 0,
+  createdAt: result.createdAt,
+});
+
+/** Interview scores run 0–10 rather than out of a question count, so they are
+ *  rescaled to /10 the way the rest of the table expects a total to work. */
+const shapeInterviewAttempt = (result) => ({
+  _id: String(result._id),
+  userName: result.userId
+    ? `${result.userId.firstName || ''} ${result.userId.lastName || ''}`.trim() || result.userId.email
+    : 'Deleted user',
+  skill: result.role || 'Interview',
+  difficulty: 'Interview',
+  score: result.overallScore ?? 0,
+  totalQuestions: 10,
+  createdAt: result.createdAt,
+});
+
+/**
+ * The `limit` most recent attempts across all three assessment types.
+ *
+ * Each collection is independently sorted and capped at `limit` before the
+ * merge, which is enough: the true top-`limit` across three already-sorted
+ * streams can never reach further than `limit` into any one of them.
+ */
+const getRecentAttempts = async (limit) => {
+  const [quiz, practice, interview] = await Promise.all([
+    QuizResult.find({}).sort({ createdAt: -1 }).limit(limit)
+      .populate('userId', 'firstName lastName email')
+      .populate('topicId', 'name')
+      .lean(),
+    PracticeResult.find({}).sort({ createdAt: -1 }).limit(limit)
+      .populate('userId', 'firstName lastName email')
+      .lean(),
+    InterviewResult.find({}).sort({ createdAt: -1 }).limit(limit)
+      .populate('userId', 'firstName lastName email')
+      .lean(),
+  ]);
+
+  return [
+    ...quiz.map(shapeQuizAttempt),
+    ...practice.map(shapePracticeAttempt),
+    ...interview.map(shapeInterviewAttempt),
+  ]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, limit);
+};
+
 /** GET /api/admin/attempts */
 export const getAttempts = async (req, res) => {
   try {
-    const results = await QuizResult.find({})
-      .sort({ createdAt: -1 })
-      .limit(200)
-      .populate('userId', 'firstName lastName email')
-      .populate('topicId', 'name')
-      .lean();
-
-    return res.status(200).json({ success: true, data: results.map(shapeAttempt) });
+    return res.status(200).json({ success: true, data: await getRecentAttempts(200) });
   } catch (error) {
     console.error('Admin attempts error:', error);
     return res.status(500).json({ success: false, message: 'Failed to load attempts' });
@@ -200,6 +306,8 @@ export const deleteUser = async (req, res) => {
     // Their work goes with them, the same as a self-service deletion.
     await Promise.all([
       QuizResult.deleteMany({ userId: user._id }),
+      PracticeResult.deleteMany({ userId: user._id }),
+      InterviewResult.deleteMany({ userId: user._id }),
       Roadmap.deleteMany({ user_id: user._id }),
     ]);
 
@@ -263,6 +371,7 @@ export const getAnalytics = async (req, res) => {
     const [
       quizzes, quizzesLast30, quizzesPrev30, quizzesToday,
       roadmaps, roadmapsLast30, roadmapsPrev30,
+      interviews, interviewsLast30, interviewsPrev30, interviewsToday,
       requestedRoles, difficultySplit,
     ] = await Promise.all([
       QuizResult.countDocuments({}),
@@ -273,6 +382,13 @@ export const getAnalytics = async (req, res) => {
       Roadmap.countDocuments({}),
       Roadmap.countDocuments({ createdAt: { $gte: last30 } }),
       Roadmap.countDocuments({ createdAt: { $gte: prev30, $lt: last30 } }),
+
+      // Every question and its evaluation is AI-generated, same as a quiz or
+      // a roadmap, so mock interviews belong in this count too.
+      InterviewResult.countDocuments({}),
+      InterviewResult.countDocuments({ createdAt: { $gte: last30 } }),
+      InterviewResult.countDocuments({ createdAt: { $gte: prev30, $lt: last30 } }),
+      InterviewResult.countDocuments({ createdAt: { $gte: today } }),
 
       Roadmap.aggregate([
         { $group: { _id: '$target_role', value: { $sum: 1 } } },
@@ -291,10 +407,18 @@ export const getAnalytics = async (req, res) => {
       success: true,
       data: {
         stats: [
-          { label: 'Generations', value: quizzes + roadmaps, delta: delta(quizzesLast30 + roadmapsLast30, quizzesPrev30 + roadmapsPrev30) },
-          { label: 'Today', value: quizzesToday, delta: null },
+          {
+            label: 'Generations',
+            value: quizzes + roadmaps + interviews,
+            delta: delta(
+              quizzesLast30 + roadmapsLast30 + interviewsLast30,
+              quizzesPrev30 + roadmapsPrev30 + interviewsPrev30
+            ),
+          },
+          { label: 'Today', value: quizzesToday + interviewsToday, delta: null },
           { label: 'Quizzes made', value: quizzes, delta: delta(quizzesLast30, quizzesPrev30) },
           { label: 'Roadmaps made', value: roadmaps, delta: delta(roadmapsLast30, roadmapsPrev30) },
+          { label: 'Interviews made', value: interviews, delta: delta(interviewsLast30, interviewsPrev30) },
         ],
         requestedRoles: requestedRoles.map((row) => ({
           label: row._id || 'Untagged',
