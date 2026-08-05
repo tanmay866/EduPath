@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQuiz } from "../../Context/QuizContext";
 import { fetchQuizTopics, startQuiz } from "../../Services/assessmentService";
 import { useQuizLogic } from "./hooks/useQuizLogic";
@@ -24,6 +24,7 @@ const SELECT_STYLE = {
 
 const QuizPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check authentication on component mount
   useEffect(() => {
@@ -80,7 +81,23 @@ const QuizPage = () => {
     try {
       setLoadingTopics(true);
       const response = await fetchQuizTopics();
-      setTopics(response.data?.data || []);
+      const list = response.data?.data || [];
+      setTopics(list);
+
+      // Arriving from a roadmap skill: preselect the topic that covers it so
+      // the learner is not asked to find it again in a list of 29.
+      const wanted = location.state?.topicId;
+      if (wanted) {
+        const match = list.find((t) => String(t._id) === String(wanted));
+        if (match) {
+          setQuizConfig((prev) => ({
+            ...prev,
+            topicId: match._id,
+            topicName: match.name,
+            topicIcon: match.icon,
+          }));
+        }
+      }
     } catch (err) {
       console.error('Failed to load topics:', err);
       setError('Failed to load topics');

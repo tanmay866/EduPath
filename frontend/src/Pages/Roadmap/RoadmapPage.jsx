@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Map, Zap, ArrowLeft, Clock } from 'lucide-react';
 import {
@@ -27,6 +27,7 @@ const getErrorMessage = (error, fallback) => {
 /* ── component ───────────────────────────────────────────────────── */
 const RoadmapPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [history,          setHistory]         = useState([]);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
@@ -220,6 +221,11 @@ const RoadmapPage = () => {
           updatingSkill={updatingSkill}
           onMarkCompleted={handleMarkCompleted}
           onRegenerate={handleGenerate}
+          onTestSkill={(step) =>
+            navigate('/assessment/quiz', {
+              state: { topicId: step.quiz_topic_id, topicName: step.quiz_topic_name, fromSkill: step.skill },
+            })
+          }
           latestInterview={latestInterview}
           loadingInterview={loadingInterview}
           targetRole={profile?.target_role}

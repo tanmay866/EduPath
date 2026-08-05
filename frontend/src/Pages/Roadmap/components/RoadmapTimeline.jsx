@@ -65,7 +65,7 @@ const STATUS_BORDER = {
   future: 'transparent',
 };
 
-const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted, onRegenerate, latestInterview, loadingInterview, targetRole }) => {
+const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted, onRegenerate, latestInterview, loadingInterview, targetRole, onTestSkill }) => {
   const skills = roadmapData?.skills || [];
   const [expanded, setExpanded] = useState('');
 
@@ -148,7 +148,7 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
           const isDone = step.status === 'completed';
           const isCurrent = i === currentIndex;
           const busy = updatingSkill === step.skill;
-          const hasDetail = Boolean(step.resources?.length || step.mini_project);
+          const hasDetail = Boolean(step.resources?.length || step.mini_project || step.quiz_topic_id);
           const isOpen = hasDetail && expanded === step.skill;
           const statusKey = isDone ? 'done' : isCurrent ? 'current' : 'future';
 
@@ -247,6 +247,28 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
                         Resources
                       </MicroLabel>
                       <ResourceList resources={step.resources} />
+                    </div>
+                  )}
+
+                  {/* Marking done is self-reported; this offers to check it
+                      instead. The quiz covers the topic the skill sits in,
+                      which is broader than the skill itself — so it is
+                      offered as a check, not as proof of completion. */}
+                  {step.quiz_topic_id && onTestSkill && (
+                    <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--color-line-soft)' }}>
+                      <MicroLabel size={10} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 8 }}>
+                        Check yourself
+                      </MicroLabel>
+                      <p style={{ fontSize: 13.5, color: 'var(--color-text-3)', lineHeight: 1.5, margin: '0 0 12px' }}>
+                        {`Sit the ${step.quiz_topic_name} assessment. The score feeds back into this plan.`}
+                      </p>
+                      <Button
+                        variant="secondary"
+                        style={{ padding: '9px 16px', fontSize: 13.5 }}
+                        onClick={(e) => { e.stopPropagation(); onTestSkill(step); }}
+                      >
+                        Test me on this
+                      </Button>
                     </div>
                   )}
                 </div>

@@ -41,3 +41,23 @@ export const TOPIC_SKILL_MAP = {
   'Data Visualization': ['Data Visualization'],
   'Statistics': ['Statistics & Probability'],
 };
+
+/**
+ * The same mapping read backwards: which topic can be sat to test a roadmap
+ * skill. Derived from the table above rather than written out again, so the
+ * two can never disagree.
+ *
+ * Not every skill has one. "REST API Design" and "JWT Authentication" are real
+ * roadmap steps with no topic in the catalogue, and they return undefined
+ * rather than being pointed at something approximate.
+ */
+const SKILL_TO_TOPIC = Object.entries(TOPIC_SKILL_MAP).reduce((acc, [topic, skills]) => {
+  for (const skill of skills) {
+    // First topic wins: a skill listed under two topics is an authoring
+    // mistake, and picking arbitrarily would hide it.
+    if (!acc[skill]) acc[skill] = topic;
+  }
+  return acc;
+}, {});
+
+export const topicForSkill = (skill) => SKILL_TO_TOPIC[String(skill || '').trim()];

@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import Roadmap from "../models/Roadmap.js";
 import User from "../models/userModel.js";
 import SkillGap from "../models/SkillGap.js";
+import Topic from "../models/Topic.js";
+import { topicForSkill } from "../utils/skillTopicMap.js";
 
 const AI_SERVICE_URL =
     process.env.AI_SERVICE_URL || "http://localhost:8000";
@@ -268,10 +270,34 @@ export const getRoadmapById = async (req, res) => {
 
         const assessedAt = skillGap?.updatedAt || null;
 
+        // Marking a skill done is self-reported. Where a skill has a topic in
+        // the quiz catalogue, the plan can offer to test it instead — so each
+        // skill carries the topic that covers it, when one exists. Skills like
+        // "REST API Design" have no topic and simply carry none.
+        const topicNames = [
+            ...new Set(
+                (roadmap.skills || []).map((s) => topicForSkill(s.skill)).filter(Boolean)
+            ),
+        ];
+        const topicIdByName = new Map(
+            topicNames.length
+                ? (await Topic.find({ name: { $in: topicNames }, isActive: true })
+                      .select("name")
+                      .lean()).map((t) => [t.name, String(t._id)])
+                : []
+        );
+
+        const skills = (roadmap.skills || []).map((s) => {
+            const topicName = topicForSkill(s.skill);
+            const topicId = topicName ? topicIdByName.get(topicName) : undefined;
+            return topicId ? { ...s, quiz_topic_id: topicId, quiz_topic_name: topicName } : s;
+        });
+
         res.status(200).json({
             success: true,
             data: {
                 ...roadmap,
+                skills,
                 is_stale: Boolean(assessedAt && new Date(assessedAt) > new Date(roadmap.createdAt)),
                 assessed_at: assessedAt,
             },
