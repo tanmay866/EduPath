@@ -377,13 +377,75 @@ export const EditorialSection = ({ eyebrow, heading, children, first = false, st
 /* ── Footer ───────────────────────────────────────────────────────────────
    Ink panel, 48px 32px, inner 1100px. Logo left, link columns right, a mono
    copyright line under a #2A2822 rule. */
-export const SiteFooter = ({ columns = [] }) => (
+/**
+ * Ink panel, 1100px inner, brand block left and link columns right over a
+ * #2A2822 rule.
+ *
+ * The brand side used to hold nothing but the wordmark against
+ * `space-between`, which pushed the columns hard right and left roughly half
+ * the footer empty. It now carries a line about what the product does and how
+ * to reach a person, so the space is doing something.
+ *
+ * Links take either `to` (in-app) or `href` (mail and anything off-site), so a
+ * contact address can sit in a column without a second component.
+ */
+const FooterLink = ({ link }) => {
+  const style = { fontSize: 14, color: 'var(--color-dark-text-2)', textDecoration: 'none' };
+  const hover = {
+    onMouseEnter: (e) => { e.currentTarget.style.color = '#fff'; },
+    onMouseLeave: (e) => { e.currentTarget.style.color = 'var(--color-dark-text-2)'; },
+  };
+
+  return link.href
+    ? <a href={link.href} style={style} {...hover}>{link.label}</a>
+    : <Link to={link.to} style={style} {...hover}>{link.label}</Link>;
+};
+
+export const SiteFooter = ({ columns = [], blurb, contact = [], note }) => (
   <footer style={{ background: 'var(--color-ink)', padding: '48px 32px' }}>
     <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 48, flexWrap: 'wrap' }}>
-        <Wordmark dark size={28} labelSize={24} />
+      <div style={{ display: 'flex', gap: 56, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        {/* Brand. Grows to fill, but stops before the measure gets unreadable. */}
+        <div style={{ flex: '1 1 260px', maxWidth: 340 }}>
+          <Wordmark dark size={28} labelSize={24} />
 
-        <div style={{ display: 'flex', gap: 64, flexWrap: 'wrap' }}>
+          {blurb && (
+            <p style={{ margin: '18px 0 0', fontSize: 14, lineHeight: 1.6, color: 'var(--color-dark-text-2)' }}>
+              {blurb}
+            </p>
+          )}
+
+          {contact.length > 0 && (
+            <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {contact.map((row) => (
+                <span key={row.label} style={{ fontFamily: 'var(--font-mono)', fontSize: 12.5, color: 'var(--color-dark-text-3)' }}>
+                  {row.href
+                    ? (
+                      <a
+                        href={row.href}
+                        style={{ color: 'var(--color-dark-text-3)', textDecoration: 'none' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-dark-text-3)'; }}
+                      >
+                        {row.label}
+                      </a>
+                    )
+                    : row.label}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Columns share the remaining width and wrap rather than squeezing. */}
+        <div
+          style={{
+            flex: '2 1 520px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))',
+            gap: '32px 36px',
+          }}
+        >
           {columns.map((col) => (
             <div key={col.heading}>
               <MicroLabel size={10.5} tracking="0.14em" color="var(--color-dark-text-3)" style={{ display: 'block', marginBottom: 14 }}>
@@ -391,16 +453,7 @@ export const SiteFooter = ({ columns = [] }) => (
               </MicroLabel>
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {col.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      to={link.to}
-                      style={{ fontSize: 14, color: 'var(--color-dark-text-2)', textDecoration: 'none' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-dark-text-2)'; }}
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
+                  <li key={link.label}><FooterLink link={link} /></li>
                 ))}
               </ul>
             </div>
@@ -408,10 +461,26 @@ export const SiteFooter = ({ columns = [] }) => (
         </div>
       </div>
 
-      <div style={{ borderTop: '1px solid #2A2822', marginTop: 40, paddingTop: 20 }}>
+      <div
+        style={{
+          borderTop: '1px solid #2A2822',
+          marginTop: 40,
+          paddingTop: 20,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          gap: 24,
+          flexWrap: 'wrap',
+        }}
+      >
         <MicroLabel size={11} tracking="0.12em" color="var(--color-dark-text-3)">
           © {new Date().getFullYear()} EduPath
         </MicroLabel>
+        {note && (
+          <MicroLabel size={11} tracking="0.12em" color="var(--color-dark-text-3)">
+            {note}
+          </MicroLabel>
+        )}
       </div>
     </div>
   </footer>
