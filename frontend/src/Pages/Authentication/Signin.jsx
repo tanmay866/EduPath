@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
@@ -12,6 +12,11 @@ import {
 const Signin = () => {
   const navigate = useNavigate();
 
+  // Server-side failures were reported by toast alone, so the reason a sign-in
+  // was refused slid off screen after five seconds and left the form looking
+  // untouched. It stays on the form now, next to the fields it is about.
+  const [formError, setFormError] = useState('');
+
   const formik = useFormik({
     initialValues: { identifier: '', password: '' },
 
@@ -23,6 +28,8 @@ const Signin = () => {
     },
 
     onSubmit: async (values, { resetForm }) => {
+      setFormError('');
+
       try {
         const identifier = values.identifier.trim();
         const payload = { password: values.password };
@@ -40,14 +47,22 @@ const Signin = () => {
         toast.success('Signin successful!');
         resetForm();
 
+        // App picks the admin route tree from sessionStorage once, at render,
+        // so an in-app navigation would land on the learner tree. This used to
+        // navigate, wait a second and then reload; one real navigation does
+        // the same job without the flash in between.
         if (res.data.user.role === 'admin') {
-          setTimeout(() => {
-            navigate('/admin');
-            window.location.reload();
-          }, 1000);
-        } else {
-          navigate('/');
+          window.location.assign('/admin');
+          return;
         }
+
+        // Signing in used to land on the marketing home page, which is the one
+        // place a signed-in user has no reason to be. Straight to the app —
+        // or to onboarding first, matching what RequiresProfile would decide.
+        navigate(
+          sessionStorage.getItem('profileComplete') === '1' ? '/assessment' : '/onboarding',
+          { replace: true }
+        );
       } catch (error) {
         console.error('Signin error:', error);
 
@@ -62,16 +77,11 @@ const Signin = () => {
 
         const message = data?.message
           || (error.request ? 'Cannot reach the server. Please make sure the backend is running.' : 'Signin failed. Please try again.');
+        setFormError(message);
         toast.error(message);
       }
     },
   });
-
-  useEffect(() => {
-    if (formik.submitCount > 0 && !formik.isValid) {
-      toast.error('Please fill all required fields correctly');
-    }
-  }, [formik.submitCount]);
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
@@ -113,7 +123,7 @@ const Signin = () => {
             <Input
               name="identifier"
               value={formik.values.identifier}
-              onChange={formik.handleChange}
+              onChange={(e) => { setFormError(''); formik.handleChange(e); }}
               onBlur={formik.handleBlur}
               error={Boolean(showError && formik.errors.identifier)}
               autoComplete="username"
@@ -141,7 +151,7 @@ const Signin = () => {
             <PasswordInput
               name="password"
               value={formik.values.password}
-              onChange={formik.handleChange}
+              onChange={(e) => { setFormError(''); formik.handleChange(e); }}
               onBlur={formik.handleBlur}
               error={Boolean(showError && formik.errors.password)}
               autoComplete="current-password"
@@ -150,7 +160,12 @@ const Signin = () => {
           </Field>
         </FieldGroup>
 
-        {showError && !formik.isValid && (
+        {/* role="status" lives inside InlineMessage, so a screen reader is
+            told why the attempt failed rather than only sighted users. */}
+        {formError && (
+          <InlineMessage tone="error" style={{ marginTop: 22 }}>{formError}</InlineMessage>
+        )}
+        {!formError && showError && !formik.isValid && (
           <InlineMessage tone="error" style={{ marginTop: 22 }}>
             Check the fields above and try again.
           </InlineMessage>

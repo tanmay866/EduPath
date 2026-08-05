@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { API_BASE } from '../../config';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
@@ -12,8 +12,15 @@ import {
 const Signup = () => {
   const navigate = useNavigate();
 
+  // Kept on the form rather than only in a toast, so "that address is already
+  // registered" is still readable while you decide what to do about it.
+  const [formError, setFormError] = useState('');
+
   const formik = useFormik({
-    initialValues: { firstName: '', lastName: '', email: '', password: '', role: 'student' },
+    // No `role` here. The signup route ignores it now — it used to accept
+    // whatever the client sent, including 'admin' — and a field the server
+    // must refuse has no business being in the payload.
+    initialValues: { firstName: '', lastName: '', email: '', password: '' },
 
     validate: (values) => {
       const errors = {};
@@ -30,6 +37,8 @@ const Signup = () => {
     },
 
     onSubmit: async (values, { resetForm, setSubmitting }) => {
+      setFormError('');
+
       try {
         const response = await axios.post(`${API_BASE}/auth/signup`, values);
 
@@ -40,18 +49,14 @@ const Signup = () => {
         navigate('/verify-email', { state: { email: values.email } });
       } catch (error) {
         console.error('Signup error:', error);
-        toast.error(getApiErrorMessage(error.response?.data, 'Signup failed. Please try again.'));
+        const message = getApiErrorMessage(error.response?.data, 'Signup failed. Please try again.');
+        setFormError(message);
+        toast.error(message);
       } finally {
         setSubmitting(false);
       }
     },
   });
-
-  useEffect(() => {
-    if (formik.submitCount > 0 && !formik.isValid) {
-      toast.error('Please fill all required fields correctly');
-    }
-  }, [formik.submitCount]);
 
   const showError = formik.submitCount > 0;
   const err = (name) => (showError ? formik.errors[name] : null);
@@ -75,7 +80,7 @@ const Signup = () => {
               <Input
                 name="firstName"
                 value={formik.values.firstName}
-                onChange={formik.handleChange}
+                onChange={(e) => { setFormError(''); formik.handleChange(e); }}
                 onBlur={formik.handleBlur}
                 error={Boolean(err('firstName'))}
                 autoComplete="given-name"
@@ -85,7 +90,7 @@ const Signup = () => {
               <Input
                 name="lastName"
                 value={formik.values.lastName}
-                onChange={formik.handleChange}
+                onChange={(e) => { setFormError(''); formik.handleChange(e); }}
                 onBlur={formik.handleBlur}
                 error={Boolean(err('lastName'))}
                 autoComplete="family-name"
@@ -98,7 +103,7 @@ const Signup = () => {
               name="email"
               type="email"
               value={formik.values.email}
-              onChange={formik.handleChange}
+              onChange={(e) => { setFormError(''); formik.handleChange(e); }}
               onBlur={formik.handleBlur}
               error={Boolean(err('email'))}
               autoComplete="email"
@@ -110,7 +115,7 @@ const Signup = () => {
             <PasswordInput
               name="password"
               value={formik.values.password}
-              onChange={formik.handleChange}
+              onChange={(e) => { setFormError(''); formik.handleChange(e); }}
               onBlur={formik.handleBlur}
               error={Boolean(err('password'))}
               autoComplete="new-password"
@@ -121,7 +126,10 @@ const Signup = () => {
           </Field>
         </FieldGroup>
 
-        {showError && !formik.isValid && (
+        {formError && (
+          <InlineMessage tone="error" style={{ marginTop: 22 }}>{formError}</InlineMessage>
+        )}
+        {!formError && showError && !formik.isValid && (
           <InlineMessage tone="error" style={{ marginTop: 22 }}>
             Check the fields above and try again.
           </InlineMessage>
