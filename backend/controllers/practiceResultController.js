@@ -1,4 +1,5 @@
 import PracticeResult from '../models/PracticeResult.js';
+import { normalizeDifficulty } from '../utils/difficulty.js';
 
 const TYPES = ['aptitude', 'cs-fundamentals'];
 
@@ -17,10 +18,12 @@ export const createPracticeResult = async (req, res) => {
       return res.status(400).json({ success: false, message: 'total, correct, wrong, unanswered and percentage must be numbers' });
     }
 
+    // CS Fundamentals sends Easy/Medium/Hard because the upstream question
+    // API does. What we store is the vocabulary everything else reads.
     const result = await PracticeResult.create({
       userId: req.user._id,
       type,
-      difficulty,
+      difficulty: normalizeDifficulty(difficulty),
       total,
       correct,
       wrong,

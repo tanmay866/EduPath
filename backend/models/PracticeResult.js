@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { DIFFICULTIES } from '../utils/difficulty.js';
 
 /**
  * Results for the practice tests that don't run against a Topic-backed
@@ -29,7 +30,9 @@ const practiceResultSchema = new mongoose.Schema(
       enum: ['aptitude', 'cs-fundamentals'],
       required: true,
     },
-    difficulty: { type: String },
+    // Enforced now: this was a free String, which is how "Easy" reached the
+    // admin difficulty split as a category that exists nowhere else.
+    difficulty: { type: String, enum: [...DIFFICULTIES, null], default: null },
     total: { type: Number, required: true },
     correct: { type: Number, required: true },
     wrong: { type: Number, required: true },
