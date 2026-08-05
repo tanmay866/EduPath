@@ -4,6 +4,7 @@ import {
   Card, CardHeader, CardFooterNote, Button, Toggle, MicroLabel, Loading, Empty, type,
 } from '../../design';
 import { saveInterviewResult } from '../Services/interviewResultService';
+import { useCareerRoles } from '../../hooks/useCareerRoles';
 
 /**
  * AI mock interview — setup, then one question at a time with feedback after
@@ -50,10 +51,11 @@ const AIMockInterview = () => {
   // Interview stages: 'setup', 'interview', 'result'
   const [stage, setStage] = useState('setup');
 
-  // Setup state
-  const [roles, setRoles] = useState([]);
-  const [loadingRoles, setLoadingRoles] = useState(true);
-  const [selectedRole, setSelectedRole] = useState(null);
+  // Setup state. The role defaults to the one on the profile, so the usual
+  // path is to press start — but it stays changeable here for anyone who
+  // wants to rehearse for a different track without editing their profile.
+  const { roles: careerRoles } = useCareerRoles();
+  const [selectedRole, setSelectedRole] = useState(() => sessionStorage.getItem('targetRole') || '');
 
   // Interview state
   const [currentQuestion, setCurrentQuestion] = useState('');
@@ -89,11 +91,6 @@ const AIMockInterview = () => {
       navigate('/signin');
     }
   }, [navigate]);
-
-  // Fetch available roles on mount
-  useEffect(() => {
-    fetchRoles();
-  }, []);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -142,21 +139,6 @@ const AIMockInterview = () => {
     };
   }, [isRecording]);
 
-  // Fetch available roles
-  const fetchRoles = async () => {
-    setLoadingRoles(true);
-    try {
-      const response = await fetch(`${API_URL}/api/mock-interview/roles`);
-      const data = await response.json();
-      if (data.success) {
-        setRoles(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching roles:', error);
-    } finally {
-      setLoadingRoles(false);
-    }
-  };
 
   // Text-to-speech function using Microsoft neural voices
   const speak = (text, isFeedback = false) => {
@@ -216,7 +198,7 @@ const AIMockInterview = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          role: selectedRole.name,
+          role: selectedRole,
           questionNumber: qNumber,
           previousQuestions
         })
@@ -255,7 +237,7 @@ const AIMockInterview = () => {
         body: JSON.stringify({
           question: currentQuestion,
           answer: answer.trim(),
-          role: selectedRole.name
+          role: selectedRole
         })
       });
 
@@ -311,7 +293,7 @@ const AIMockInterview = () => {
         },
         body: JSON.stringify({
           results,
-          role: selectedRole.name
+          role: selectedRole
         })
       });
 
@@ -322,7 +304,7 @@ const AIMockInterview = () => {
         // Fire-and-forget, same as the practice-test results: the summary
         // is already on screen regardless of whether this save lands.
         saveInterviewResult({
-          role: selectedRole.name,
+          role: selectedRole,
           overallScore: data.data.overallScore,
           recommendation: data.data.recommendation,
           summary: data.data.summary,
@@ -352,7 +334,9 @@ const AIMockInterview = () => {
   // Restart interview
   const restartInterview = () => {
     setStage('setup');
-    setSelectedRole(null);
+    // Back to the profile's role rather than blank, so starting again is one
+    // press even after rehearsing for a different track.
+    setSelectedRole(sessionStorage.getItem('targetRole') || '');
     setQuestionNumber(1);
     setPreviousQuestions([]);
     setResults([]);
@@ -393,61 +377,54 @@ const AIMockInterview = () => {
               Say the answer out loud.
             </h1>
             <p style={{ ...type.body, margin: '12px 0 0', maxWidth: 560 }}>
-              Five questions for the role you pick, asked one at a time. Answer by speaking or by
+              Five questions for your role, asked one at a time. Answer by speaking or by
               typing, and each answer is scored with what worked and what to fix before the next one.
             </p>
           </div>
 
-          <div style={{ padding: '0 34px 6px' }}>
-            <MicroLabel size={10.5} tracking="0.13em" style={{ display: 'block', marginBottom: 14 }}>
-              Choose a role
-            </MicroLabel>
-          </div>
-
-          {loadingRoles ? (
-            <Loading label="Loading roles" />
-          ) : roles.length === 0 ? (
-            <Empty>No roles are available right now.</Empty>
-          ) : (
-            // Two columns rather than one long stack — six roles as a
-            // single column ran the card past the fold with paper visibly
-            // spare on both sides.
-            <div
+          {/* The role comes from the profile, so the usual path is to press
+              start. It stays changeable for rehearsing a different track,
+              but changing it here does not alter the profile. */}
+          <div
+            style={{
+              padding: '17px 34px',
+              borderTop: '1px solid var(--color-line)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 24,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>
+                Interviewing for
+              </div>
+              <div style={{ fontSize: 14, color: 'var(--color-text-3)', marginTop: 3 }}>
+                Taken from your profile. Change it just for this interview if you like.
+              </div>
+            </div>
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: 1,
-                background: 'var(--color-line-soft)',
-                borderTop: '1px solid var(--color-line)',
+                padding: '11px 14px',
+                fontSize: 15,
+                fontFamily: 'var(--font-sans)',
+                color: 'var(--color-ink)',
+                background: '#fff',
+                border: '1px solid var(--color-line-input)',
+                borderRadius: 0,
+                outline: 'none',
+                minWidth: 240,
+                flexShrink: 0,
               }}
             >
-              {roles.map((role) => {
-                const active = selectedRole?.id === role.id || selectedRole?.name === role.name;
-                return (
-                  <div
-                    key={role.id || role.name}
-                    onClick={() => setSelectedRole(role)}
-                    style={{
-                      padding: '15px 34px',
-                      borderLeft: `3px solid ${active ? 'var(--color-clay)' : 'transparent'}`,
-                      background: active ? 'var(--color-surface-active)' : 'var(--color-surface)',
-                      cursor: 'pointer',
-                      transition: 'background-color 120ms ease',
-                    }}
-                  >
-                    <div style={{ fontSize: 15.5, fontWeight: active ? 600 : 400, color: 'var(--color-ink)' }}>
-                      {role.name}
-                    </div>
-                    {role.description && (
-                      <div style={{ fontSize: 14, color: 'var(--color-text-3)', marginTop: 3 }}>
-                        {role.description}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
+              {!selectedRole && <option value="">Select a role</option>}
+              {(careerRoles.length ? careerRoles : [selectedRole].filter(Boolean)).map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
+          </div>
 
           <div
             style={{
@@ -499,7 +476,7 @@ const AIMockInterview = () => {
                   <Button variant="quiet" onClick={stopSpeaking}>Stop reading</Button>
                 )}
                 <MicroLabel size={11} tracking="0.1em" color="var(--color-clay)">
-                  {selectedRole?.name}
+                  {selectedRole}
                 </MicroLabel>
               </span>
             }
@@ -635,7 +612,7 @@ const AIMockInterview = () => {
       <Page>
         <Card>
           <CardHeader
-            label={selectedRole?.name || 'Mock interview'}
+            label={selectedRole || 'Mock interview'}
             right={
               <MicroLabel size={11} tracking="0.1em" color={scoreTone(summary.overallScore)}>
                 {String(summary.recommendation || '').replace(/_/g, ' ')}

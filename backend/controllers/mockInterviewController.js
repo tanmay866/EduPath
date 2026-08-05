@@ -126,66 +126,19 @@ export const getSummary = async (req, res) => {
 };
 
 /**
- * Get available interview roles
- * GET /api/mock-interview/roles
+ * Removed: GET /api/mock-interview/roles
+ *
+ * It served its own six roles — Frontend, Backend, Full Stack, MERN Stack,
+ * Data Scientist — which overlapped the roadmap's six by exactly one string.
+ * Picking "Frontend Developer" here therefore meant something no roadmap
+ * could be built for. The interview now uses the profile's target role, and
+ * the list lives in one place: GET /api/career-roles.
+ *
+ * Nothing needed rewriting to support it: the role is interpolated into the
+ * prompt as plain text, so the model takes whichever role it is handed.
  */
-export const getRoles = async (req, res) => {
-  try {
-    const roles = [
-      {
-        id: 'frontend',
-        name: 'Frontend Developer',
-        description: 'React, JavaScript, CSS, HTML, UI/UX',
-        icon: '🎨'
-      },
-      {
-        id: 'backend',
-        name: 'Backend Developer',
-        description: 'Node.js, APIs, Databases, Server-side logic',
-        icon: '⚙️'
-      },
-      {
-        id: 'fullstack',
-        name: 'Full Stack Developer',
-        description: 'End-to-end development, Frontend & Backend',
-        icon: '🔄'
-      },
-      {
-        id: 'mern',
-        name: 'MERN Stack Developer',
-        description: 'MongoDB, Express, React, Node.js',
-        icon: '🚀'
-      },
-      {
-        id: 'devops',
-        name: 'DevOps Engineer',
-        description: 'CI/CD, Docker, Kubernetes, Cloud',
-        icon: '☁️'
-      },
-      {
-        id: 'data',
-        name: 'Data Scientist',
-        description: 'Python, ML, Data Analysis, Statistics',
-        icon: '📊'
-      }
-    ];
-
-    res.json({
-      success: true,
-      data: roles
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch roles'
-    });
-  }
-};
-
 export default {
   getQuestion,
   evaluate,
-  getSummary,
-  getRoles
+  getSummary
 };

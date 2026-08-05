@@ -238,7 +238,9 @@ export const verifyOtp = asyncHandler(async (req, res, next) => {
             phone: user.profile?.phone || '',
             skills: user.profile?.skills || '',
             // Lets the client send a new account to onboarding without a
-            // second round trip to work out whether it is needed.
+            // second round trip to work out whether it is needed, and lets
+            // role-driven screens open without asking for the role again.
+            target_role: user.target_role || '',
             profile_complete: Boolean(user.profile_complete),
         },
     });
@@ -368,6 +370,7 @@ export const login = asyncHandler(async (req, res, next) => {
             profilePicture: '', // Not stored in MongoDB, only in Cloudinary
             phone: user.profile?.phone || '',
             skills: user.profile?.skills || '',
+            target_role: user.target_role || '',
             profile_complete: Boolean(user.profile_complete),
         },
     });

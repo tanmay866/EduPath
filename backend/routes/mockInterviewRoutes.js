@@ -2,8 +2,7 @@ import express from 'express';
 import {
   getQuestion,
   evaluate,
-  getSummary,
-  getRoles
+  getSummary
 } from '../controllers/mockInterviewController.js';
 import {
   createInterviewResult,
@@ -15,8 +14,8 @@ import { isStudent } from '../middlewares/roleMiddleware.js';
 
 const router = express.Router();
 
-// Get available interview roles (public)
-router.get('/roles', getRoles);
+// The role now comes from the user's profile; the canonical list is served
+// by GET /api/career-roles rather than a second one kept here.
 
 // Protected routes - require authentication
 router.post('/question', protect, getQuestion);

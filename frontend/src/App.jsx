@@ -154,7 +154,7 @@ const App = () => {
           <Route path="/assessment-hub/cs-fundamentals/results/:resultId" element={<PracticeResultDetail type="cs-fundamentals" />} />
           <Route path="/assessment-hub/mock-interview/results" element={<InterviewResults />} />
           <Route path="/assessment-hub/mock-interview/results/:resultId" element={<InterviewResultDetail />} />
-          <Route path="/assessment-hub/mock-interview" element={<AIMockInterview />} />
+          <Route path="/assessment-hub/mock-interview" element={<RequiresProfile><AIMockInterview /></RequiresProfile>} />
 
           {/* New Feature Routes */}
           <Route path="/resume-builder" element={<ResumeBuilder />} />
