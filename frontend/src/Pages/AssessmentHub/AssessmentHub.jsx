@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getQuizHistory } from '../Services/assessmentService';
 import { getPracticeHistory } from '../Services/practiceResultService';
+import { getInterviewHistory } from '../Services/interviewResultService';
 import {
   LearnerShell, Card, RuledGrid, RuledCell, Button, Badge, MicroLabel, type,
 } from '../../design';
@@ -58,13 +59,22 @@ const AssessmentHub = () => {
       } catch (error) {
         console.error('Error fetching practice history:', error);
       }
+
+      // AI Mock Interview now saves every attempt too.
+      try {
+        const interviewRes = await getInterviewHistory();
+        setCompletedAssessments((prev) => ({
+          ...prev,
+          mockInterview: (interviewRes.data?.data?.results || []).length > 0,
+        }));
+      } catch (error) {
+        console.error('Error fetching interview history:', error);
+      }
     };
 
     checkCompletedAssessments();
   }, []);
 
-  // AI Mock Interview still isn't written anywhere, so it keeps no
-  // resultsPath — there is genuinely nowhere to send "See results" to.
   const assessments = [
     {
       kicker: 'Technical',
@@ -98,7 +108,7 @@ const AssessmentHub = () => {
       title: 'AI Mock Interview',
       description: 'Answer role-specific questions and get scored feedback on each response.',
       path: '/assessment-hub/mock-interview',
-      resultsPath: null,
+      resultsPath: '/assessment-hub/mock-interview/results',
       duration: '30 MIN',
       completed: completedAssessments.mockInterview,
     },

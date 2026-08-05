@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Card, CardHeader, CardFooterNote, Button, Toggle, MicroLabel, Loading, Empty, type,
 } from '../../design';
+import { saveInterviewResult } from '../Services/interviewResultService';
 
 /**
  * AI mock interview — setup, then one question at a time with feedback after
@@ -317,6 +318,19 @@ const AIMockInterview = () => {
       const data = await response.json();
       if (data.success) {
         setSummary(data.data);
+
+        // Fire-and-forget, same as the practice-test results: the summary
+        // is already on screen regardless of whether this save lands.
+        saveInterviewResult({
+          role: selectedRole.name,
+          overallScore: data.data.overallScore,
+          recommendation: data.data.recommendation,
+          summary: data.data.summary,
+          topStrengths: data.data.topStrengths,
+          areasToImprove: data.data.areasToImprove,
+          advice: data.data.advice,
+          results,
+        }).catch((err) => console.error('Failed to save interview result:', err));
       }
     } catch (error) {
       console.error('Error generating summary:', error);
@@ -677,7 +691,7 @@ const AIMockInterview = () => {
             <Button onClick={restartInterview}>Interview again</Button>
           </div>
 
-          <CardFooterNote>Mock interviews are not written to your quiz history.</CardFooterNote>
+          <CardFooterNote>This interview is saved — find it again from the hub.</CardFooterNote>
         </Card>
       </Page>
     );

@@ -37,6 +37,8 @@ import CSFundamentals from './Pages/AssessmentHub/CSFundamentals'
 import AIMockInterview from './Pages/AssessmentHub/AIMockInterview'
 import PracticeResults from './Pages/AssessmentHub/PracticeResults'
 import PracticeResultDetail from './Pages/AssessmentHub/PracticeResultDetail'
+import InterviewResults from './Pages/AssessmentHub/InterviewResults'
+import InterviewResultDetail from './Pages/AssessmentHub/InterviewResultDetail'
 
 // Admin Components — the sidebar and header now come from AdminShell.
 import AdminDashboard from './Admin/pages/AdminDashboard'
@@ -131,10 +133,11 @@ const App = () => {
           <Route path="/assessment/result/:resultId" element={<ResultPage />} />
 
           {/* Assessment Hub Routes — the actual test-taking screens (and the
-              past-result detail view, which reuses the same layout) drop the
-              marketing Navbar entirely so there's nothing to look at but the
-              test. The hub itself and the plain results-list screens keep
-              it; they're browsing, not mid-attempt. */}
+              past-result detail views, which reuse that same bare layout)
+              carry no marketing Navbar, so there's nothing to look at but
+              the test. The hub and the results-list screens are a different
+              chrome entirely (LearnerShell's own sidebar and header) since
+              they're for browsing, not mid-attempt. */}
           <Route path="/assessment-hub" element={<AssessmentHub />} />
           <Route path="/assessment-hub/skill" element={<SkillAssessment />} />
           <Route path="/assessment-hub/aptitude" element={<AptitudeTest />} />
@@ -143,6 +146,8 @@ const App = () => {
           <Route path="/assessment-hub/cs-fundamentals" element={<CSFundamentals />} />
           <Route path="/assessment-hub/cs-fundamentals/results" element={<PracticeResults type="cs-fundamentals" label="CS fundamentals" retakePath="/assessment-hub/cs-fundamentals" />} />
           <Route path="/assessment-hub/cs-fundamentals/results/:resultId" element={<PracticeResultDetail type="cs-fundamentals" />} />
+          <Route path="/assessment-hub/mock-interview/results" element={<InterviewResults />} />
+          <Route path="/assessment-hub/mock-interview/results/:resultId" element={<InterviewResultDetail />} />
           <Route path="/assessment-hub/mock-interview" element={<AIMockInterview />} />
 
           {/* New Feature Routes */}
