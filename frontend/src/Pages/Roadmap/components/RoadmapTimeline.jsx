@@ -64,7 +64,7 @@ const STATUS_BORDER = {
   future: 'transparent',
 };
 
-const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted }) => {
+const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted, onRegenerate }) => {
   const skills = roadmapData?.skills || [];
   const [expanded, setExpanded] = useState('');
 
@@ -103,6 +103,36 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 22, alignItems: 'start' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 22, minWidth: 0 }}>
+      {/* The plan was built from the gaps known when it was generated, and
+          nothing rebuilds it on its own. Saying so beats showing a stale
+          plan as though it were current. */}
+      {roadmapData?.isStale && (
+        <Card
+          style={{
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 20,
+            borderLeft: '3px solid var(--color-amber)',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-ink)' }}>
+              You have assessed since this plan was built
+            </div>
+            <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '5px 0 0' }}>
+              Regenerating rebuilds it around your latest results. Your progress on other roles is kept.
+            </p>
+          </div>
+          {onRegenerate && (
+            <Button variant="attention" onClick={onRegenerate} style={{ flexShrink: 0 }}>
+              Regenerate
+            </Button>
+          )}
+        </Card>
+      )}
+
       <Card>
         <CardHeader
           label="Learning path"

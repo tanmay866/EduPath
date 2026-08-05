@@ -77,7 +77,7 @@ const RoadmapPage = () => {
     try {
       const res  = await getRoadmapById(id);
       const data = res?.data;
-      setRoadmapData({ roadmap_id: data?.roadmap_id || id, duration: data?.total_duration_weeks || data?.duration || 0, skills: data?.skills || [], weeklyPlans: data?.weekly_plans || [], status: data?.status || 'active' });
+      setRoadmapData({ roadmap_id: data?.roadmap_id || id, duration: data?.total_duration_weeks || data?.duration || 0, skills: data?.skills || [], weeklyPlans: data?.weekly_plans || [], status: data?.status || 'active', isStale: Boolean(data?.is_stale) });
       setSelectedRoadmapId(id);
       // Selecting a roadmap from the history list loaded it into state just
       // fine, but left the history list on screen — the load was invisible
@@ -203,6 +203,7 @@ const RoadmapPage = () => {
           isRoadmapLoading={isRoadmapLoading}
           updatingSkill={updatingSkill}
           onMarkCompleted={handleMarkCompleted}
+          onRegenerate={handleGenerate}
         />
       )}
     </LearnerShell>

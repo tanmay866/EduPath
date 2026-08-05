@@ -247,7 +247,7 @@ export const getRoadmapById = async (req, res) => {
         const roadmap = await Roadmap.findOne({
             roadmap_id: req.params.roadmap_id,
             user_id: req.user._id,
-        });
+        }).lean();
 
         if (!roadmap) {
             return res
@@ -255,7 +255,27 @@ export const getRoadmapById = async (req, res) => {
                 .json({ success: false, message: "Roadmap not found." });
         }
 
-        res.status(200).json({ success: true, data: roadmap });
+        // A plan is built from the skill gaps known at the time. Assessments
+        // taken since then are not reflected in it, and nothing regenerates
+        // automatically — so the screen needs to be able to say so rather
+        // than presenting an out-of-date plan as current.
+        const skillGap = await SkillGap.findOne({
+            user_id: req.user._id,
+            target_role: roadmap.target_role,
+        })
+            .select("updatedAt")
+            .lean();
+
+        const assessedAt = skillGap?.updatedAt || null;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                ...roadmap,
+                is_stale: Boolean(assessedAt && new Date(assessedAt) > new Date(roadmap.createdAt)),
+                assessed_at: assessedAt,
+            },
+        });
     } catch (err) {
         console.error("getRoadmapById error:", err);
         res.status(500).json({
