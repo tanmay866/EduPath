@@ -173,6 +173,8 @@ export const sendAccountDeletedEmail = async (user, removed = {}) => {
     skillGaps: 'Skill assessments',
     quizSessions: 'Quiz sessions',
     quizResults: 'Quiz results',
+    practiceResults: 'Aptitude & CS fundamentals results',
+    interviewResults: 'Mock interview results',
     progressLogs: 'Progress records',
     portfolios: 'Portfolios',
     resumes: 'Uploaded resumes',

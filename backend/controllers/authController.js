@@ -3,6 +3,8 @@ import Roadmap from '../models/Roadmap.js';
 import SkillGap from '../models/SkillGap.js';
 import QuizSession from '../models/QuizSession.js';
 import QuizResult from '../models/QuizResult.js';
+import PracticeResult from '../models/PracticeResult.js';
+import InterviewResult from '../models/InterviewResult.js';
 import ProgressLog from '../models/ProgressLog.js';
 import Portfolio from '../models/Portfolio.js';
 import Resume from '../models/Resume.js';
@@ -151,6 +153,8 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
         skillGaps: SkillGap,
         quizSessions: QuizSession,
         quizResults: QuizResult,
+        practiceResults: PracticeResult,
+        interviewResults: InterviewResult,
         progressLogs: ProgressLog,
         portfolios: Portfolio,
         resumes: Resume,
