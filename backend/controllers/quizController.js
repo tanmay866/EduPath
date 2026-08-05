@@ -831,12 +831,21 @@ export const getQuizStats = async (req, res) => {
 
     const topicPerformance = await QuizResult.aggregate([
       { $match: { userId } },
+      // Oldest first so $first/$last are the earliest and most recent attempt.
+      // Every attempt is already on record here, so improvement is derived
+      // rather than stored — a second copy of these scores could disagree
+      // with the results they came from.
+      { $sort: { createdAt: 1 } },
       {
         $group: {
           _id: '$topicId',
           quizCount: { $sum: 1 },
           averageScore: { $avg: '$percentage' },
           bestScore: { $max: '$percentage' },
+          firstScore: { $first: '$percentage' },
+          latestScore: { $last: '$percentage' },
+          firstAt: { $first: '$createdAt' },
+          latestAt: { $last: '$createdAt' },
         },
       },
       {
@@ -855,8 +864,14 @@ export const getQuizStats = async (req, res) => {
           quizCount: 1,
           averageScore: { $round: ['$averageScore', 2] },
           bestScore: { $round: ['$bestScore', 2] },
+          firstScore: { $round: ['$firstScore', 0] },
+          latestScore: { $round: ['$latestScore', 0] },
+          firstAt: 1,
+          latestAt: 1,
         },
       },
+      // Biggest movement first, so what changed leads.
+      { $sort: { quizCount: -1, latestAt: -1 } },
     ]);
 
     res.json({

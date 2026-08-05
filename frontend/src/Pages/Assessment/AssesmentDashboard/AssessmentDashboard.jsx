@@ -6,6 +6,7 @@ import {
   OrdinalRow, ListItem, Button, ProgressBar, MicroLabel, Badge, Loading, Empty, type,
 } from '../../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../../design/nav';
+import TopicProgress from './TopicProgress';
 
 /**
  * Spec §7 Overview.
@@ -93,7 +94,8 @@ const AssessmentDashboard = () => {
       <StatStrip items={statItems} />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
-        {/* Left — recent activity as ordinal rows */}
+        {/* Left — recent activity as ordinal rows, then movement per topic */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22, minWidth: 0 }}>
         <Card>
           <CardHeader label="Recent attempts" />
           {recent.length === 0 ? (
@@ -143,6 +145,9 @@ const AssessmentDashboard = () => {
             </CardFooterNote>
           )}
         </Card>
+
+        <TopicProgress topics={stats?.topicPerformance || []} />
+        </div>
 
         {/* Right — next action, then one ink panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
