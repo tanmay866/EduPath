@@ -1,4 +1,6 @@
-const API_URL = '' + import.meta.env.VITE_API_URL + '/api/resume';
+import { API_BASE } from '../../config';
+
+const API_URL = `${API_BASE}/resume`;
 
 export const uploadResume = async (resumeData, onProgress) => {
   return new Promise((resolve, reject) => {

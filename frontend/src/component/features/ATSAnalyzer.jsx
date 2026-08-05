@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import {
   LearnerShell, Card, CardHeader, CardFooterNote, Button, Field, Empty,
@@ -98,7 +99,7 @@ const ATSAnalyzer = () => {
       formData.append('resume', resumeFile);
       formData.append('jobDescription', jobDescription);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ats/analyze`, {
+      const response = await fetch(`${API_BASE}/ats/analyze`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -137,7 +138,7 @@ const ATSAnalyzer = () => {
       const token = sessionStorage.getItem('token');
       if (!token) throw new Error('Please login to download reports');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ats/generate-report`, {
+      const response = await fetch(`${API_BASE}/ats/generate-report`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ analysisData: results }),

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
+import { API_URL } from '../config';
 import {
   TemplateEditorial,
   Template1, Template2, Template3, Template4, Template5,
@@ -21,7 +22,7 @@ const TEMPLATES = {
   template10: Template10,
 };
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/+$/, '');
+const API_BASE = API_URL;
 
 export default function PublicPortfolio() {
   const { portfolioId, username } = useParams();

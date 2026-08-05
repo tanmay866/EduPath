@@ -1,12 +1,10 @@
 import axios from "axios";
+import { API_BASE } from "../../config";
 
-const apiHostname = window.location.hostname === '0.0.0.0'
-  ? 'localhost'
-  : window.location.hostname;
-
-const API_BASE_URL = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, '')}/api`
-  : `${window.location.protocol}//${apiHostname}:4000/api`;
+// Resolved centrally in config.js so every caller agrees on the host and a
+// missing VITE_API_URL is reported once rather than silently producing
+// "undefined/api/..." in a production build.
+const API_BASE_URL = API_BASE;
 
 const API = axios.create({
   baseURL: API_BASE_URL,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE as API_ROOT } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import {
   TemplateEditorial,
@@ -38,7 +39,7 @@ const TEMPLATE_META = [
   { key: 'template10', name: 'Indigo Violet', desc: 'Creative, tech-leaning' }
 ];
 
-const API_BASE = '' + import.meta.env.VITE_API_URL + '/api/portfolio';
+const API_BASE = `${API_ROOT}/portfolio`;
 
 function PortfolioGenerator() {
   const navigate = useNavigate();

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import {
   LearnerShell, Card, CardHeader, CardFooterNote, Button, Field, Input,
@@ -719,7 +720,7 @@ function ResumeBuilder() {
     // Conversion runs on the backend: the FreeConvert API key used to be inlined
     // here, which shipped it to every browser that loaded this bundle.
     const token = sessionStorage.getItem('token');
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/resume-generator/convert-to-pdf`, {
+    const response = await fetch(`${API_BASE}/resume-generator/convert-to-pdf`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -839,7 +840,7 @@ function ResumeBuilder() {
 
       // Always generate DOCX from backend first
       setMessage('Generating resume...');
-      const response = await fetch('' + import.meta.env.VITE_API_URL + '/api/resume-generator/generate', {
+      const response = await fetch(`${API_BASE}/resume-generator/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

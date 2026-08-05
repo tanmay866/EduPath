@@ -4,9 +4,10 @@ import {
   ConfigureStage, InstructionsStage, QuizStage, ResultStage, LoadingStage,
 } from './components/QuizStages';
 import { savePracticeResult } from '../Services/practiceResultService';
+import { API_URL } from '../../config';
 
 
-const API_URL = import.meta.env.VITE_API_URL || '' + import.meta.env.VITE_API_URL + '';
+
 
 /**
  * CS fundamentals — questions served by the EduPath API, run through the

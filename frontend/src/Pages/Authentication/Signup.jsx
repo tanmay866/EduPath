@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { API_BASE } from '../../config';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
 import axios from 'axios';
@@ -30,7 +31,7 @@ const Signup = () => {
 
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signup`, values);
+        const response = await axios.post(`${API_BASE}/auth/signup`, values);
 
         // The account is not usable until the emailed code is entered, so send
         // the user straight to that step rather than to sign-in.

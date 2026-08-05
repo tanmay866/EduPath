@@ -30,20 +30,32 @@ class SkillAssessmentService:
     def _initialize_llm(self):
         """Initialize HuggingFace LLM"""
         try:
+            # temperature and top_p are constructor fields, not model_kwargs.
+            # Passing them inside model_kwargs is rejected outright, so this
+            # raised on every boot and left self.llm as None — meaning the
+            # "AI-powered" assessment silently ran its rule-based fallback for
+            # every single request, while printing one warning at startup that
+            # was easy to read as harmless.
             self.llm = HuggingFaceEndpoint(
                 repo_id=self.settings.LLM_MODEL,
                 huggingfacehub_api_token=self.settings.HUGGINGFACE_API_KEY,
                 task="text2text-generation",
-                model_kwargs={
-                    "temperature": self.settings.LLM_TEMPERATURE,
-                    "max_length": 512,
-                    "top_p": 0.9
-                }
+                temperature=self.settings.LLM_TEMPERATURE,
+                top_p=0.9,
+                max_new_tokens=512,
             )
+            # Constructing the client proves nothing — langchain-huggingface
+            # 0.1.x calls InferenceClient.post, which huggingface_hub removed
+            # in 0.30, so the object builds and then every call raises. Without
+            # this probe the failure moved from one warning at startup to a
+            # silent exception on each request, still answered from the
+            # rule-based fallback, with the logs claiming the LLM was loaded.
+            self.llm.invoke("ping")
             print(f"✅ LLM initialized: {self.settings.LLM_MODEL}")
         except Exception as e:
-            print(f"⚠️  LLM initialization failed: {e}")
-            print("🔄 Continuing with rule-based analysis...")
+            print(f"⚠️  LLM unavailable ({type(e).__name__}: {e})")
+            print("🔄 Using rule-based analysis. Recommendations are still produced,")
+            print("   but they are templated rather than generated.")
             self.llm = None
 
     async def assess_skill(

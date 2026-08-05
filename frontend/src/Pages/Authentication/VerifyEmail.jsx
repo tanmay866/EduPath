@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_URL } from '../../config';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -6,7 +7,7 @@ import { getApiErrorMessage } from '../../utils/passwordPolicy';
 import { storeSession } from '../../utils/session';
 import { AuthShell, Field, Input, Button, InlineMessage, MicroLabel, type } from '../../design';
 
-const API_URL = import.meta.env.VITE_API_URL;
+
 const RESEND_COOLDOWN_SECONDS = 60;
 
 /**

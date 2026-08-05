@@ -6,7 +6,9 @@
  * that merely has role='admin' in sessionStorage gets the screens but not the
  * data.
  */
-const API_BASE = `${import.meta.env.VITE_API_URL}/api/admin`;
+import { API_BASE as API_ROOT } from '../../config';
+
+const API_BASE = `${API_ROOT}/admin`;
 
 const request = async (path, options = {}) => {
   const token = sessionStorage.getItem('token');

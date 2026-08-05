@@ -5,6 +5,7 @@ import {
 } from '../../design';
 import { saveInterviewResult } from '../Services/interviewResultService';
 import { useCareerRoles } from '../../hooks/useCareerRoles';
+import { API_URL } from '../../config';
 
 /**
  * AI mock interview — setup, then one question at a time with feedback after
@@ -43,7 +44,7 @@ import {
   stopSpeaking as stopVoice
 } from '../../utils/voiceService';
 
-const API_URL = import.meta.env.VITE_API_URL || '' + import.meta.env.VITE_API_URL + '';
+
 
 const AIMockInterview = () => {
   const navigate = useNavigate();

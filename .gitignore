@@ -1,2 +1,24 @@
 .vscode
 .DS_Store
+
+# Dependencies and build output — never committed
+node_modules/
+dist/
+build/
+
+# Python virtualenv and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets. Each service also ignores its own, but a repo-wide rule means a
+# new service cannot leak one by forgetting to add its .gitignore first —
+# which is how credentials reached this history before.
+.env
+.env.*
+!.env.example
+
+# Editor and OS noise
+*.swp
+*.orig
+*.backup

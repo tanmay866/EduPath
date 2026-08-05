@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE } from '../../config';
 import {
   EditorialShell, Button, Field, FieldGroup, Input, InlineMessage, MicroLabel, type,
 } from '../../design';
@@ -66,7 +67,7 @@ const Contact = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/send`, {
+      const response = await fetch(`${API_BASE}/contact/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
