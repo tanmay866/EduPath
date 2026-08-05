@@ -658,28 +658,32 @@ const gapSeverity = (score) => {
 const REQUIRED_SCORE = 70;
 
 /**
- * Upserts the user's single running SkillGap document: sets/replaces the
- * score and gap entry for each canonical skill this topic covers, then
- * recomputes the overall strength_score from everything on record.
+ * Upserts the user's running SkillGap document for their current target role:
+ * sets/replaces the score and gap entry for each canonical skill this topic
+ * covers, then recomputes strength_score from everything on record.
+ *
+ * Scoped per role because the skill names differ between curricula — mixing
+ * a MERN score into an AI/ML document would leave entries the roadmap
+ * generator can never match.
  */
 const syncSkillGap = async (userId, canonicalSkills, score) => {
   const roundedScore = Math.round(score);
   const severity = gapSeverity(roundedScore);
 
-  let skillGap = await SkillGap.findOne({ user_id: userId }).sort({ createdAt: -1 });
+  const user = await User.findById(userId).select('target_role');
+  const targetRole = user?.target_role || 'Unspecified';
+
+  let skillGap = await SkillGap.findOne({ user_id: userId, target_role: targetRole })
+    .sort({ createdAt: -1 });
   if (!skillGap) {
-    const user = await User.findById(userId).select('target_role');
     skillGap = new SkillGap({
       user_id: userId,
-      target_role: user?.target_role || 'Unspecified',
-      skill_scores: new Map(),
+      target_role: targetRole,
       skill_gaps: [],
     });
   }
 
   for (const skill of canonicalSkills) {
-    skillGap.skill_scores.set(skill, roundedScore);
-
     const entry = {
       skill,
       gap_severity: severity,
@@ -694,7 +698,7 @@ const syncSkillGap = async (userId, canonicalSkills, score) => {
     }
   }
 
-  const scores = [...skillGap.skill_scores.values()];
+  const scores = skillGap.skill_gaps.map((g) => g.current_score ?? 0);
   skillGap.strength_score = scores.length
     ? Math.round(scores.reduce((sum, s) => sum + s, 0) / scores.length)
     : 0;

@@ -8,10 +8,10 @@ const SkillGapSchema = new mongoose.Schema(
             required: true,
         },
         target_role: { type: String, required: true },
-        skill_scores: {
-            type: Map,
-            of: Number, // skill_name -> score (0-100)
-        },
+        // Scores live only on skill_gaps below. There used to be a parallel
+        // `skill_scores` Map keyed by skill name, but Mongoose maps reject keys
+        // containing '.', so "Node.js Basics" and "Express.js" — both real
+        // template skills — threw on write and the result was silently dropped.
         skill_gaps: [
             {
                 skill: String,
@@ -33,7 +33,11 @@ const SkillGapSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-SkillGapSchema.index({ user_id: 1 });
+// Scores are only meaningful next to the role they were measured against —
+// "React Basics" means nothing to the AI/ML curriculum — so a user keeps one
+// document per target role rather than one overall. Switching roles therefore
+// starts clean, and switching back restores what was already assessed.
+SkillGapSchema.index({ user_id: 1, target_role: 1 });
 
 const SkillGap = mongoose.model("SkillGap", SkillGapSchema);
 

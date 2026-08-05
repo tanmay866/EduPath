@@ -101,20 +101,26 @@ export const generateRoadmap = async (req, res) => {
             await user.save({ validateBeforeSave: false });
         }
 
-        // 2. Fetch latest skill gap analysis
-        const skillGap = await SkillGap.findOne({ user_id: userId }).sort({
+        // 2. Fetch the skill gap analysis for this role. Scores earned against
+        // a different curriculum use different skill names, so they would
+        // never match this role's template — reading them would be noise.
+        const skillGap = await SkillGap.findOne({
+            user_id: userId,
+            target_role: roadmapProfile.targetRole,
+        }).sort({
             createdAt: -1,
         });
 
         if (!skillGap) {
             console.info(
-                `No skill gap analysis found for user='${userId}'. Generating full roadmap from profile only.`
+                `No skill gap analysis found for user='${userId}' role='${roadmapProfile.targetRole}'. Generating full roadmap from profile only.`
             );
         }
 
-        // 3. Mark old roadmaps as regenerated
+        // 3. Supersede the previous roadmap for this role only, so a plan for
+        // another track the user may return to is left alone.
         await Roadmap.updateMany(
-            { user_id: userId, status: "active" },
+            { user_id: userId, status: "active", target_role: roadmapProfile.targetRole },
             { status: "regenerated" }
         );
 
@@ -126,9 +132,12 @@ export const generateRoadmap = async (req, res) => {
             hours_per_week: roadmapProfile.hoursPerWeek,
             learning_style: roadmapProfile.learningStyle,
             skill_gaps: skillGap?.skill_gaps || [],
-            skill_scores: skillGap?.skill_scores
-                ? Object.fromEntries(skillGap.skill_scores)
-                : {},
+            // Derived rather than stored: one score per skill, kept on
+            // skill_gaps, reshaped into the name->score map the AI service
+            // expects. Skill names legitimately contain dots.
+            skill_scores: Object.fromEntries(
+                (skillGap?.skill_gaps || []).map((gap) => [gap.skill, gap.current_score])
+            ),
             current_skills: normalizeCurrentSkillsForAI(user.current_skills),
         };
 
@@ -200,10 +209,17 @@ export const generateRoadmap = async (req, res) => {
 // ─────────────────────────────────────────────
 export const getRoadmap = async (req, res) => {
     try {
-        const roadmap = await Roadmap.findOne({
-            user_id: req.user._id,
-            status: "active",
-        }).sort({ createdAt: -1 });
+        // Show the plan for the role the user is currently working towards.
+        // Changing role therefore reveals that role's roadmap rather than a
+        // stale one for a track they have left, and changing back brings the
+        // original plan straight back instead of forcing a regenerate.
+        const user = await User.findById(req.user._id).select("target_role");
+        const query = { user_id: req.user._id, status: "active" };
+        if (user?.target_role) {
+            query.target_role = user.target_role;
+        }
+
+        const roadmap = await Roadmap.findOne(query).sort({ createdAt: -1 });
 
         if (!roadmap) {
             return res.status(404).json({
