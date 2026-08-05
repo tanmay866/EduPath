@@ -163,7 +163,11 @@ const ManageUsers = () => {
             )}
 
             <CardFooterNote>
-              {`Showing ${filteredUsers.length} of ${users.length} user${users.length === 1 ? '' : 's'}.`}
+              {/* The endpoint returns the 500 newest accounts, so this counts
+                  what was loaded rather than every user on the install — a
+                  flat total here would disagree with the overview once there
+                  are more than that. */}
+              {`Showing ${filteredUsers.length} of the ${users.length} newest account${users.length === 1 ? '' : 's'}.`}
             </CardFooterNote>
           </>
         )}

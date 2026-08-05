@@ -10,7 +10,7 @@ import { useAdminData } from '../useAdminData';
 /**
  * Spec §7 Admin · AI analytics.
  *
- * A four-cell stat strip, then `1fr 1fr`: a four-bar normalised card on the
+ * A five-cell stat strip, then `1fr 1fr`: a four-bar normalised card on the
  * left; on the right, stacked, a share chart and an ink panel.
  *
  * This reports what the AI produced, which is countable, rather than how many

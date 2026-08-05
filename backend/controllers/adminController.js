@@ -44,6 +44,7 @@ export const getOverview = async (req, res) => {
       skillUsage, practiceUsage, interviewUsage,
       difficultySplit, practiceDifficultySplit,
       recent,
+      activeLearners, activeLearnersPrev30,
     ] = await Promise.all([
       User.countDocuments({}),
       User.countDocuments({ createdAt: { $gte: last30 } }),
@@ -88,6 +89,9 @@ export const getOverview = async (req, res) => {
       ]),
 
       getRecentAttempts(8),
+
+      countActiveLearners(last30),
+      countActiveLearners(prev30, last30),
     ]);
 
     // Topic ids mean nothing on screen, so they are resolved to names here.
@@ -129,7 +133,12 @@ export const getOverview = async (req, res) => {
             ),
           },
           { label: 'Roadmaps', value: roadmaps, delta: delta(roadmapsLast30, roadmapsPrev30) },
-          { label: 'Active learners', value: await User.countDocuments({ isActive: true }), delta: null },
+          // Learners who actually did something, not accounts an admin has
+          // not blocked. This counted isActive, which is the moderation flag
+          // the block button flips — true for everyone else, so the cell
+          // silently repeated the "Users" figure beside it under a label that
+          // reads as engagement.
+          { label: 'Active learners', value: activeLearners, delta: delta(activeLearners, activeLearnersPrev30) },
         ],
         skillUsage: combinedUsage.slice(0, 6),
         difficultySplit: combinedDifficulty,
@@ -140,6 +149,23 @@ export const getOverview = async (req, res) => {
     console.error('Admin overview error:', error);
     return res.status(500).json({ success: false, message: 'Failed to load overview' });
   }
+};
+
+/**
+ * Distinct users with at least one attempt of any kind in a window.
+ *
+ * Counted across the three result collections and de-duplicated here rather
+ * than summed — one person who took a quiz, an aptitude test and an interview
+ * is one active learner, not three.
+ */
+const countActiveLearners = async (since, until) => {
+  const range = until ? { $gte: since, $lt: until } : { $gte: since };
+  const idSets = await Promise.all(
+    [QuizResult, PracticeResult, InterviewResult].map((Model) =>
+      Model.distinct('userId', { createdAt: range })
+    )
+  );
+  return new Set(idSets.flat().filter(Boolean).map(String)).size;
 };
 
 const PRACTICE_TYPE_LABELS = { aptitude: 'Aptitude', 'cs-fundamentals': 'CS Fundamentals' };
@@ -370,7 +396,7 @@ export const getAnalytics = async (req, res) => {
 
     const [
       quizzes, quizzesLast30, quizzesPrev30, quizzesToday,
-      roadmaps, roadmapsLast30, roadmapsPrev30,
+      roadmaps, roadmapsLast30, roadmapsPrev30, roadmapsToday,
       interviews, interviewsLast30, interviewsPrev30, interviewsToday,
       requestedRoles, difficultySplit,
     ] = await Promise.all([
@@ -382,6 +408,7 @@ export const getAnalytics = async (req, res) => {
       Roadmap.countDocuments({}),
       Roadmap.countDocuments({ createdAt: { $gte: last30 } }),
       Roadmap.countDocuments({ createdAt: { $gte: prev30, $lt: last30 } }),
+      Roadmap.countDocuments({ createdAt: { $gte: today } }),
 
       // Every question and its evaluation is AI-generated, same as a quiz or
       // a roadmap, so mock interviews belong in this count too.
@@ -415,7 +442,10 @@ export const getAnalytics = async (req, res) => {
               quizzesPrev30 + roadmapsPrev30 + interviewsPrev30
             ),
           },
-          { label: 'Today', value: quizzesToday + interviewsToday, delta: null },
+          // The same three things "Generations" counts. Roadmaps were left out
+          // of the daily figure, so a day spent generating nothing but
+          // roadmaps reported zero next to a total that included them.
+          { label: 'Today', value: quizzesToday + roadmapsToday + interviewsToday, delta: null },
           { label: 'Quizzes made', value: quizzes, delta: delta(quizzesLast30, quizzesPrev30) },
           { label: 'Roadmaps made', value: roadmaps, delta: delta(roadmapsLast30, roadmapsPrev30) },
           { label: 'Interviews made', value: interviews, delta: delta(interviewsLast30, interviewsPrev30) },
