@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import StartLink from '../../component/StartLink';
 import { Card, Button, MicroLabel, StatusBox, LabelledBar, type } from '../../design';
 import { TRACKS } from './tracks';
 
@@ -470,9 +471,9 @@ const Home = () => (
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
-        <Link to="/signup" style={{ textDecoration: 'none' }}>
+        <StartLink>
           <Button style={{ padding: '16px 30px', fontSize: 14.5 }}>Begin assessment</Button>
-        </Link>
+        </StartLink>
         <Link to="/services" style={{ textDecoration: 'none' }}>
           <Button variant="secondary" style={{ padding: '15px 26px', fontSize: 14.5 }}>Browse tracks</Button>
         </Link>

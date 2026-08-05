@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import StartLink from '../../component/StartLink';
 import { EditorialShell, StatStrip, Button, MicroLabel, type } from '../../design';
 
 /**
@@ -93,9 +94,9 @@ const About = () => (
       </Para>
 
       <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-        <Link to="/signup" style={{ textDecoration: 'none' }}>
+        <StartLink>
           <Button>Start with the assessment</Button>
-        </Link>
+        </StartLink>
         <Link to="/contact" style={{ textDecoration: 'none' }}>
           <Button variant="secondary">Get in touch</Button>
         </Link>

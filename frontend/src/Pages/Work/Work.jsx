@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import StartLink from '../../component/StartLink';
 import { EditorialShell, Button, MicroLabel, type } from '../../design';
 import IndexRows from '../../component/marketing/IndexRows';
 
@@ -67,9 +68,9 @@ const Work = () => (
         screen.
       </p>
       <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
-        <Link to="/signup" style={{ textDecoration: 'none' }}>
+        <StartLink>
           <Button>Start now</Button>
-        </Link>
+        </StartLink>
         <Link to="/faq" style={{ textDecoration: 'none' }}>
           <Button variant="secondary">Read the FAQ</Button>
         </Link>

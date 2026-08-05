@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import StartLink from '../../component/StartLink';
 import { EditorialShell, Button, MicroLabel, type } from '../../design';
 import IndexRows from '../../component/marketing/IndexRows';
 import { TRACKS } from '../Home/tracks';
@@ -43,9 +44,9 @@ const Services = () => (
         the two tracks you are nearest today.
       </p>
       <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
-        <Link to="/signup" style={{ textDecoration: 'none' }}>
+        <StartLink>
           <Button>Take the assessment</Button>
-        </Link>
+        </StartLink>
         <Link to="/work" style={{ textDecoration: 'none' }}>
           <Button variant="secondary">How it works</Button>
         </Link>
