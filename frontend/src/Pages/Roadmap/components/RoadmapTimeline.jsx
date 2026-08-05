@@ -3,6 +3,7 @@ import {
   Card, CardHeader, CardFooterNote, Button, MicroLabel, Badge, StatusBox, LabelledBar, Loading, Empty,
 } from '../../../design';
 import WeeklyPlan from './WeeklyPlan';
+import InterviewReadiness from './InterviewReadiness';
 
 /**
  * Spec §7 Roadmap.
@@ -64,7 +65,7 @@ const STATUS_BORDER = {
   future: 'transparent',
 };
 
-const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted, onRegenerate }) => {
+const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted, onRegenerate, latestInterview, loadingInterview, targetRole }) => {
   const skills = roadmapData?.skills || [];
   const [expanded, setExpanded] = useState('');
 
@@ -334,6 +335,8 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
             )}
           </div>
         </Card>
+
+        <InterviewReadiness latest={latestInterview} role={targetRole} loading={loadingInterview} />
 
         <Card>
           <CardHeader label="Gap report" />

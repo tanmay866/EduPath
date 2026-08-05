@@ -9,6 +9,7 @@ import {
   updateSkillStatus,
 } from '../Services/roadmapService';
 import { getProfile } from '../Services/profileService';
+import { getInterviewHistory } from '../Services/interviewResultService';
 import HistorySidebar from './components/HistorySidebar';
 import RoadmapForm    from './components/RoadmapForm';
 import RoadmapTimeline from './components/RoadmapTimeline';
@@ -38,6 +39,9 @@ const RoadmapPage = () => {
   // Shown instead of a form: these values live on the profile now.
   const [profile,          setProfile]          = useState(null);
   const [loadingProfile,   setLoadingProfile]   = useState(true);
+  // The interview score for this role, shown as a readiness signal beside the plan.
+  const [latestInterview,  setLatestInterview]  = useState(null);
+  const [loadingInterview, setLoadingInterview] = useState(true);
 
   // Load whatever the learner already has. Previously this only ran when
   // arriving from "View History", so a returning user with a saved roadmap
@@ -58,9 +62,21 @@ const RoadmapPage = () => {
   // reflected here without signing in again.
   useEffect(() => {
     getProfile()
-      .then((response) => setProfile(response?.data || null))
+      .then((response) => {
+        const p = response?.data || null;
+        setProfile(p);
+
+        // Scoped to the role the plan is for — a score earned while targeting
+        // another track says nothing about readiness for this one.
+        return getInterviewHistory()
+          .then((res) => {
+            const all = res?.data?.data?.results || [];
+            setLatestInterview(all.find((r) => r.role === p?.target_role) || null);
+          })
+          .catch((err) => console.error('Failed to load interview history:', err));
+      })
       .catch((err) => console.error('Failed to load profile for roadmap:', err))
-      .finally(() => setLoadingProfile(false));
+      .finally(() => { setLoadingProfile(false); setLoadingInterview(false); });
   }, []);
 
   const summary = useMemo(() => {
@@ -204,6 +220,9 @@ const RoadmapPage = () => {
           updatingSkill={updatingSkill}
           onMarkCompleted={handleMarkCompleted}
           onRegenerate={handleGenerate}
+          latestInterview={latestInterview}
+          loadingInterview={loadingInterview}
+          targetRole={profile?.target_role}
         />
       )}
     </LearnerShell>
