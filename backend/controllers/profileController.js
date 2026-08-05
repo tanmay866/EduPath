@@ -114,6 +114,7 @@ export const getProfile = async (req, res) => {
         learning_style: user.learning_style || '',
         current_skills: user.current_skills || [],
         profile_complete: Boolean(user.profile_complete),
+        tour_seen: Boolean(user.tour_seen_at),
         profilePicture: user.profile?.avatar || '',
         loginId: user.loginId || ''
       }
@@ -250,6 +251,7 @@ export const updateProfile = async (req, res) => {
         learning_style: updatedUser.learning_style || '',
         current_skills: updatedUser.current_skills || [],
         profile_complete: Boolean(updatedUser.profile_complete),
+        tour_seen: Boolean(updatedUser.tour_seen_at),
         profilePicture: '', // Not stored in MongoDB, only in Cloudinary
         loginId: updatedUser.loginId
       }
@@ -458,6 +460,32 @@ export const updateSkills = async (req, res) => {
     res.status(200).json({ success: true, data: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Record that the first-run tour has been dismissed
+// @route   PUT /api/profile/tour-seen
+// @access  Private
+//
+// Deliberately its own route rather than a field on updateProfile: dismissing
+// a tour should not run the whole profile validation path, and it must still
+// succeed for an account part-way through setup.
+export const markTourSeen = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { tour_seen_at: new Date() } },
+      { new: true }
+    ).select('tour_seen_at');
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, data: { tour_seen: true } });
+  } catch (err) {
+    console.error('Mark tour seen error:', err);
+    res.status(500).json({ success: false, message: 'Failed to record tour state' });
   }
 };
 

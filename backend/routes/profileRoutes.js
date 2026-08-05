@@ -4,6 +4,7 @@ import {
   getProfile,
   updateProfile,
   updateSettings,
+  markTourSeen,
   uploadProfilePicture,
   deleteProfilePicture,
   updateBasic,
@@ -21,6 +22,7 @@ router.put('/basic', updateBasic);
 router.put('/skills', updateSkills);
 router.put('/availability', updateAvailability);
 router.put('/settings', updateSettings);
+router.put('/tour-seen', markTourSeen);
 router.post('/upload-picture', uploadProfilePicture);
 router.delete('/delete-picture', deleteProfilePicture);
 

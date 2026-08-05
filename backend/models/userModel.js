@@ -93,6 +93,13 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // When the first-run tour was dismissed. Stored per account rather than in
+    // browser storage so it follows the person to another device and is not
+    // lost by clearing site data. Null means they have not seen it.
+    tour_seen_at: {
+      type: Date,
+      default: null,
+    },
     profile: {
       phone: {
         type: String,

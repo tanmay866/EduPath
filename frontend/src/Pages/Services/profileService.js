@@ -89,3 +89,13 @@ export const resetPassword = async (token, passwordData) => {
     throw error.response?.data || error;
   }
 };
+
+// Record that the first-run tour has been dismissed
+export const markTourSeen = async () => {
+  try {
+    const response = await API.put('/profile/tour-seen');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

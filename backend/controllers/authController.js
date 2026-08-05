@@ -242,6 +242,7 @@ export const verifyOtp = asyncHandler(async (req, res, next) => {
             // role-driven screens open without asking for the role again.
             target_role: user.target_role || '',
             profile_complete: Boolean(user.profile_complete),
+            tour_seen: Boolean(user.tour_seen_at),
         },
     });
 
@@ -372,6 +373,7 @@ export const login = asyncHandler(async (req, res, next) => {
             skills: user.profile?.skills || '',
             target_role: user.target_role || '',
             profile_complete: Boolean(user.profile_complete),
+            tour_seen: Boolean(user.tour_seen_at),
         },
     });
 });
@@ -403,6 +405,7 @@ export const getMe = asyncHandler(async (req, res, next) => {
             learning_style: user.learning_style || '',
             current_skills: user.current_skills || [],
             profile_complete: Boolean(user.profile_complete),
+            tour_seen: Boolean(user.tour_seen_at),
         },
     });
 });

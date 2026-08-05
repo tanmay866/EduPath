@@ -7,6 +7,8 @@ import {
   LearnerShell, Card, RuledGrid, RuledCell, Button, Badge, MicroLabel, type,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
+import OnboardingTour from '../../component/OnboardingTour';
+import { markTourSeen } from '../Services/profileService';
 
 /**
  * Spec §7 Assessments.
@@ -24,6 +26,20 @@ const AssessmentHub = () => {
     csFundamentals: false,
     mockInterview: false,
   });
+
+  // Shown once per account, not once per browser — the flag lives on the user.
+  const [showTour, setShowTour] = useState(
+    () => Boolean(sessionStorage.getItem('token')) && sessionStorage.getItem('tourSeen') !== '1'
+  );
+
+  const dismissTour = () => {
+    setShowTour(false);
+    sessionStorage.setItem('tourSeen', '1');
+    // Closing must not depend on the network. If this fails the tour simply
+    // reappears next session, which is far better than an overlay the user
+    // cannot get out of.
+    markTourSeen().catch((error) => console.error('Could not record tour state:', error));
+  };
 
   useEffect(() => {
     const checkCompletedAssessments = async () => {
@@ -125,6 +141,8 @@ const AssessmentHub = () => {
       initials={sessionInitials()}
       footLabel={sessionLoginId()}
     >
+      <OnboardingTour open={showTour} onDismiss={dismissTour} />
+
       {/* Completion card: status left, ticks and the primary right. */}
       <Card style={{ padding: '22px 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
         <div>
@@ -132,7 +150,23 @@ const AssessmentHub = () => {
             {takenCount} of {assessments.length} assessments complete
           </div>
           <p style={{ fontSize: 14.5, color: 'var(--color-text-3)', margin: '6px 0 0' }}>
-            Each one you finish narrows what the roadmap recommends.
+            Each one you finish narrows what the roadmap recommends.{' '}
+            {/* Recoverable rather than gone for good once dismissed. */}
+            <button
+              type="button"
+              onClick={() => setShowTour(true)}
+              style={{
+                font: 'inherit',
+                color: 'var(--color-text-2)',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                textDecoration: 'underline',
+                cursor: 'pointer',
+              }}
+            >
+              How this works
+            </button>
           </p>
         </div>
 

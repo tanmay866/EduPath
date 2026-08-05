@@ -34,6 +34,9 @@ export const storeSession = (token, user = {}) => {
   // The career track role-driven screens open with, so none of them has to
   // ask for it again.
   sessionStorage.setItem('targetRole', user.target_role || '');
+  // Whether the first-run tour has already been dismissed. The account is the
+  // source of truth; this is just a copy so the hub can decide on first paint.
+  sessionStorage.setItem('tourSeen', user.tour_seen ? '1' : '0');
 
   // Profile pictures live only in Cloudinary; the URL is derived from the id.
   // An existing value is kept so a freshly uploaded picture is not overwritten
