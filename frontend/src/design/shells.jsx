@@ -125,6 +125,15 @@ const NavItem = ({ to, children, dark = false, end = false }) => (
   </NavLink>
 );
 
+/**
+ * Only the admin shell renders this now — the learner side signs out from
+ * Settings, behind a confirmation.
+ *
+ * It has to stay here. When the role is admin, App mounts a route tree whose
+ * catch-all matches every path, so /settings resolves to the dashboard and the
+ * learner sign-out is unreachable; /admin/settings is platform configuration
+ * and has none. This button is an administrator's only way out.
+ */
 const SignOut = ({ dark = false }) => (
   <button
     type="button"
@@ -191,12 +200,16 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
       </nav>
 
       {/* The label names who is signed in rather than repeating a nav section
-          heading, which would print "Account" twice in the same column. */}
+          heading, which would print "Account" twice in the same column.
+
+          No sign out here: Settings carries it, behind a confirmation, and it
+          is one click away under Account in the nav above. A second copy in
+          the corner of every learner page was a destructive action sitting
+          permanently under the cursor with nothing to confirm it. */}
       <div style={{ marginTop: 'auto', borderTop: '1px solid var(--color-line)', padding: 24 }}>
-        <MicroLabel size={10.5} tracking="0.14em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10, wordBreak: 'break-all' }}>
+        <MicroLabel size={10.5} tracking="0.14em" color="var(--color-text-4)" style={{ display: 'block', wordBreak: 'break-all' }}>
           {footLabel || 'Signed in'}
         </MicroLabel>
-        <SignOut />
       </div>
     </aside>
 
