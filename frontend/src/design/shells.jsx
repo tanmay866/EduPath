@@ -1,10 +1,26 @@
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Logo, Wordmark, MicroLabel, Avatar } from './primitives';
 
 /**
  * Spec §6 — Auth, learner, admin and editorial shells, plus the footer.
  */
+
+/**
+ * Fades the content column in when the route changes.
+ *
+ * Keyed on the path because a CSS animation only replays when the element is
+ * recreated; without the key the wrapper survives navigation and nothing
+ * happens. It sits inside the shells rather than around the routes so the
+ * sidebar and header never repaint — they do not change between pages, and
+ * animating them would read as a flicker.
+ *
+ * Reduced motion is handled globally in index.css.
+ */
+const PageFade = ({ children }) => {
+  const { pathname } = useLocation();
+  return <div key={pathname} className="page-enter">{children}</div>;
+};
 
 /* ── Auth shell ───────────────────────────────────────────────────────────
    1fr 1fr at 100vh. Left ink panel: logo top, a Newsreader 44px pull quote
@@ -226,9 +242,11 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
           shrinks to fit its container by default, which was squeezing every
           card down to nothing instead of letting main grow a scrollbar. */}
       <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
-        <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
-          {children}
-        </div>
+        <PageFade>
+          <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
+            {children}
+          </div>
+        </PageFade>
       </main>
     </div>
   </div>
@@ -304,9 +322,11 @@ export const AdminShell = ({ items = [], title, chip, action, children }) => (
           shrinks to fit its container by default, which was squeezing every
           card down to nothing instead of letting main grow a scrollbar. */}
       <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
-        <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
-          {children}
-        </div>
+        <PageFade>
+          <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
+            {children}
+          </div>
+        </PageFade>
       </main>
     </div>
   </div>
