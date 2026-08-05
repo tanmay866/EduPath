@@ -51,7 +51,7 @@ const CareerRoadmap = () => {
         </MicroLabel>
 
         <h1 style={{ ...type.marketingHeading, margin: '0 0 20px', maxWidth: 720 }}>
-          A dated plan, not a reading list.
+          A schedule, not a reading list.
         </h1>
 
         <p style={{ ...type.prose, margin: '0 0 32px', maxWidth: 680 }}>

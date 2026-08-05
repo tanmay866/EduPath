@@ -245,8 +245,8 @@ const Home = () => (
         </h1>
 
         <p style={{ margin: '0 0 34px', fontSize: 17, lineHeight: 1.65, color: 'var(--color-text-2)', maxWidth: 460 }}>
-          One assessment produces a dated plan, a gap report and an ATS-scored resume. Everything
-          reschedules itself as you finish work.
+          One assessment produces a week-by-week plan and a gap report against the role you want.
+          Everything reschedules itself as you finish work.
         </p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -273,7 +273,7 @@ const Home = () => (
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '52px 44px 26px', gap: 32 }}>
         <SectionHeading>Six roles. Pick a destination.</SectionHeading>
         <span style={{ fontSize: 13.5, color: 'var(--color-text-2)', maxWidth: 380, textAlign: 'right' }}>
-          Not sure? The assessment tells you which two you are closest to today.
+          Not sure? Pick the closest — the tracks are broad, and you can change it in your profile later.
           {/* Weeks fall out of hours per week, so the pace is stated rather
               than a bare number being quoted as if it were fixed. Anything
               already known drops the count — the plan only schedules gaps. */}

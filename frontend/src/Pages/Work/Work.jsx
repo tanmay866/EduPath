@@ -36,7 +36,7 @@ const STAGES = [
   {
     name: 'Ship',
     description:
-      'A portfolio site, parsed from your resume and filled with the projects you finished, published at a URL you can put on an application. Deploy it to Vercel in one click if you want an address that outlives your EduPath account.',
+      'A portfolio site, parsed from a resume you upload or filled in by hand, published at a URL you can put on an application. Deploy it to Vercel in one click if you want an address that outlives your EduPath account.',
     stack: '11 TEMPLATES · ONE-CLICK DEPLOY · PUBLIC URL',
     to: '/portfolio-generator',
   },

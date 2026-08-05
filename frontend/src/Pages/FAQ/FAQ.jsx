@@ -16,7 +16,7 @@ const SECTIONS = [
     items: [
       {
         q: 'What is EduPath?',
-        a: 'A career development platform that assesses where your skills are today, turns that into a dated learning roadmap, then helps you produce a resume and portfolio from the work you finish along the way.',
+        a: 'A career development platform that assesses where your skills are today, turns that into a week-by-week learning roadmap, then helps you build a resume and a portfolio site when you are ready to apply.',
       },
       {
         q: 'Who is it for?',

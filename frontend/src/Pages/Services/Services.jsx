@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import StartLink from '../../component/StartLink';
 import { EditorialShell, Button, MicroLabel, type } from '../../design';
 import IndexRows from '../../component/marketing/IndexRows';
-import { TRACKS } from '../Home/tracks';
+import { TRACKS, TRACK_PACE_HOURS, TRACK_PACE_LEVEL } from '../Home/tracks';
 
 /**
  * Spec §7 Marketing · index page — the six role tracks.
@@ -19,13 +19,14 @@ const Services = () => (
       </MicroLabel>
 
       <h1 style={{ ...type.marketingHeading, margin: '0 0 20px', maxWidth: 720 }}>
-        Six destinations. One assessment tells you which two are closest.
+        Six destinations. The plan narrows to what you are missing.
       </h1>
 
       <p style={{ ...type.prose, margin: '0 0 40px', maxWidth: 680 }}>
         Every track is a dependency-sorted sequence of skills, not a reading list. The week counts
-        below assume the hours you tell us you have — give it fewer and the plan stretches rather
-        than falling apart.
+        below assume {TRACK_PACE_HOURS} h/week from {TRACK_PACE_LEVEL} — the same figures the
+        landing page quotes. Give it fewer hours and the plan stretches rather than falling apart,
+        and anything you already know is not scheduled at all.
       </p>
 
       <IndexRows
@@ -40,8 +41,9 @@ const Services = () => (
 
     <section style={{ padding: '56px 0 80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
       <p style={{ ...type.body, margin: 0, maxWidth: 460 }}>
-        Not sure which one? The assessment reads your answers rather than your ambitions, and names
-        the two tracks you are nearest today.
+        Not sure which one? Pick the closest — these are broad, and the assessment then narrows the
+        plan to what you personally are missing, which matters more than the label. You can change
+        your track in your profile at any time.
       </p>
       <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
         <StartLink>
