@@ -53,8 +53,10 @@ export const TOPIC_SKILL_MAP = {
  */
 const SKILL_TO_TOPIC = Object.entries(TOPIC_SKILL_MAP).reduce((acc, [topic, skills]) => {
   for (const skill of skills) {
-    // First topic wins: a skill listed under two topics is an authoring
-    // mistake, and picking arbitrarily would hide it.
+    // Some skills are genuinely covered by more than one topic: the template
+    // has a single "Cross-Platform Development (React Native/Flutter)" that
+    // both the React Native and Flutter topics assess. Either is a fair test
+    // of it, so the first listed wins rather than the skill being untestable.
     if (!acc[skill]) acc[skill] = topic;
   }
   return acc;
