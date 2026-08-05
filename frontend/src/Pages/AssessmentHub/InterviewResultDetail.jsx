@@ -5,9 +5,9 @@ import {
   Card, CardHeader, CardFooterNote, Button, MicroLabel, Loading, Empty, type,
 } from '../../design';
 
-const Page = ({ children }) => (
+const Page = ({ children, width = 760 }) => (
   <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
-    <div style={{ maxWidth: 760, margin: '0 auto' }}>{children}</div>
+    <div style={{ maxWidth: width, margin: '0 auto' }}>{children}</div>
   </div>
 );
 
@@ -83,98 +83,103 @@ const InterviewResultDetail = () => {
   }
 
   return (
-    <Page>
+    <Page width={1300}>
       <div style={{ marginBottom: 18 }}>
         <Button variant="quiet" onClick={() => navigate('/assessment-hub/mock-interview/results')}>Back to results</Button>
       </div>
 
-      <Card>
-        <CardHeader
-          label={data.role || 'Mock interview'}
-          right={
-            <MicroLabel size={11} tracking="0.1em" color={scoreTone(data.overallScore)}>
-              {String(data.recommendation || '').replace(/_/g, ' ')}
-            </MicroLabel>
-          }
-        />
+      {/* Summary beside the per-question breakdown rather than above it —
+          both are tall enough on their own that stacking them ran the page
+          a long way down with the sides sitting empty. */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 22, alignItems: 'start' }}>
+        <Card>
+          <CardHeader
+            label={data.role || 'Mock interview'}
+            right={
+              <MicroLabel size={11} tracking="0.1em" color={scoreTone(data.overallScore)}>
+                {String(data.recommendation || '').replace(/_/g, ' ')}
+              </MicroLabel>
+            }
+          />
 
-        <div style={{ padding: 34, display: 'flex', gap: 40, alignItems: 'flex-start' }}>
-          <div>
-            <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10 }}>
-              Overall
-            </MicroLabel>
-            <span style={{ ...type.heroMetric, fontSize: 68, color: scoreTone(data.overallScore), display: 'block', lineHeight: 1 }}>
-              {data.overallScore}
-            </span>
-          </div>
-
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
-              {data.summary}
-            </p>
-          </div>
-        </div>
-
-        {data.topStrengths?.length > 0 && (
-          <PointList label="Strengths" items={data.topStrengths} tone="var(--color-green)" />
-        )}
-        {data.areasToImprove?.length > 0 && (
-          <PointList label="Work on" items={data.areasToImprove} tone="var(--color-clay)" />
-        )}
-
-        {data.advice && (
-          <div style={{ padding: '22px 34px', borderTop: '1px solid var(--color-line)' }}>
-            <MicroLabel size={10.5} tracking="0.13em" style={{ display: 'block', marginBottom: 10 }}>
-              Before the next one
-            </MicroLabel>
-            <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
-              {data.advice}
-            </p>
-          </div>
-        )}
-
-        <CardFooterNote>
-          {data.createdAt
-            ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-            : ''}
-        </CardFooterNote>
-      </Card>
-
-      {data.results?.length > 0 && (
-        <Card style={{ marginTop: 22 }}>
-          <CardHeader label="Question by question" />
-          {data.results.map((r, i) => (
-            <div
-              key={i}
-              style={{
-                padding: '20px 34px',
-                borderBottom: i === data.results.length - 1 ? 'none' : '1px solid var(--color-line-soft)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
-                <div style={{ fontSize: 15, color: 'var(--color-ink)', lineHeight: 1.5, flex: 1 }}>
-                  {r.question}
-                </div>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 14,
-                    color: scoreTone(r.evaluation?.score ?? 0),
-                    flexShrink: 0,
-                  }}
-                >
-                  {`${r.evaluation?.score ?? '—'}/10`}
-                </span>
-              </div>
-              {r.evaluation?.feedback && (
-                <p style={{ fontSize: 13.5, color: 'var(--color-text-3)', lineHeight: 1.55, margin: '8px 0 0' }}>
-                  {r.evaluation.feedback}
-                </p>
-              )}
+          <div style={{ padding: 34, display: 'flex', gap: 40, alignItems: 'flex-start' }}>
+            <div>
+              <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 10 }}>
+                Overall
+              </MicroLabel>
+              <span style={{ ...type.heroMetric, fontSize: 68, color: scoreTone(data.overallScore), display: 'block', lineHeight: 1 }}>
+                {data.overallScore}
+              </span>
             </div>
-          ))}
+
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
+                {data.summary}
+              </p>
+            </div>
+          </div>
+
+          {data.topStrengths?.length > 0 && (
+            <PointList label="Strengths" items={data.topStrengths} tone="var(--color-green)" />
+          )}
+          {data.areasToImprove?.length > 0 && (
+            <PointList label="Work on" items={data.areasToImprove} tone="var(--color-clay)" />
+          )}
+
+          {data.advice && (
+            <div style={{ padding: '22px 34px', borderTop: '1px solid var(--color-line)' }}>
+              <MicroLabel size={10.5} tracking="0.13em" style={{ display: 'block', marginBottom: 10 }}>
+                Before the next one
+              </MicroLabel>
+              <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
+                {data.advice}
+              </p>
+            </div>
+          )}
+
+          <CardFooterNote>
+            {data.createdAt
+              ? new Date(data.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+              : ''}
+          </CardFooterNote>
         </Card>
-      )}
+
+        {data.results?.length > 0 && (
+          <Card>
+            <CardHeader label="Question by question" />
+            {data.results.map((r, i) => (
+              <div
+                key={i}
+                style={{
+                  padding: '20px 34px',
+                  borderBottom: i === data.results.length - 1 ? 'none' : '1px solid var(--color-line-soft)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
+                  <div style={{ fontSize: 15, color: 'var(--color-ink)', lineHeight: 1.5, flex: 1 }}>
+                    {r.question}
+                  </div>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 14,
+                      color: scoreTone(r.evaluation?.score ?? 0),
+                      flexShrink: 0,
+                    }}
+                  >
+                    {`${r.evaluation?.score ?? '—'}/10`}
+                  </span>
+                </div>
+                {r.evaluation?.feedback && (
+                  <p style={{ fontSize: 13.5, color: 'var(--color-text-3)', lineHeight: 1.55, margin: '8px 0 0' }}>
+                    {r.evaluation.feedback}
+                  </p>
+                )}
+              </div>
+            ))}
+          </Card>
+        )}
+      </div>
     </Page>
   );
 };
