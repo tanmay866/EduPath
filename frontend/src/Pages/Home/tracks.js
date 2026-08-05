@@ -32,7 +32,7 @@ export const TRACKS = [
     // track shown here is a track that can actually be built.
     name: 'MERN Developer',
     stack: 'JavaScript, React, Node, Express, MongoDB',
-    weeks: 55,
+    weeks: 49,
     nodes: 14,
     summary:
       'The full JavaScript stack, front to back: build interfaces with React, serve them from Express, and store what they produce in MongoDB.',
@@ -40,7 +40,7 @@ export const TRACKS = [
   {
     name: 'AI/ML Engineer',
     stack: 'Python, PyTorch, LLMs, evaluation, MLOps',
-    weeks: 47,
+    weeks: 42,
     nodes: 9,
     summary:
       'Train and evaluate models, then get them into production — including the parts most courses skip, like measurement and deployment.',
@@ -48,7 +48,7 @@ export const TRACKS = [
   {
     name: 'Data Science Engineer',
     stack: 'SQL, pandas, statistics, visualisation',
-    weeks: 34,
+    weeks: 30,
     nodes: 8,
     summary:
       'Query, clean and interrogate real data, then present a finding somebody can act on without needing you to explain it.',
@@ -56,7 +56,7 @@ export const TRACKS = [
   {
     name: 'DevOps Engineer',
     stack: 'Linux, Docker, Kubernetes, CI/CD, IaC',
-    weeks: 35,
+    weeks: 32,
     nodes: 8,
     summary:
       'Ship other people’s code safely and repeatedly: containers, pipelines, infrastructure written down rather than clicked together.',
@@ -64,7 +64,7 @@ export const TRACKS = [
   {
     name: 'Mobile Developer',
     stack: 'React Native, Swift, Kotlin, store release',
-    weeks: 34,
+    weeks: 29,
     nodes: 8,
     summary:
       'Build for phones and get through review — the release process is part of the track, not an afterthought.',
@@ -72,7 +72,7 @@ export const TRACKS = [
   {
     name: 'Cybersecurity Engineer',
     stack: 'Networking, threat modelling, pentesting',
-    weeks: 36,
+    weeks: 32,
     nodes: 7,
     summary:
       'Understand how systems are attacked so you can argue about how they should be defended, with evidence.',

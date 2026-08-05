@@ -94,6 +94,18 @@ def allocate_weeks(
     Assigns start_week and end_week to each skill based on estimated hours
     and the learner's weekly availability.
 
+    Hours run continuously: a skill starts in the week the previous one ran
+    out, rather than waiting for the next whole week. Each skill used to be
+    rounded up to whole weeks on its own, so every remainder was discarded —
+    a 16.9 hour skill occupied two full weeks and threw away 3.1 hours of the
+    learner's time. Across a track that lost 11-18% of the schedule: MERN
+    spanned 55 weeks to teach 483 hours of material at 10 hours a week, which
+    is 67 hours of capacity nobody was ever given anything to do in.
+
+    A week can therefore hold the end of one skill and the start of the next,
+    which is what the weekly plan already assumed when it listed the skills
+    active in a given week.
+
     Args:
         skills_with_hours: list of {skill, hours_estimated, ...}
         hours_per_week: learner's available hours per week
@@ -104,17 +116,22 @@ def allocate_weeks(
     if hours_per_week <= 0:
         hours_per_week = 10  # safe default
 
-    current_week = 1
+    scheduled_hours = 0.0
 
     for skill_entry in skills_with_hours:
         hours = skill_entry["hours_estimated"]
-        duration_weeks = max(1, math.ceil(hours / hours_per_week))
 
-        skill_entry["start_week"] = current_week
-        skill_entry["end_week"] = current_week + duration_weeks - 1
+        # Begins in whichever week the running total currently sits in.
+        start_week = int(scheduled_hours // hours_per_week) + 1
+        scheduled_hours += hours
+
+        # Ends in the week the running total reaches, and never before it
+        # starts — a zero-hour skill still occupies the week it falls in.
+        end_week = max(start_week, math.ceil(scheduled_hours / hours_per_week))
+
+        skill_entry["start_week"] = start_week
+        skill_entry["end_week"] = end_week
         skill_entry["hours_allocated"] = hours
-
-        current_week += duration_weeks
 
     return skills_with_hours
 

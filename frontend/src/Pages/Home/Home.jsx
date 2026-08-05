@@ -47,8 +47,8 @@ const CONSOLE_WEEKS = [38, 52, 44, 70, 61, 80, 47];
 // Weeks in the track, for the axis. The chart itself draws a fixed number of
 // slots rather than 55 hair-thin ones — the filled share matches progress
 // (week 21 of 55) so the picture and the figures agree.
-const CONSOLE_TOTAL = 55;
-const CONSOLE_SLOTS = 18;
+const CONSOLE_TOTAL = 49;
+const CONSOLE_SLOTS = 25;
 
 const ConsoleCell = ({ value, unit, label, tone }) => (
   <div style={{ padding: '16px 18px', borderRight: '1px solid var(--color-line)' }}>
@@ -83,7 +83,7 @@ const ConsoleRow = ({ status, title, tag, tone, current = false }) => (
 
 const RoadmapConsole = () => (
   <div style={{ padding: 36, background: 'var(--color-paper)', borderLeft: '1px solid var(--color-line)' }}>
-    <Card style={{ borderColor: 'var(--color-line-btn)' }}>
+    <Card style={{ border: '1px solid var(--color-line-btn)' }}>
       <div
         style={{
           display: 'flex',
@@ -97,7 +97,7 @@ const RoadmapConsole = () => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)">Roadmap</MicroLabel>
           <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-ink)' }}>
-            MERN Developer · 55 weeks
+            MERN Developer · 49 weeks
           </span>
         </span>
         <span
@@ -119,9 +119,9 @@ const RoadmapConsole = () => (
             of which the product tracks — under a caption claiming it was the
             real screen. */}
         <ConsoleCell value="14" label="total skills" />
-        <ConsoleCell value="5" label="completed" />
-        <ConsoleCell value="9" label="remaining" tone="var(--color-amber)" />
-        <ConsoleCell value="55" label="est. weeks" />
+        <ConsoleCell value="4" label="completed" />
+        <ConsoleCell value="10" label="remaining" tone="var(--color-amber)" />
+        <ConsoleCell value="49" label="est. weeks" />
       </div>
 
       <div style={{ padding: 20 }}>
@@ -152,21 +152,21 @@ const RoadmapConsole = () => (
             borderBottom: '1px solid var(--color-line)',
           }}
         >
-          <span>W1</span><span>W18</span><span>W36</span><span>W55</span>
+          <span>W1</span><span>W16</span><span>W32</span><span>W49</span>
         </div>
 
         {/* Skill names exactly as the MERN template defines them. */}
-        <ConsoleRow status="done" title="Async JS (Promises, async/await)" tag="Done" />
-        <ConsoleRow status="done" title="React Hooks & State Management" tag="Done" />
+        <ConsoleRow status="done" title="Node.js Basics" tag="Done" />
+        <ConsoleRow status="done" title="ES6+ & Modern JS" tag="Done" />
         <ConsoleRow
           status="current"
           title="Express.js"
-          tag="Week 21"
+          tag="Week 13"
           tone="var(--color-amber)"
           current
         />
-        <ConsoleRow status="future" title="MongoDB & Mongoose" tag="Week 26" tone="var(--color-text-4)" />
-        <ConsoleRow status="future" title="JWT Authentication" tag="Week 36" tone="var(--color-text-4)" />
+        <ConsoleRow status="future" title="Async JS (Promises, async/await)" tag="Week 17" tone="var(--color-text-4)" />
+        <ConsoleRow status="future" title="React Basics" tag="Week 20" tone="var(--color-text-4)" />
       </div>
     </Card>
 
@@ -208,7 +208,7 @@ const GAP_REPORT = [
 ];
 
 const OutcomeCard = ({ label, children, note }) => (
-  <Card style={{ borderColor: 'var(--color-line-btn)' }}>
+  <Card style={{ border: '1px solid var(--color-line-btn)' }}>
     <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--color-line)' }}>
       <MicroLabel size={10} tracking="0.12em" color="var(--color-text-4)">{label}</MicroLabel>
     </div>
