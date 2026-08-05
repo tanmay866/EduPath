@@ -181,7 +181,7 @@ const STEPS = [
   {
     kicker: '01 — Assess',
     title: 'Four instruments',
-    body: 'An adaptive skills quiz, a timed aptitude test, CS fundamentals and a spoken AI mock interview — one honest profile.',
+    body: 'A skills quiz at the level you pick, an aptitude test, CS fundamentals and a spoken AI mock interview. The skills quiz is the one your plan is built from.',
   },
   {
     kicker: '02 — Plan',

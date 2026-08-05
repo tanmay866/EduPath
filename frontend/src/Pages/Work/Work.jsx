@@ -15,8 +15,8 @@ const STAGES = [
   {
     name: 'Assess',
     description:
-      'Four instruments rather than one: an adaptive skills quiz that gets harder as you get things right, a timed aptitude test, CS fundamentals, and a spoken AI mock interview. Together they produce a single profile of where you stand — including the parts you would rather not know about.',
-    stack: 'ADAPTIVE QUIZ · APTITUDE · CS FUNDAMENTALS · MOCK INTERVIEW',
+      'Four instruments rather than one: a skills quiz you set to your own level, an aptitude test, CS fundamentals, and a spoken AI mock interview. The skills quiz is what the roadmap reads — the other three tell you where you stand without changing the plan, including the parts you would rather not know about.',
+    stack: 'SKILL QUIZ · APTITUDE · CS FUNDAMENTALS · MOCK INTERVIEW',
     to: '/assessment-hub',
   },
   {

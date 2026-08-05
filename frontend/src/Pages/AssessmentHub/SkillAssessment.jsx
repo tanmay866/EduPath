@@ -47,8 +47,9 @@ const SkillAssessment = () => {
               Find out where your skills actually are.
             </h1>
             <p style={{ ...type.body, margin: '12px 0 0', maxWidth: 560 }}>
-              An adaptive set of questions across the technical domains in your track. The score is
-              less important than the breakdown — it is what the roadmap is built from.
+              Questions across the technical domains in your track, generated fresh at the level
+              you pick. The score is less important than the breakdown — it is what the roadmap is
+              built from.
             </p>
           </div>
 
