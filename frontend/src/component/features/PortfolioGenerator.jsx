@@ -8,7 +8,7 @@ import {
 } from '../templates';
 import {
   LearnerShell, Card, CardHeader, Button, Field, Input, Toggle, InlineMessage,
-  MicroLabel, Badge, RuledGrid, RuledCell, Loading, Empty, type,
+  MicroLabel, Badge, RuledGrid, RuledCell, Loading, Empty, type, formatPhone, PhoneInput,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 
@@ -635,7 +635,9 @@ function PortfolioGenerator() {
               <PortfolioField label="Full name *" value={portfolioData.name} onChange={(v) => handleDataUpdate('name', v)} placeholder="Tanmay Patel" />
               <PortfolioField label="Job title *" value={portfolioData.title} onChange={(v) => handleDataUpdate('title', v)} placeholder="Full Stack Developer" />
               <PortfolioField label="Email" type="email" value={portfolioData.email} onChange={(v) => handleDataUpdate('email', v)} placeholder="you@example.com" />
-              <PortfolioField label="Phone" value={portfolioData.phone} onChange={(v) => handleDataUpdate('phone', v)} placeholder="9313928398" />
+              <Field label="Phone">
+                <PhoneInput name="phone" value={portfolioData.phone} onChange={(e) => handleDataUpdate('phone', e.target.value)} />
+              </Field>
               <PortfolioField label="Location" value={portfolioData.location} onChange={(v) => handleDataUpdate('location', v)} placeholder="Ahmedabad, India" />
               <PortfolioField label="GitHub" value={portfolioData.github} onChange={(v) => handleDataUpdate('github', v)} placeholder="github.com/you" />
               <PortfolioField label="LinkedIn" value={portfolioData.linkedin} onChange={(v) => handleDataUpdate('linkedin', v)} placeholder="linkedin.com/in/you" />
@@ -876,7 +878,9 @@ function PortfolioGenerator() {
               <div style={{ maxHeight: 560, overflowY: 'auto', borderTop: '1px solid var(--color-line)' }}>
                 {(() => {
                   const TemplateComp = TEMPLATES_MAP[selectedTemplate] || TemplateEditorial;
-                  return <TemplateComp data={portfolioData} />;
+                  // The country code is put back here rather than in each of
+                  // the eleven templates, which all just print `data.phone`.
+                  return <TemplateComp data={{ ...portfolioData, phone: formatPhone(portfolioData.phone) }} />;
                 })()}
               </div>
             </Card>

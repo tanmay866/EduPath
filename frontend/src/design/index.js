@@ -13,7 +13,7 @@ export {
   InlineMessage, Toggle, Stepper, SegmentedFilter,
   PhoneInput,
 } from './form';
-export { PHONE_COUNTRY_CODE, PHONE_DIGITS, normalizePhone, formatPhone } from './phone';
+export { PHONE_COUNTRY_CODE, PHONE_DIGITS, normalizePhone, formatPhone, isStoredPhone } from './phone';
 export { TableHead, TableRow, NumCell, ActionCell, OrdinalRow, ListItem } from './Table';
 export { Modal } from './Modal';
 export { BarChart, ShareChart, LabelledBar } from './charts';

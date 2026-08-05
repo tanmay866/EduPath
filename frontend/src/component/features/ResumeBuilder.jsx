@@ -3,7 +3,7 @@ import { API_BASE } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import {
   LearnerShell, Card, CardHeader, CardFooterNote, Button, Field, Input,
-  InlineMessage, MicroLabel, type,
+  InlineMessage, MicroLabel, type, PhoneInput, formatPhone, normalizePhone, isStoredPhone,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 
@@ -70,6 +70,15 @@ const InputField = ({
           resize: 'vertical',
         }}
       />
+    ) : type === 'tel' ? (
+      // The one field with a fixed country code beside it. Routed through here
+      // rather than swapped in at the call site so it keeps this wrapper's
+      // label, error and help behaviour.
+      <PhoneInput
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        error={Boolean(error)}
+      />
     ) : (
       <Input
         type={type}
@@ -120,7 +129,9 @@ const clean = (list = []) => list.filter((v) => String(v || '').trim());
 
 const ResumeDocument = ({ data }) => {
   const p = data.personalInfo || {};
-  const contact = clean([p.email, p.phone, p.location]).join('  ·  ');
+  // Stored as ten bare digits, printed with the country code — a resume is
+  // read by a stranger who has to be able to dial it.
+  const contact = clean([p.email, formatPhone(p.phone), p.location]).join('  ·  ');
   const links = clean([p.linkedin, p.github, p.website]).join('  ·  ');
 
   const education = (data.education || []).filter((e) => e.degree || e.institution);
@@ -336,9 +347,11 @@ function ResumeBuilder() {
   };
 
   const validatePhone = (phone) => {
-    const phoneRegex = /^[+]?[\d\s\-()]{10,20}$/;
+    // The field itself now only lets ten digits through, so this checks the
+    // shape rather than trying to recognise a phone number. The old pattern
+    // accepted ten spaces.
     if (!phone) return 'Phone number is required';
-    if (!phoneRegex.test(phone)) return 'Please enter a valid phone number';
+    if (!isStoredPhone(phone)) return 'Enter all ten digits';
     return '';
   };
 
@@ -399,10 +412,6 @@ function ResumeBuilder() {
     return value.replace(/[^a-zA-Z\s.'-]/g, '').slice(0, 50);
   };
 
-  const formatPhoneInput = (value) => {
-    return value.replace(/[^\d\s+\-()]/g, '').slice(0, 20);
-  };
-
   const formatLocationInput = (value) => {
     return value.replace(/[^a-zA-Z0-9\s,.\-']/g, '').slice(0, 100);
   };
@@ -455,7 +464,7 @@ function ResumeBuilder() {
         error = validateEmail(formattedValue);
         break;
       case 'phone':
-        formattedValue = formatPhoneInput(value);
+        formattedValue = normalizePhone(value);
         error = validatePhone(formattedValue);
         break;
       case 'location':
@@ -1008,11 +1017,11 @@ function ResumeBuilder() {
                 />
                 <InputField
                   label="Phone"
+                  type="tel"
                   required
                   value={resumeData.personalInfo.phone}
                   onChange={(v) => handlePersonalInfoChange('phone', v)}
                   error={getFieldError('personalInfo', 'phone')}
-                  placeholder="9313928398"
                 />
               </div>
 

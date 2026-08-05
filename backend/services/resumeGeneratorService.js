@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { formatPhone } from '../utils/phone.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {
@@ -104,7 +105,9 @@ class ResumeGeneratorService {
 
       if (personalInfo.phone) {
         if (contactChildren.length > 0) contactChildren.push(new TextRun({ text: '  •  ', size: 20, color: COLORS.secondary }));
-        contactChildren.push(new TextRun({ text: personalInfo.phone, size: 20, color: COLORS.text }));
+        // Stored as ten bare digits; a resume is read by a stranger who has
+        // to be able to dial it, so the country code goes back on.
+        contactChildren.push(new TextRun({ text: formatPhone(personalInfo.phone), size: 20, color: COLORS.text }));
       }
 
       if (personalInfo.location) {

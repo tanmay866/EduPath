@@ -3,6 +3,8 @@
  * Each function generates a complete standalone HTML file.
  */
 
+import { formatPhone } from '../utils/phone.js';
+
 const escapeHtml = (text) => {
   if (!text) return '';
   return String(text)
@@ -112,7 +114,7 @@ function generateBodyContent(data) {
     <p class="subtitle">${title}</p>
     <div class="contact-row">
       ${data.email ? `<span>${escapeHtml(data.email)}</span>` : ''}
-      ${data.phone ? `<span>${escapeHtml(data.phone)}</span>` : ''}
+      ${data.phone ? `<span>${escapeHtml(formatPhone(data.phone))}</span>` : ''}
       ${data.location ? `<span>${escapeHtml(data.location)}</span>` : ''}
     </div>
     <div class="social-links">${socialLinks(data)}</div>

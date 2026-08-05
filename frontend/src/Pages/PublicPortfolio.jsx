@@ -6,7 +6,7 @@ import {
   Template1, Template2, Template3, Template4, Template5,
   Template6, Template7, Template8, Template9, Template10
 } from '../component/templates';
-import { Card, Loading, Empty, Button } from '../design';
+import { Card, Loading, Empty, Button, formatPhone } from '../design';
 
 const TEMPLATES = {
   editorial: TemplateEditorial,
@@ -91,7 +91,9 @@ export default function PublicPortfolio() {
     name: portfolio.personalInfo?.name,
     title: portfolio.personalInfo?.title,
     email: portfolio.personalInfo?.email,
-    phone: portfolio.personalInfo?.phone,
+    // Stored as ten bare digits; the templates print it as-is, so the
+    // country code goes back on here.
+    phone: formatPhone(portfolio.personalInfo?.phone),
     location: portfolio.personalInfo?.location,
     about: portfolio.personalInfo?.about,
     github: portfolio.personalInfo?.github,

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { normalizePhone, formatPhone, PHONE_COUNTRY_CODE } from './phone.js';
+import { normalizePhone, formatPhone, isStoredPhone, PHONE_COUNTRY_CODE } from './phone.js';
 
 /**
  * The field shows "+91" beside it and stores ten bare digits, so everything
@@ -49,6 +49,21 @@ test('formatPhone puts the code back for display, and leaves empty empty', () =>
   assert.equal(formatPhone('9313928398'), `${PHONE_COUNTRY_CODE} 9313928398`);
   assert.equal(formatPhone(''), '');
   assert.equal(formatPhone(undefined), '');
+});
+
+test('formatPhone leaves a number it did not store alone', () => {
+  // Resumes and portfolios hold free-form numbers written before this field
+  // existed. Prefixing one of those would put +91 on a US number.
+  assert.equal(formatPhone('+1 415 555 0000'), '+1 415 555 0000');
+  assert.equal(formatPhone('+44 20 7946 0958'), '+44 20 7946 0958');
+  assert.equal(formatPhone('+91 9313928398'), '+91 9313928398');
+});
+
+test('isStoredPhone recognises only the ten-digit shape', () => {
+  assert.equal(isStoredPhone('9313928398'), true);
+  assert.equal(isStoredPhone('931392839'), false);
+  assert.equal(isStoredPhone('+91 9313928398'), false);
+  assert.equal(isStoredPhone(''), false);
 });
 
 test('normalizing is idempotent, so a stored value round-trips unchanged', () => {

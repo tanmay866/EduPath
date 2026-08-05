@@ -31,8 +31,19 @@ export const normalizePhone = (raw) => {
   return digits.slice(0, PHONE_DIGITS);
 };
 
-/** A stored number as it should be read by a person. Empty stays empty. */
-export const formatPhone = (raw) => {
-  const digits = normalizePhone(raw);
-  return digits ? `${PHONE_COUNTRY_CODE} ${digits}` : '';
+/** True only for exactly ten digits — the shape this codebase stores. */
+export const isStoredPhone = (value) => new RegExp(`^\\d{${PHONE_DIGITS}}$`).test(String(value ?? '').trim());
+
+/**
+ * A stored number with its country code back on, for showing to a person.
+ *
+ * Deliberately not `normalizePhone` + prefix: resumes and portfolios predate
+ * this field and some hold numbers written out in full, occasionally for other
+ * countries. Normalising those would keep the last ten digits and stamp +91 on
+ * them — a wrong number on somebody's CV, which is worse than an inconsistent
+ * one. Anything that is not already ten bare digits is passed through.
+ */
+export const formatPhone = (value) => {
+  const raw = String(value ?? '').trim();
+  return isStoredPhone(raw) ? `${PHONE_COUNTRY_CODE} ${raw}` : raw;
 };
