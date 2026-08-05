@@ -134,6 +134,9 @@ class RoadmapGenerateRequest(BaseModel):
     skill_gaps: List[SkillGapItem] = []
     skill_scores: dict = {}
     current_skills: List[CurrentSkillItem] = []
+    # "Modules per roadmap" from the admin settings screen. Optional so a
+    # caller that does not send it gets the whole track, as before.
+    max_modules: Optional[int] = Field(default=None, ge=1, le=30)
 
 
 class AdaptRoadmapRequest(BaseModel):
@@ -329,6 +332,7 @@ async def generate_roadmap(request: RoadmapGenerateRequest):
             "skill_gaps": [g.dict() for g in request.skill_gaps],
             "skill_scores": request.skill_scores,
             "current_skills": [s.dict() for s in request.current_skills],
+            "max_modules": request.max_modules,
         }
 
         result = roadmap_agent.generate(payload)

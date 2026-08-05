@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 import SkillGap from "../models/SkillGap.js";
 import Topic from "../models/Topic.js";
 import { topicForSkill } from "../utils/skillTopicMap.js";
+import Settings from "../models/Settings.js";
 
 const AI_SERVICE_URL =
     process.env.AI_SERVICE_URL || "http://localhost:8000";
@@ -20,11 +21,16 @@ const normalizeExperienceLevel = (value) => {
     return validLevels.includes(normalized) ? normalized : "";
 };
 
-const resolveRoadmapProfile = (user) => {
+const resolveRoadmapProfile = (user, settings) => {
     const targetRole = user.target_role || "";
-    const experienceLevel = normalizeExperienceLevel(
-        user.experience_level || user.profile?.occupation?.experienceLevel
-    );
+    // The admin's default is the fallback, which is what "used when a learner
+    // does not pick one" on the settings screen has always claimed. Without it
+    // an unset level reached the generator as "" and silently took a 1.0
+    // multiplier, so the setting could be changed with no effect at all.
+    const experienceLevel =
+        normalizeExperienceLevel(
+            user.experience_level || user.profile?.occupation?.experienceLevel
+        ) || normalizeExperienceLevel(settings?.defaultLevel) || "beginner";
     const hoursPerWeek =
         user.hours_per_week || user.profile?.availableLearningTime || 10;
     const learningStyle = user.learning_style || user.profile?.learningStyle || "mixed";
@@ -77,8 +83,11 @@ export const generateRoadmap = async (req, res) => {
         const userId = req.user._id;
 
         // 1. Fetch user profile
-        const user = await User.findById(userId);
-        const roadmapProfile = resolveRoadmapProfile(user || {});
+        const [user, settings] = await Promise.all([
+            User.findById(userId),
+            Settings.current(),
+        ]);
+        const roadmapProfile = resolveRoadmapProfile(user || {}, settings);
         const profileIsComplete = Boolean(
             user &&
             (user.profile_complete ||
@@ -141,6 +150,10 @@ export const generateRoadmap = async (req, res) => {
                 (skillGap?.skill_gaps || []).map((gap) => [gap.skill, gap.current_score])
             ),
             current_skills: normalizeCurrentSkillsForAI(user.current_skills),
+            // "Modules per roadmap" on the admin settings screen. Applied in
+            // the generator, after the dependency sort, so the skills that
+            // survive still arrive in a workable order.
+            max_modules: settings.maxModules,
         };
 
         let aiResult;

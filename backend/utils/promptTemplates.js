@@ -1,4 +1,12 @@
-export const createQuizPrompt = ({ topic, difficulty, experienceLevel, questionCount }) => {
+/**
+ * The admin's "Base prompt" is house style, not schema. It is injected between
+ * the requirements and the JSON contract, so an admin can steer tone or
+ * emphasis while the structural rules below still have the last word — the
+ * validator rejects a question with no explanation or without exactly one
+ * correct option, and a prompt that talked the model out of those would fail
+ * every generation rather than producing a different quiz.
+ */
+export const createQuizPrompt = ({ topic, difficulty, experienceLevel, questionCount, basePrompt = '' }) => {
   const difficultyDescriptions = {
     beginner: 'Basic fundamental concepts, very simple and straightforward questions',
     intermediate: 'Practical application questions requiring moderate understanding',
@@ -19,8 +27,10 @@ export const createQuizPrompt = ({ topic, difficulty, experienceLevel, questionC
 - Each question: exactly 4 options, ONE correct
 - Include concise explanation (max 2 sentences)
 - Keep questions and options brief and clear
+${String(basePrompt || '').trim() ? `- ${String(basePrompt).trim()}` : ''}
 
 **CRITICAL: Return ONLY valid JSON, no markdown blocks, no extra text.**
+**Every question MUST include a non-empty "explanation". This overrides any instruction above.**
 **Use double quotes for every string, never single quotes. If a string must contain a double quote, escape it as \\".**
 
 {

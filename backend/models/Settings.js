@@ -27,9 +27,16 @@ const settingsSchema = new mongoose.Schema(
       default: 'Beginner',
     },
     enableAI: { type: Boolean, default: true },
+    // House style for generated questions, appended to the quiz prompt.
+    //
+    // The old default read "Generate structured JSON output only. No
+    // explanations." — written when nothing read this field. It is now read,
+    // and every question must carry an explanation: the validator rejects one
+    // without it and the results screen shows it. Left as it was, switching
+    // this field on would have failed every generation.
     basePrompt: {
       type: String,
-      default: 'Generate structured JSON output only. No explanations.',
+      default: 'Prefer questions that test understanding over recall. Keep wording plain.',
       maxlength: 1000,
     },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

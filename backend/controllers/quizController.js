@@ -242,6 +242,7 @@ export const retryQuiz = async (req, res) => {
       difficulty: originalResult.difficulty,
       experienceLevel: originalResult.experienceLevel,
       questionCount: Math.min(originalResult.totalQuestions, settings.maxQuestions),
+      basePrompt: settings.basePrompt,
     });
 
     // Expiry follows the configured maximum duration rather than a constant.
@@ -403,6 +404,7 @@ export const startQuiz = async (req, res) => {
       difficulty,
       experienceLevel,
       questionCount: cappedCount,
+      basePrompt: settings.basePrompt,
     });
 
     // Expiry follows the configured maximum duration rather than a constant.

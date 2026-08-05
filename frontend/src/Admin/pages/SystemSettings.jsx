@@ -16,9 +16,13 @@ import { useAdminData } from '../useAdminData';
  * surface-field. The footer pairs the primary with a green confirmation note
  * that only appears after saving.
  *
- * These are read by the quiz controller before it builds a quiz — the question
- * count is capped, the session expiry follows the duration, and turning AI
- * generation off refuses the request. Without that they would be a form.
+ * All six are read where they claim to apply. The quiz controller caps the
+ * question count, takes the session expiry from the duration, refuses the
+ * request when AI generation is off, and passes the base prompt into the
+ * generation prompt; the roadmap controller sends the module cap to the
+ * generator and falls back to the default level when a learner has not picked
+ * one. Three of them used to be stored and read by nothing, which made this
+ * screen a form that looked like a control panel.
  */
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
@@ -121,7 +125,7 @@ const SystemSettings = () => {
             />
           </Row>
 
-          <Row title="Modules per roadmap" detail="How many stages a generated roadmap may contain.">
+          <Row title="Modules per roadmap" detail="Longer tracks are trimmed to this, keeping prerequisites.">
             <Stepper
               value={settings.maxModules}
               onChange={(v) => change('maxModules', v)}
@@ -130,7 +134,7 @@ const SystemSettings = () => {
             />
           </Row>
 
-          <Row title="Default roadmap level" detail="Used when a learner does not pick one." last>
+          <Row title="Default roadmap level" detail="Paces the plan when a learner has not set their own." last>
             <SegmentedFilter
               options={LEVELS}
               value={settings.defaultLevel}
@@ -162,6 +166,10 @@ const SystemSettings = () => {
             <MicroLabel size={11} tracking="0.12em" style={{ display: 'block', marginBottom: 8 }}>
               Base prompt
             </MicroLabel>
+            <p style={{ margin: '0 0 10px', fontSize: 14, color: 'var(--color-text-3)' }}>
+              Added to the quiz prompt as house style. The rules that keep a question
+              valid are applied after it, so this cannot break generation.
+            </p>
             <input
               value={settings.basePrompt}
               onChange={(e) => change('basePrompt', e.target.value)}

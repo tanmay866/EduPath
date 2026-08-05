@@ -21,9 +21,10 @@ class HuggingFaceService {
      * @param {string} params.difficulty - beginner | intermediate | advanced
      * @param {string} params.experienceLevel - beginner | intermediate | advanced
      * @param {number} params.questionCount - Number of questions to generate
+     * @param {string} params.basePrompt - Admin house-style line from platform settings
      * @returns {Promise<Array>} Array of generated questions
      */
-    async generateQuizQuestions({ topic, difficulty, experienceLevel, questionCount = 10 }) {
+    async generateQuizQuestions({ topic, difficulty, experienceLevel, questionCount = 10, basePrompt = '' }) {
         try {
             console.log('🚀 Generating quiz questions with Hugging Face API...');
             console.log(`📚 Topic: ${topic}`);
@@ -32,7 +33,7 @@ class HuggingFaceService {
             console.log(`🔢 Count: ${questionCount}`);
 
             // Create the prompt
-            const prompt = createQuizPrompt({ topic, difficulty, experienceLevel, questionCount });
+            const prompt = createQuizPrompt({ topic, difficulty, experienceLevel, questionCount, basePrompt });
 
             // Generate content with retry logic — validation runs inside this,
             // so a bad set (e.g. two options marked correct) gets the same

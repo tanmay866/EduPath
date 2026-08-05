@@ -43,7 +43,8 @@ class RoadmapGeneratorAgent:
             payload: {
                 user_id, target_role, experience_level,
                 hours_per_week, learning_style,
-                skill_gaps, skill_scores, current_skills
+                skill_gaps, skill_scores, current_skills,
+                max_modules (optional)
             }
 
         Returns:
@@ -89,6 +90,24 @@ class RoadmapGeneratorAgent:
         sorted_skills = sort_skills_by_priority(
             needed_skills, skill_definitions, skill_gaps
         )
+
+        # ── Step 4b: Apply the admin's module cap ─────────────────────────
+        # Truncating here is safe: steps 2 and 4 leave the list in dependency
+        # order, and the priority sorter only reorders siblings within a level,
+        # so everything a kept skill depends on is already above it. Cutting
+        # from the front, or filtering by priority, would strand skills whose
+        # prerequisites had been removed.
+        #
+        # Applied before hours and weeks are worked out so the schedule, the
+        # weekly plan and the total duration all describe the plan the learner
+        # actually gets.
+        max_modules = payload.get("max_modules")
+        if max_modules and len(sorted_skills) > max_modules:
+            logger.info(
+                f"Capping roadmap at {max_modules} modules "
+                f"(track has {len(sorted_skills)})"
+            )
+            sorted_skills = sorted_skills[:max_modules]
 
         # ── Step 5 & 6: Estimate hours + assign weeks ─────────────────────
         skills_with_hours = []
