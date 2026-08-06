@@ -35,16 +35,22 @@ TASKS_BY_STYLE = {
             "Read the documentation for {skill}",
             "Note the parts of {skill} you could not follow",
             "Look up one thing the {skill} docs assumed you already knew",
+            "Skim the whole {skill} guide before going deep",
+            "Write down the questions about {skill} you want answered",
         ],
         "practise": [
             "Work through the examples in the {skill} docs",
             "Write a short summary of {skill} in your own words",
             "Go back to your notes and close the gaps you left",
+            "Work an example from the {skill} docs without copying it",
+            "Compare what you wrote with what the docs did",
         ],
         "apply": [
             "Write something of your own that uses {skill}",
             "Explain {skill} in a short write-up, without the docs open",
             "Correct your earlier notes on {skill} where they were wrong",
+            "Answer the questions about {skill} you wrote down at the start",
+            "Read something advanced on {skill} and see how much lands",
         ],
     },
     "video": {
@@ -52,16 +58,22 @@ TASKS_BY_STYLE = {
             "Watch a walkthrough covering {skill}",
             "Mark the points in it you want to come back to",
             "Pause and say what {skill} is doing before moving on",
+            "Skim the {skill} series to see what it covers",
+            "Write down what the videos have not answered",
         ],
         "practise": [
             "Follow along and build the {skill} example yourself",
             "Rebuild the {skill} example once without the video",
             "Find where your version differs and work out why",
+            "Change the {skill} example and predict what breaks",
+            "Redo the part you had to rewind",
         ],
         "apply": [
             "Build something with {skill} that no video covered",
             "Talk through your own {skill} work start to finish",
             "Rewatch the part you found hardest and check you had it right",
+            "Work from the {skill} docs instead of a video",
+            "Take on a {skill} problem with no walkthrough to follow",
         ],
     },
     "project": {
@@ -69,16 +81,22 @@ TASKS_BY_STYLE = {
             "Build the smallest thing that uses {skill}",
             "Read enough of the {skill} docs to get it working",
             "Note where you had to guess at {skill}",
+            "Sketch what you want to build with {skill}",
+            "Get the smallest version running end to end",
         ],
         "practise": [
             "Extend it with one part of {skill} you have not tried",
             "Break it on purpose to see how {skill} fails",
             "Handle the case you skipped the first time",
+            "Add the part of {skill} you have been avoiding",
+            "Make it work for input you did not plan for",
         ],
         "apply": [
             "Rebuild it with {skill} from scratch, without your notes",
             "Refactor it and note what you would do differently",
             "Write down what you would want to know before using {skill} again",
+            "Use {skill} in a second project unlike the first",
+            "Hand it to someone else and watch where they get stuck",
         ],
     },
     "mixed": {
@@ -86,16 +104,22 @@ TASKS_BY_STYLE = {
             "Study the core concepts of {skill}",
             "Write down what you expect {skill} to be useful for",
             "List the parts of {skill} you cannot yet explain",
+            "Skim {skill} end to end before going deep",
+            "Find where {skill} fits with what you already know",
         ],
         "practise": [
             "Complete practice exercises for {skill}",
             "Redo the ones you got wrong, without help",
             "Review and take notes on {skill}",
+            "Work a problem set on {skill} without your notes",
+            "Explain your working, not just the answer",
         ],
         "apply": [
             "Use {skill} on a problem that was not set for you",
             "Explain {skill} without looking at your notes",
             "Note what you still avoid doing with {skill}",
+            "Teach {skill} to someone and note what they ask",
+            "Go back to the parts of {skill} you found hardest",
         ],
     },
 }
@@ -250,21 +274,61 @@ def build_weekly_plan_skeleton(
     return weekly_plans
 
 
+# How many tasks a week asks of one skill. Every week carries the same
+# number, so no week reads as a light one when it is not.
+TASKS_PER_SKILL_WEEK = 3
+
+
+def _ordered_templates(style_tasks: Dict[str, List[str]]) -> List[str]:
+    """The style's tasks as one progression, from first meeting to using it."""
+    return [t for phase in PHASES for t in style_tasks[phase]]
+
+
+def _template_count() -> int:
+    """
+    How long that progression is. Every style and phase carries the same
+    number, so the sliding window and the phase label agree whichever style
+    the learner picked; a test holds them level.
+    """
+    return len(_ordered_templates(TASKS_BY_STYLE[DEFAULT_LEARNING_STYLE]))
+
+
+def window_start(span: int, position: int) -> int:
+    """
+    Where a week's slice of that progression begins.
+
+    Splitting the run into three blocks gave a four-week skill two identical
+    middle weeks — three phases cannot fill more than three distinct weeks,
+    which was the original complaint again at a longer span. So the slice
+    slides instead of jumping: the first week always starts at the beginning
+    and the last always ends at the end, and the weeks between move along it.
+
+    Fifteen templates in slices of three leave thirteen distinct positions,
+    so a skill of up to thirteen weeks gets weeks that differ — which covers
+    the longest skill any track currently schedules. Past that the slices
+    land on the same place twice, and that is a limit of the curriculum
+    rather than of the arithmetic: a skill budgeted ninety hours has no
+    subtopics behind it to say anything more specific with.
+    """
+    if span <= 1:
+        return 0
+    return round(position * (_template_count() - TASKS_PER_SKILL_WEEK) / (span - 1))
+
+
 def phase_for_week(week_num: int, start_week: int, end_week: int) -> Optional[str]:
     """
-    Which phase of a skill this week is.
+    Which phase of a skill this week mostly is.
 
-    The first week of a skill is always "learn" and the last is always
-    "apply", however many weeks lie between; a two-week skill therefore goes
-    straight from meeting something to using it, which is what two weeks
-    buys you. None means the skill has a single week and gets all of it.
+    Derived from the same slice the tasks come from, so the label cannot
+    drift from the work. None means the skill has a single week.
     """
     span = max(1, end_week - start_week + 1)
     if span == 1:
         return None
 
     position = min(max(week_num - start_week, 0), span - 1)
-    return PHASES[round(position * (len(PHASES) - 1) / (span - 1))]
+    per_phase = _template_count() // len(PHASES)
+    return PHASES[min(len(PHASES) - 1, window_start(span, position) // per_phase)]
 
 
 def _generate_tasks_for_week(
@@ -273,19 +337,22 @@ def _generate_tasks_for_week(
     learning_style: Optional[str] = DEFAULT_LEARNING_STYLE,
 ) -> List[str]:
     """Task descriptions for the week, phrased for how the learner prefers to work."""
-    by_phase = TASKS_BY_STYLE[normalize_learning_style(learning_style)]
+    style_tasks = TASKS_BY_STYLE[normalize_learning_style(learning_style)]
+    ordered = _ordered_templates(style_tasks)
 
     tasks = []
     for skill in skills:
         name = skill["skill"]
-        phase = phase_for_week(week_num, skill["start_week"], skill["end_week"])
+        span = max(1, skill["end_week"] - skill["start_week"] + 1)
 
-        if phase is None:
+        if span == 1:
             # One week for the whole skill: meet it, practise it and use it,
             # rather than three weeks' worth of any one of those.
-            templates = [by_phase[p][0] for p in PHASES]
+            templates = [style_tasks[p][0] for p in PHASES]
         else:
-            templates = by_phase[phase]
+            position = min(max(week_num - skill["start_week"], 0), span - 1)
+            start = window_start(span, position)
+            templates = ordered[start:start + TASKS_PER_SKILL_WEEK]
 
         tasks += [template.format(skill=name) for template in templates]
 

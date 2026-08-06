@@ -65,6 +65,7 @@ def proven_skills(
     unknown, not known, and the difference is the whole point of this module.
     """
     proven: Set[str] = set()
+    judged: Set[str] = set()
 
     for gap in skill_gaps or []:
         name = gap.get("skill")
@@ -74,11 +75,16 @@ def proven_skills(
         required = gap.get("required_score")
         if required is None:
             required = DEFAULT_REQUIRED_SCORE
+        judged.add(name)
         if current >= required:
             proven.add(name)
 
+    # Only for skills the gap record says nothing about. A gap entry carries
+    # the bar that skill has to clear, and the caller builds this map out of
+    # the same records with that bar dropped — so letting it speak for a skill
+    # already judged would pass anything scoring 70 against a bar set higher.
     for name, score in (skill_scores or {}).items():
-        if score is not None and score >= DEFAULT_REQUIRED_SCORE:
+        if name not in judged and score is not None and score >= DEFAULT_REQUIRED_SCORE:
             proven.add(name)
 
     return proven

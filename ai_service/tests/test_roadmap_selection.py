@@ -96,6 +96,15 @@ def test_raw_assessment_scores_also_count_as_proof():
     assert select_skills_for_role(TRACK, [], {"Python Basics": 30}) == TRACK
 
 
+def test_a_gap_record_outranks_the_bare_score_for_the_same_skill():
+    # The caller derives skill_scores from these same records, dropping the
+    # bar each one has to clear. 80 passes the default and fails this skill's
+    # real requirement, so the record has to win.
+    strict = [gap("Python Basics", 80, required=85)]
+    kept = select_skills_for_role(TRACK, strict, {"Python Basics": 80})
+    assert "Python Basics" in kept, "a score below its own requirement is not a pass"
+
+
 # ── what a week of it looks like ─────────────────────────────────────────
 
 def test_a_one_week_skill_has_no_phase():
@@ -140,9 +149,40 @@ def test_a_week_holding_two_skills_phases_each_one_separately():
         10,
         "project",
     )
-    second = weeks[1]["tasks"]
-    assert second[0] == TASKS_BY_STYLE["project"]["apply"][0].format(skill="Python Basics")
-    assert second[3] == TASKS_BY_STYLE["project"]["learn"][0].format(skill="NumPy & Pandas")
+    second = [t for t in weeks[1]["tasks"] if "self-assessment" not in t]
+    ending, starting = second[:3], second[3:]
+
+    apply_tasks = TASKS_BY_STYLE["project"]["apply"]
+    learn_tasks = TASKS_BY_STYLE["project"]["learn"]
+    assert all(t.replace("Python Basics", "{skill}") in apply_tasks for t in ending), ending
+    assert all(t.replace("NumPy & Pandas", "{skill}") in learn_tasks for t in starting), starting
+
+
+def test_every_style_carries_the_same_number_of_tasks():
+    # The sliding window and the phase label are both worked out from this
+    # length, so a style with more tasks than another would put them out of
+    # step and label a week's work as a phase it did not come from.
+    counts = {
+        style: [len(templates) for templates in phases.values()]
+        for style, phases in TASKS_BY_STYLE.items()
+    }
+    flat = [n for lengths in counts.values() for n in lengths]
+    assert len(set(flat)) == 1, f"phases must be the same length everywhere: {counts}"
+
+
+def test_a_skill_gets_distinct_weeks_for_as_long_as_any_track_schedules_one():
+    # The longest single skill currently scheduled is eleven weeks (Deep
+    # Learning, at ninety-four hours). Past thirteen the templates run out,
+    # which is a curriculum limit, not an arithmetic one.
+    for span in range(1, 14):
+        weeks = build_weekly_plan_skeleton(
+            [{"skill": "X", "start_week": 1, "end_week": span}], 10, "mixed"
+        )
+        shapes = {
+            tuple(t for t in w["tasks"] if not t.startswith("Weekly self-assessment"))
+            for w in weeks
+        }
+        assert len(shapes) == span, f"span {span} repeats a week"
 
 
 def test_every_style_and_phase_carries_tasks_that_name_the_skill():
