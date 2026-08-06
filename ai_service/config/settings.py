@@ -24,9 +24,13 @@ class Settings(BaseSettings):
     HUGGINGFACE_API_TOKEN: Optional[str] = os.getenv("HUGGINGFACE_API_TOKEN")
     
     # Model Configuration
+    # google/flan-t5-base was the default and is no longer served by any
+    # HuggingFace inference provider — a request for it fails outright. This
+    # one is served as a conversational model, which is what the client asks
+    # for, and is ungated, so a fresh checkout with a valid token works.
     LLM_MODEL: str = os.getenv(
         "LLM_MODEL",
-        "google/flan-t5-base"
+        "HuggingFaceH4/zephyr-7b-beta"
     )
 
     # LLM Parameters

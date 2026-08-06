@@ -3,12 +3,11 @@ Skill Assessment Service - AI-powered skill analysis
 Unified async service for analyzing quiz results and providing intelligent recommendations
 """
 import asyncio
+import re
 import numpy as np
 from datetime import datetime
 from typing import Dict, List, Optional
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain_huggingface import HuggingFaceEndpoint
+from huggingface_hub import InferenceClient
 
 from config import settings, RECOMMENDATION_TEMPLATES, CAREER_SKILL_MAPPING
 from models.agent_models import AgentAssessment
@@ -28,30 +27,51 @@ class SkillAssessmentService:
         self._initialize_llm()
 
     def _initialize_llm(self):
-        """Initialize HuggingFace LLM"""
+        """
+        Connect to HuggingFace inference.
+
+        This used to go through langchain's HuggingFaceEndpoint, and had been
+        dead for some time. langchain-huggingface 0.1.x calls
+        InferenceClient.post, which huggingface_hub removed in 0.30 — so the
+        object constructed, the probe raised, and every assessment quietly
+        answered from the rule-based fallback while the startup log scrolled
+        past.
+
+        Three separate things were wrong underneath that:
+
+          - the wrapper and the hub were version-locked to each other, and the
+            hub is pinned >=0.30 for Python 3.13 support, so they could not
+            both be satisfied;
+          - the call asked for task "text2text-generation", but the configured
+            model is a chat model. HuggingFace now serves it only as
+            "conversational" and rejects the other task by name;
+          - the fallback default, google/flan-t5-base, is no longer served by
+            any provider at all.
+
+        The client is called directly now. langchain was imported for a prompt
+        template and a one-step chain — an f-string and a single call — and
+        this was its only use anywhere in the service, so the whole dependency
+        tree goes with it and cannot break this again.
+        """
+        token = self.settings.HUGGINGFACE_API_KEY or self.settings.HUGGINGFACE_API_TOKEN
+        if not token:
+            print("⚠️  No HuggingFace token configured.")
+            print("🔄 Using rule-based analysis. Recommendations are still produced,")
+            print("   but they are templated rather than generated.")
+            self.llm = None
+            return
+
         try:
-            # temperature and top_p are constructor fields, not model_kwargs.
-            # Passing them inside model_kwargs is rejected outright, so this
-            # raised on every boot and left self.llm as None — meaning the
-            # "AI-powered" assessment silently ran its rule-based fallback for
-            # every single request, while printing one warning at startup that
-            # was easy to read as harmless.
-            self.llm = HuggingFaceEndpoint(
-                repo_id=self.settings.LLM_MODEL,
-                huggingfacehub_api_token=self.settings.HUGGINGFACE_API_KEY,
-                task="text2text-generation",
-                temperature=self.settings.LLM_TEMPERATURE,
-                top_p=0.9,
-                max_new_tokens=512,
+            client = InferenceClient(token=token, timeout=self.settings.REQUEST_TIMEOUT)
+            # A real round trip, not just construction. Reachability, the
+            # token, the model and the task are all only provable by calling.
+            client.chat_completion(
+                messages=[{"role": "user", "content": "ping"}],
+                model=self.settings.LLM_MODEL,
+                max_tokens=5,
             )
-            # Constructing the client proves nothing — langchain-huggingface
-            # 0.1.x calls InferenceClient.post, which huggingface_hub removed
-            # in 0.30, so the object builds and then every call raises. Without
-            # this probe the failure moved from one warning at startup to a
-            # silent exception on each request, still answered from the
-            # rule-based fallback, with the logs claiming the LLM was loaded.
-            self.llm.invoke("ping")
-            print(f"✅ LLM initialized: {self.settings.LLM_MODEL}")
+            self.llm = client
+            print(f"✅ LLM ready: {self.settings.LLM_MODEL}")
         except Exception as e:
             print(f"⚠️  LLM unavailable ({type(e).__name__}: {e})")
             print("🔄 Using rule-based analysis. Recommendations are still produced,")
@@ -292,37 +312,34 @@ class SkillAssessmentService:
         weak_areas: List[str],
         career_path: str
     ) -> List[str]:
-        """Generate recommendations using LLM"""
-        try:
-            prompt_template = PromptTemplate(
-                input_variables=["skill", "performance", "weak_areas", "career"],
-                template="""You are an expert learning advisor for {career} developers.
+        """Generate recommendations using the LLM, falling back if it will not."""
+        prompt = f"""You are an expert learning advisor for {career_path} developers.
 
-Skill: {skill}
-Performance Level: {performance}
-Weak Areas: {weak_areas}
+Skill: {skill_name}
+Performance Level: {performance_category.replace("_", " ")}
+Weak Areas: {", ".join(weak_areas) if weak_areas else "None identified"}
 
 Provide 4 specific, actionable learning recommendations to improve this skill.
-Keep each recommendation concise (1-2 sentences).
+Keep each recommendation to one or two sentences. Reply with a numbered list and nothing else."""
 
-Recommendations:"""
+        try:
+            response = self.llm.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                model=self.settings.LLM_MODEL,
+                max_tokens=400,
+                temperature=self.settings.LLM_TEMPERATURE,
             )
+            text = (response.choices[0].message.content or "").strip()
 
-            chain = LLMChain(llm=self.llm, prompt=prompt_template)
-
-            response = chain.run(
-                skill=skill_name,
-                performance=performance_category.replace("_", " "),
-                weak_areas=", ".join(weak_areas) if weak_areas else "None identified",
-                career=career_path
-            )
-
-            # Parse response into list
-            recommendations = [
-                rec.strip()
-                for rec in response.split('\n')
-                if rec.strip() and not rec.strip().startswith('Recommendations:')
-            ]
+            # Chat models answer with a numbered or bulleted list. The old
+            # parser split on newlines and kept the markers, so a stored
+            # recommendation began "1. " or "- ".
+            recommendations = []
+            for line in text.splitlines():
+                line = re.sub(r"^\s*(?:\d+[.)]|[-*•])\s*", "", line).strip()
+                if not line or line.lower().startswith("recommendation"):
+                    continue
+                recommendations.append(line)
 
             return recommendations[:4] if recommendations else self._generate_rule_based_recommendations(
                 performance_category, weak_areas, skill_name

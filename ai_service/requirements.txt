@@ -11,10 +11,15 @@ pydantic>=2.11,<3
 pydantic-settings==2.6.0
 python-multipart==0.0.12
 
-# AI & ML - LangChain for LLM integration
-langchain==0.3.14
-langchain-community==0.3.14
-langchain-huggingface==0.1.2
+# AI & ML — the inference client is called directly.
+#
+# langchain, langchain-community and langchain-huggingface used to be here for
+# a prompt template and a one-step chain in skill_assessment_service. That
+# wrapper was version-locked to huggingface-hub: langchain-huggingface 0.1.x
+# calls InferenceClient.post, removed in hub 0.30, and the hub is pinned >=0.30
+# below for Python 3.13. The two could not both be satisfied, so the LLM was
+# dead and every assessment fell back to templates. Calling the hub directly
+# removed the conflict and the whole dependency tree with it.
 # 0.23.0 predates Python 3.13 support and can cause ResolutionImpossible.
 huggingface-hub>=0.30.0,<1.0.0
 # Python 3.13 compatibility: avoid old tokenizers (<0.20) that trigger Rust source builds.
