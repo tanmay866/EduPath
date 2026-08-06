@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useQuiz } from "../../Context/QuizContext";
+import { useQuiz } from "../../Context/useQuiz";
 import { fetchQuizTopics, startQuiz } from "../../Services/assessmentService";
 import { useQuizLogic } from "./hooks/useQuizLogic";
 import QuizLayout from "./components/QuizLayout";

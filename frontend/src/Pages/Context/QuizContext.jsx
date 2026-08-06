@@ -1,6 +1,6 @@
-import { createContext, useContext, useState } from "react";
+import { useState } from "react";
 
-const QuizContext = createContext();
+import { QuizContext } from "./useQuiz";
 
 export const QuizProvider = ({ children }) => {
   const [assessment, setAssessment] = useState(null);
@@ -36,5 +36,3 @@ export const QuizProvider = ({ children }) => {
     </QuizContext.Provider>
   );
 };
-
-export const useQuiz = () => useContext(QuizContext);
