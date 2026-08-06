@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardFooterNote, MicroLabel, StatusBox, InlineMessage } from '../../../design';
-import { updateTaskStatus } from '../../Services/roadmapService';
+import TaskRow from './TaskRow';
+import { completedSkillNames, isWeekDone as weekIsDone, doneWeekCount } from '../weekProgress';
+import { useWeekTicks } from '../useWeekTicks';
 
 /**
  * The week-by-week schedule the AI service produces alongside the skill list.
@@ -21,52 +23,18 @@ import { updateTaskStatus } from '../../Services/roadmapService';
  */
 const WeeklyPlan = ({ weeks = [], skills = [] }) => {
   const [open, setOpen] = useState(null);
-  // Ticks are applied here and sent in the background: waiting on a round trip
-  // to fill a checkbox makes the page feel broken. A failed save rolls back.
-  const [ticks, setTicks] = useState({});
-  const [saveError, setSaveError] = useState('');
-
-  const ticksFor = (week) => ticks[week.week_number] ?? new Set((week.completed_tasks || []).map(Number));
-
-  const toggleTask = async (week, index) => {
-    const current = ticksFor(week);
-    const next = new Set(current);
-    const done = !next.has(index);
-    if (done) next.add(index);
-    else next.delete(index);
-
-    setTicks((prev) => ({ ...prev, [week.week_number]: next }));
-    setSaveError('');
-
-    try {
-      await updateTaskStatus(week.week_number, index, done);
-    } catch (err) {
-      setTicks((prev) => ({ ...prev, [week.week_number]: current }));
-      // The service throws the server's payload when there is one and the raw
-      // axios error when there is not — and that one's message is the literal
-      // string "Network Error", which tells a learner nothing.
-      const fromServer = err && err.success === false && err.message;
-      setSaveError(fromServer || 'That did not save. Check your connection and try again.');
-    }
-  };
+  const { ticksByWeek, ticksOf, toggle, error: saveError } = useWeekTicks();
 
   // Roadmaps generated before this was surfaced may have no weekly plan.
   if (!weeks.length) return null;
 
-  const doneSkills = new Set(
-    skills.filter((s) => s.status === 'completed').map((s) => s.skill)
-  );
-
-  const allTasksTicked = (week) =>
-    (week.tasks || []).length > 0 && ticksFor(week).size >= week.tasks.length;
-
-  const allSkillsDone = (week) =>
-    (week.skills || []).length > 0 && week.skills.every((s) => doneSkills.has(s));
-
-  const isWeekDone = (week) => allTasksTicked(week) || allSkillsDone(week);
+  const doneSkills = completedSkillNames(skills);
+  const ticksFor = ticksOf;
+  const isWeekDone = (week) => weekIsDone(week, doneSkills, ticksByWeek);
+  const toggleTask = toggle;
 
   const currentWeek = weeks.find((w) => !isWeekDone(w))?.week_number ?? null;
-  const doneCount = weeks.filter(isWeekDone).length;
+  const doneCount = doneWeekCount(weeks, skills, ticksByWeek);
 
   return (
     <Card>
@@ -154,56 +122,15 @@ const WeeklyPlan = ({ weeks = [], skills = [] }) => {
 
             {isOpen && (
               <div style={{ padding: '4px 20px 20px 52px', background: current ? 'var(--color-surface-current)' : 'transparent' }}>
-                {tasks.map((task, t) => {
-                  const ticked = weekTicks.has(t);
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => toggleTask(week, t)}
-                      aria-pressed={ticked}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '10px 1fr',
-                        gap: 12,
-                        marginTop: t ? 9 : 4,
-                        alignItems: 'start',
-                        width: '100%',
-                        textAlign: 'left',
-                        background: 'none',
-                        border: 'none',
-                        padding: 0,
-                        cursor: 'pointer',
-                        font: 'inherit',
-                      }}
-                    >
-                      {/* Fills rather than gaining a tick: §5 has no
-                          checkmarks, and this is the same square the password
-                          rules use to mean satisfied. */}
-                      <span
-                        style={{
-                          width: 8,
-                          height: 8,
-                          marginTop: 6,
-                          display: 'block',
-                          background: ticked ? 'var(--color-green)' : 'transparent',
-                          border: ticked ? 'none' : '1px solid var(--color-line-btn)',
-                          transition: 'background-color 120ms ease',
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: 14,
-                          lineHeight: 1.5,
-                          color: ticked ? 'var(--color-text-4)' : 'var(--color-text-2)',
-                          textDecoration: ticked ? 'line-through' : 'none',
-                        }}
-                      >
-                        {task}
-                      </span>
-                    </button>
-                  );
-                })}
+                {tasks.map((task, t) => (
+                  <TaskRow
+                    key={t}
+                    task={task}
+                    first={t === 0}
+                    ticked={weekTicks.has(t)}
+                    onToggle={() => toggleTask(week, t)}
+                  />
+                ))}
 
                 {week.mini_project?.title && (
                   <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--color-line-soft)' }}>

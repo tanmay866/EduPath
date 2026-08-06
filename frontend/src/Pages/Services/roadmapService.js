@@ -9,6 +9,16 @@ export const generateRoadmap = async () => {
   }
 };
 
+/** The active roadmap for the role the learner is currently working towards. */
+export const getRoadmap = async () => {
+  try {
+    const response = await API.get('/roadmap');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 export const getRoadmapHistory = async () => {
   try {
     const response = await API.get('/roadmap/history');

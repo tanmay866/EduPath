@@ -7,12 +7,19 @@ import {
 } from '../../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../../design/nav';
 import TopicProgress from './TopicProgress';
+import ThisWeek from '../../Roadmap/components/ThisWeek';
+import { getRoadmap } from '../../Services/roadmapService';
 
 /**
  * Spec §7 Overview.
  *
  * Stat strip of four, then 1.4fr / 1fr: recent activity as ordinal rows on the
  * left, the next action and an ink panel stacked on the right.
+ *
+ * The current week leads, above the strip. This is the page a returning
+ * learner lands on, and what they need is the next thing to do, not a summary
+ * of what they have already done — the plan runs up to 49 weeks and the
+ * roadmap screen shows all of them at once.
  */
 const AssessmentDashboard = () => {
   const navigate = useNavigate();
@@ -20,6 +27,9 @@ const AssessmentDashboard = () => {
   const [topicCount, setTopicCount] = useState(0);
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
+  // The plan, for the current week's tasks. Fetched separately and allowed to
+  // fail: a learner with no roadmap yet still gets the rest of the page.
+  const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,11 +43,15 @@ const AssessmentDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [topicsRes, statsRes, historyRes] = await Promise.all([
+      const [topicsRes, statsRes, historyRes, roadmapRes] = await Promise.all([
         fetchQuizTopics(),
         getQuizStats().catch(() => ({ data: { data: { overall: { totalQuizzes: 0, averageScore: 0 }, topicPerformance: [] } } })),
         getQuizHistory().catch(() => ({ data: { data: { results: [] } } })),
+        // 404 when no plan has been generated yet, which is a normal state for
+        // a new account rather than an error for the whole page.
+        getRoadmap().catch(() => null),
       ]);
+      setRoadmap(roadmapRes?.data || null);
       setTopicCount((topicsRes.data?.data || []).length);
       setStats(statsRes.data?.data || null);
       setHistory(historyRes.data?.data?.results || []);
@@ -91,6 +105,8 @@ const AssessmentDashboard = () => {
 
   return shell(
     <>
+      <ThisWeek roadmap={roadmap} />
+
       <StatStrip items={statItems} />
 
       <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
