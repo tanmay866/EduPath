@@ -1,0 +1,74 @@
+name: Weekly plan email
+
+# Monday 08:00 Asia/Kolkata. GitHub schedules in UTC only and does not observe
+# any timezone, so this is 02:30 UTC — India is UTC+5:30 with no daylight
+# saving, which is why one fixed UTC time works all year.
+#
+# Why this exists rather than the cron inside the server: a free Render
+# instance sleeps after about fifteen minutes idle, so at eight on a Monday
+# morning the process is not running and its own schedule never fires. This
+# both wakes it and triggers the send.
+#
+# GitHub delays scheduled runs under load, sometimes by fifteen minutes or
+# more, and disables schedules on repositories with no activity for 60 days.
+# Neither matters much for a weekly email that says "this is the week you are
+# on", but it does mean the exact minute is not guaranteed.
+on:
+  schedule:
+    - cron: "30 2 * * 1"
+  # So it can be run by hand from the Actions tab — useful for the first send
+  # and for checking the setup without waiting for Monday.
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: "Report who would be emailed without sending"
+        type: boolean
+        default: true
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake the service
+        # The first request to a sleeping instance takes 20-30 seconds and can
+        # time out. This absorbs the cold start so the real call arrives at a
+        # service that is already up. Failure is fine — the next step retries
+        # in effect, and a 404 here still counts as awake.
+        continue-on-error: true
+        run: |
+          curl --silent --output /dev/null --max-time 90 \
+            "${{ secrets.BACKEND_URL }}/api/" || true
+
+      - name: Trigger the send
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          TRIGGER_SECRET: ${{ secrets.WEEKLY_EMAIL_TRIGGER_SECRET }}
+          # A manual run defaults to a dry run so nobody sends real mail by
+          # clicking the button to see what it does. The schedule sends.
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dryRun && '1' || '0' }}
+        run: |
+          if [ -z "$BACKEND_URL" ] || [ -z "$TRIGGER_SECRET" ]; then
+            echo "::error::BACKEND_URL or WEEKLY_EMAIL_TRIGGER_SECRET is not set in repository secrets."
+            exit 1
+          fi
+
+          echo "Dry run: $DRY_RUN"
+          response=$(mktemp)
+          code=$(curl --silent --show-error --max-time 300 \
+            --write-out "%{http_code}" --output "$response" \
+            --request POST \
+            --header "x-trigger-secret: $TRIGGER_SECRET" \
+            "$BACKEND_URL/api/internal/weekly-email?dryRun=$DRY_RUN")
+
+          echo "HTTP $code"
+          cat "$response"
+          echo
+
+          if [ "$code" != "200" ]; then
+            echo "::error::Weekly email trigger returned HTTP $code"
+            exit 1
+          fi
+
+          # A 200 with sent: 0 is normal — nobody opted in, or everyone was
+          # already sent to today — so it is reported, not failed.
+          echo "::notice::$(python3 -c "import json,sys; d=json.load(open('$response'))['data']; print(f\"sent {d['sent']} of {d['considered']} considered; skipped {d['skipped']}\")" 2>/dev/null || echo 'see output above')"

@@ -12,6 +12,7 @@ import profileRoutes from './routes/profileRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 import unsubscribeRoutes from './routes/unsubscribeRoutes.js';
+import internalRoutes from './routes/internalRoutes.js';
 import startScheduler from './services/scheduler.js';
 import resumeRoutes from './routes/resumeRoutes.js';
 import resumeGeneratorRoutes from './routes/resumeGeneratorRoutes.js';
@@ -140,6 +141,8 @@ app.use('/api/auth/signup', sensitiveLimiter);
 app.use('/api/auth/forgot-password', sensitiveLimiter);
 app.use('/api/auth/resend-otp', sensitiveLimiter);
 app.use('/api/contact/send', sensitiveLimiter);
+// Guarded by a secret already; this only blunts someone hammering the URL.
+app.use('/api/internal', sensitiveLimiter);
 
 // Guessing a 6-digit code is only hard if guesses are limited. 10 attempts per
 // 15 minutes leaves a brute-forcer needing years; a real user needs two or three.
@@ -160,6 +163,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/unsubscribe', unsubscribeRoutes);
+app.use('/api/internal', internalRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/resume-generator', resumeGeneratorRoutes);
 app.use('/api/portfolio', portfolioRoutes);
