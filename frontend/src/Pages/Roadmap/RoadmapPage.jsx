@@ -7,6 +7,7 @@ import {
   getRoadmapById,
   getRoadmapHistory,
   updateSkillStatus,
+  adaptRoadmap,
 } from '../Services/roadmapService';
 import { getProfile } from '../Services/profileService';
 import { getInterviewHistory } from '../Services/interviewResultService';
@@ -35,6 +36,7 @@ const RoadmapPage = () => {
   const [isRoadmapLoading, setIsRoadmapLoading] = useState(false);
   const [selectedRoadmapId,setSelectedRoadmapId]= useState('');
   const [roadmapData,      setRoadmapData]      = useState(null);
+  const [adapting,         setAdapting]         = useState(false);
   const [updatingSkill,    setUpdatingSkill]    = useState('');
   const [showHistory,      setShowHistory]      = useState(false);
   // Shown instead of a form: these values live on the profile now.
@@ -132,6 +134,35 @@ const RoadmapPage = () => {
     finally       { setIsGenerating(false); }
   };
 
+  /**
+   * Rebuild the plan in place, keeping what has been finished.
+   *
+   * The plan is reloaded rather than patched from the response: adapting can
+   * reorder skills and renumber every week, so anything held locally is stale
+   * the moment it returns.
+   */
+  const handleAdapt = async () => {
+    setAdapting(true);
+    try {
+      const res = await adaptRoadmap();
+      const d = res?.data;
+      if (d?.roadmap_id) await loadRoadmapById(d.roadmap_id);
+      await loadHistory();
+
+      // Says what was kept, because "your plan changed" without that is
+      // exactly the sentence that makes someone worry they lost something.
+      const kept = [
+        d?.skills_carried ? `${d.skills_carried} completed ${d.skills_carried === 1 ? 'skill' : 'skills'}` : null,
+        d?.ticks_carried ? `${d.ticks_carried} ticked ${d.ticks_carried === 1 ? 'task' : 'tasks'}` : null,
+      ].filter(Boolean).join(' and ');
+      toast.success(kept ? `Plan updated — kept ${kept}.` : 'Plan updated around your latest results.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Could not update the plan.'));
+    } finally {
+      setAdapting(false);
+    }
+  };
+
   const handleMarkCompleted = async (skillName) => {
     if (!skillName || !roadmapData) return;
     const prev = roadmapData.skills || [];
@@ -221,6 +252,8 @@ const RoadmapPage = () => {
           updatingSkill={updatingSkill}
           onMarkCompleted={handleMarkCompleted}
           onRegenerate={handleGenerate}
+          onAdapt={handleAdapt}
+          adapting={adapting}
           onTestSkill={(step) =>
             navigate('/assessment/quiz', {
               state: { topicId: step.quiz_topic_id, topicName: step.quiz_topic_name, fromSkill: step.skill },

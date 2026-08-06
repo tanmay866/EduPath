@@ -65,7 +65,8 @@ const STATUS_BORDER = {
   future: 'transparent',
 };
 
-const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted, onRegenerate, latestInterview, loadingInterview, targetRole, onTestSkill }) => {
+const RoadmapTimeline = ({
+  onAdapt, adapting, roadmapData, isRoadmapLoading, updatingSkill, onMarkCompleted, onRegenerate, latestInterview, loadingInterview, targetRole, onTestSkill }) => {
   const skills = roadmapData?.skills || [];
   const [expanded, setExpanded] = useState('');
 
@@ -115,22 +116,34 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 20,
+            flexWrap: 'wrap',
             borderLeft: '3px solid var(--color-amber)',
           }}
         >
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-ink)' }}>
               You have assessed since this plan was built
             </div>
+            {/* Two different actions, and the difference matters: updating
+                keeps what you have finished, regenerating starts the plan
+                over. Only one of those was offered before. */}
             <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '5px 0 0' }}>
-              Regenerating rebuilds it around your latest results. Your progress on other roles is kept.
+              Updating rebuilds it around your latest results and keeps everything you have
+              marked done. Regenerating starts the plan over.
             </p>
           </div>
-          {onRegenerate && (
-            <Button variant="attention" onClick={onRegenerate} style={{ flexShrink: 0 }}>
-              Regenerate
-            </Button>
-          )}
+          <div style={{ display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+            {onAdapt && (
+              <Button variant="attention" onClick={onAdapt} loading={adapting} loadingLabel="Updating…">
+                Update this plan
+              </Button>
+            )}
+            {onRegenerate && (
+              <Button variant="secondary" onClick={onRegenerate}>
+                Start over
+              </Button>
+            )}
+          </div>
         </Card>
       )}
 

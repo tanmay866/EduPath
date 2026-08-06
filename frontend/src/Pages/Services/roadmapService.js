@@ -56,6 +56,16 @@ export const updateSkillStatus = async (skill, status) => {
   }
 };
 
+/** Rebuild the active plan around newer results, keeping progress. */
+export const adaptRoadmap = async () => {
+  try {
+    const response = await API.post('/roadmap/adapt');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 /** Tick or untick one task in a week of the active roadmap. */
 export const updateTaskStatus = async (weekNumber, taskIndex, done) => {
   try {

@@ -6,6 +6,7 @@ import SkillGap from "../models/SkillGap.js";
 import Topic from "../models/Topic.js";
 import { topicForSkill } from "../utils/skillTopicMap.js";
 import Settings from "../models/Settings.js";
+import { mergeRoadmapProgress } from "../utils/mergeRoadmapProgress.js";
 
 const AI_SERVICE_URL =
     process.env.AI_SERVICE_URL || "http://localhost:8000";
@@ -544,6 +545,116 @@ export const analyseJobPosting = async (req, res) => {
             });
         }
         console.error("analyseJobPosting error:", err);
+        return res.status(500).json({ success: false, message: "Server error.", error: err.message });
+    }
+};
+
+/**
+ * POST /api/roadmap/adapt — rebuild the active plan around newer results,
+ * keeping the progress made on it.
+ *
+ * The stale notice used to offer only "Regenerate", which writes a new
+ * document, supersedes the old one, and leaves every completed skill and every
+ * ticked task behind in history. So the offer to rebuild around a fresh
+ * assessment was really an offer to start again, and for anyone a few weeks in
+ * the sensible answer was to ignore it.
+ *
+ * This rebuilds the same document. Skills carry by name and ticks carry by
+ * what the task says, so the plan can reorder and renumber freely without
+ * losing the work — see utils/mergeRoadmapProgress.js for why neither can be
+ * carried by position.
+ *
+ * Regenerate is still there for a genuine restart. This is the other case.
+ */
+export const adaptRoadmap = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const [user, settings] = await Promise.all([User.findById(userId), Settings.current()]);
+        const roadmapProfile = resolveRoadmapProfile(user || {}, settings);
+
+        const roadmap = await Roadmap.findOne({
+            user_id: userId,
+            status: "active",
+            ...(roadmapProfile.targetRole ? { target_role: roadmapProfile.targetRole } : {}),
+        }).sort({ createdAt: -1 });
+
+        if (!roadmap) {
+            return res.status(404).json({
+                success: false,
+                message: "No active roadmap to adapt. Generate one first.",
+            });
+        }
+
+        const skillGap = await SkillGap.findOne({
+            user_id: userId,
+            target_role: roadmapProfile.targetRole,
+        }).sort({ createdAt: -1 });
+
+        let aiResult;
+        try {
+            const response = await axios.post(
+                `${AI_SERVICE_URL}/api/roadmap/generate`,
+                {
+                    user_id: userId.toString(),
+                    target_role: roadmapProfile.targetRole,
+                    experience_level: roadmapProfile.experienceLevel,
+                    hours_per_week: roadmapProfile.hoursPerWeek,
+                    learning_style: roadmapProfile.learningStyle,
+                    skill_gaps: skillGap?.skill_gaps || [],
+                    skill_scores: Object.fromEntries(
+                        (skillGap?.skill_gaps || []).map((gap) => [gap.skill, gap.current_score])
+                    ),
+                    current_skills: normalizeCurrentSkillsForAI(user.current_skills),
+                    max_modules: settings.maxModules,
+                },
+                { timeout: 30000 }
+            );
+            aiResult = response.data;
+        } catch (aiError) {
+            console.error("AI service error during adapt:", aiError.message);
+            // The existing plan is untouched, so saying so is the whole
+            // recovery — nothing has been half-rewritten.
+            return res.status(503).json({
+                success: false,
+                message: "Could not rebuild the plan just now. Your current one is unchanged.",
+            });
+        }
+
+        const previous = {
+            skills: roadmap.skills.map((s) => ({ skill: s.skill, status: s.status })),
+            weekly_plans: roadmap.weekly_plans.map((w) => ({
+                week_number: w.week_number,
+                skills: [...(w.skills || [])],
+                tasks: [...(w.tasks || [])],
+                completed_tasks: [...(w.completed_tasks || [])],
+            })),
+        };
+
+        const next = {
+            skills: aiResult.skills || [],
+            weekly_plans: aiResult.weekly_plans || [],
+        };
+        const carried = mergeRoadmapProgress(previous, next);
+
+        roadmap.skills = next.skills;
+        roadmap.weekly_plans = next.weekly_plans;
+        roadmap.total_duration_weeks = aiResult.total_duration_weeks;
+        roadmap.metadata = { ...(roadmap.metadata || {}), last_adapted_at: new Date() };
+        await roadmap.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Plan rebuilt around your latest results.",
+            data: {
+                roadmap_id: roadmap.roadmap_id,
+                total_duration_weeks: roadmap.total_duration_weeks,
+                skills_carried: carried.skillsCarried,
+                ticks_carried: carried.ticksCarried,
+                ticks_dropped: carried.ticksDropped,
+            },
+        });
+    } catch (err) {
+        console.error("adaptRoadmap error:", err);
         return res.status(500).json({ success: false, message: "Server error.", error: err.message });
     }
 };
