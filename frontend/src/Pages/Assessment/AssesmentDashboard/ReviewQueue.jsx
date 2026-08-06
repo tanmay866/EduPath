@@ -79,10 +79,15 @@ const ReviewQueue = ({ queue = [] }) => {
             </p>
           </div>
 
+          {/* Straight to the quiz with this topic already chosen. Sending the
+              learner to the hub instead made the button a round trip back to
+              this page, and even arriving at the right screen they would have
+              had to find the topic again in a list of 29 — for a card whose
+              whole point is naming the one topic to go back to. */}
           <Button
             variant="secondary"
             style={{ flexShrink: 0, padding: '9px 18px', fontSize: 14 }}
-            onClick={() => navigate('/assessment-hub/skill')}
+            onClick={() => navigate('/assessment/quiz', { state: { topicId: item.topicId } })}
           >
             Retake
           </Button>
