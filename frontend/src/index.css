@@ -260,3 +260,33 @@ textarea {
     display: none !important;
   }
 }
+
+/* ── Marketing index rows ─────────────────────────────────────────────────
+   The 90px ordinal column plus a 30px display heading does not fit a phone.
+   The heading is the binding constraint: a grid item's default min-width is
+   auto, so it could not shrink below its own longest word and pushed the row
+   past the viewport — "Cybersecurity Engineer" overflowed at 360px on the
+   roadmap, tracks and how-it-works pages alike.
+
+   The inline `min-width: 0` on the body handles the shrinking; this drops the
+   ordinal column and eases the heading down at the widths where 30px stops
+   fitting. Media queries cannot be written in a style object, which is why
+   this is here rather than in the component. */
+@media (max-width: 640px) {
+  .index-row {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+
+  .index-row__name {
+    font-size: 24px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .index-row__name {
+    font-size: 21px !important;
+    /* Last resort for a single word longer than the column. */
+    overflow-wrap: break-word;
+  }
+}

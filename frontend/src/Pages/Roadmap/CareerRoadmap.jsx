@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EditorialShell, Button, MicroLabel, StatStrip, type } from '../../design';
 import IndexRows from '../../component/marketing/IndexRows';
-import { TRACKS } from '../Home/tracks';
+import { TRACKS, TRACK_PACE_HOURS, TRACK_PACE_LEVEL } from '../Home/tracks';
 
 /**
  * The roadmap explainer, on the §7 marketing index pattern.
@@ -10,6 +10,10 @@ import { TRACKS } from '../Home/tracks';
  * This was a landing page with a typewriter headline, drifting orbs and
  * colour-coded pills — §4 rules out motion, and §5 rules out the pills. It is
  * now a text page over ordinal rows, funnelling to the generator.
+ *
+ * The nav sends everyone here, including people who already have a plan, so
+ * the actions at the top follow the session: a returning learner is offered
+ * their roadmap rather than a pitch for one.
  */
 const STEPS = [
   {
@@ -40,8 +44,21 @@ const FIGURES = [
   { label: 'Cost', value: 'Free' },
 ];
 
+const isSignedIn = () => Boolean(sessionStorage.getItem('token'));
+
 const CareerRoadmap = () => {
   const navigate = useNavigate();
+  const [signedIn, setSignedIn] = useState(isSignedIn);
+
+  useEffect(() => {
+    const read = () => setSignedIn(isSignedIn());
+    window.addEventListener('storage', read);
+    window.addEventListener('sessionStorageUpdated', read);
+    return () => {
+      window.removeEventListener('storage', read);
+      window.removeEventListener('sessionStorageUpdated', read);
+    };
+  }, []);
 
   return (
     <EditorialShell>
@@ -60,8 +77,10 @@ const CareerRoadmap = () => {
           the rest of the schedule moves.
         </p>
 
-        <div style={{ display: 'flex', gap: 12, marginBottom: 40 }}>
-          <Button onClick={() => navigate('/roadmap/generate')}>Generate a roadmap</Button>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+          <Button onClick={() => navigate('/roadmap/generate')}>
+            {signedIn ? 'Open my roadmap' : 'Generate a roadmap'}
+          </Button>
           <Button
             variant="secondary"
             onClick={() => navigate('/roadmap/generate', { state: { openHistory: true } })}
@@ -69,6 +88,16 @@ const CareerRoadmap = () => {
             My saved roadmaps
           </Button>
         </div>
+
+        {/* The single most useful thing this page can tell someone, and it did
+            not say it anywhere: the plan is the whole track until an
+            assessment cuts it down. */}
+        <p style={{ ...type.prose, margin: '0 0 40px', maxWidth: 680, color: 'var(--color-text-3)' }}>
+          Generate one whenever you like — but take the skill assessment first if you can. Anything
+          you already score well on is shortened or dropped, which is usually the difference between
+          a plan of months and a plan of a year. Without it the generator assumes you are starting
+          from the beginning.
+        </p>
 
         <StatStrip items={FIGURES} style={{ marginBottom: 56 }} />
 
@@ -92,11 +121,27 @@ const CareerRoadmap = () => {
           }))}
         />
 
-        <div style={{ display: 'flex', gap: 12, marginTop: 40 }}>
-          <Button onClick={() => navigate('/roadmap/generate')}>Start now</Button>
-          <Button variant="secondary" onClick={() => navigate('/assessment-hub')}>
-            Assess first
-          </Button>
+        {/* Weeks are not a property of a track — they fall out of hours per
+            week and experience. Quoted bare, as they were here, they read as
+            fixed. The landing page and the tracks index state the same pace
+            from the same constants. */}
+        <p style={{ fontSize: 13.5, color: 'var(--color-text-4)', margin: '14px 0 0', maxWidth: 680 }}>
+          {`Week counts assume ${TRACK_PACE_HOURS} h/week from ${TRACK_PACE_LEVEL}. Fewer hours stretches the plan rather than breaking it, and anything you already know is not scheduled at all.`}
+        </p>
+
+        <div style={{ display: 'flex', gap: 12, marginTop: 40, flexWrap: 'wrap' }}>
+          {/* Assessing is the recommended order, so it leads here rather than
+              sitting second to a button that repeats the one at the top.
+
+              Signed in, the roadmap button is already at the top of the page —
+              a second one here would be the same words twice on one screen, so
+              the closing action is just the recommended one. */}
+          <Button onClick={() => navigate('/assessment-hub')}>Take the skill assessment</Button>
+          {!signedIn && (
+            <Button variant="secondary" onClick={() => navigate('/roadmap/generate')}>
+              Skip and generate a plan
+            </Button>
+          )}
         </div>
       </section>
     </EditorialShell>

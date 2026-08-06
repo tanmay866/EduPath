@@ -8,13 +8,20 @@ import { Link } from 'react-router-dom';
  * `grid-template-columns: 90px 1fr` — a mono ordinal beside a Newsreader 30px
  * name and a 15px description. Explicitly not a card grid.
  *
- * Shared by Tracks and How it works, which are the same shape.
+ * Shared by Tracks, How it works and the roadmap explainer, which are the
+ * same shape.
+ *
+ * Narrow-screen behaviour is in index.css: a grid item defaults to
+ * `min-width: auto`, so the 30px display heading could not shrink below its
+ * own longest word and pushed the row past the viewport — "Cybersecurity
+ * Engineer" overflowed a 360px screen on every page using this component.
  */
 const IndexRows = ({ rows = [] }) => (
   <div style={{ borderTop: '1px solid var(--color-ink)' }}>
     {rows.map((row, i) => {
       const body = (
         <div
+          className="index-row"
           style={{
             display: 'grid',
             gridTemplateColumns: '90px 1fr',
@@ -28,9 +35,12 @@ const IndexRows = ({ rows = [] }) => (
             {row.ordinal || String(i + 1).padStart(2, '0')}
           </span>
 
-          <div>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 24 }}>
+          {/* minWidth: 0 lets the column shrink; without it the grid item is
+              floored at the heading's min-content width. */}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
               <h2
+                className="index-row__name"
                 style={{
                   fontFamily: 'var(--font-display)',
                   fontSize: 30,
