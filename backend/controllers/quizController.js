@@ -7,7 +7,7 @@ import User from '../models/userModel.js';
 import huggingFaceService from '../services/huggingFaceService.js';
 import aiService from '../services/aiService.js';
 import Settings from '../models/Settings.js';
-import { TOPIC_SKILL_MAP } from '../utils/skillTopicMap.js';
+import { skillsAssessedBy } from '../utils/skillTopicMap.js';
 import { reviewQueue } from '../utils/reviewSchedule.js';
 import { topicsForRole } from '../utils/roleTopicMap.js';
 
@@ -563,7 +563,12 @@ export const submitQuiz = async (req, res) => {
     // what roadmap generation reads to personalize which skills it
     // schedules. Only topics with a known mapping to the AI service's
     // canonical skill names are written — see skillTopicMap.js.
-    const canonicalSkills = TOPIC_SKILL_MAP[session.topicId.name] || [];
+    //
+    // Only the skills this topic actually assesses. The skills it merely
+    // touches are deliberately not recorded: a passing score removes a skill
+    // from the roadmap, so writing them let one quiz clear three skills the
+    // learner was never asked about.
+    const canonicalSkills = skillsAssessedBy(session.topicId.name);
     if (canonicalSkills.length > 0) {
       try {
         await syncSkillGap(userId, canonicalSkills, percentage);

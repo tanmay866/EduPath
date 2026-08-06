@@ -40,7 +40,14 @@ test('skill names containing dots are stored and read back intact', () => {
 test('every skill the topic map can produce is storable', () => {
   // The write path only ever inserts names from this map, so if any of them
   // cannot be stored the failure is silent for that topic alone.
-  const everySkill = Object.values(TOPIC_SKILL_MAP).flat();
+  //
+  // Only the assessed names are ever written — the related ones are recorded
+  // nowhere — but both are checked, so adding a dotted name to either list
+  // cannot reintroduce the fault by being promoted later.
+  const everySkill = Object.values(TOPIC_SKILL_MAP).flatMap((e) => [
+    ...e.assesses,
+    ...e.related,
+  ]);
   const doc = buildGap(everySkill);
 
   assert.equal(doc.validateSync(), undefined, 'no mapped skill may be unstorable');

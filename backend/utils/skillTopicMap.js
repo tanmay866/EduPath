@@ -4,55 +4,120 @@
  *
  * The two taxonomies were built independently — quiz topics are coarse
  * ("React"), role-template skills are fine-grained ("React Hooks & State
- * Management") — and the roadmap generator filters by exact string match
- * against those canonical names. So a single quiz score has to fan out to
- * every canonical skill it covers, spelled exactly as the AI service has
- * them.
+ * Management") — and the roadmap generator matches by exact name.
+ *
+ * Each topic therefore says two different things, and conflating them was a
+ * real bug. `assesses` is what sitting the quiz actually demonstrates.
+ * `related` is what the topic touches on without testing it properly.
+ *
+ * The distinction only started to matter when a passing score began removing
+ * a skill from a roadmap. Before that an unproven skill and a wrongly proven
+ * one both ended up on the plan, so the over-reach was invisible; afterwards,
+ * ten questions on "Python Basics" would excuse a Cybersecurity learner from
+ * "Python for Security" — a different subject that happens to share a word.
+ *
+ * The rule is that a topic proves a skill only where it covers the same
+ * subject at the same or wider scope. It never proves a skill whose name
+ * points at a narrower specialism: "React" does not prove "React Router",
+ * because React Router is a separate library a React quiz need not touch.
+ *
+ * Two names for one skill are both proven, because they are one skill. The
+ * templates spell the same material differently per track — AI/ML has "ML
+ * Fundamentals (Scikit-learn)" where Data Science has "Machine Learning
+ * Fundamentals" — and a machine learning quiz is an equally fair test of
+ * either.
+ *
+ * The cost is that skills with no topic of their own can no longer be tested
+ * out of at all: "Python for Security", "Linux & Shell Scripting" and
+ * "Feature Engineering & Model Evaluation" stay on a plan until the learner
+ * marks them done. That is the honest answer while the catalogue has no topic
+ * for them, and the fix is to add those topics rather than to accept a
+ * neighbouring quiz as proof.
  *
  * A few topics (TypeScript, Computer Vision, Big Data) have no canonical
  * skill in any role template and are left unmapped on purpose — inventing a
  * match would misrepresent a gap that was never actually assessed.
  */
 export const TOPIC_SKILL_MAP = {
-  'JavaScript': ['JavaScript Basics', 'ES6+ & Modern JS', 'Async JS (Promises, async/await)'],
-  'React': ['React Basics', 'React Hooks & State Management', 'React Router'],
-  'Node.js': ['Node.js Basics'],
-  'HTML & CSS': ['HTML & CSS Basics'],
-  'Express.js': ['Express.js'],
-  'MongoDB': ['MongoDB & Mongoose'],
-  'Python Basics': ['Python Basics', 'Python for Security', 'Python for Data Science'],
-  'Machine Learning': ['ML Fundamentals (Scikit-learn)', 'Machine Learning Fundamentals'],
-  'Deep Learning': ['Deep Learning (PyTorch/TensorFlow)'],
-  'Natural Language Processing': ['NLP Basics'],
-  'Network Security': ['Networking Fundamentals'],
-  'Ethical Hacking': ['Ethical Hacking & Penetration Testing'],
-  'Cryptography': ['Cryptography Basics'],
-  'Web Security': ['Web Security (OWASP Top 10)'],
-  'React Native': ['Cross-Platform Development (React Native/Flutter)'],
-  'Flutter': ['Cross-Platform Development (React Native/Flutter)'],
-  'iOS Development': ['iOS Development (Swift)'],
-  'Android Development': ['Android Development (Kotlin)'],
-  'Docker': ['Docker Fundamentals'],
-  'Kubernetes': ['Kubernetes Basics'],
-  'AWS': ['Cloud Fundamentals (AWS/Azure/GCP)'],
-  'CI/CD': ['CI/CD Pipelines'],
-  'Linux': ['Linux Basics', 'Linux & Shell Scripting'],
-  'Data Analysis': ['NumPy & Pandas', 'Feature Engineering & Model Evaluation'],
-  'Data Visualization': ['Data Visualization'],
-  'Statistics': ['Statistics & Probability'],
+  'JavaScript': {
+    assesses: ['JavaScript Basics'],
+    related: ['ES6+ & Modern JS', 'Async JS (Promises, async/await)'],
+  },
+  'React': {
+    assesses: ['React Basics'],
+    related: ['React Hooks & State Management', 'React Router'],
+  },
+  'Node.js': { assesses: ['Node.js Basics'], related: [] },
+  'HTML & CSS': { assesses: ['HTML & CSS Basics'], related: [] },
+  'Express.js': { assesses: ['Express.js'], related: [] },
+  'MongoDB': { assesses: ['MongoDB & Mongoose'], related: [] },
+  'Python Basics': {
+    assesses: ['Python Basics'],
+    // Same language, different subject: one is security tooling, the other is
+    // the scientific stack. Neither is demonstrated by a basics quiz.
+    related: ['Python for Security', 'Python for Data Science'],
+  },
+  'Machine Learning': {
+    // One skill under two spellings, one per track.
+    assesses: ['ML Fundamentals (Scikit-learn)', 'Machine Learning Fundamentals'],
+    related: [],
+  },
+  'Deep Learning': { assesses: ['Deep Learning (PyTorch/TensorFlow)'], related: [] },
+  'Natural Language Processing': { assesses: ['NLP Basics'], related: [] },
+  'Network Security': { assesses: ['Networking Fundamentals'], related: [] },
+  'Ethical Hacking': { assesses: ['Ethical Hacking & Penetration Testing'], related: [] },
+  'Cryptography': { assesses: ['Cryptography Basics'], related: [] },
+  'Web Security': { assesses: ['Web Security (OWASP Top 10)'], related: [] },
+  'React Native': { assesses: ['Cross-Platform Development (React Native/Flutter)'], related: [] },
+  'Flutter': { assesses: ['Cross-Platform Development (React Native/Flutter)'], related: [] },
+  'iOS Development': { assesses: ['iOS Development (Swift)'], related: [] },
+  'Android Development': { assesses: ['Android Development (Kotlin)'], related: [] },
+  'Docker': { assesses: ['Docker Fundamentals'], related: [] },
+  'Kubernetes': { assesses: ['Kubernetes Basics'], related: [] },
+  'AWS': { assesses: ['Cloud Fundamentals (AWS/Azure/GCP)'], related: [] },
+  'CI/CD': { assesses: ['CI/CD Pipelines'], related: [] },
+  'Linux': {
+    assesses: ['Linux Basics'],
+    // Shell scripting is its own discipline; a Linux quiz need never ask you
+    // to write one.
+    related: ['Linux & Shell Scripting'],
+  },
+  'Data Analysis': {
+    assesses: ['NumPy & Pandas'],
+    related: ['Feature Engineering & Model Evaluation'],
+  },
+  'Data Visualization': { assesses: ['Data Visualization'], related: [] },
+  'Statistics': { assesses: ['Statistics & Probability'], related: [] },
 };
+
+/**
+ * The skills a score on this topic may be recorded against.
+ *
+ * Only what the quiz demonstrates. Writing the related skills too is what let
+ * one quiz clear three skills off a plan, and it bought nothing: a skill that
+ * is merely recorded and not proven is kept on the roadmap anyway.
+ */
+export const skillsAssessedBy = (topicName) =>
+  TOPIC_SKILL_MAP[String(topicName || '').trim()]?.assesses || [];
+
+/** What the topic touches without testing. Kept so the relationship is
+ *  written down somewhere rather than lost, and so nothing has to guess at it
+ *  later. */
+export const skillsRelatedTo = (topicName) =>
+  TOPIC_SKILL_MAP[String(topicName || '').trim()]?.related || [];
 
 /**
  * The same mapping read backwards: which topic can be sat to test a roadmap
  * skill. Derived from the table above rather than written out again, so the
  * two can never disagree.
  *
- * Not every skill has one. "REST API Design" and "JWT Authentication" are real
- * roadmap steps with no topic in the catalogue, and they return undefined
- * rather than being pointed at something approximate.
+ * Built from `assesses` only. A skill that is merely related has no fair test
+ * in the catalogue, and offering a neighbouring quiz would send the learner
+ * somewhere that cannot settle the question. Those return undefined, as do
+ * real roadmap steps like "REST API Design" that have no topic at all.
  */
-const SKILL_TO_TOPIC = Object.entries(TOPIC_SKILL_MAP).reduce((acc, [topic, skills]) => {
-  for (const skill of skills) {
+const SKILL_TO_TOPIC = Object.entries(TOPIC_SKILL_MAP).reduce((acc, [topic, entry]) => {
+  for (const skill of entry.assesses) {
     // Some skills are genuinely covered by more than one topic: the template
     // has a single "Cross-Platform Development (React Native/Flutter)" that
     // both the React Native and Flutter topics assess. Either is a fair test
