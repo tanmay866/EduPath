@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Card, CardHeader, CardFooterNote, Button, Toggle, MicroLabel, Loading, Empty, type,
+  Card, CardHeader, CardFooterNote, Button, Toggle, MicroLabel, Loading, Empty,
+  InlineMessage, type,
 } from '../../design';
 import { saveInterviewResult } from '../Services/interviewResultService';
 import { useCareerRoles } from '../../hooks/useCareerRoles';
@@ -50,6 +51,27 @@ import {
 
 const VOICE_HINT_KEY = 'voiceHintSeen';
 
+/** Joins a typed draft to recognised speech without gluing words together. */
+const joinAnswer = (base, spoken) => {
+  const left = (base || '').trim();
+  const right = (spoken || '').trim();
+  if (!left) return right;
+  if (!right) return left;
+  return `${left} ${right}`;
+};
+
+/**
+ * What went wrong, in words that say what to do about it. The browser gives
+ * these as bare codes and the old handler only logged them, so a learner who
+ * had blocked the microphone saw the button flip back and nothing else.
+ */
+const MIC_ERRORS = {
+  'not-allowed': 'Microphone access is blocked. Allow it in your browser’s site settings, or type your answer instead.',
+  'service-not-allowed': 'Your browser refused speech recognition. Type your answer instead.',
+  'audio-capture': 'No microphone was found. Plug one in, or type your answer instead.',
+  network: 'Speech recognition needs a network connection and could not reach it. Type your answer instead.',
+};
+
 const AIMockInterview = () => {
   const navigate = useNavigate();
 
@@ -72,6 +94,8 @@ const AIMockInterview = () => {
 
   // Voice state
   const [isRecording, setIsRecording] = useState(false);
+  const [micError, setMicError] = useState('');
+  const [speechSupported, setSpeechSupported] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
 
@@ -115,6 +139,14 @@ const AIMockInterview = () => {
 
   // Speech recognition ref
   const recognitionRef = useRef(null);
+  // Whether the learner still means to be recording. The browser ends a
+  // session on its own after a pause; this is what decides to resume.
+  const wantRecordingRef = useRef(false);
+  // What was in the field when recording started, so speech is added to a
+  // typed draft rather than replacing it.
+  const baseAnswerRef = useRef('');
+  const finalRef = useRef('');
+  const answerRef = useRef('');
 
   // Total questions
   const TOTAL_QUESTIONS = 5;
@@ -127,55 +159,94 @@ const AIMockInterview = () => {
     }
   }, [navigate]);
 
-  // Initialize speech recognition
+  /**
+   * Speech recognition, built once.
+   *
+   * This effect used to list `isRecording` as a dependency. Pressing record
+   * called start() and then setIsRecording(true), which re-ran the effect —
+   * whose cleanup stopped the recogniser that had just started and replaced
+   * it with a fresh one. Recording ended roughly the moment it began.
+   *
+   * The handlers therefore cannot close over state; they read refs, which are
+   * current whenever the browser calls them.
+   */
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
-
-      recognitionRef.current.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        setAnswer(prev => {
-          const newText = (prev + finalTranscript).trim();
-          return newText || interimTranscript;
-        });
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsRecording(false);
-      };
-
-      recognitionRef.current.onend = () => {
-        if (isRecording) {
-          recognitionRef.current.start();
-        }
-      };
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setSpeechSupported(false);
+      return undefined;
     }
 
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalRef.current += `${transcript} `;
+        else interim += transcript;
+      }
+      // Interim text used to be dropped as soon as anything final existed, so
+      // after the first phrase the box stopped moving while you talked. Both
+      // are shown, on top of whatever was already in the field.
+      setAnswer(joinAnswer(baseAnswerRef.current, finalRef.current + interim));
+    };
+
+    recognition.onerror = (event) => {
+      // Silence is not a failure — continuous recognition reports it and then
+      // ends, and onend restarts. Aborting is what stop() does.
+      if (event.error === 'no-speech' || event.error === 'aborted') return;
+
+      wantRecordingRef.current = false;
+      setIsRecording(false);
+      setMicError(MIC_ERRORS[event.error] || 'Recording stopped unexpectedly. You can type your answer instead.');
+    };
+
+    recognition.onend = () => {
+      // Chrome ends the session after a pause even with continuous set, so a
+      // long think mid-answer would silently end the recording. Restart while
+      // the learner still means to be recording.
+      if (!wantRecordingRef.current) {
+        setIsRecording(false);
+        return;
+      }
+      try {
+        recognition.start();
+      } catch {
+        wantRecordingRef.current = false;
+        setIsRecording(false);
       }
     };
-  }, [isRecording]);
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      wantRecordingRef.current = false;
+      recognition.onend = null;
+      recognition.onresult = null;
+      recognition.onerror = null;
+      try { recognition.abort(); } catch { /* never started */ }
+    };
+  }, []);
 
 
-  // Text-to-speech function using Microsoft neural voices
+  // The result handler reads this rather than closing over `answer`.
+  useEffect(() => { answerRef.current = answer; }, [answer]);
+
+  /**
+   * Typing re-bases the recogniser: anything said next is added after what
+   * was just typed instead of overwriting it on the following result.
+   */
+  const handleAnswerChange = (e) => {
+    setAnswer(e.target.value);
+    baseAnswerRef.current = e.target.value;
+    finalRef.current = '';
+  };
+
+  // Text-to-speech
   const speak = (text, isFeedback = false) => {
     if (!voiceEnabled) return;
 
@@ -195,21 +266,46 @@ const AIMockInterview = () => {
     setIsSpeaking(false);
   };
 
-  // Start recording
+  /**
+   * Begin recording, adding to the answer rather than replacing it.
+   *
+   * This used to clear the field first, so recording a second time — to add a
+   * point you had forgotten, or after the browser cut the session short —
+   * destroyed everything said so far.
+   */
   const startRecording = () => {
-    if (recognitionRef.current) {
-      setAnswer('');
-      recognitionRef.current.start();
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+
+    setMicError('');
+    // The question may still be being read aloud, and the microphone would
+    // otherwise transcribe our own voice back into the answer.
+    stopSpeaking();
+
+    baseAnswerRef.current = answerRef.current;
+    finalRef.current = '';
+    wantRecordingRef.current = true;
+
+    try {
+      recognition.start();
       setIsRecording(true);
+    } catch (err) {
+      // start() throws if a session is already running; that is the state we
+      // wanted, so treat it as success rather than an error.
+      if (err?.name === 'InvalidStateError') {
+        setIsRecording(true);
+        return;
+      }
+      wantRecordingRef.current = false;
+      setIsRecording(false);
+      setMicError('Recording could not start. You can type your answer instead.');
     }
   };
 
-  // Stop recording
   const stopRecording = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
-    }
+    wantRecordingRef.current = false;
+    setIsRecording(false);
+    try { recognitionRef.current?.stop(); } catch { /* never started */ }
   };
 
   // Fetch new question. Takes the question number explicitly rather than
@@ -260,6 +356,7 @@ const AIMockInterview = () => {
 
     setLoadingEvaluation(true);
     stopRecording();
+    setMicError('');
 
     try {
       const token = sessionStorage.getItem('token');
@@ -592,7 +689,7 @@ const AIMockInterview = () => {
 
                   <textarea
                     value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
+                    onChange={handleAnswerChange}
                     rows={7}
                     placeholder="Speak, or type your answer here"
                     style={{
@@ -611,12 +708,23 @@ const AIMockInterview = () => {
                   />
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 20 }}>
+                {/* The browser reports these as bare codes and they were only
+                    reaching the console, so a blocked microphone looked like a
+                    button that did nothing. */}
+                {(micError || !speechSupported) && (
+                  <InlineMessage tone="error" style={{ marginTop: 14 }}>
+                    {micError || 'This browser cannot record speech. Chrome or Edge can, and typing works everywhere.'}
+                  </InlineMessage>
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 20, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
                     <Button
                       variant={isRecording ? 'attention' : 'secondary'}
                       style={{ padding: '10px 20px', fontSize: 14 }}
                       onClick={isRecording ? stopRecording : startRecording}
+                      disabled={!speechSupported}
+                      title={speechSupported ? undefined : 'This browser has no speech recognition'}
                     >
                       {isRecording ? 'Stop recording' : 'Record answer'}
                     </Button>
