@@ -9,6 +9,7 @@ import {
   getQuizStats,
   retryQuiz,
   getAllTopics,
+  getReviewQueue,
 } from '../controllers/quizController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 import { isStudent } from '../middlewares/roleMiddleware.js';
@@ -30,5 +31,6 @@ router.get('/result/:resultId', isStudent, resultIdValidation, getQuizResult);
 router.post('/result/:resultId/retry', isStudent, resultIdValidation, retryQuiz);
 router.get('/history', isStudent, getQuizHistory);
 router.get('/stats', isStudent, getQuizStats);
+router.get('/review-queue', isStudent, getReviewQueue);
 router.get('/topics', getAllTopics);
 export default router;

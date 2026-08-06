@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import QuizSession from '../models/QuizSession.js';
 import QuizResult from '../models/QuizResult.js';
 import Topic from '../models/Topic.js';
@@ -7,6 +8,7 @@ import huggingFaceService from '../services/huggingFaceService.js';
 import aiService from '../services/aiService.js';
 import Settings from '../models/Settings.js';
 import { TOPIC_SKILL_MAP } from '../utils/skillTopicMap.js';
+import { reviewQueue } from '../utils/reviewSchedule.js';
 import { topicsForRole } from '../utils/roleTopicMap.js';
 
 
@@ -892,5 +894,61 @@ export const getQuizStats = async (req, res) => {
   } catch (error) {
     console.error('❌ Error fetching quiz stats:', error);
     res.status(500).json({ error: 'Failed to fetch quiz statistics' });
+  }
+};
+
+/**
+ * GET /api/quiz/review-queue — topics worth going back to.
+ *
+ * Every attempt has always been stored and nothing ever read it back. The
+ * history screen lists attempts; nothing said "you scored 40% on this five
+ * weeks ago and have not touched it since", which is the one thing that record
+ * is good for.
+ *
+ * Built from the same aggregation the stats screen uses, so a topic's latest
+ * score cannot differ between the two.
+ */
+export const getReviewQueue = async (req, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+
+    const topicPerformance = await QuizResult.aggregate([
+      { $match: { userId } },
+      { $sort: { createdAt: 1 } },
+      {
+        $group: {
+          _id: '$topicId',
+          latestScore: { $last: '$percentage' },
+          latestAt: { $last: '$createdAt' },
+          attempts: { $sum: 1 },
+        },
+      },
+      { $lookup: { from: 'topics', localField: '_id', foreignField: '_id', as: 'topic' } },
+      { $unwind: '$topic' },
+      {
+        $project: {
+          topicId: '$_id',
+          topicName: '$topic.name',
+          latestScore: { $round: ['$latestScore', 0] },
+          latestAt: 1,
+          attempts: 1,
+        },
+      },
+    ]);
+
+    const due = reviewQueue(topicPerformance);
+
+    res.json({
+      success: true,
+      data: {
+        due,
+        // So the screen can say "nothing due" rather than "nothing here",
+        // which read as though the feature was broken on a fresh account.
+        tracked: topicPerformance.length,
+      },
+    });
+  } catch (error) {
+    console.error('getReviewQueue error:', error);
+    res.status(500).json({ success: false, message: 'Server error.', error: error.message });
   }
 };

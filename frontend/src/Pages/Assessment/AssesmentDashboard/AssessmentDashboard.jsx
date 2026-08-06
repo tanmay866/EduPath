@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchQuizTopics, getQuizStats, getQuizHistory } from '../../Services/assessmentService';
+import { fetchQuizTopics, getQuizStats, getQuizHistory, getReviewQueue } from '../../Services/assessmentService';
 import {
   LearnerShell, StatStrip, Card, CardHeader, CardFooterNote, InkPanel,
   OrdinalRow, ListItem, Button, ProgressBar, MicroLabel, Badge, Loading, Empty, type,
@@ -8,6 +8,7 @@ import {
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../../design/nav';
 import TopicProgress from './TopicProgress';
 import ThisWeek from '../../Roadmap/components/ThisWeek';
+import ReviewQueue from './ReviewQueue';
 import { getRoadmap } from '../../Services/roadmapService';
 
 /**
@@ -30,6 +31,9 @@ const AssessmentDashboard = () => {
   // The plan, for the current week's tasks. Fetched separately and allowed to
   // fail: a learner with no roadmap yet still gets the rest of the page.
   const [roadmap, setRoadmap] = useState(null);
+  // Topics whose last score has been sitting untouched long enough to be
+  // worth another look. Allowed to fail: it is an extra, not the page.
+  const [reviewDue, setReviewDue] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -43,15 +47,17 @@ const AssessmentDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [topicsRes, statsRes, historyRes, roadmapRes] = await Promise.all([
+      const [topicsRes, statsRes, historyRes, roadmapRes, reviewRes] = await Promise.all([
         fetchQuizTopics(),
         getQuizStats().catch(() => ({ data: { data: { overall: { totalQuizzes: 0, averageScore: 0 }, topicPerformance: [] } } })),
         getQuizHistory().catch(() => ({ data: { data: { results: [] } } })),
         // 404 when no plan has been generated yet, which is a normal state for
         // a new account rather than an error for the whole page.
         getRoadmap().catch(() => null),
+        getReviewQueue().catch(() => null),
       ]);
       setRoadmap(roadmapRes?.data || null);
+      setReviewDue(reviewRes?.data?.data?.due || []);
       setTopicCount((topicsRes.data?.data || []).length);
       setStats(statsRes.data?.data || null);
       setHistory(historyRes.data?.data?.results || []);
@@ -106,6 +112,8 @@ const AssessmentDashboard = () => {
   return shell(
     <>
       <ThisWeek roadmap={roadmap} />
+
+      <ReviewQueue queue={reviewDue} />
 
       <StatStrip items={statItems} />
 

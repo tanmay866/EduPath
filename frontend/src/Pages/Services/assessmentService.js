@@ -50,4 +50,7 @@ export const getQuizHistory = () => API.get('/quiz/history');
 // Get Quiz Stats
 export const getQuizStats = () => API.get('/quiz/stats');
 
+/** Topics due for another look, most overdue first. */
+export const getReviewQueue = () => API.get('/quiz/review-queue');
+
 export default API;

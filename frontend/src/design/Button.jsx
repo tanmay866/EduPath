@@ -46,7 +46,9 @@ const VARIANTS = {
     padding: '13px 26px',
     fontSize: 15,
     fontWeight: 500,
-    hover: { borderColor: 'var(--color-ink)' },
+    // The whole shorthand, not just borderColor: React warns when a style
+    // object swaps between the two across renders, and the base sets `border`.
+    hover: { border: '1px solid var(--color-ink)' },
   },
   destructive: {
     background: 'transparent',
