@@ -8,6 +8,7 @@ import {
     getRoadmapById,
     getRoadmapHistory,
     updateSkillStatus,
+    updateTaskStatus,
 } from "../controllers/roadmapController.js";
 
 router.use(protect);
@@ -17,5 +18,6 @@ router.get("/", getRoadmap);
 router.get("/history", getRoadmapHistory);
 router.get("/:roadmap_id", getRoadmapById);
 router.patch("/skill-status", updateSkillStatus);
+router.patch("/task-status", updateTaskStatus);
 
 export default router;

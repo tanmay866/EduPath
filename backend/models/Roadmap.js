@@ -39,6 +39,14 @@ const WeeklyPlanSchema = new mongoose.Schema(
         week_number: { type: Number, required: true },
         skills: [{ type: String }],
         tasks: [{ type: String }],
+        // Indices into `tasks`, rather than reshaping tasks into objects.
+        //
+        // Tasks are generated as plain strings and every roadmap already
+        // stored is that shape; changing it would have meant migrating them or
+        // carrying both forms. Indices are stable within a saved roadmap
+        // because regeneration writes a new document rather than editing this
+        // one — the old plan is kept in history untouched.
+        completed_tasks: [{ type: Number }],
         estimated_hours: { type: Number },
         mini_project: {
             title: String,

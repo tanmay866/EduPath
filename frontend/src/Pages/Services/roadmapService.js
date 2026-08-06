@@ -36,6 +36,20 @@ export const updateSkillStatus = async (skill, status) => {
   }
 };
 
+/** Tick or untick one task in a week of the active roadmap. */
+export const updateTaskStatus = async (weekNumber, taskIndex, done) => {
+  try {
+    const response = await API.patch('/roadmap/task-status', {
+      week_number: weekNumber,
+      task_index: taskIndex,
+      done,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 export const updateRoadmapSkillsProfile = async (payload) => {
   try {
     const response = await API.put('/profile/skills', payload);

@@ -414,3 +414,71 @@ export const updateSkillStatus = async (req, res) => {
         });
     }
 };
+
+/**
+ * PATCH /api/roadmap/task-status — tick or untick one task in a week.
+ *
+ * Weeks already had a status but nothing could set it, and the smallest thing
+ * a learner could mark was a whole skill — three and a half weeks of work on
+ * the MERN track between one tick and the next. This is the unit people
+ * actually finish in an evening.
+ */
+export const updateTaskStatus = async (req, res) => {
+    try {
+        const { week_number: weekNumber, task_index: taskIndex, done } = req.body || {};
+
+        if (!Number.isInteger(weekNumber) || !Number.isInteger(taskIndex)) {
+            return res.status(400).json({
+                success: false,
+                message: "week_number and task_index must be integers.",
+            });
+        }
+        if (typeof done !== "boolean") {
+            return res.status(400).json({ success: false, message: "done must be true or false." });
+        }
+
+        const roadmap = await Roadmap.findOne({ user_id: req.user._id, status: "active" });
+        if (!roadmap) {
+            return res.status(404).json({ success: false, message: "Active roadmap not found." });
+        }
+
+        const week = roadmap.weekly_plans.find((w) => w.week_number === weekNumber);
+        if (!week) {
+            return res.status(404).json({ success: false, message: `Week ${weekNumber} not found.` });
+        }
+        // Bounds are checked against the stored tasks, so an index from a stale
+        // page cannot write a tick that points at nothing.
+        if (taskIndex < 0 || taskIndex >= week.tasks.length) {
+            return res.status(400).json({
+                success: false,
+                message: `Week ${weekNumber} has ${week.tasks.length} tasks; ${taskIndex} is not one of them.`,
+            });
+        }
+
+        const ticked = new Set((week.completed_tasks || []).map(Number));
+        if (done) ticked.add(taskIndex);
+        else ticked.delete(taskIndex);
+        week.completed_tasks = [...ticked].sort((a, b) => a - b);
+
+        // The week's own status follows its tasks rather than being set by
+        // hand, so the two can never disagree.
+        const total = week.tasks.length;
+        const complete = week.completed_tasks.length;
+        week.status = complete === 0 ? "pending" : complete >= total ? "completed" : "in_progress";
+
+        await roadmap.save();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                week_number: weekNumber,
+                completed_tasks: week.completed_tasks,
+                status: week.status,
+                total_tasks: total,
+            },
+        });
+    } catch (err) {
+        console.error("updateTaskStatus error:", err);
+        res.status(500).json({ success: false, message: "Server error.", error: err.message });
+    }
+};
