@@ -82,7 +82,7 @@ const ConsoleRow = ({ status, title, tag, tone, current = false }) => (
 );
 
 const RoadmapConsole = () => (
-  <div style={{ padding: 36, background: 'var(--color-paper)', borderLeft: '1px solid var(--color-line)' }}>
+  <div className="home-console" style={{ padding: 36, background: 'var(--color-paper)', borderLeft: '1px solid var(--color-line)' }}>
     <Card style={{ border: '1px solid var(--color-line-btn)' }}>
       <div
         style={{
@@ -113,7 +113,7 @@ const RoadmapConsole = () => (
         </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--color-line)' }}>
+      <div className="home-console__cells" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--color-line)' }}>
         {/* The four cells the roadmap screen actually shows. This used to
             display hours-this-week, a day streak and a projected date, none
             of which the product tracks — under a caption claiming it was the
@@ -224,8 +224,8 @@ const mern = TRACKS.find((t) => t.name === 'MERN Developer');
 const Home = () => (
   <div style={{ background: 'var(--color-surface)' }}>
     {/* ── Hero ── */}
-    <section style={{ display: 'grid', gridTemplateColumns: '1fr 620px', borderBottom: '1px solid var(--color-ink)' }}>
-      <div style={{ padding: '76px 44px 68px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section className="home-hero" style={{ display: 'grid', gridTemplateColumns: '1fr 620px', borderBottom: '1px solid var(--color-ink)' }}>
+      <div className="home-hero__copy" style={{ padding: '76px 44px 68px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <MicroLabel size={11} tracking="0.14em" color="var(--color-clay)" style={{ display: 'block', marginBottom: 24 }}>
           Assess · Plan · Apply · Ship
         </MicroLabel>
@@ -249,7 +249,7 @@ const Home = () => (
           Everything reschedules itself as you finish work.
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div className="home-hero__actions" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <Link to="/assessment-hub" style={{ textDecoration: 'none' }}>
             <Button style={{ padding: '15px 26px', fontSize: 14.5 }}>Take the assessment</Button>
           </Link>
@@ -258,7 +258,7 @@ const Home = () => (
           </Link>
         </div>
 
-        <div style={{ marginTop: 44, paddingTop: 26, borderTop: '1px solid var(--color-line)', display: 'flex', gap: 52 }}>
+        <div className="home-hero__stats" style={{ marginTop: 44, paddingTop: 26, borderTop: '1px solid var(--color-line)', display: 'flex', gap: 52 }}>
           <HeroStat value="6" label="role tracks" />
           <HeroStat value="4" label="assessment instruments" />
           <HeroStat value="1" label="click to publish a portfolio" />
@@ -270,7 +270,7 @@ const Home = () => (
 
     {/* ── Track index ── */}
     <section>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '52px 44px 26px', gap: 32 }}>
+      <div className="home-sectionhead" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '52px 44px 26px', gap: 32 }}>
         <SectionHeading>Six roles. Pick a destination.</SectionHeading>
         <span style={{ fontSize: 13.5, color: 'var(--color-text-2)', maxWidth: 380, textAlign: 'right' }}>
           Not sure? Pick the closest — the tracks are broad, and you can change it in your profile later.
@@ -288,6 +288,7 @@ const Home = () => (
           <Link
             key={track.name}
             to="/services"
+            className="home-track"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -301,8 +302,10 @@ const Home = () => (
               {String(i + 1).padStart(2, '0')}
             </span>
             <span
+              className="home-track__name"
               style={{
                 flex: 1,
+                minWidth: 0,
                 fontFamily: 'var(--font-display)',
                 fontSize: 32,
                 fontWeight: 400,
@@ -312,11 +315,11 @@ const Home = () => (
             >
               {track.name}
             </span>
-            <span style={{ fontSize: 13.5, color: 'var(--color-text-2)', width: 300 }}>{track.stack}</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-2)', width: 70, textAlign: 'right' }}>
+            <span className="home-track__stack" style={{ fontSize: 13.5, color: 'var(--color-text-2)', width: 300 }}>{track.stack}</span>
+            <span className="home-track__meta" style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-2)', width: 70, textAlign: 'right' }}>
               {`${track.weeks} wks`}
             </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-2)', width: 70, textAlign: 'right' }}>
+            <span className="home-track__meta" style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-2)', width: 70, textAlign: 'right' }}>
               {`${track.nodes} nodes`}
             </span>
             <span style={{ fontSize: 18, color: 'var(--color-clay)' }}>→</span>
@@ -326,7 +329,7 @@ const Home = () => (
     </section>
 
     {/* ── Four steps ── */}
-    <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--color-line)' }}>
+    <section className="home-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderBottom: '1px solid var(--color-line)' }}>
       {STEPS.map((step, i) => (
         <div
           key={step.kicker}
@@ -359,7 +362,7 @@ const Home = () => (
         Three artefacts: two you can send someone, and one that tells you whether you are ready to.
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+      <div className="home-outcomes" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
         <OutcomeCard
           label="01 · Resume"
           note="Scored against the description you paste in, so you can see what the parser sees before a person does."
@@ -433,6 +436,7 @@ const Home = () => (
         gap: 64,
         alignItems: 'center',
       }}
+      className="home-band"
     >
       {/* This band carried a quote attributed to "a learner on the Data
           Science Engineer track, week 14 of 20". There is no such learner —
@@ -473,6 +477,7 @@ const Home = () => (
 
     {/* ── Closing ── */}
     <section
+      className="home-closing"
       style={{
         padding: '72px 44px',
         display: 'flex',
