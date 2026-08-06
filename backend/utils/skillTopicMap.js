@@ -88,6 +88,37 @@ export const TOPIC_SKILL_MAP = {
   },
   'Data Visualization': { assesses: ['Data Visualization'], related: [] },
   'Statistics': { assesses: ['Statistics & Probability'], related: [] },
+
+  // Added so the curriculum can actually be tested. Half of it had no quiz
+  // behind it, which meant those skills could never be shown as known and
+  // never came off a plan however much the learner already knew. The topic
+  // is named exactly as the skill is, so the two cover the same ground by
+  // construction rather than by a judgement someone has to keep making.
+  'ES6+ & Modern JS': { assesses: ['ES6+ & Modern JS'], related: [] },
+  'Async JS (Promises, async/await)': { assesses: ['Async JS (Promises, async/await)'], related: [] },
+  'React Hooks & State Management': { assesses: ['React Hooks & State Management'], related: [] },
+  'React Router': { assesses: ['React Router'], related: [] },
+  'REST API Design': { assesses: ['REST API Design'], related: [] },
+  'JWT Authentication': { assesses: ['JWT Authentication'], related: [] },
+  'Full Stack Integration': { assesses: ['Full Stack Integration'], related: [] },
+  'Deployment (Vercel + Render)': { assesses: ['Deployment (Vercel + Render)'], related: [] },
+  'LLMs & Prompt Engineering': { assesses: ['LLMs & Prompt Engineering'], related: [] },
+  'MLOps Basics': { assesses: ['MLOps Basics'], related: [] },
+  'Python for Data Science': { assesses: ['Python for Data Science'], related: [] },
+  'SQL Fundamentals': { assesses: ['SQL Fundamentals'], related: [] },
+  'Feature Engineering & Model Evaluation': { assesses: ['Feature Engineering & Model Evaluation'], related: [] },
+  'Model Deployment Basics': { assesses: ['Model Deployment Basics'], related: [] },
+  'Linux & Shell Scripting': { assesses: ['Linux & Shell Scripting'], related: [] },
+  'Git & GitHub Workflows': { assesses: ['Git & GitHub Workflows'], related: [] },
+  'Infrastructure as Code (Terraform)': { assesses: ['Infrastructure as Code (Terraform)'], related: [] },
+  'Monitoring & Observability': { assesses: ['Monitoring & Observability'], related: [] },
+  'Programming Fundamentals': { assesses: ['Programming Fundamentals'], related: [] },
+  'OOP & App Architecture': { assesses: ['OOP & App Architecture'], related: [] },
+  'Mobile UI/UX Basics': { assesses: ['Mobile UI/UX Basics'], related: [] },
+  'API Integration & State Management': { assesses: ['API Integration & State Management'], related: [] },
+  'Testing & App Deployment': { assesses: ['Testing & App Deployment'], related: [] },
+  'Python for Security': { assesses: ['Python for Security'], related: [] },
+  'SIEM & Incident Response': { assesses: ['SIEM & Incident Response'], related: [] },
 };
 
 /**

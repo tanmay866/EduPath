@@ -94,18 +94,35 @@ test('the reverse lookup resolves every assessed skill to a topic that claims it
   }
 });
 
-test('a merely related skill has no topic offered for it', () => {
-  // Sending someone to a Python Basics quiz to settle Python for Security
-  // cannot answer the question, so the roadmap offers no test at all.
-  for (const skill of ['Python for Security', 'React Router', 'Linux & Shell Scripting']) {
-    assert.equal(topicForSkill(skill), undefined, `${skill} should not resolve to a topic`);
+test('a skill is never sent to the topic that merely touches it', () => {
+  // Each of these now has a topic of its own. What must not happen is the
+  // lookup falling back to the broader topic that only brushes past it —
+  // sending someone to a Python Basics quiz cannot settle Python for
+  // Security, and answering it well would wrongly take the skill off a plan.
+  const wrongAnswers = [
+    ['Python for Security', 'Python Basics'],
+    ['Python for Data Science', 'Python Basics'],
+    ['React Router', 'React'],
+    ['React Hooks & State Management', 'React'],
+    ['ES6+ & Modern JS', 'JavaScript'],
+    ['Async JS (Promises, async/await)', 'JavaScript'],
+    ['Linux & Shell Scripting', 'Linux'],
+    ['Feature Engineering & Model Evaluation', 'Data Analysis'],
+  ];
+  for (const [skill, tooBroad] of wrongAnswers) {
+    assert.notEqual(
+      topicForSkill(skill),
+      tooBroad,
+      `${skill} must not be settled by the ${tooBroad} quiz`
+    );
+    assert.equal(topicForSkill(skill), skill, `${skill} should be tested by its own topic`);
   }
 });
 
-test('skills with no topic behind them resolve to nothing rather than something approximate', () => {
-  // Real roadmap steps with no assessment in the catalogue. Returning a
-  // near-match here is how learners get sent to an unrelated quiz.
-  for (const skill of ['REST API Design', 'JWT Authentication', 'Full Stack Integration']) {
+test('a skill nobody has heard of resolves to nothing rather than a near match', () => {
+  // Returning something approximate is how a learner gets sent to a quiz
+  // that cannot answer the question they arrived with.
+  for (const skill of ['Rust Basics', 'Quantum Computing', 'React Native Router', '', null]) {
     assert.equal(topicForSkill(skill), undefined, `${skill} should not resolve to a topic`);
   }
 });

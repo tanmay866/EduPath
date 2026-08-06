@@ -22,6 +22,15 @@ export const ROLE_TOPICS = {
     'Node.js',
     'Express.js',
     'MongoDB',
+    // The track's own curriculum skills, each with a topic of its own.
+    'ES6+ & Modern JS',
+    'Async JS (Promises, async/await)',
+    'React Hooks & State Management',
+    'React Router',
+    'REST API Design',
+    'JWT Authentication',
+    'Full Stack Integration',
+    'Deployment (Vercel + Render)',
   ],
   'AI/ML Engineer': [
     'Python Basics',
@@ -32,6 +41,9 @@ export const ROLE_TOPICS = {
     'Statistics',
     'Data Analysis',
     'Data Visualization',
+    // The track's own curriculum skills, each with a topic of its own.
+    'LLMs & Prompt Engineering',
+    'MLOps Basics',
   ],
   'Data Science Engineer': [
     'Python Basics',
@@ -40,6 +52,11 @@ export const ROLE_TOPICS = {
     'Data Visualization',
     'Machine Learning',
     'Big Data',
+    // The track's own curriculum skills, each with a topic of its own.
+    'Python for Data Science',
+    'SQL Fundamentals',
+    'Feature Engineering & Model Evaluation',
+    'Model Deployment Basics',
   ],
   'DevOps Engineer': [
     'Linux',
@@ -47,6 +64,11 @@ export const ROLE_TOPICS = {
     'Kubernetes',
     'CI/CD',
     'AWS',
+    // The track's own curriculum skills, each with a topic of its own.
+    'Linux & Shell Scripting',
+    'Git & GitHub Workflows',
+    'Infrastructure as Code (Terraform)',
+    'Monitoring & Observability',
   ],
   'Mobile Developer': [
     'JavaScript',
@@ -54,6 +76,12 @@ export const ROLE_TOPICS = {
     'Flutter',
     'Android Development',
     'iOS Development',
+    // The track's own curriculum skills, each with a topic of its own.
+    'Programming Fundamentals',
+    'OOP & App Architecture',
+    'Mobile UI/UX Basics',
+    'API Integration & State Management',
+    'Testing & App Deployment',
   ],
   'Cybersecurity Engineer': [
     'Linux',
@@ -62,6 +90,9 @@ export const ROLE_TOPICS = {
     'Web Security',
     'Cryptography',
     'Ethical Hacking',
+    // The track's own curriculum skills, each with a topic of its own.
+    'Python for Security',
+    'SIEM & Incident Response',
   ],
 };
 
