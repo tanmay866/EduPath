@@ -41,10 +41,14 @@ const PointList = ({ label, items, tone }) => (
 import {
   speakInterviewQuestion,
   speakFeedback,
-  stopSpeaking as stopVoice
+  stopSpeaking as stopVoice,
+  getBestVoice,
+  voicesReady,
 } from '../../utils/voiceService';
 
 
+
+const VOICE_HINT_KEY = 'voiceHintSeen';
 
 const AIMockInterview = () => {
   const navigate = useNavigate();
@@ -70,6 +74,36 @@ const AIMockInterview = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+
+  // Which voice will actually read the questions, and whether to say so.
+  //
+  // Shown once per device rather than once per account: the voice list comes
+  // from the browser, the choice is stored in localStorage, and the same
+  // person on a laptop and a phone gets two different voices. An
+  // account-level flag would tell them on one and stay quiet on the other,
+  // which is the wrong way round.
+  const [voiceName, setVoiceName] = useState('');
+  const [showVoiceHint, setShowVoiceHint] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    voicesReady().then(() => {
+      if (!live) return;
+      const voice = getBestVoice();
+      setVoiceName(voice?.name || '');
+      // Nothing to point at if the browser has no voices — Settings would
+      // have nothing to offer either.
+      let seen = null;
+      try { seen = localStorage.getItem(VOICE_HINT_KEY); } catch { /* private mode */ }
+      if (voice && !seen) setShowVoiceHint(true);
+    });
+    return () => { live = false; };
+  }, []);
+
+  const dismissVoiceHint = () => {
+    setShowVoiceHint(false);
+    try { localStorage.setItem(VOICE_HINT_KEY, '1'); } catch { /* private mode */ }
+  };
 
   // Loading states
   const [loadingQuestion, setLoadingQuestion] = useState(false);
@@ -451,6 +485,54 @@ const AIMockInterview = () => {
             </div>
             <Toggle checked={voiceEnabled} onChange={setVoiceEnabled} label="Read questions aloud" />
           </div>
+
+          {/* Names the voice rather than pointing vaguely at a setting: the
+              reason it sounds the way it does is that it belongs to the
+              browser, and knowing that is what makes the setting worth
+              opening. Only on the setup screen, where leaving the page costs
+              nothing — mid-interview it would offer to throw away progress. */}
+          {showVoiceHint && voiceEnabled && (
+            <div
+              style={{
+                padding: '14px 34px',
+                borderTop: '1px solid var(--color-line)',
+                background: 'var(--color-surface-attn, var(--color-surface))',
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                gap: 16,
+                flexWrap: 'wrap',
+              }}
+            >
+              <p style={{ fontSize: 14, color: 'var(--color-text-2)', margin: 0, lineHeight: 1.55, flex: '1 1 260px' }}>
+                {`Questions will be read in ${voiceName}. `}
+                Voices come from your browser rather than from us, so if that one grates there are
+                others — pick from them in{' '}
+                <button
+                  type="button"
+                  onClick={() => { dismissVoiceHint(); navigate('/settings'); }}
+                  style={{
+                    font: 'inherit',
+                    color: 'var(--color-ink)',
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Settings
+                </button>.
+              </p>
+              <Button
+                variant="quiet"
+                onClick={dismissVoiceHint}
+                style={{ flexShrink: 0 }}
+              >
+                Got it
+              </Button>
+            </div>
+          )}
 
           <div style={{ padding: '18px 34px', borderTop: '1px solid var(--color-line)' }}>
             <Button onClick={startInterview} disabled={!selectedRole}>Start the interview</Button>
