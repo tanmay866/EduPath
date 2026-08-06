@@ -263,7 +263,7 @@ const FAQ = () => {
         ))}
       </section>
 
-      <section style={{ padding: '0 0 80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
+      <section style={{ padding: '0 0 80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32, flexWrap: 'wrap' }}>
         <p style={{ ...type.body, margin: 0, maxWidth: 460 }}>
           Not answered here? The contact form reaches a person, not a queue.
         </p>

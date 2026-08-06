@@ -91,7 +91,7 @@ const InterviewResultDetail = () => {
       {/* Summary beside the per-question breakdown rather than above it —
           both are tall enough on their own that stacking them ran the page
           a long way down with the sides sitting empty. */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 22, alignItems: 'start' }}>
+      <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 22, alignItems: 'start' }}>
         <Card>
           <CardHeader
             label={data.role || 'Mock interview'}

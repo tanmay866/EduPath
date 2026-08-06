@@ -93,7 +93,7 @@ const AssessmentDashboard = () => {
     <>
       <StatStrip items={statItems} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
+      <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 22, alignItems: 'start' }}>
         {/* Left — recent activity as ordinal rows, then movement per topic */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22, minWidth: 0 }}>
         <Card>

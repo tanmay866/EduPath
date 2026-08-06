@@ -102,7 +102,7 @@ const RoadmapTimeline = ({ roadmapData, isRoadmapLoading, updatingSkill, onMarkC
   }));
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 22, alignItems: 'start' }}>
+    <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1.55fr 1fr', gap: 22, alignItems: 'start' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 22, minWidth: 0 }}>
       {/* The plan was built from the gaps known when it was generated, and
           nothing rebuilds it on its own. Saying so beats showing a stale

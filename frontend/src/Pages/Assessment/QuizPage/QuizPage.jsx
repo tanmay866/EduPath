@@ -331,7 +331,7 @@ const QuizPage = () => {
             <div style={{ padding: '32px 34px' }}>
               <h1 style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>Ready to start</h1>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', padding: '14px 0', borderTop: '1px solid var(--color-line-soft)', borderBottom: '1px solid var(--color-line-soft)', margin: '24px 0' }}>
+              <div className="grid-sm-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', padding: '14px 0', borderTop: '1px solid var(--color-line-soft)', borderBottom: '1px solid var(--color-line-soft)', margin: '24px 0' }}>
                 {[
                   { label: 'Questions', value: quizConfig.questionCount },
                   { label: 'Time limit', value: `${quizConfig.questionCount} min` },

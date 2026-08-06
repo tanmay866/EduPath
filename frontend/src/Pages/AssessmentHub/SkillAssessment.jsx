@@ -53,7 +53,7 @@ const SkillAssessment = () => {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--color-line)', borderBottom: '1px solid var(--color-line)' }}>
+          <div className="grid-sm-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--color-line)', borderBottom: '1px solid var(--color-line)' }}>
             {FACTS.map((fact, i) => (
               <div
                 key={fact.label}

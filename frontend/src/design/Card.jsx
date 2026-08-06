@@ -23,6 +23,9 @@ export const CardHeader = ({ label, right, style }) => (
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 12,
+      // Several headers carry a segmented filter on the right, which is wider
+      // than a phone leaves beside a label. It drops to its own line.
+      flexWrap: 'wrap',
       ...style,
     }}
   >
@@ -52,6 +55,7 @@ export const CardFooterNote = ({ children, style }) => (
    14px suffix or a mono 12.5px delta (green positive, clay negative). */
 export const StatStrip = ({ items = [], cellPadding = '18px 22px', style }) => (
   <div
+    className="grid-sm-2"
     style={{
       background: 'var(--color-surface)',
       border: '1px solid var(--color-line)',
@@ -129,6 +133,7 @@ export const InkPanel = ({ label, title, children, titleSize = 26, style }) => (
    coloured `line` is what draws the rules between cells. */
 export const RuledGrid = ({ columns = 2, children, style }) => (
   <div
+    className="grid-sm-2"
     style={{
       display: 'grid',
       gridTemplateColumns: `repeat(${columns}, 1fr)`,

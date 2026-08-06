@@ -416,8 +416,11 @@ const AIMockInterview = () => {
                 border: '1px solid var(--color-line-input)',
                 borderRadius: 0,
                 outline: 'none',
-                minWidth: 240,
-                flexShrink: 0,
+                // Was minWidth 240 with flexShrink 0, which forced the row
+                // wider than a phone. It fills whatever the row leaves.
+                flex: '1 1 200px',
+                minWidth: 0,
+                maxWidth: 320,
               }}
             >
               {!selectedRole && <option value="">Select a role</option>}
@@ -435,6 +438,7 @@ const AIMockInterview = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 24,
+              flexWrap: 'wrap',
             }}
           >
             <div>

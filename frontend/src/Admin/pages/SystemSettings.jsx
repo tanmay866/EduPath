@@ -33,6 +33,7 @@ const Row = ({ title, detail, children, last = false }) => (
       alignItems: 'center',
       justifyContent: 'space-between',
       gap: 24,
+      flexWrap: 'wrap',
       padding: '17px 20px',
       borderBottom: last ? 'none' : '1px solid var(--color-line-soft)',
     }}

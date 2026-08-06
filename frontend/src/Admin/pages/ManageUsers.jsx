@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   AdminShell, Card, CardHeader, CardFooterNote, TableHead, TableRow, NumCell,
   ActionCell, SegmentedFilter, Button, Input, InlineMessage, MicroLabel,
-  Modal, Loading, Empty,
+  Modal, Loading, Empty, TableScroll,
 } from '../../design';
 import { adminNav } from '../../design/nav';
 import { shortDate } from '../format';
@@ -105,6 +105,7 @@ const ManageUsers = () => {
           <Empty action={<Button onClick={reload}>Try again</Button>}>{error}</Empty>
         ) : (
           <>
+            <TableScroll minWidth={680}>
             <TableHead columns={COLUMNS} align={['left', 'left', 'right', 'left', 'right']}>
               <span>Name</span>
               <span>Email</span>
@@ -161,6 +162,7 @@ const ManageUsers = () => {
                 );
               })
             )}
+            </TableScroll>
 
             <CardFooterNote>
               {/* The endpoint returns the 500 newest accounts, so this counts

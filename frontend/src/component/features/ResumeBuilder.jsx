@@ -254,7 +254,10 @@ const Entry = ({ ordinal, onRemove, children }) => (
   </div>
 );
 
-const TWO_UP = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 };
+// auto-fit rather than a hard 1fr 1fr: below roughly 420px two columns
+// leave each field too narrow to read what is typed in it, so the pair
+// becomes one column on its own.
+const TWO_UP = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 20 };
 
 function ResumeBuilder() {
   const navigate = useNavigate();
@@ -936,7 +939,7 @@ function ResumeBuilder() {
         <InlineMessage tone={isError ? 'error' : 'success'}>{message}</InlineMessage>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 22, alignItems: 'start' }}>
+      <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 22, alignItems: 'start' }}>
         {/* Left — the form, or the download controls once a file exists. */}
         {showPreview ? (
           <Card>
@@ -1325,7 +1328,7 @@ function ResumeBuilder() {
         )}
 
         {/* Right — the document card, then the two-up action row. */}
-        <div style={{ position: 'sticky', top: 26 }}>
+        <div className="preview-col" style={{ position: 'sticky', top: 26 }}>
           <Card>
             <CardHeader
               label="Document"
@@ -1335,6 +1338,13 @@ function ResumeBuilder() {
                 </MicroLabel>
               }
             />
+            {/* The form works on a phone; judging a page layout on one does
+                not. Said once, here, rather than blocking the page — the
+                document is still readable, just not at the proportions it
+                will print at. */}
+            <p className="wide-screen-note">
+              This is roughly what will print. It is easier to judge on a wider screen.
+            </p>
             <div style={{ maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }}>
               <ResumeDocument data={resumeData} />
             </div>

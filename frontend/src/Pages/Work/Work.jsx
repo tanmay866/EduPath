@@ -62,7 +62,7 @@ const Work = () => (
       <IndexRows rows={STAGES} />
     </section>
 
-    <section style={{ padding: '56px 0 80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
+    <section style={{ padding: '56px 0 80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32, flexWrap: 'wrap' }}>
       <p style={{ ...type.body, margin: 0, maxWidth: 460 }}>
         The whole loop is free. Start at the assessment and your first roadmap appears on the next
         screen.

@@ -39,7 +39,7 @@ const Services = () => (
       />
     </section>
 
-    <section style={{ padding: '56px 0 80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
+    <section style={{ padding: '56px 0 80px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32, flexWrap: 'wrap' }}>
       <p style={{ ...type.body, margin: 0, maxWidth: 460 }}>
         Not sure which one? Pick the closest — these are broad, and the assessment then narrows the
         plan to what you personally are missing, which matters more than the label. You can change

@@ -121,7 +121,7 @@ const Contact = () => {
 
   return (
     <EditorialShell>
-      <section style={{ padding: '80px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
+      <section className="stack-sm" style={{ padding: '80px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'start' }}>
         {/* Left — who you are writing to */}
         <div>
           <MicroLabel size={11} tracking="0.14em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 16 }}>

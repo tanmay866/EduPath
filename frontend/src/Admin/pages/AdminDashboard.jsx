@@ -48,7 +48,7 @@ const AdminDashboard = () => {
     <AdminShell items={adminNav} title="Overview">
       <StatStrip items={data.stats} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: 22, alignItems: 'start' }}>
+      <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: 22, alignItems: 'start' }}>
         <Card>
           <CardHeader label="Attempts by topic" />
           {data.skillUsage.length === 0 ? (

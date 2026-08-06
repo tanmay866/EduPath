@@ -1,5 +1,5 @@
 import React from 'react';
-import { TableHead, TableRow, NumCell, MicroLabel, Empty } from '../../design';
+import { TableHead, TableRow, NumCell, MicroLabel, Empty, TableScroll } from '../../design';
 import { scoreTone, shortDate } from '../format';
 
 /**
@@ -13,7 +13,7 @@ import { scoreTone, shortDate } from '../format';
 const COLUMNS = '1.4fr 1fr 0.8fr 0.6fr 0.7fr';
 
 const AttemptsTable = ({ rows = [] }) => (
-  <>
+  <TableScroll>
     <TableHead columns={COLUMNS} align={['left', 'left', 'left', 'right', 'right']}>
       <span>Learner</span>
       <span>Skill</span>
@@ -38,7 +38,7 @@ const AttemptsTable = ({ rows = [] }) => (
         );
       })
     )}
-  </>
+  </TableScroll>
 );
 
 export default AttemptsTable;

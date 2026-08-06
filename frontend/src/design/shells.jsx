@@ -103,6 +103,7 @@ const HEADER_HEIGHT = 93;
 const NavItem = ({ to, children, dark = false, end = false }) => (
   <NavLink
     to={to}
+    className="app-nav__item"
     /* Without `end`, a parent path such as /admin stays lit on every child
        route, so two items read as selected at once. */
     end={end}
@@ -164,8 +165,9 @@ const SignOut = ({ dark = false }) => (
 );
 
 export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, footLabel, children }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: '230px 1fr', height: '100vh' }}>
+  <div className="app-shell" style={{ display: 'grid', gridTemplateColumns: '230px 1fr', height: '100vh' }}>
     <aside
+      className="app-shell__aside"
       style={{
         background: 'var(--color-surface)',
         borderRight: '1px solid var(--color-line)',
@@ -175,15 +177,15 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
         overflowY: 'auto',
       }}
     >
-      <div style={{ height: HEADER_HEIGHT, flexShrink: 0, display: 'flex', alignItems: 'center', padding: '0 24px', borderBottom: '1px solid var(--color-line)' }}>
+      <div className="app-shell__brand" style={{ height: HEADER_HEIGHT, flexShrink: 0, display: 'flex', alignItems: 'center', padding: '0 24px', borderBottom: '1px solid var(--color-line)' }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
           <Wordmark size={26} labelSize={22} />
         </Link>
       </div>
 
-      <nav style={{ flex: 1 }}>
+      <nav className="app-shell__nav" style={{ flex: 1 }}>
         {sections.map((section) => (
-          <div key={section.label}>
+          <div className="app-shell__navgroup" key={section.label}>
             <MicroLabel
               size={10.5}
               tracking="0.14em"
@@ -206,15 +208,16 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
           is one click away under Account in the nav above. A second copy in
           the corner of every learner page was a destructive action sitting
           permanently under the cursor with nothing to confirm it. */}
-      <div style={{ marginTop: 'auto', borderTop: '1px solid var(--color-line)', padding: 24 }}>
+      <div className="app-shell__foot" style={{ marginTop: 'auto', borderTop: '1px solid var(--color-line)', padding: 24 }}>
         <MicroLabel size={10.5} tracking="0.14em" color="var(--color-text-4)" style={{ display: 'block', wordBreak: 'break-all' }}>
           {footLabel || 'Signed in'}
         </MicroLabel>
       </div>
     </aside>
 
-    <div style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflow: 'hidden' }}>
+    <div className="app-shell__body" style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflow: 'hidden' }}>
       <header
+        className="app-shell__header"
         style={{
           height: HEADER_HEIGHT,
           background: 'var(--color-surface)',
@@ -257,7 +260,7 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
           a plain block child of it, not a flex item itself — a flex item
           shrinks to fit its container by default, which was squeezing every
           card down to nothing instead of letting main grow a scrollbar. */}
-      <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+      <main className="app-shell__main" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
         <PageFade>
           <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
             {children}
@@ -272,25 +275,26 @@ export const LearnerShell = ({ sections = [], eyebrow, title, note, initials, fo
    218px ink sidebar. Header carries a mono chip and a quiet action rather
    than the learner header's note and avatar. */
 export const AdminShell = ({ items = [], title, chip, action, children }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: '218px 1fr', height: '100vh' }}>
-    <aside style={{ background: 'var(--color-ink)', display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
-      <div style={{ padding: '26px 24px' }}>
+  <div className="app-shell" style={{ display: 'grid', gridTemplateColumns: '218px 1fr', height: '100vh' }}>
+    <aside className="app-shell__aside" style={{ background: 'var(--color-ink)', display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
+      <div className="app-shell__brand" style={{ padding: '26px 24px' }}>
         <Wordmark dark size={26} labelSize={22} />
       </div>
 
-      <nav style={{ flex: 1 }}>
+      <nav className="app-shell__nav" style={{ flex: 1 }}>
         {items.map((item) => (
           <NavItem key={item.to} to={item.to} end={item.end} dark>{item.label}</NavItem>
         ))}
       </nav>
 
-      <div style={{ padding: '24px' }}>
+      <div className="app-shell__foot" style={{ padding: '24px' }}>
         <SignOut dark />
       </div>
     </aside>
 
-    <div style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflow: 'hidden' }}>
+    <div className="app-shell__body" style={{ background: 'var(--color-paper-warm)', display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflow: 'hidden' }}>
       <header
+        className="app-shell__header"
         style={{
           background: 'var(--color-surface)',
           borderBottom: '1px solid var(--color-line)',
@@ -337,7 +341,7 @@ export const AdminShell = ({ items = [], title, chip, action, children }) => (
           a plain block child of it, not a flex item itself — a flex item
           shrinks to fit its container by default, which was squeezing every
           card down to nothing instead of letting main grow a scrollbar. */}
-      <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+      <main className="app-shell__main" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
         <PageFade>
           <div style={{ padding: '26px 32px', display: 'flex', flexDirection: 'column', gap: 22 }}>
             {children}

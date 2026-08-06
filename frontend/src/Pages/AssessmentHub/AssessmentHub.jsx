@@ -144,7 +144,7 @@ const AssessmentHub = () => {
       <OnboardingTour open={showTour} onDismiss={dismissTour} />
 
       {/* Completion card: status left, ticks and the primary right. */}
-      <Card style={{ padding: '22px 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+      <Card style={{ padding: '22px 26px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-ink)' }}>
             {takenCount} of {assessments.length} assessments complete
@@ -170,12 +170,15 @@ const AssessmentHub = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          {/* The ticks are a progress bar in four pieces. They shrink rather
+              than holding 58px each, which on a phone was 250px of fixed width
+              sitting beside a button in a row that could not wrap. */}
+          <div style={{ display: 'flex', gap: 6, flex: '1 1 140px', minWidth: 0 }}>
             {assessments.map((a) => (
               <span
                 key={a.title}
-                style={{ width: 58, height: 5, background: a.completed ? 'var(--color-green)' : 'var(--color-line)' }}
+                style={{ flex: 1, maxWidth: 58, height: 5, background: a.completed ? 'var(--color-green)' : 'var(--color-line)' }}
               />
             ))}
           </div>
@@ -199,7 +202,7 @@ const AssessmentHub = () => {
               {a.description}
             </p>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 20, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
                 {a.completed ? (
                   <Button variant="quiet" onClick={() => navigate(a.path)}>Retake</Button>

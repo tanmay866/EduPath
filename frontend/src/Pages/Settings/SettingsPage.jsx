@@ -148,7 +148,7 @@ const SettingsPage = () => {
           <Button variant="quiet" onClick={() => navigate('/profile')}>Back to profile</Button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22, alignItems: 'start' }}>
+        <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22, alignItems: 'start' }}>
           {/* Left — change password, the one card here with real content */}
           <Card>
             <CardHeader label="Change password" />

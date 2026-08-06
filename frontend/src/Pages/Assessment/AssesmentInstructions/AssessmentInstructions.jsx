@@ -115,7 +115,7 @@ const AssessmentInstructions = () => {
             </h1>
 
             {/* Three-cell mono stat row, ruled top and bottom. */}
-            <div
+            <div className="grid-sm-2"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',

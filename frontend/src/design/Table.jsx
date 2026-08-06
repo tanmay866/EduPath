@@ -7,6 +7,21 @@ import React from 'react';
  * given as a grid fraction (`1.4fr 1fr 0.8fr …`).
  */
 
+/**
+ * Wraps a table so it scrolls sideways instead of breaking the page.
+ *
+ * These grids are five columns of learner names, emails and dates; below
+ * roughly 640px there is no honest way to show them all at once, and stacking
+ * a table into cards loses the column-to-column comparison that is the reason
+ * to look at it. So the table keeps its shape and the reader scrolls it,
+ * which is what a table on a phone is expected to do.
+ */
+export const TableScroll = ({ minWidth = 640, children, style }) => (
+  <div style={{ overflowX: 'auto', ...style }}>
+    <div style={{ minWidth }}>{children}</div>
+  </div>
+);
+
 /* ── Table ────────────────────────────────────────────────────────────────
    Header: mono 10.5px / 0.12em text-4 at 11px 20px with a line rule beneath.
    Body row: 14–15px 20px, line-soft rule, 14.5px, centred. Numeric and date

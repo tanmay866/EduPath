@@ -36,6 +36,9 @@ const ROW = {
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: 24,
+  // The control used to be a hard 300px beside the label. On a phone that is
+  // wider than the row, so the pair wraps and the control takes the line.
+  flexWrap: 'wrap',
   padding: '17px 20px',
   borderBottom: '1px solid var(--color-line-soft)',
 };
@@ -46,7 +49,7 @@ const Row = ({ title, detail, titleTone, children, last = false }) => (
       <div style={{ fontSize: 15.5, fontWeight: 500, color: titleTone || 'var(--color-ink)' }}>{title}</div>
       {detail && <div style={{ fontSize: 14, color: 'var(--color-text-3)', marginTop: 3 }}>{detail}</div>}
     </div>
-    <div style={{ width: 300, flexShrink: 0 }}>{children}</div>
+    <div style={{ flex: '1 1 260px', maxWidth: 300, minWidth: 0 }}>{children}</div>
   </div>
 );
 
@@ -505,8 +508,12 @@ const ProfilePage = () => {
               >
                 {fullName}
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-                <span style={{ fontSize: 14.5, color: 'var(--color-text-3)' }}>{profileData.email}</span>
+              {/* A long address beside the badge is wider than a phone, so
+                  the pair wraps and the address is free to break. */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 14.5, color: 'var(--color-text-3)', wordBreak: 'break-word', minWidth: 0 }}>
+                  {profileData.email}
+                </span>
                 <Badge tone="green">Active</Badge>
               </div>
             </div>
@@ -518,7 +525,7 @@ const ProfilePage = () => {
 
           {/* Stat strip — inline rather than <StatStrip> because one value is a
               login ID, which needs mono at a smaller size than 28px. */}
-          <div
+          <div className="grid-sm-2"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',

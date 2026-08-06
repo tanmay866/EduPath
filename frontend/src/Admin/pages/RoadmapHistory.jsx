@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   AdminShell, Card, CardHeader, CardFooterNote, TableHead, TableRow, NumCell,
-  SegmentedFilter, Input, Button, Loading, Empty,
+  SegmentedFilter, Input, Button, Loading, Empty, TableScroll,
 } from '../../design';
 import { adminNav } from '../../design/nav';
 import { shortDate } from '../format';
@@ -76,6 +76,7 @@ const RoadmapHistory = () => {
           <Empty action={<Button onClick={reload}>Try again</Button>}>{error}</Empty>
         ) : (
           <>
+            <TableScroll minWidth={680}>
             <TableHead columns={COLUMNS} align={['left', 'left', 'right', 'left', 'right']}>
               <span>Learner</span>
               <span>Track</span>
@@ -101,6 +102,7 @@ const RoadmapHistory = () => {
                 </TableRow>
               ))
             )}
+            </TableScroll>
 
             <CardFooterNote>
               {levelFilter === 'All'

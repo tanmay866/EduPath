@@ -833,7 +833,7 @@ function PortfolioGenerator() {
 
       {/* ── Step 3: template ── */}
       {currentStep === 3 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 22, alignItems: 'start' }}>
+        <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 22, alignItems: 'start' }}>
           <Card>
             <CardHeader
               label="Templates"
@@ -875,6 +875,9 @@ function PortfolioGenerator() {
               />
               {/* The template itself is the user's site, not EduPath chrome, so it
                   keeps its own colours inside this frame. */}
+              <p className="wide-screen-note">
+                This is your published site at desktop width. It is easier to judge on a wider screen.
+              </p>
               <div style={{ maxHeight: 560, overflowY: 'auto', borderTop: '1px solid var(--color-line)' }}>
                 {(() => {
                   const TemplateComp = TEMPLATES_MAP[selectedTemplate] || TemplateEditorial;
@@ -915,7 +918,10 @@ const TEXTAREA = {
   resize: 'vertical',
 };
 
-const TWO_UP = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 };
+// auto-fit rather than a hard 1fr 1fr: below roughly 420px two columns
+// leave each field too narrow to read what is typed in it, so the pair
+// becomes one column on its own.
+const TWO_UP = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 20 };
 
 function Section({ label, onAdd, addLabel, children }) {
   return (

@@ -425,3 +425,170 @@ textarea {
     gap: 20px 32px !important;
   }
 }
+
+/* ── Learner and admin shells on a phone ──────────────────────────────────
+   Both are `230px 1fr` (218px for admin) pinned to 100vh. On a 390px screen
+   that left 160px of usable app — and it never registered as overflow,
+   because the 1fr column simply shrank. The sidebar was taking nearly two
+   thirds of the viewport to show six links.
+
+   Below 900px the sidebar becomes a strip above the content: brand row, then
+   the nav items in a single horizontal line that scrolls sideways. Section
+   labels ("Learn", "Build", "Account") go — they organise a tall column, and
+   in a row they read as items you cannot click.
+
+   The 100vh + inner overflow-y is also dropped. A pinned shell with its own
+   scrolling pane fights the browser on touch: the address bar resize changes
+   100vh mid-scroll, and momentum scrolling stops at the pane edge. The
+   document scrolls instead, which is what a phone expects. */
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    min-height: 100vh;
+  }
+
+  /* min-width: 0 on both children, or the grid column sizes itself to the
+     nav row's content and the whole shell grows to ~750px instead of letting
+     the strip scroll. A grid item's default min-width is auto. */
+  .app-shell__aside {
+    height: auto !important;
+    overflow: visible !important;
+    min-width: 0;
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .app-shell__brand {
+    height: auto !important;
+    padding: 14px 20px !important;
+  }
+
+  .app-shell__nav {
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    /* Momentum scrolling without a visible bar over the nav. */
+    scrollbar-width: none;
+  }
+
+  .app-shell__nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The groups stop being boxes so their items join one row. */
+  .app-shell__navgroup {
+    display: contents;
+  }
+
+  .app-shell__navgroup > span {
+    display: none !important;
+  }
+
+  /* Selection moves from the left edge to underneath, which is where it
+     reads in a horizontal strip. */
+  .app-nav__item {
+    width: auto !important;
+    white-space: nowrap;
+    border-left: none !important;
+    border-bottom: 3px solid transparent;
+    padding: 12px 16px !important;
+  }
+
+  .app-nav__item[aria-current='page'] {
+    border-bottom-color: var(--color-clay);
+  }
+
+  /* Not hidden: on the admin side this row is the only sign out in the whole
+     interface, since /settings resolves to the dashboard when the role is
+     admin. It just gets out of the way. */
+  .app-shell__foot {
+    margin-top: 0 !important;
+    padding: 10px 20px !important;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .app-shell__body {
+    height: auto !important;
+    overflow: visible !important;
+    min-width: 0;
+  }
+
+  .app-shell__main {
+    overflow: visible !important;
+  }
+
+  .app-shell__header {
+    height: auto !important;
+    padding: 16px 20px !important;
+    align-items: flex-start !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell__main > div > div {
+    padding: 18px 16px !important;
+  }
+}
+
+/* ── Layout utilities for narrow screens ──────────────────────────────────
+   Applied to the page-level grids only — the two- and three-column layouts
+   that carry a sidebar or a card row. The small ones (`10px 1fr` for a bullet
+   beside text, `20px 1fr` for an ordinal) are left alone: those are
+   typography, and stacking them would break the line they draw.
+
+   `.stack-sm`   two columns that become one.
+   `.grid-sm-2`  three or four cells that become two, then one on the
+                 narrowest screens, so a stat strip stays a strip. */
+@media (max-width: 760px) {
+  .stack-sm {
+    grid-template-columns: 1fr !important;
+  }
+
+  .grid-sm-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Cells drawn by a right border become a stack, so the border that used to
+     separate columns now has to separate rows instead. */
+  .grid-sm-2 > * {
+    border-right: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .grid-sm-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Preview notes ────────────────────────────────────────────────────────
+   The resume and portfolio builders both show a document beside the form.
+   Everything on those pages works on a phone — the form, the fields, the
+   download — but a page layout is a page layout, and judging one at 390px is
+   not the same as seeing it at the width it will be read at. The note says so
+   where that is true and nowhere else. It is not a barrier: the preview still
+   renders and still scrolls. */
+.wide-screen-note {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .wide-screen-note {
+    display: block;
+    margin: 0;
+    padding: 11px 20px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--color-text-3);
+    background: var(--color-surface-attn, var(--color-surface));
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  /* Sticky is for a column beside the form. Stacked underneath it, it pins
+     the preview over the fields being typed into. */
+  .preview-col {
+    position: static !important;
+  }
+}

@@ -63,7 +63,7 @@ const QuizLayout = ({
   return (
     <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
       <div style={{ maxWidth: 1160, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 22, alignItems: 'start' }}>
+        <div className="stack-sm" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 22, alignItems: 'start' }}>
           <Card>
             <CardHeader
               label={`Question ${currentQuestionIndex + 1} of ${total}`}
