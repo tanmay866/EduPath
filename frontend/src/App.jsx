@@ -9,6 +9,7 @@ import Signup from './Pages/Authentication/Signup'
 import Signin from './Pages/Authentication/Signin'
 import ResetPassword from './Pages/Authentication/ResetPassword'
 import VerifyEmail from './Pages/Authentication/VerifyEmail'
+import Unsubscribe from './Pages/Unsubscribe'
 import Footer from './component/Footer/Footer'
 import AssessmentDashboard from './Pages/Assessment/AssesmentDashboard/AssessmentDashboard'
 import AssessmentInstructions from './Pages/Assessment/AssesmentInstructions/AssessmentInstructions'
@@ -125,6 +126,9 @@ const App = () => {
           <Route path="/signin" element={<Signin />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          {/* Reached from a link in an email, so it sits with the other
+              routes that must work with no session. */}
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/onboarding" element={<Onboarding />} />
