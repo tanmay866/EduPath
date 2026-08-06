@@ -2,6 +2,10 @@ import User from '../models/userModel.js';
 import cloudinary from '../config/cloudinaryConfig.js';
 import { CAREER_ROLES, isCareerRole } from '../utils/careerRoles.js';
 import { LEARNING_STYLES, isLearningStyle } from '../utils/learningStyles.js';
+import InterviewResult from '../models/InterviewResult.js';
+import PracticeResult from '../models/PracticeResult.js';
+import GeneratedResume from '../models/GeneratedResume.js';
+import Portfolio from '../models/Portfolio.js';
 
 const normalizeExperienceLevel = (value) => {
   if (!value) {
@@ -532,5 +536,68 @@ export const updateAvailability = async (req, res) => {
     res.status(200).json({ success: true, data: updated });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * GET /api/profile/activity — a one-line state for each part of the product
+ * the Overview does not otherwise mention.
+ *
+ * The Overview is the page called "Overview" and it covered two of the six
+ * things a learner can do here: assessments and the roadmap. Mock interviews,
+ * coding practice, the resume and the portfolio were each their own island —
+ * you could finish a mock interview and nothing anywhere else would know it
+ * had happened.
+ *
+ * Deliberately small. This is a summary that says whether a thing has been
+ * started and how it went, not a second copy of each feature's own screen.
+ * One request rather than four so the page still paints in one pass.
+ */
+export const getActivitySummary = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const [interviews, practice, resumes, portfolio] = await Promise.all([
+      InterviewResult.find({ userId }).sort({ createdAt: -1 }).select('role overallScore createdAt').lean(),
+      PracticeResult.find({ userId }).sort({ createdAt: -1 }).select('total correct createdAt').lean(),
+      GeneratedResume.find({ userId }).sort({ updatedAt: -1 }).select('version updatedAt').lean(),
+      Portfolio.findOne({ userId }).sort({ updatedAt: -1 }).select('username updatedAt').lean(),
+    ]);
+
+    // Accuracy across every practice session rather than the last one — a
+    // single session is too small a sample to describe as a rate.
+    const attempted = practice.reduce((sum, p) => sum + (p.total || 0), 0);
+    const correct = practice.reduce((sum, p) => sum + (p.correct || 0), 0);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        interview: {
+          count: interviews.length,
+          lastScore: interviews[0]?.overallScore ?? null,
+          lastRole: interviews[0]?.role ?? null,
+          lastAt: interviews[0]?.createdAt ?? null,
+        },
+        practice: {
+          sessions: practice.length,
+          attempted,
+          correct,
+          accuracy: attempted ? Math.round((correct / attempted) * 100) : null,
+          lastAt: practice[0]?.createdAt ?? null,
+        },
+        resume: {
+          versions: resumes.length,
+          lastAt: resumes[0]?.updatedAt ?? null,
+        },
+        portfolio: {
+          exists: Boolean(portfolio),
+          username: portfolio?.username ?? null,
+          lastAt: portfolio?.updatedAt ?? null,
+        },
+      },
+    });
+  } catch (err) {
+    console.error('getActivitySummary error:', err);
+    return res.status(500).json({ success: false, message: 'Server error.', error: err.message });
   }
 };

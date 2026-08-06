@@ -9,7 +9,9 @@ import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../
 import TopicProgress from './TopicProgress';
 import ThisWeek from '../../Roadmap/components/ThisWeek';
 import ReviewQueue from './ReviewQueue';
+import ActivitySummary from './ActivitySummary';
 import { getRoadmap } from '../../Services/roadmapService';
+import { getActivitySummary } from '../../Services/profileService';
 
 /**
  * Spec §7 Overview.
@@ -34,6 +36,7 @@ const AssessmentDashboard = () => {
   // Topics whose last score has been sitting untouched long enough to be
   // worth another look. Allowed to fail: it is an extra, not the page.
   const [reviewDue, setReviewDue] = useState([]);
+  const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -47,7 +50,7 @@ const AssessmentDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [topicsRes, statsRes, historyRes, roadmapRes, reviewRes] = await Promise.all([
+      const [topicsRes, statsRes, historyRes, roadmapRes, reviewRes, activityRes] = await Promise.all([
         fetchQuizTopics(),
         getQuizStats().catch(() => ({ data: { data: { overall: { totalQuizzes: 0, averageScore: 0 }, topicPerformance: [] } } })),
         getQuizHistory().catch(() => ({ data: { data: { results: [] } } })),
@@ -55,9 +58,11 @@ const AssessmentDashboard = () => {
         // a new account rather than an error for the whole page.
         getRoadmap().catch(() => null),
         getReviewQueue().catch(() => null),
+        getActivitySummary().catch(() => null),
       ]);
       setRoadmap(roadmapRes?.data || null);
       setReviewDue(reviewRes?.data?.data?.due || []);
+      setActivity(activityRes?.data || null);
       setTopicCount((topicsRes.data?.data || []).length);
       setStats(statsRes.data?.data || null);
       setHistory(historyRes.data?.data?.results || []);
@@ -114,6 +119,8 @@ const AssessmentDashboard = () => {
       <ThisWeek roadmap={roadmap} />
 
       <ReviewQueue queue={reviewDue} />
+
+      <ActivitySummary activity={activity} />
 
       <StatStrip items={statItems} />
 

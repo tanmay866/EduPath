@@ -9,7 +9,8 @@ import {
   deleteProfilePicture,
   updateBasic,
   updateSkills,
-  updateAvailability
+  updateAvailability,
+  getActivitySummary
 } from '../controllers/profileController.js';
 
 const router = express.Router();
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.use(protect);
 router.get('/', getProfile);
+router.get('/activity', getActivitySummary);
 router.put('/', updateProfile);
 router.put('/basic', updateBasic);
 router.put('/skills', updateSkills);

@@ -99,3 +99,14 @@ export const markTourSeen = async () => {
     throw error.response?.data || error;
   }
 };
+
+// A one-line state for each part of the product the Overview does not
+// otherwise mention, in a single request.
+export const getActivitySummary = async () => {
+  try {
+    const response = await API.get('/profile/activity');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
