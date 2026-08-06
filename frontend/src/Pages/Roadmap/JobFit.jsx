@@ -6,6 +6,7 @@ import {
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 import { analyseJobPosting } from '../Services/roadmapService';
+import { updateProfile } from '../Services/profileService';
 
 /**
  * Read a real job posting against the curriculum.
@@ -40,6 +41,7 @@ const JobFit = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [switching, setSwitching] = useState(false);
 
   const analyse = async () => {
     setLoading(true);
@@ -52,6 +54,30 @@ const JobFit = () => {
       setError(err?.message || 'That did not go through. Try again in a moment.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Actually change track, rather than pointing at the screen that can.
+   *
+   * The button said "Switch to Data Science Engineer" and then navigated to
+   * Profile, leaving the learner to find the field and set it to the value
+   * they had just been shown — which is the whole of what the click was
+   * promising to do.
+   */
+  const switchTrack = async () => {
+    setSwitching(true);
+    setError('');
+    try {
+      await updateProfile({ target_role: result.matched_role });
+      // The guards and role-driven screens read this copy, so it has to move
+      // with the account or the next page still opens on the old track.
+      sessionStorage.setItem('targetRole', result.matched_role);
+      window.dispatchEvent(new Event('sessionStorageUpdated'));
+      navigate('/roadmap/generate');
+    } catch (err) {
+      setError(err?.message || 'Could not change your track. Try again in a moment.');
+      setSwitching(false);
     }
   };
 
@@ -186,7 +212,9 @@ const JobFit = () => {
 
           <div style={{ padding: '4px 24px 20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {differentTrack ? (
-              <Button onClick={() => navigate('/profile')}>{`Switch to ${result.matched_role}`}</Button>
+              <Button onClick={switchTrack} disabled={switching}>
+                {switching ? 'Switching…' : `Switch to ${result.matched_role}`}
+              </Button>
             ) : (
               <Button onClick={() => navigate('/roadmap/generate')}>Open my plan</Button>
             )}
@@ -210,7 +238,7 @@ const JobFit = () => {
 
           <CardFooterNote>
             {differentTrack
-              ? `Your plan is for ${targetRole}. Changing track in Profile builds a plan for this one instead, and keeps the old one in history.`
+              ? `Your plan is for ${targetRole}. Switching changes the track on your profile and builds a plan for this one instead, keeping the old one in history.`
               : 'Anything you can already do is left out of the estimate. Assessing first usually shortens it further.'}
           </CardFooterNote>
         </Card>
