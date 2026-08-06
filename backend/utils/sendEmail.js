@@ -10,6 +10,8 @@ import {
   notice,
   linkFallback,
   badge,
+  escapeHtml,
+  bulletList,
 } from './emailLayout.js';
 
 /**
@@ -210,6 +212,57 @@ export const sendAccountDeletedEmail = async (user, removed = {}) => {
       eyebrow: 'Account deleted',
       content: content.join('\n'),
     }),
+  });
+};
+
+/**
+ * The Monday email: the week the learner is on, and its tasks.
+ *
+ * Deliberately narrow. It says what to do this week and links to it — no
+ * digest of everything, no streak, no scores. A weekly mail that reproduces
+ * the dashboard gets filtered; one that answers a single question gets opened.
+ *
+ * Only sent to someone who asked for it and has an unfinished plan, so the
+ * copy can assume both rather than hedging.
+ *
+ * @param {Object} user
+ * @param {Object} week - the current weekly_plan entry
+ * @param {Object} meta - { targetRole, weekCount, doneCount, unsubscribeUrl }
+ */
+export const sendWeeklyPlanEmail = async (user, week, meta = {}) => {
+  const tasks = week.tasks || [];
+  const ticked = new Set((week.completed_tasks || []).map(Number));
+  // What is left, not everything. A task ticked last week reappearing as
+  // homework reads as the product not paying attention.
+  const remaining = tasks.filter((_, i) => !ticked.has(i));
+
+  const covers = (week.skills || []).join(', ');
+  const title = covers || `Week ${week.week_number}`;
+  const openUrl = `${process.env.FRONTEND_URL}/assessment`;
+
+  const html = layout({
+    preheader: `Week ${week.week_number}: ${title} — ${remaining.length} ${remaining.length === 1 ? 'task' : 'tasks'} left.`,
+    eyebrow: `Week ${week.week_number} of ${meta.weekCount}`,
+    content: [
+      heading(title),
+      paragraph(`Hi ${escapeHtml(user.firstName)}, this is where you are on ${escapeHtml(meta.targetRole || 'your track')}.`),
+      bulletList(remaining),
+      button('Open this week', openUrl),
+      subtle(
+        `${meta.doneCount} of ${meta.weekCount} weeks done.`
+        + (week.estimated_hours ? ` About ${week.estimated_hours} hours planned.` : '')
+      ),
+      linkFallback(openUrl),
+      meta.unsubscribeUrl
+        ? subtle(`Not useful? <a href="${meta.unsubscribeUrl}" style="color:#3A3733;">Stop these emails</a> — your plan stays exactly as it is.`)
+        : '',
+    ].filter(Boolean).join('\n'),
+  });
+
+  return await sendEmail({
+    email: user.email,
+    subject: `Week ${week.week_number}: ${title}`,
+    html,
   });
 };
 

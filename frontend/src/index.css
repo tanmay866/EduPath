@@ -546,6 +546,13 @@ textarea {
     grid-template-columns: 1fr !important;
   }
 
+  /* A grid item defaults to min-width: auto, so a single column still cannot
+     shrink below its widest child — a card with a long field inside kept a
+     376px floor in a 360px viewport. */
+  .stack-sm > * {
+    min-width: 0;
+  }
+
   .grid-sm-2 {
     grid-template-columns: repeat(2, 1fr) !important;
   }

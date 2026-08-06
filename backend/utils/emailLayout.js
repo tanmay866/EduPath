@@ -270,4 +270,34 @@ export const badge = (label, tone = 'green') => {
   return `<span class="ep-mono ${cls}" style="font-family:${FONT_MONO};font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${color};border:1px solid ${color};padding:4px 9px;display:inline-block;">${label}</span>`;
 };
 
-export default { layout, heading, paragraph, subtle, button, codeBlock, detailRows, notice, linkFallback, badge };
+/**
+ * Escapes text that came from anywhere but this file.
+ *
+ * Skill names, role names and generated task text all end up in these
+ * templates. None of it is attacker-controlled today, but an apostrophe or an
+ * ampersand in a track name should not be able to break the markup, and the
+ * cost of being careful here is nothing.
+ */
+export const escapeHtml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+/** A bulleted list. Tables rather than <ul>, like everything else here. */
+export const bulletList = (items = []) => {
+  if (!items.length) return '';
+  const rows = items
+    .map(
+      (item) =>
+        `                <tr><td class="ep-sans ep-text-2" style="padding:0 0 9px 0;font-family:${FONT_SANS};font-size:15px;line-height:1.55;color:${COLOR.text2};">&bull;&nbsp;&nbsp;${escapeHtml(item)}</td></tr>`
+    )
+    .join('\n');
+  return `              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 22px 0;">
+${rows}
+              </table>`;
+};
+
+export default { layout, heading, paragraph, subtle, button, codeBlock, detailRows, notice, linkFallback, badge, escapeHtml, bulletList };

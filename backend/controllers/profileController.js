@@ -117,7 +117,8 @@ export const getProfile = async (req, res) => {
         profile_complete: Boolean(user.profile_complete),
         tour_seen: Boolean(user.tour_seen_at),
         profilePicture: user.profile?.avatar || '',
-        loginId: user.loginId || ''
+        loginId: user.loginId || '',
+        weekly_email: Boolean(user.weeklyEmail?.enabled)
       }
     });
   } catch (error) {
@@ -281,7 +282,7 @@ export const updateProfile = async (req, res) => {
 // @access  Private
 export const updateSettings = async (req, res) => {
   try {
-    const { theme, language, notificationEnabled } = req.body;
+    const { theme, language, notificationEnabled, weeklyEmail } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -296,6 +297,11 @@ export const updateSettings = async (req, res) => {
     if (theme !== undefined) user.theme = theme;
     if (language !== undefined) user.language = language;
     if (notificationEnabled !== undefined) user.notificationEnabled = notificationEnabled;
+    // Only the flag is writable — lastSentAt is the job's bookkeeping and a
+    // client that could set it could suppress its own next email.
+    if (typeof weeklyEmail?.enabled === 'boolean') {
+      user.weeklyEmail = { ...(user.weeklyEmail || {}), enabled: weeklyEmail.enabled };
+    }
 
     await user.save();
 
@@ -305,7 +311,8 @@ export const updateSettings = async (req, res) => {
       data: {
         theme: user.theme,
         language: user.language,
-        notificationEnabled: user.notificationEnabled
+        notificationEnabled: user.notificationEnabled,
+        weeklyEmail: { enabled: user.weeklyEmail?.enabled ?? false }
       }
     });
   } catch (error) {

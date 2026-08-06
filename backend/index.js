@@ -11,6 +11,8 @@ import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
+import unsubscribeRoutes from './routes/unsubscribeRoutes.js';
+import startScheduler from './services/scheduler.js';
 import resumeRoutes from './routes/resumeRoutes.js';
 import resumeGeneratorRoutes from './routes/resumeGeneratorRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
@@ -157,6 +159,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/unsubscribe', unsubscribeRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/resume-generator', resumeGeneratorRoutes);
 app.use('/api/portfolio', portfolioRoutes);
@@ -218,6 +221,7 @@ const server = app.listen(PORT, () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Started at: ${new Date().toLocaleString()}`);
   console.log('='.repeat(50));
+  startScheduler();
 });
 
 // Handle unhandled promise rejections

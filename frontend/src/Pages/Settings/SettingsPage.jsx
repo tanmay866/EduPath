@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { changePassword, deleteAccount } from '../Services/profileService';
+import { changePassword, deleteAccount, getProfile, updateSettings } from '../Services/profileService';
 import { getPasswordError, getApiErrorMessage, getPasswordRules } from '../../utils/passwordPolicy';
 import {
   LearnerShell, Card, CardHeader, Button, Field, FieldGroup, PasswordInput, Input,
-  PasswordRequirements, InlineMessage, MicroLabel, Modal,
+  PasswordRequirements, InlineMessage, MicroLabel, Modal, Toggle,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 import {
@@ -38,6 +38,33 @@ const SettingsPage = () => {
 
   // Sign out state
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+
+  // The Monday email. Off for anyone who had an account before it existed —
+  // they never agreed to it — so this is where it gets turned on.
+  const [weeklyEmail, setWeeklyEmail] = useState(false);
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailError, setEmailError] = useState('');
+
+  useEffect(() => {
+    getProfile()
+      .then((res) => setWeeklyEmail(Boolean(res?.data?.weekly_email)))
+      .catch(() => { /* the rest of the page still works */ });
+  }, []);
+
+  const handleWeeklyEmail = async (next) => {
+    const previous = weeklyEmail;
+    setWeeklyEmail(next);
+    setEmailSaving(true);
+    setEmailError('');
+    try {
+      await updateSettings({ weeklyEmail: { enabled: next } });
+    } catch (err) {
+      setWeeklyEmail(previous);
+      setEmailError(err?.message || 'That did not save. Try again in a moment.');
+    } finally {
+      setEmailSaving(false);
+    }
+  };
 
   // Reading voice for the mock interview. The list is whatever the browser
   // has installed, so it differs per device and can only be read at runtime.
@@ -224,6 +251,42 @@ const SettingsPage = () => {
           {/* Right — voice, session and the danger zone, stacked. Danger stays
               last so the destructive control is never the first thing reached. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+            <Card>
+              <CardHeader label="Email" />
+
+              <div
+                style={{
+                  padding: '17px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 24,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>
+                    Weekly plan email
+                  </div>
+                  <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                    {weeklyEmail
+                      ? 'Monday mornings: the week you are on and what is left in it. Nothing else.'
+                      : 'Off. Turn it on for a Monday note with the week you are on and what is left in it.'}
+                  </p>
+                </div>
+                <Toggle
+                  checked={weeklyEmail}
+                  onChange={handleWeeklyEmail}
+                  disabled={emailSaving}
+                  label="Weekly plan email"
+                />
+              </div>
+
+              {emailError && (
+                <InlineMessage tone="error" style={{ margin: '0 20px 16px' }}>{emailError}</InlineMessage>
+              )}
+            </Card>
+
             <Card>
               <CardHeader label="Interview voice" />
 

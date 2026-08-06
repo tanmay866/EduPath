@@ -184,6 +184,23 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    /**
+     * The Monday email.
+     *
+     * Separate from notificationEnabled, which is a generic flag nothing has
+     * ever read — folding an actual outbound email into it would mean a
+     * learner who turned off "notifications" for something else silently
+     * stopped receiving this too, or worse, started receiving it.
+     *
+     * Defaults to true so a new signup is opted in at the point they choose
+     * to join. Accounts that existed before the email did are switched off by
+     * scripts/optOutExistingFromWeeklyEmail.js — they never agreed to it.
+     */
+    weeklyEmail: {
+      enabled: { type: Boolean, default: true },
+      // Guards against a double send if the job runs twice in a window.
+      lastSentAt: { type: Date },
+    },
     // Skill assessment profile
     skillProfile: {
       assessedSkills: [{
