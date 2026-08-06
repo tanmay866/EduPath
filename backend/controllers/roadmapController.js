@@ -535,7 +535,30 @@ export const analyseJobPosting = async (req, res) => {
             { timeout: 20000 }
         );
 
-        return res.status(200).json({ success: true, data });
+        // Attach the quiz topic that covers each missing skill, the same way
+        // the roadmap does, so "assess these skills" can open the quiz on one
+        // of them instead of leaving the learner to find it in a list of 29.
+        // Skills with no topic in the catalogue simply carry none.
+        // Kept in the order the skills are missing rather than whatever order
+        // the lookup returns, so the first one offered is the first gap named.
+        const missingTopicNames = [
+            ...new Set((data?.missing || []).map((s) => topicForSkill(s)).filter(Boolean)),
+        ];
+        const idByName = new Map(
+            missingTopicNames.length
+                ? (await Topic.find({ name: { $in: missingTopicNames }, isActive: true })
+                      .select("name")
+                      .lean()).map((t) => [t.name, String(t._id)])
+                : []
+        );
+        const missingTopics = missingTopicNames
+            .filter((name) => idByName.has(name))
+            .map((name) => ({ topicId: idByName.get(name), topicName: name }));
+
+        return res.status(200).json({
+            success: true,
+            data: { ...data, missing_topics: missingTopics },
+        });
     } catch (err) {
         if (err.response || err.request) {
             console.error("Job analysis service error:", err.message);

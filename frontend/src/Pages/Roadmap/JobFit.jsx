@@ -190,9 +190,22 @@ const JobFit = () => {
             ) : (
               <Button onClick={() => navigate('/roadmap/generate')}>Open my plan</Button>
             )}
-            <Button variant="secondary" onClick={() => navigate('/assessment-hub/skill')}>
-              Assess these skills
-            </Button>
+            {/* Straight into a quiz on one of the skills the posting wants and
+                the learner does not have. It used to open the hub's explainer,
+                whose own button returns to the dashboard — so the posting's
+                whole point, the named gap, was dropped on the way. */}
+            {result.missing_topics?.length > 0 && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  navigate('/assessment/quiz', {
+                    state: { topicId: result.missing_topics[0].topicId },
+                  })
+                }
+              >
+                {`Assess ${result.missing_topics[0].topicName}`}
+              </Button>
+            )}
           </div>
 
           <CardFooterNote>
