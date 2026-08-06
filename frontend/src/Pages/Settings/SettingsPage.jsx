@@ -7,6 +7,10 @@ import {
   PasswordRequirements, InlineMessage, MicroLabel, Modal,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
+import {
+  getVoiceOptions, getPreferredVoiceURI, setPreferredVoice, voicesReady,
+  speakText, stopSpeaking,
+} from '../../utils/voiceService';
 
 /**
  * Spec §7 Settings (security).
@@ -34,6 +38,23 @@ const SettingsPage = () => {
 
   // Sign out state
   const [showSignOutModal, setShowSignOutModal] = useState(false);
+
+  // Reading voice for the mock interview. The list is whatever the browser
+  // has installed, so it differs per device and can only be read at runtime.
+  const [voices, setVoices] = useState([]);
+  const [voiceURI, setVoiceURI] = useState(() => getPreferredVoiceURI() || '');
+
+  useEffect(() => {
+    let live = true;
+    voicesReady().then(() => { if (live) setVoices(getVoiceOptions()); });
+    return () => { live = false; stopSpeaking(); };
+  }, []);
+
+  const handleVoiceChange = (uri) => {
+    setVoiceURI(uri);
+    setPreferredVoice(uri);
+    stopSpeaking();
+  };
 
   // Account deletion state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -200,8 +221,66 @@ const SettingsPage = () => {
             </form>
           </Card>
 
-          {/* Right — session and the danger zone, each a single row, stacked */}
+          {/* Right — voice, session and the danger zone, stacked. Danger stays
+              last so the destructive control is never the first thing reached. */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+            <Card>
+              <CardHeader label="Interview voice" />
+
+              <div style={{ padding: '17px 20px' }}>
+                <div style={{ fontSize: 15.5, fontWeight: 500, color: 'var(--color-ink)' }}>
+                  Reading voice
+                </div>
+                <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 14px', lineHeight: 1.5 }}>
+                  Used when the mock interview reads a question aloud. These come from your
+                  browser and device, so the list differs between them — the best available is
+                  picked for you unless you choose otherwise.
+                </p>
+
+                {voices.length === 0 ? (
+                  <p style={{ fontSize: 14, color: 'var(--color-text-4)', margin: 0 }}>
+                    This browser reports no speech voices, so questions will be shown rather than
+                    spoken.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <select
+                      value={voiceURI}
+                      onChange={(e) => handleVoiceChange(e.target.value)}
+                      aria-label="Reading voice"
+                      style={{
+                        flex: '1 1 220px',
+                        minWidth: 0,
+                        padding: '11px 14px',
+                        fontSize: 15,
+                        fontFamily: 'var(--font-sans)',
+                        color: 'var(--color-ink)',
+                        background: '#fff',
+                        border: '1px solid var(--color-line-input)',
+                        borderRadius: 0,
+                        outline: 'none',
+                      }}
+                    >
+                      <option value="">Best available ({voices[0].name})</option>
+                      {voices.map((v) => (
+                        <option key={v.uri} value={v.uri}>{`${v.name} — ${v.lang}`}</option>
+                      ))}
+                    </select>
+
+                    <Button
+                      variant="secondary"
+                      style={{ flexShrink: 0, padding: '10px 20px', fontSize: 14 }}
+                      onClick={() => speakText(
+                        'This is how your mock interview questions will sound.',
+                      ).catch(() => {})}
+                    >
+                      Preview
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </Card>
+
             <Card>
               <CardHeader label="Session" />
 

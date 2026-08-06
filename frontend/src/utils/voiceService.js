@@ -1,294 +1,243 @@
 /**
- * Voice Service Utility
- * Provides high-quality text-to-speech using Microsoft neural voices
+ * Text to speech for the mock interview, on the browser's own speech engine.
+ *
+ * This file used to say it provided "high-quality Microsoft neural voices". It
+ * cannot: `speechSynthesis.getVoices()` returns what is installed on the
+ * listener's machine and nothing else. The old priority list named five
+ * Microsoft voices first, all of which exist only on Windows 11, so on macOS,
+ * iOS and Android every one of them missed and selection fell through to
+ * whatever happened to be there — including the novelty voices macOS ships
+ * (Albert, Zarvox, Bubbles), since the last resort was `voices[0]` and that
+ * list is alphabetical.
+ *
+ * Voices are scored instead of matched by name. The signals that actually
+ * predict quality are the same on every platform:
+ *
+ *   "Natural"            Windows 11 neural voices
+ *   "(Premium)"          macOS/iOS downloaded high-quality voices
+ *   "(Enhanced)"         macOS/iOS mid-tier, still far better than compact
+ *   "Google …"           Chrome's network voices, better than legacy locals
+ *   localService: false  network-backed, generally better than on-device
+ *
+ * A learner can override the choice in Settings; that wins over any score.
  */
 
-// Store the selected voice for reuse
-let cachedVoice = null;
-let voicesLoaded = false;
+const STORAGE_KEY = 'preferredVoiceURI';
 
-/**
- * Microsoft neural voice priority list
- */
-const PREFERRED_VOICES = [
-  'Microsoft Jenny',
-  'Microsoft Aria',
-  'Microsoft Guy',
-  'Microsoft Zira',
-  'Microsoft David',
+/** Names that are jokes rather than voices. macOS ships all of these. */
+const NOVELTY = /\b(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Jester|Junior|Organ|Ralph|Superstar|Trinoids|Whisper|Wobble|Zarvox|Grandma|Grandpa|Rocko|Shelley|Sandy|Flo|Eddy|Reed|Kathy|Fred)\b/i;
+
+/** Known-good names, as a tiebreak once the structural signals are equal. */
+const GOOD_NAMES = [
+  'Google UK English Female',
   'Google US English',
-  'Samantha', // macOS
-  'Alex', // macOS
+  'Google UK English Male',
+  'Microsoft Aria',
+  'Microsoft Jenny',
+  'Microsoft Guy',
+  'Ava',
+  'Samantha',
+  'Serena',
+  'Daniel',
+  'Karen',
+  'Moira',
 ];
 
 /**
- * Get the best available voice
- * Prioritizes Microsoft neural voices for natural speech
+ * Higher is better. Anything not English scores below zero and is skipped —
+ * the interview is in English, and a Hindi voice reading an English question
+ * is worse than a plain one.
  */
-function getBestVoice() {
+export const scoreVoice = (voice) => {
+  if (!voice || !/^en/i.test(voice.lang || '')) return -1;
+
+  const name = voice.name || '';
+  let score = 1;
+
+  if (NOVELTY.test(name)) return -1;
+
+  if (/natural/i.test(name)) score += 100;
+  if (/\(premium\)/i.test(name)) score += 90;
+  if (/\(enhanced\)/i.test(name)) score += 60;
+  if (/^google\b/i.test(name)) score += 70;
+  if (voice.localService === false) score += 30;
+
+  const known = GOOD_NAMES.findIndex((n) => name.includes(n));
+  if (known !== -1) score += 40 - known;
+
+  // en-US and en-GB are what the questions are written in.
+  if (/^en[-_](US|GB)$/i.test(voice.lang)) score += 10;
+
+  return score;
+};
+
+/** Every usable English voice, best first. */
+export const getVoiceOptions = () => {
+  const voices = window.speechSynthesis?.getVoices?.() || [];
+  return voices
+    .map((voice) => ({ voice, score: scoreVoice(voice) }))
+    .filter((entry) => entry.score >= 0)
+    .sort((a, b) => b.score - a.score)
+    .map(({ voice, score }) => ({
+      uri: voice.voiceURI,
+      name: voice.name,
+      lang: voice.lang,
+      score,
+    }));
+};
+
+/** The learner's explicit choice, if the voice is still installed. */
+const storedVoice = () => {
+  let uri = null;
+  try { uri = localStorage.getItem(STORAGE_KEY); } catch { /* private mode */ }
+  if (!uri) return null;
+  const voices = window.speechSynthesis?.getVoices?.() || [];
+  return voices.find((v) => v.voiceURI === uri) || null;
+};
+
+/**
+ * The voice to speak with.
+ *
+ * Deliberately not cached. The old version stored its choice in a module
+ * variable on first use and never looked again — and on Chrome `getVoices()`
+ * is empty on first call and fills in asynchronously, so a selection made
+ * before the list arrived was kept for the rest of the session even once the
+ * good voices had loaded. Scoring a short list costs nothing.
+ */
+export const getBestVoice = () => {
+  const chosen = storedVoice();
+  if (chosen) return chosen;
+
+  const voices = window.speechSynthesis?.getVoices?.() || [];
+  let best = null;
+  let bestScore = 0;
+  for (const voice of voices) {
+    const score = scoreVoice(voice);
+    if (score > bestScore) { best = voice; bestScore = score; }
+  }
+  return best;
+};
+
+export const setPreferredVoice = (uri) => {
+  try {
+    if (uri) localStorage.setItem(STORAGE_KEY, uri);
+    else localStorage.removeItem(STORAGE_KEY);
+  } catch { /* private mode — the session still works, it just will not persist */ }
+};
+
+export const getPreferredVoiceURI = () => {
+  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+};
+
+/** Resolves once the browser has published its voice list. */
+export const voicesReady = () => new Promise((resolve) => {
   const synth = window.speechSynthesis;
-  const voices = synth.getVoices();
+  if (!synth) { resolve([]); return; }
+  if (synth.getVoices().length) { resolve(synth.getVoices()); return; }
 
-  if (voices.length === 0) return null;
-
-  // Try to find preferred voices in order
-  for (const preferredName of PREFERRED_VOICES) {
-    const voice = voices.find(v =>
-      v.name.includes(preferredName) && v.lang.startsWith('en')
-    );
-    if (voice) {
-      console.log(`🎤 Selected voice: ${voice.name}`);
-      return voice;
-    }
-  }
-
-  // Fallback: Find any English US voice
-  const englishUSVoice = voices.find(v => v.lang === 'en-US');
-  if (englishUSVoice) {
-    console.log(`🎤 Fallback voice: ${englishUSVoice.name}`);
-    return englishUSVoice;
-  }
-
-  // Fallback: Find any English voice
-  const englishVoice = voices.find(v => v.lang.startsWith('en'));
-  if (englishVoice) {
-    console.log(`🎤 Fallback voice: ${englishVoice.name}`);
-    return englishVoice;
-  }
-
-  // Last resort: Use first available voice
-  console.log(`🎤 Using default voice: ${voices[0]?.name}`);
-  return voices[0] || null;
-}
+  let settled = false;
+  const done = () => {
+    if (settled) return;
+    settled = true;
+    resolve(synth.getVoices());
+  };
+  synth.addEventListener('voiceschanged', done, { once: true });
+  // Some browsers never fire the event when the list was already warm.
+  setTimeout(done, 1200);
+});
 
 /**
- * Initialize voices and cache the best one
- */
-function initializeVoices() {
-  return new Promise((resolve) => {
-    const synth = window.speechSynthesis;
-
-    const loadVoices = () => {
-      const voices = synth.getVoices();
-      if (voices.length > 0) {
-        cachedVoice = getBestVoice();
-        voicesLoaded = true;
-        resolve(cachedVoice);
-      }
-    };
-
-    // Try to load voices immediately
-    loadVoices();
-
-    // If voices aren't loaded yet, wait for the event
-    if (!voicesLoaded) {
-      synth.onvoiceschanged = () => {
-        loadVoices();
-      };
-
-      // Fallback timeout
-      setTimeout(() => {
-        if (!voicesLoaded) {
-          loadVoices();
-          resolve(cachedVoice);
-        }
-      }, 1000);
-    }
-  });
-}
-
-/**
- * Speak text using high-quality Microsoft neural voice
- * @param {string} text - Text to speak
- * @param {object} options - Optional configuration
- * @returns {Promise} - Resolves when speech ends
+ * Speak text.
+ *
+ * @param {string} text
+ * @param {object} options rate / pitch / volume / lang and lifecycle callbacks
+ * @returns {Promise<void>} resolves when speech ends
  */
 export function speakText(text, options = {}) {
   return new Promise((resolve, reject) => {
-    if (!window.speechSynthesis) {
-      console.error('Speech synthesis not supported');
-      reject(new Error('Speech synthesis not supported'));
+    const synth = window.speechSynthesis;
+    if (!synth) {
+      reject(new Error('This browser has no speech synthesis'));
       return;
     }
 
-    const synth = window.speechSynthesis;
-
-    // Cancel any ongoing speech
     synth.cancel();
 
     const speak = () => {
-      // Get or use cached voice
-      const voice = cachedVoice || getBestVoice();
-
       const utterance = new SpeechSynthesisUtterance(text);
-
-      // Set voice if available
+      const voice = getBestVoice();
       if (voice) {
         utterance.voice = voice;
+        // Matching the voice's own locale avoids the engine substituting a
+        // different one mid-sentence.
+        utterance.lang = voice.lang;
+      } else {
+        utterance.lang = options.lang || 'en-US';
       }
 
-      // Voice configuration for natural speech
-      utterance.lang = options.lang || 'en-US';
-      utterance.rate = options.rate || 0.9;  // Slightly slower for clarity
-      utterance.pitch = options.pitch || 1;
-      utterance.volume = options.volume || 1;
+      // 0.85 was slow enough to sound laboured, which reads as more robotic
+      // rather than clearer. Just under natural pace keeps it intelligible.
+      utterance.rate = options.rate ?? 0.95;
+      utterance.pitch = options.pitch ?? 1;
+      utterance.volume = options.volume ?? 1;
 
-      // Event handlers
-      utterance.onstart = () => {
-        console.log('🔊 Speech started');
-        if (options.onStart) options.onStart();
-      };
-
-      utterance.onend = () => {
-        console.log('🔇 Speech ended');
-        if (options.onEnd) options.onEnd();
-        resolve();
-      };
-
+      utterance.onstart = () => options.onStart?.();
+      utterance.onend = () => { options.onEnd?.(); resolve(); };
       utterance.onerror = (event) => {
+        // Cancelling on purpose fires an error; it is not one.
+        if (event.error === 'canceled' || event.error === 'interrupted') {
+          resolve();
+          return;
+        }
         console.error('Speech error:', event.error);
-        if (options.onError) options.onError(event);
+        options.onError?.(event);
         reject(event);
       };
 
-      utterance.onpause = () => {
-        if (options.onPause) options.onPause();
-      };
-
-      utterance.onresume = () => {
-        if (options.onResume) options.onResume();
-      };
-
-      // Speak the text
       synth.speak(utterance);
     };
 
-    // Ensure voices are loaded before speaking
-    if (synth.getVoices().length === 0) {
-      synth.onvoiceschanged = () => {
-        cachedVoice = getBestVoice();
-        speak();
-      };
-
-      // Fallback if voices don't load
-      setTimeout(() => {
-        if (synth.getVoices().length === 0) {
-          speak(); // Try anyway with default voice
-        }
-      }, 500);
-    } else {
-      if (!cachedVoice) {
-        cachedVoice = getBestVoice();
-      }
-      speak();
-    }
+    if (synth.getVoices().length === 0) voicesReady().then(speak);
+    else speak();
   });
 }
 
-/**
- * Stop any ongoing speech
- */
 export function stopSpeaking() {
-  if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
-    console.log('🔇 Speech cancelled');
-  }
+  window.speechSynthesis?.cancel();
 }
 
-/**
- * Check if speech synthesis is currently speaking
- * @returns {boolean}
- */
 export function isSpeaking() {
   return window.speechSynthesis?.speaking || false;
 }
 
-/**
- * Pause current speech
- */
 export function pauseSpeaking() {
-  if (window.speechSynthesis) {
-    window.speechSynthesis.pause();
-  }
+  window.speechSynthesis?.pause();
 }
 
-/**
- * Resume paused speech
- */
 export function resumeSpeaking() {
-  if (window.speechSynthesis) {
-    window.speechSynthesis.resume();
-  }
+  window.speechSynthesis?.resume();
 }
 
-/**
- * Get list of all available voices
- * @returns {Array} - Array of available voices
- */
 export function getAvailableVoices() {
-  if (!window.speechSynthesis) return [];
-  return window.speechSynthesis.getVoices();
+  return window.speechSynthesis?.getVoices?.() || [];
 }
 
-/**
- * Get the currently selected voice
- * @returns {SpeechSynthesisVoice|null}
- */
 export function getCurrentVoice() {
-  return cachedVoice;
+  return getBestVoice();
 }
 
-/**
- * Set a specific voice by name
- * @param {string} voiceName - Name of the voice to use
- */
-export function setVoice(voiceName) {
-  const voices = window.speechSynthesis?.getVoices() || [];
-  const voice = voices.find(v => v.name.includes(voiceName));
-  if (voice) {
-    cachedVoice = voice;
-    console.log(`🎤 Voice set to: ${voice.name}`);
-    return true;
-  }
-  return false;
-}
-
-/**
- * Speak text for interview questions with optimal settings
- * @param {string} question - Interview question to speak
- * @param {function} onStart - Callback when speech starts
- * @param {function} onEnd - Callback when speech ends
- */
+/** Reads an interview question. */
 export function speakInterviewQuestion(question, onStart, onEnd) {
-  return speakText(question, {
-    rate: 0.85,  // Slightly slower for interview questions
-    pitch: 1,
-    volume: 1,
-    onStart,
-    onEnd
-  });
+  return speakText(question, { rate: 0.95, onStart, onEnd });
 }
 
-/**
- * Speak feedback with slightly faster rate
- * @param {string} feedback - Feedback text to speak
- * @param {function} onStart - Callback when speech starts
- * @param {function} onEnd - Callback when speech ends
- */
+/** Reads feedback, a touch quicker — it is longer and less consequential. */
 export function speakFeedback(feedback, onStart, onEnd) {
-  return speakText(feedback, {
-    rate: 0.95,  // Slightly faster for feedback
-    pitch: 1,
-    volume: 1,
-    onStart,
-    onEnd
-  });
+  return speakText(feedback, { rate: 1, onStart, onEnd });
 }
 
-// Initialize voices on module load
-if (typeof window !== 'undefined' && window.speechSynthesis) {
-  initializeVoices();
-}
+// Warm the voice list so the first question does not wait for it.
+if (typeof window !== 'undefined' && window.speechSynthesis) voicesReady();
 
 export default {
   speakText,
@@ -298,7 +247,11 @@ export default {
   resumeSpeaking,
   getAvailableVoices,
   getCurrentVoice,
-  setVoice,
+  getVoiceOptions,
+  getBestVoice,
+  setPreferredVoice,
+  getPreferredVoiceURI,
+  voicesReady,
   speakInterviewQuestion,
-  speakFeedback
+  speakFeedback,
 };
