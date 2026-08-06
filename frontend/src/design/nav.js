@@ -12,6 +12,7 @@ export const learnerNav = [
     items: [
       { to: '/assessment', label: 'Overview', end: true },
       { to: '/roadmap', label: 'Roadmap' },
+      { to: '/job-fit', label: 'Job fit' },
       { to: '/assessment-hub', label: 'Assessments' },
     ],
   },

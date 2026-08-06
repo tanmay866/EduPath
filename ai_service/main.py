@@ -139,6 +139,16 @@ class RoadmapGenerateRequest(BaseModel):
     max_modules: Optional[int] = Field(default=None, ge=1, le=30)
 
 
+class JobMatchRequest(BaseModel):
+    job_description: str = Field(..., min_length=20, max_length=20000)
+    known_skills: List[str] = []
+    hours_per_week: int = Field(default=10, ge=1, le=168)
+    experience_level: str = "beginner"
+    # Lets a learner ask what a posting means for the track they are on,
+    # rather than only for the track it fits best.
+    role_hint: Optional[str] = None
+
+
 class AdaptRoadmapRequest(BaseModel):
     user_id: str
     roadmap_id: str
@@ -342,6 +352,30 @@ async def generate_roadmap(request: RoadmapGenerateRequest):
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
+
+
+@app.post("/api/jobs/analyse")
+async def analyse_job_posting(request: JobMatchRequest):
+    """
+    Read a job posting against the curriculum.
+
+    Answers the question a learner actually arrives with — can I do this job,
+    and if not, how far off am I — rather than the one the ATS check answers,
+    which is whether their CV contains the right words.
+    """
+    try:
+        from utils.job_matcher import analyse_job
+
+        return analyse_job(
+            request.job_description,
+            known_skills=request.known_skills,
+            hours_per_week=request.hours_per_week,
+            experience_level=request.experience_level,
+            role_hint=request.role_hint,
+        )
+    except Exception as e:
+        logger.error(f"Job analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Error analysing posting: {str(e)}")
 
 
 @app.post("/api/roadmap/adapt")

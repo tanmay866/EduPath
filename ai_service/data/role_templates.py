@@ -626,6 +626,20 @@ ROLE_TEMPLATES = {
     },
 }
 
+# The six roles EduPath can actually build a plan for, in the exact spelling
+# the rest of the system uses. Mirrors backend/utils/careerRoles.js, which the
+# API validates against — the aliases below all resolve to one of these, so
+# anything choosing a role to *report* must pick from here rather than from
+# ROLE_TEMPLATES.keys(), which also contains twelve alternate spellings.
+CANONICAL_ROLES = [
+    "MERN Developer",
+    "AI/ML Engineer",
+    "Data Science Engineer",
+    "DevOps Engineer",
+    "Mobile Developer",
+    "Cybersecurity Engineer",
+]
+
 # Aliases to support role names used across backend/profile/resume flows.
 ROLE_TEMPLATES["MERN"] = ROLE_TEMPLATES["MERN Developer"]
 ROLE_TEMPLATES["AI"] = ROLE_TEMPLATES["AI/ML Engineer"]

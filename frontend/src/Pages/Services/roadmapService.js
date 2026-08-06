@@ -9,6 +9,16 @@ export const generateRoadmap = async () => {
   }
 };
 
+/** Read a job posting against the curriculum. */
+export const analyseJobPosting = async (jobDescription, roleHint = null) => {
+  try {
+    const response = await API.post('/roadmap/analyse-job', { jobDescription, roleHint });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 /** The active roadmap for the role the learner is currently working towards. */
 export const getRoadmap = async () => {
   try {

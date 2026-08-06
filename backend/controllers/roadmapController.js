@@ -482,3 +482,68 @@ export const updateTaskStatus = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error.", error: err.message });
     }
 };
+
+/**
+ * POST /api/roadmap/analyse-job — read a job posting against the curriculum.
+ *
+ * The ATS check already parses a posting, but only to score a CV against it.
+ * This asks the question a learner actually arrives with: can I do this job,
+ * and if not, how far off am I.
+ *
+ * What counts as "already have" comes from two places — the skills on the
+ * profile, and skills assessed at or above the pass mark. A skill someone
+ * scored 40% on is not one they have, and scheduling it is the point.
+ */
+export const analyseJobPosting = async (req, res) => {
+    try {
+        const jobDescription = (req.body?.jobDescription || "").trim();
+        if (jobDescription.length < 20) {
+            return res.status(400).json({
+                success: false,
+                message: "Paste the job posting — a line or two is not enough to read.",
+            });
+        }
+
+        const user = await User.findById(req.user._id).select(
+            "current_skills target_role hours_per_week experience_level"
+        );
+
+        // Assessed skills count only if they were actually passed.
+        const gap = await SkillGap.findOne({
+            user_id: req.user._id,
+            target_role: user?.target_role,
+        }).lean();
+        const passed = (gap?.skill_gaps || [])
+            .filter((g) => Number(g.current_score) >= 70)
+            .map((g) => g.skill);
+
+        const known = [
+            ...normalizeCurrentSkillsForAI(user?.current_skills).map((s) => s.skill || s),
+            ...passed,
+        ].filter(Boolean);
+
+        const { data } = await axios.post(
+            `${AI_SERVICE_URL}/api/jobs/analyse`,
+            {
+                job_description: jobDescription,
+                known_skills: known,
+                hours_per_week: user?.hours_per_week || 10,
+                experience_level: user?.experience_level || "beginner",
+                role_hint: req.body?.roleHint || null,
+            },
+            { timeout: 20000 }
+        );
+
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        if (err.response || err.request) {
+            console.error("Job analysis service error:", err.message);
+            return res.status(503).json({
+                success: false,
+                message: "The analysis service is not reachable. Try again in a moment.",
+            });
+        }
+        console.error("analyseJobPosting error:", err);
+        return res.status(500).json({ success: false, message: "Server error.", error: err.message });
+    }
+};

@@ -25,6 +25,7 @@ import FAQ from './Pages/FAQ/FAQ'
 import Services from './Pages/Services/Services'
 import CareerRoadmap from './Pages/Roadmap/CareerRoadmap'
 import RoadmapPage from './Pages/Roadmap/RoadmapPage'
+import JobFit from './Pages/Roadmap/JobFit'
 
 // New Features - Resume Builder, Portfolio Generator, ATS Analyzer
 import ResumeBuilder from './component/features/ResumeBuilder'
@@ -122,6 +123,8 @@ const App = () => {
           <Route path="/services" element={<><Navbar /><Services /><Footer /></>} />
           <Route path="/roadmap" element={<><Navbar /><CareerRoadmap /><Footer /></>} />
           <Route path="/roadmap/generate" element={<RequiresProfile><RoadmapPage /></RequiresProfile>} />
+          {/* Needs a profile: the estimate is in the learner's own hours. */}
+          <Route path="/job-fit" element={<RequiresProfile><JobFit /></RequiresProfile>} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
