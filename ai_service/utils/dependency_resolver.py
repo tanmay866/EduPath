@@ -4,7 +4,7 @@ Ensures skills are always scheduled after their prerequisites.
 """
 
 from collections import defaultdict, deque
-from typing import Dict, List
+from typing import Dict, List, Optional, Set
 
 
 def topological_sort(skills: Dict[str, dict]) -> List[str]:
@@ -50,53 +50,72 @@ def topological_sort(skills: Dict[str, dict]) -> List[str]:
     return ordered
 
 
-def filter_skills_by_gap(
+# The score a skill is assumed to require when the gap record does not say.
+DEFAULT_REQUIRED_SCORE = 70
+
+
+def proven_skills(
+    skill_gaps: List[dict],
+    skill_scores: Optional[Dict[str, float]] = None,
+) -> Set[str]:
+    """
+    The skills the learner has actually demonstrated.
+
+    Only a score does that. A skill nobody has ever been asked about is
+    unknown, not known, and the difference is the whole point of this module.
+    """
+    proven: Set[str] = set()
+
+    for gap in skill_gaps or []:
+        name = gap.get("skill")
+        current = gap.get("current_score")
+        if not name or current is None:
+            continue
+        required = gap.get("required_score")
+        if required is None:
+            required = DEFAULT_REQUIRED_SCORE
+        if current >= required:
+            proven.add(name)
+
+    for name, score in (skill_scores or {}).items():
+        if score is not None and score >= DEFAULT_REQUIRED_SCORE:
+            proven.add(name)
+
+    return proven
+
+
+def select_skills_for_role(
     ordered_skills: List[str],
     skill_gaps: List[dict],
-    include_all: bool = False,
+    skill_scores: Optional[Dict[str, float]] = None,
 ) -> List[str]:
     """
-    Filter the full topologically-sorted skill list down to only what
-    the user actually needs to learn, while preserving dependency order.
+    The skills of this role that the learner still has to cover.
+
+    This used to run the other way round: it started from the gap list and
+    kept only the role skills that appeared in it. That reads a gap record as
+    if it were a syllabus, and it is not — it is a record of what happened to
+    be assessed. Gaps are stored per learner rather than per role, so an
+    AI/ML roadmap was filtered through React scores from a web quiz, matched
+    on the single name the two lists had in common, and came back as three
+    weeks of Python with no AI or ML in it at all.
+
+    The perverse part was that sitting an assessment made the roadmap worse.
+    With no gap data the generator fell through to the whole track; with one
+    quiz behind you it collapsed to whatever that quiz happened to name.
+
+    So the role decides what is on the plan, and evidence only takes things
+    off it. Absence of evidence about a skill is not evidence the learner has
+    it. A skill scored below what it requires stays on the plan and is given
+    fewer hours instead, which the hour estimate already handles.
 
     Args:
-        ordered_skills: topologically sorted full skill list
-        skill_gaps: list of {skill, gap_severity, priority_rank, ...}
-        include_all: if True, return all skills (e.g. beginner users)
+        ordered_skills: the role's skills, already in dependency order
+        skill_gaps: list of {skill, current_score, required_score, ...}
+        skill_scores: optional {skill: score} from assessments
 
     Returns:
-        Filtered & ordered list of skill names to include in roadmap.
+        The same list minus anything already demonstrated, order preserved.
     """
-    if include_all:
-        return ordered_skills
-
-    gap_skill_names = {g["skill"] for g in skill_gaps}
-
-    # Also include any transitive dependencies even if not in gap list
-    # (we can't do Async JS without JS Basics even if JS Basics score is OK)
-    return [s for s in ordered_skills if s in gap_skill_names]
-
-
-def resolve_with_dependencies(
-    ordered_skills: List[str],
-    skill_gaps: List[dict],
-    all_skills: Dict[str, dict],
-) -> List[str]:
-    """
-    Ensures transitive dependencies are included even if they aren't
-    in the skill gap list directly.
-    """
-    gap_skill_names = {g["skill"] for g in skill_gaps}
-    required: set = set()
-
-    def add_with_deps(skill_name: str):
-        if skill_name not in all_skills or skill_name in required:
-            return
-        for dep in all_skills[skill_name].get("dependencies", []):
-            add_with_deps(dep)
-        required.add(skill_name)
-
-    for skill in gap_skill_names:
-        add_with_deps(skill)
-
-    return [s for s in ordered_skills if s in required]
+    known = proven_skills(skill_gaps, skill_scores)
+    return [s for s in ordered_skills if s not in known]

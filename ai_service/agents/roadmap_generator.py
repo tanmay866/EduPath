@@ -8,7 +8,7 @@ import logging
 from typing import Dict, List, Optional
 
 from data.role_templates import ROLE_TEMPLATES
-from utils.dependency_resolver import topological_sort, resolve_with_dependencies
+from utils.dependency_resolver import topological_sort, select_skills_for_role
 from utils.priority_sorter import sort_skills_by_priority
 from utils.time_allocator import (
     estimate_skill_hours,
@@ -26,7 +26,7 @@ class RoadmapGeneratorAgent:
     Pipeline:
       1. Map target role → skill template
       2. Topological sort of all skills in template (DAG)
-      3. Filter to skills the user actually needs (gap + transitive deps)
+      3. Drop the skills the user has already demonstrated
       4. Priority sort within each dependency wave
       5. Estimate hours per skill (rule-based + partial knowledge reduction)
       6. Assign start_week / end_week based on hours_per_week
@@ -75,16 +75,19 @@ class RoadmapGeneratorAgent:
         topo_ordered = topological_sort(skill_definitions)
         logger.debug(f"Topo order: {topo_ordered}")
 
-        # ── Step 3: Filter to skills user needs (with transitive deps) ────
-        if skill_gaps:
-            needed_skills = resolve_with_dependencies(
-                topo_ordered, skill_gaps, skill_definitions
-            )
-        else:
-            # No gap data — include everything (new user / beginner)
-            needed_skills = topo_ordered
+        # ── Step 3: Drop what the learner has already demonstrated ────────
+        # The role decides what is on the plan; assessment evidence only takes
+        # things off it. There is no branch for "no gap data" any more — with
+        # nothing proven this returns the whole track, which is the same
+        # answer the old code reached by a special case.
+        needed_skills = select_skills_for_role(
+            topo_ordered, skill_gaps, skill_scores
+        )
 
-        logger.debug(f"Skills after gap filter: {needed_skills}")
+        logger.debug(
+            f"Skills after removing {len(topo_ordered) - len(needed_skills)} "
+            f"proven of {len(topo_ordered)}: {needed_skills}"
+        )
 
         # ── Step 4: Priority sort (within dependency waves) ───────────────
         sorted_skills = sort_skills_by_priority(

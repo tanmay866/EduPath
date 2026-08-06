@@ -9,37 +9,95 @@ from typing import Dict, List, Optional
 from data.role_templates import DIFFICULTY_MULTIPLIER, EXPERIENCE_ADJUSTMENT
 
 
-# How a week's work is phrased for each learning style.
+# A skill takes as many weeks as its hours need, and those weeks used to be
+# identical: the same three tasks regenerated each time, so a three-week skill
+# read "Study core concepts" three weeks running and the only thing that
+# changed was the number on the quiz. It looked like the plan had nothing to
+# say after week one.
 #
-# The learner picks this and is told it decides "what your weekly plan leans
-# on", but it was collected, stored, sent here and then never read — every
-# style produced the same three tasks per skill.
+# So a skill's weeks are phased. The first is for meeting it, the last is for
+# using it without help, and anything between is practice.
+PHASES = ("learn", "practise", "apply")
+
+# How a week's work is phrased, for each learning style and each phase.
+#
+# The learner picks the style and is told it decides "what your weekly plan
+# leans on", but it was collected, stored, sent here and then never read —
+# every style produced the same three tasks per skill.
 #
 # It changes the tasks rather than the resources on purpose: the role templates
 # only carry docs and articles, with no video or course links anywhere, so
 # filtering resources by style would hand a video learner an empty list. What
 # can honestly differ is how the week is spent.
 TASKS_BY_STYLE = {
-    "reading": [
-        "Read the documentation for {skill}",
-        "Write a short summary of {skill} in your own words",
-        "Work through the examples in the {skill} docs",
-    ],
-    "video": [
-        "Watch a walkthrough covering {skill}",
-        "Follow along and build the example yourself",
-        "Rebuild the {skill} example once without the video",
-    ],
-    "project": [
-        "Build something small that uses {skill}",
-        "Extend it with one part of {skill} you have not tried",
-        "Refactor it and note what you would do differently",
-    ],
-    "mixed": [
-        "Study core concepts of {skill}",
-        "Complete practice exercises for {skill}",
-        "Review and take notes on {skill}",
-    ],
+    "reading": {
+        "learn": [
+            "Read the documentation for {skill}",
+            "Note the parts of {skill} you could not follow",
+            "Look up one thing the {skill} docs assumed you already knew",
+        ],
+        "practise": [
+            "Work through the examples in the {skill} docs",
+            "Write a short summary of {skill} in your own words",
+            "Go back to your notes and close the gaps you left",
+        ],
+        "apply": [
+            "Write something of your own that uses {skill}",
+            "Explain {skill} in a short write-up, without the docs open",
+            "Correct your earlier notes on {skill} where they were wrong",
+        ],
+    },
+    "video": {
+        "learn": [
+            "Watch a walkthrough covering {skill}",
+            "Mark the points in it you want to come back to",
+            "Pause and say what {skill} is doing before moving on",
+        ],
+        "practise": [
+            "Follow along and build the {skill} example yourself",
+            "Rebuild the {skill} example once without the video",
+            "Find where your version differs and work out why",
+        ],
+        "apply": [
+            "Build something with {skill} that no video covered",
+            "Talk through your own {skill} work start to finish",
+            "Rewatch the part you found hardest and check you had it right",
+        ],
+    },
+    "project": {
+        "learn": [
+            "Build the smallest thing that uses {skill}",
+            "Read enough of the {skill} docs to get it working",
+            "Note where you had to guess at {skill}",
+        ],
+        "practise": [
+            "Extend it with one part of {skill} you have not tried",
+            "Break it on purpose to see how {skill} fails",
+            "Handle the case you skipped the first time",
+        ],
+        "apply": [
+            "Rebuild it with {skill} from scratch, without your notes",
+            "Refactor it and note what you would do differently",
+            "Write down what you would want to know before using {skill} again",
+        ],
+    },
+    "mixed": {
+        "learn": [
+            "Study the core concepts of {skill}",
+            "Write down what you expect {skill} to be useful for",
+            "List the parts of {skill} you cannot yet explain",
+        ],
+        "practise": [
+            "Complete practice exercises for {skill}",
+            "Redo the ones you got wrong, without help",
+            "Review and take notes on {skill}",
+        ],
+        "apply": [
+            "Use {skill} on a problem that was not set for you",
+            "Explain {skill} without looking at your notes",
+            "Note what you still avoid doing with {skill}",
+        ],
+    },
 }
 
 DEFAULT_LEARNING_STYLE = "mixed"
@@ -159,12 +217,14 @@ def build_weekly_plan_skeleton(
     weekly_plans = []
 
     for week_num in range(1, total_weeks + 1):
-        # Skills active during this week
-        active_skills = [
-            s["skill"]
+        # Skills active during this week, kept whole rather than reduced to
+        # names: the tasks depend on how far into a skill the week falls.
+        active = [
+            s
             for s in skills_with_weeks
             if s["start_week"] <= week_num <= s["end_week"]
         ]
+        active_skills = [s["skill"] for s in active]
 
         # Grab mini project if any skill ends this week
         mini_project = None
@@ -180,7 +240,7 @@ def build_weekly_plan_skeleton(
             {
                 "week_number": week_num,
                 "skills": active_skills,
-                "tasks": _generate_tasks_for_week(active_skills, week_num, learning_style),
+                "tasks": _generate_tasks_for_week(active, week_num, learning_style),
                 "estimated_hours": hours_per_week,
                 "mini_project": mini_project,
                 "status": "pending",
@@ -190,17 +250,44 @@ def build_weekly_plan_skeleton(
     return weekly_plans
 
 
+def phase_for_week(week_num: int, start_week: int, end_week: int) -> Optional[str]:
+    """
+    Which phase of a skill this week is.
+
+    The first week of a skill is always "learn" and the last is always
+    "apply", however many weeks lie between; a two-week skill therefore goes
+    straight from meeting something to using it, which is what two weeks
+    buys you. None means the skill has a single week and gets all of it.
+    """
+    span = max(1, end_week - start_week + 1)
+    if span == 1:
+        return None
+
+    position = min(max(week_num - start_week, 0), span - 1)
+    return PHASES[round(position * (len(PHASES) - 1) / (span - 1))]
+
+
 def _generate_tasks_for_week(
-    skills: List[str],
+    skills: List[dict],
     week_num: int,
     learning_style: Optional[str] = DEFAULT_LEARNING_STYLE,
 ) -> List[str]:
     """Task descriptions for the week, phrased for how the learner prefers to work."""
-    templates = TASKS_BY_STYLE[normalize_learning_style(learning_style)]
+    by_phase = TASKS_BY_STYLE[normalize_learning_style(learning_style)]
 
     tasks = []
     for skill in skills:
-        tasks += [template.format(skill=skill) for template in templates]
+        name = skill["skill"]
+        phase = phase_for_week(week_num, skill["start_week"], skill["end_week"])
+
+        if phase is None:
+            # One week for the whole skill: meet it, practise it and use it,
+            # rather than three weeks' worth of any one of those.
+            templates = [by_phase[p][0] for p in PHASES]
+        else:
+            templates = by_phase[phase]
+
+        tasks += [template.format(skill=name) for template in templates]
 
     # Every style ends the week the same way: the plan is only worth anything
     # if what was learned gets checked.
