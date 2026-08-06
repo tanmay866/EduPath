@@ -252,6 +252,11 @@ export const retryQuiz = async (req, res) => {
     const expiresAt = new Date(Date.now() + totalTimeMinutes * 60 * 1000);
 
     // Create new quiz session
+    // Anything the learner left running has run out of time by now — say so
+    // before adding another, or the record keeps several quizzes "ongoing"
+    // at once and only one of them is.
+    await QuizSession.expireOldSessions(userId);
+
     const newSession = await QuizSession.create({
       userId,
       topicId: originalResult.topicId,
@@ -414,6 +419,11 @@ export const startQuiz = async (req, res) => {
     const expiresAt = new Date(Date.now() + totalTimeMinutes * 60 * 1000);
 
     // Create quiz session with AI-generated questions
+    // Anything the learner left running has run out of time by now — say so
+    // before adding another, or the record keeps several quizzes "ongoing"
+    // at once and only one of them is.
+    await QuizSession.expireOldSessions(userId);
+
     const quizSession = await QuizSession.create({
       userId,
       topicId,

@@ -182,19 +182,41 @@ quizSessionSchema.statics.getRecentlyAttemptedQuestions = async function (
   return [...new Set(questionIds.map((id) => id.toString()))].slice(0, limit);
 };
 
-// Static method to expire old ongoing sessions
-quizSessionSchema.statics.expireOldSessions = async function () {
-  const result = await this.updateMany(
-    {
-      status: 'ongoing',
-      expiresAt: { $lt: new Date() },
-    },
-    {
-      $set: { status: 'expired' },
-    }
-  );
+/**
+ * Which sessions have run out of time but still call themselves ongoing.
+ *
+ * Split out from the update so it can be tested without a database — the
+ * failure worth catching is a filter that matches everything, which would
+ * expire a quiz somebody is in the middle of.
+ */
+export const expiredSessionFilter = (now = new Date(), userId = null) => {
+  const filter = {
+    status: 'ongoing',
+    expiresAt: { $lt: now },
+  };
+  if (userId) filter.userId = userId;
+  return filter;
+};
 
-  return result;
+/**
+ * Marks timed-out sessions as expired.
+ *
+ * Sessions were created ongoing and never moved off it. Nothing set them to
+ * expired, so a quiz abandoned days ago still described itself as in
+ * progress until the TTL index removed the row a week later. The status enum
+ * has carried 'expired' from the start and this method was written to apply
+ * it; it was simply never called.
+ *
+ * Called when a learner starts a quiz, scoped to that learner. There is no
+ * dependable scheduler here — the host sleeps when idle, which is what moved
+ * the weekly email out to an external trigger — so tying it to an action that
+ * only happens while the app is awake is what keeps it honest. Anyone who
+ * never comes back has their rows dropped by the TTL index regardless.
+ */
+quizSessionSchema.statics.expireOldSessions = async function (userId = null) {
+  return this.updateMany(expiredSessionFilter(new Date(), userId), {
+    $set: { status: 'expired' },
+  });
 };
 
 const QuizSession = mongoose.model('QuizSession', quizSessionSchema);
