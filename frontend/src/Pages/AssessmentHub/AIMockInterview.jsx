@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Card, CardHeader, CardFooterNote, Button, Toggle, MicroLabel, Loading, Empty,
   InlineMessage, type,
@@ -74,6 +74,7 @@ const MIC_ERRORS = {
 
 const AIMockInterview = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Interview stages: 'setup', 'interview', 'result'
   const [stage, setStage] = useState('setup');
@@ -81,8 +82,14 @@ const AIMockInterview = () => {
   // Setup state. The role defaults to the one on the profile, so the usual
   // path is to press start — but it stays changeable here for anyone who
   // wants to rehearse for a different track without editing their profile.
+  //
+  // Arriving from a job posting overrides it: that page has just worked out
+  // which role the advert is for, and rehearsing for the profile's track
+  // instead would answer a question nobody asked.
   const { roles: careerRoles } = useCareerRoles();
-  const [selectedRole, setSelectedRole] = useState(() => sessionStorage.getItem('targetRole') || '');
+  const [selectedRole, setSelectedRole] = useState(
+    () => location.state?.role || sessionStorage.getItem('targetRole') || ''
+  );
 
   // Interview state
   const [currentQuestion, setCurrentQuestion] = useState('');

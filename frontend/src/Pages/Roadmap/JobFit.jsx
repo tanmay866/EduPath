@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LearnerShell, Card, CardHeader, CardFooterNote, Button, MicroLabel,
@@ -6,7 +6,7 @@ import {
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 import { analyseJobPosting } from '../Services/roadmapService';
-import { updateProfile } from '../Services/profileService';
+import { updateProfile, getActivitySummary } from '../Services/profileService';
 
 /**
  * Read a real job posting against the curriculum.
@@ -42,6 +42,15 @@ const JobFit = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [switching, setSwitching] = useState(false);
+  const [interview, setInterview] = useState(null);
+
+  // What the account already knows about rehearsing for a role. A posting
+  // asks "can I do this job", and the skills are only half of that answer.
+  useEffect(() => {
+    getActivitySummary()
+      .then((res) => setInterview(res?.data?.interview || null))
+      .catch(() => setInterview(null));
+  }, []);
 
   const analyse = async () => {
     setLoading(true);
@@ -208,6 +217,16 @@ const JobFit = () => {
                 </>
               )}
             </div>
+
+            {/* The other half of "can I do this job". The skills answer what
+                you know; a rehearsal answers whether you can say it out loud.
+                Only shown when the interview was for this same role, since a
+                score against another track says nothing about this one. */}
+            {interview?.count > 0 && interview.lastRole === result.matched_role && (
+              <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '14px 0 0', lineHeight: 1.5 }}>
+                {`You scored ${interview.lastScore}/10 in a mock interview for this role.`}
+              </p>
+            )}
           </div>
 
           <div style={{ padding: '4px 24px 20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -222,6 +241,14 @@ const JobFit = () => {
                 the learner does not have. It used to open the hub's explainer,
                 whose own button returns to the dashboard — so the posting's
                 whole point, the named gap, was dropped on the way. */}
+            <Button
+              variant="secondary"
+              onClick={() =>
+                navigate('/assessment-hub/mock-interview', { state: { role: result.matched_role } })
+              }
+            >
+              Practise the interview
+            </Button>
             {result.missing_topics?.length > 0 && (
               <Button
                 variant="secondary"
