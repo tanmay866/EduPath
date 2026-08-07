@@ -284,10 +284,14 @@ const Home = () => (
       </div>
 
       <div style={{ borderTop: '1px solid var(--color-ink)' }}>
+        {/* Read-only. Every row used to link to /services, which is the same
+            six tracks again at more length — so the list invited a click that
+            went nowhere new, and Tracks is already in the top bar for anyone
+            who wants the longer version. The arrow went with the link, since
+            an arrow that does nothing is the same promise in a smaller font. */}
         {TRACKS.map((track, i) => (
-          <Link
+          <div
             key={track.name}
-            to="/services"
             className="home-track"
             style={{
               display: 'flex',
@@ -295,7 +299,6 @@ const Home = () => (
               gap: 32,
               padding: '24px 44px',
               borderBottom: i === TRACKS.length - 1 ? '1px solid var(--color-ink)' : '1px solid var(--color-line)',
-              textDecoration: 'none',
             }}
           >
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-4)', width: 28 }}>
@@ -322,8 +325,7 @@ const Home = () => (
             <span className="home-track__meta" style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-text-2)', width: 70, textAlign: 'right' }}>
               {`${track.nodes} nodes`}
             </span>
-            <span style={{ fontSize: 18, color: 'var(--color-clay)' }}>→</span>
-          </Link>
+          </div>
         ))}
       </div>
     </section>
