@@ -46,6 +46,7 @@ const QuizPage = () => {
   // Topics for dropdown
   const [topics, setTopics] = useState([]);
   const [loadingTopics, setLoadingTopics] = useState(true);
+  const [topicQuery, setTopicQuery] = useState('');
 
   // Quiz configuration
   const [quizConfig, setQuizConfig] = useState({
@@ -85,7 +86,7 @@ const QuizPage = () => {
       setTopics(list);
 
       // Arriving from a roadmap skill: preselect the topic that covers it so
-      // the learner is not asked to find it again in a list of 29.
+      // the learner is not asked to find it again in a list of 54.
       const wanted = location.state?.topicId;
       if (wanted) {
         const match = list.find((t) => String(t._id) === String(wanted));
@@ -106,10 +107,25 @@ const QuizPage = () => {
     }
   };
 
+  // The catalogue went from 29 topics to 54 when every curriculum skill got
+  // one of its own, and scanning that many options in a dropdown is not
+  // reading, it is hunting. Narrowing happens above the list rather than
+  // replacing it: the grouping by role is the useful default and a search
+  // that discarded it would be a worse starting point.
+  const topicMatches = (topic) => {
+    const term = topicQuery.trim().toLowerCase();
+    if (!term) return true;
+    // The current choice always stays in the list. Filtering it out leaves a
+    // select whose value matches no option, which reads as having lost it.
+    if (topic._id === quizConfig.topicId) return true;
+    return String(topic.name || '').toLowerCase().includes(term);
+  };
+
   // The API marks which topics suit the user's target role; the split is kept
   // here so the select can group them without reordering the source list.
-  const recommendedTopics = topics.filter((t) => t.recommended);
-  const otherTopics = topics.filter((t) => !t.recommended);
+  const recommendedTopics = topics.filter((t) => t.recommended).filter(topicMatches);
+  const otherTopics = topics.filter((t) => !t.recommended).filter(topicMatches);
+  const matchCount = recommendedTopics.length + otherTopics.length;
 
   const handleTopicChange = (e) => {
     const selectedTopic = topics.find(t => t._id === e.target.value);
@@ -248,6 +264,19 @@ const QuizPage = () => {
                         : undefined
                     }
                   >
+                    {/* Only once the list is long enough to be worth
+                        narrowing. On a short list a search box is one more
+                        thing to read past. */}
+                    {topics.length > 15 && (
+                      <input
+                        type="search"
+                        value={topicQuery}
+                        onChange={(e) => setTopicQuery(e.target.value)}
+                        placeholder={`Filter ${topics.length} topics`}
+                        style={{ ...SELECT_STYLE, marginBottom: 8, padding: '11px 14px', fontSize: 14 }}
+                      />
+                    )}
+
                     <select
                       value={quizConfig.topicId}
                       onChange={handleTopicChange}
@@ -267,6 +296,11 @@ const QuizPage = () => {
                         ))}
                       </optgroup>
                     </select>
+                    {topicQuery.trim() && matchCount === 0 && (
+                      <div style={{ fontSize: 13.5, color: 'var(--color-text-3)', marginTop: 6 }}>
+                        {`No topic matches "${topicQuery.trim()}".`}
+                      </div>
+                    )}
                   </Field>
 
                   <Field label="Difficulty">
