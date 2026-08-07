@@ -18,6 +18,20 @@ import { mergeRoadmapProgress } from "../utils/mergeRoadmapProgress.js";
 const AI_SERVICE_URL =
     process.env.AI_SERVICE_URL || "http://localhost:8000";
 
+/**
+ * Long enough for the Python service to be started from cold.
+ *
+ * It sleeps after a quiet spell on Render's free tier and a measured cold
+ * start took 162 seconds — so the twenty and thirty second timeouts these
+ * calls used to carry could not have succeeded on a first request, whatever
+ * the service was doing. It reported itself unreachable while it was in fact
+ * waking up, and the person waiting was told to try again in a moment.
+ *
+ * services/aiWarmup.js is what usually prevents the cold start; this is what
+ * makes one survivable when it happens anyway.
+ */
+const AI_TIMEOUT_MS = 180000;
+
 const normalizeExperienceLevel = (value) => {
     if (!value) {
         return "";
@@ -178,7 +192,7 @@ export const generateRoadmap = async (req, res) => {
             const response = await axios.post(
                 `${AI_SERVICE_URL}/api/roadmap/generate`,
                 aiPayload,
-                { timeout: 30000 }
+                { timeout: AI_TIMEOUT_MS }
             );
             aiResult = response.data;
         } catch (aiError) {
@@ -590,7 +604,7 @@ export const analyseJobPosting = async (req, res) => {
                 experience_level: user?.experience_level || "beginner",
                 role_hint: req.body?.roleHint || null,
             },
-            { timeout: 20000 }
+            { timeout: AI_TIMEOUT_MS }
         );
 
         // Attach the quiz topic that covers each missing skill, the same way
@@ -688,7 +702,7 @@ export const adaptRoadmap = async (req, res) => {
                     current_skills: normalizeCurrentSkillsForAI(user.current_skills),
                     max_modules: settings.maxModules,
                 },
-                { timeout: 30000 }
+                { timeout: AI_TIMEOUT_MS }
             );
             aiResult = response.data;
         } catch (aiError) {

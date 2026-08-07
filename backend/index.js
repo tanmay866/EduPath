@@ -14,6 +14,7 @@ import contactRoutes from './routes/contactRoutes.js';
 import unsubscribeRoutes from './routes/unsubscribeRoutes.js';
 import internalRoutes from './routes/internalRoutes.js';
 import startScheduler from './services/scheduler.js';
+import startAiWarmup from './services/aiWarmup.js';
 import resumeRoutes from './routes/resumeRoutes.js';
 import resumeGeneratorRoutes from './routes/resumeGeneratorRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
@@ -236,6 +237,7 @@ const server = app.listen(PORT, () => {
   console.log(`Started at: ${new Date().toLocaleString()}`);
   console.log('='.repeat(50));
   startScheduler();
+  startAiWarmup();
 });
 
 // Handle unhandled promise rejections
