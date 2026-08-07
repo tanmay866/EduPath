@@ -16,13 +16,30 @@ import { Wordmark, Button, Avatar } from '../../design';
  * already carries it on every page inside the app, so a second copy here
  * was a duplicate control rather than a needed one.
  */
+/**
+ * The bar offered five links to everyone, and three of them went nowhere
+ * without an account: Assessments, Resume & ATS and Portfolio are app
+ * screens, so a signed-out visitor clicking one was sent straight to the
+ * sign-in page. Advertising a door that is locked is worse than not drawing
+ * the door.
+ *
+ * The two without `app` are the two that genuinely work signed out. Roadmap
+ * and Tracks explain the product to someone deciding whether to sign up,
+ * which is the whole reason this bar exists on a marketing page; hiding
+ * those as well would leave a prospect nothing to read.
+ *
+ * One list rather than two, so the order cannot drift and a new link is
+ * placed once — marking it `app` is the only decision to make.
+ */
 const LINKS = [
-  { to: '/assessment-hub', label: 'Assessments' },
+  { to: '/assessment-hub', label: 'Assessments', app: true },
   { to: '/roadmap', label: 'Roadmap' },
-  { to: '/resume-builder', label: 'Resume & ATS' },
-  { to: '/portfolio-generator', label: 'Portfolio' },
+  { to: '/resume-builder', label: 'Resume & ATS', app: true },
+  { to: '/portfolio-generator', label: 'Portfolio', app: true },
   { to: '/services', label: 'Tracks' },
 ];
+
+const linksFor = (signedIn) => LINKS.filter((link) => signedIn || !link.app);
 
 // Colour alone marked the current page, one step of grey apart, which is easy
 // to miss and carries nothing for anyone who cannot separate the two. NavLink
@@ -68,7 +85,7 @@ const Navbar = () => {
       </Link>
 
       <nav className="site-header__nav" aria-label="Main">
-        {LINKS.map((link) => (
+        {linksFor(Boolean(session.email)).map((link) => (
           <NavLink key={link.to} to={link.to} style={linkStyle}>{link.label}</NavLink>
         ))}
       </nav>
