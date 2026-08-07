@@ -73,7 +73,15 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(new Error(`CORS blocked origin: ${origin}`));
+      // Marked so the error handler can answer 403 rather than 500. A
+      // request from an origin this API does not serve is a policy decision,
+      // not a fault on this side — reporting it as a server error puts it in
+      // the logs beside genuine crashes and tells the caller the wrong thing
+      // about who has the problem.
+      const blocked = new Error(`CORS blocked origin: ${origin}`);
+      blocked.statusCode = 403;
+      blocked.isOperational = true;
+      return callback(blocked);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
