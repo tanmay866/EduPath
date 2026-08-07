@@ -6,6 +6,10 @@ import {
     canDeleteRoadmap,
     progressHeldBy,
     progressSummary,
+    isSuperseded,
+    supersededPlans,
+    totalProgressHeldBy,
+    summarise,
 } from '../utils/roadmapDeletion.js';
 
 /**
@@ -107,4 +111,58 @@ test('the warning says what is actually there, in readable numbers', () => {
         progressSummary(plan({ skills: [{ status: 'completed' }, { status: 'completed' }] })),
         '2 skills done'
     );
+});
+
+/**
+ * The sweep is the dangerous one: a single click deleting many plans. What
+ * must not slip in is a plan that is not clutter — a track someone finished,
+ * or one they stepped away from and may come back to.
+ */
+test('only plans replaced by a newer one are swept', () => {
+    const plans = [
+        plan({ status: 'regenerated' }),
+        plan({ status: 'active' }),
+        plan({ status: 'completed' }),
+        plan({ status: 'draft' }),
+        plan({ status: 'regenerated', role: 'MERN Developer' }),
+    ];
+    const swept = supersededPlans(plans);
+    assert.equal(swept.length, 2);
+    assert.ok(swept.every(isSuperseded));
+});
+
+test('a finished track is never swept', () => {
+    // Completing a roadmap is the point of the product; it is not clutter.
+    assert.equal(isSuperseded(plan({ status: 'completed' })), false);
+    assert.equal(supersededPlans([plan({ status: 'completed' })]).length, 0);
+});
+
+test('a track stepped away from is never swept', () => {
+    // Switching track deliberately leaves the old plan active so it is there
+    // on return. A sweep that took it would lose that on one click.
+    assert.equal(isSuperseded(plan({ status: 'active', role: 'MERN Developer' })), false);
+});
+
+test('the sweep totals progress across every plan it would remove', () => {
+    const total = totalProgressHeldBy([
+        plan({ weeks: [{ completed_tasks: [0, 1] }], skills: [{ status: 'completed' }] }),
+        plan({ weeks: [{ completed_tasks: [0] }], skills: [{ status: 'completed' }, { status: 'pending' }] }),
+    ]);
+    assert.equal(total.ticks, 3);
+    assert.equal(total.skillsDone, 2);
+    assert.equal(summarise(total), '3 tasks ticked and 2 skills done');
+});
+
+test('an empty sweep warns about nothing rather than about zero', () => {
+    const total = totalProgressHeldBy([]);
+    assert.equal(total.isEmpty, true);
+    assert.equal(summarise(total), null);
+    assert.equal(totalProgressHeldBy(null).ticks, 0);
+});
+
+test('one wording serves a single plan and a whole sweep', () => {
+    // Two phrasings of the same warning drift apart; the sweep and the single
+    // delete have to describe a loss the same way.
+    const one = plan({ weeks: [{ completed_tasks: [0, 1] }], skills: [{ status: 'completed' }] });
+    assert.equal(progressSummary(one), summarise(totalProgressHeldBy([one])));
 });

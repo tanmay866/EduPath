@@ -108,3 +108,14 @@ export const deleteRoadmap = async (roadmapId) => {
     throw error.response?.data || error;
   }
 };
+
+// Clears out every plan a newer one replaced. Finished plans and plans for
+// tracks stepped away from are left alone by the server.
+export const deleteSupersededRoadmaps = async () => {
+  try {
+    const response = await API.delete('/roadmap/superseded');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

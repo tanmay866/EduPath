@@ -9,6 +9,7 @@ import {
   updateSkillStatus,
   adaptRoadmap,
   deleteRoadmap,
+  deleteSupersededRoadmaps,
 } from '../Services/roadmapService';
 import { getProfile } from '../Services/profileService';
 import { getInterviewHistory } from '../Services/interviewResultService';
@@ -206,6 +207,28 @@ const RoadmapPage = () => {
     }
   };
 
+  /**
+   * Clears every plan a newer one replaced. Reloads the list from the server
+   * rather than filtering locally, so what is on screen afterwards is what
+   * actually survived.
+   */
+  const handleDeleteSuperseded = async () => {
+    try {
+      const res = await deleteSupersededRoadmaps();
+      const gone = res?.data?.deleted || 0;
+      const survivors = await getRoadmapHistory();
+      const items = survivors?.data || [];
+      setHistory(items);
+      if (!items.some((h) => h.roadmap_id === selectedRoadmapId)) {
+        setRoadmapData(null);
+        setSelectedRoadmapId('');
+      }
+      toast.success(gone ? `Deleted ${gone} superseded plan${gone === 1 ? '' : 's'}.` : 'Nothing to clear.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Could not clear the superseded plans.'));
+    }
+  };
+
   /* ── Active roadmap / history view ───────────────────────────── */
   // One return below handles all three states: history, the form when nothing
   // is loaded, and the timeline. The dark-themed branch that used to sit here
@@ -262,6 +285,7 @@ const RoadmapPage = () => {
           selectedRoadmapId={selectedRoadmapId}
           onSelectRoadmap={loadRoadmapById}
           onDeleteRoadmap={handleDeleteRoadmap}
+          onDeleteSuperseded={handleDeleteSuperseded}
         />
       ) : !roadmapData && !isRoadmapLoading && !isHistoryLoading ? (
         // isHistoryLoading is included so the form does not flash on mount while

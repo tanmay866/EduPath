@@ -64,15 +64,52 @@ export const progressHeldBy = (roadmap) => {
     return { ticks, skillsDone, isEmpty: ticks === 0 && skillsDone === 0 };
 };
 
-/** The same counts as a sentence, or null when the plan holds nothing. */
-export const progressSummary = (roadmap) => {
-    const { ticks, skillsDone, isEmpty } = progressHeldBy(roadmap);
-    if (isEmpty) return null;
+/**
+ * A plan replaced by a newer one for the same track.
+ *
+ * Only 'regenerated'. A 'completed' plan is a track someone finished, which
+ * is an achievement rather than clutter, and an 'active' plan for a track
+ * they have stepped away from is waiting for them if they return — neither
+ * belongs in a sweep whose whole appeal is not having to read the list.
+ */
+export const isSuperseded = (roadmap) => roadmap?.status === 'regenerated';
+
+/** Just the superseded ones, in the order given. */
+export const supersededPlans = (roadmaps = []) => (roadmaps || []).filter(isSuperseded);
+
+/**
+ * What a whole set of plans holds between them.
+ *
+ * Summed rather than counted per plan, because the question being answered
+ * is "how much am I about to lose in one click".
+ */
+export const totalProgressHeldBy = (roadmaps = []) => {
+    const totals = (roadmaps || []).reduce(
+        (sum, roadmap) => {
+            const held = progressHeldBy(roadmap);
+            return { ticks: sum.ticks + held.ticks, skillsDone: sum.skillsDone + held.skillsDone };
+        },
+        { ticks: 0, skillsDone: 0 }
+    );
+    return { ...totals, isEmpty: totals.ticks === 0 && totals.skillsDone === 0 };
+};
+
+/**
+ * The same counts as a sentence, or null when there is nothing to warn about.
+ *
+ * Takes counts rather than a plan so one wording serves a single plan and a
+ * whole sweep — two phrasings of the same warning would drift.
+ */
+export const summarise = ({ ticks = 0, skillsDone = 0 } = {}) => {
+    if (!ticks && !skillsDone) return null;
 
     const parts = [];
     if (ticks) parts.push(`${ticks} ${ticks === 1 ? 'task' : 'tasks'} ticked`);
     if (skillsDone) parts.push(`${skillsDone} ${skillsDone === 1 ? 'skill' : 'skills'} done`);
     return parts.join(' and ');
 };
+
+/** Convenience for one plan. */
+export const progressSummary = (roadmap) => summarise(progressHeldBy(roadmap));
 
 export default canDeleteRoadmap;

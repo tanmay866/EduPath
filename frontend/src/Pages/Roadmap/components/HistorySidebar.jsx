@@ -29,6 +29,7 @@ const HistorySidebar = ({
   selectedRoadmapId,
   onSelectRoadmap,
   onDeleteRoadmap,
+  onDeleteSuperseded,
   isLoading,
 }) => {
   const [query, setQuery] = useState('');
@@ -37,6 +38,26 @@ const HistorySidebar = ({
   // is too much to describe in a browser dialog.
   const [confirmingId, setConfirmingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [sweeping, setSweeping] = useState(false);
+  const [confirmingSweep, setConfirmingSweep] = useState(false);
+
+  // What a sweep would take, and what it would cost. Only plans a newer one
+  // replaced — a finished track is an achievement and a track stepped away
+  // from is waiting to be returned to, so neither is clutter.
+  const superseded = useMemo(
+    () => history.filter((item) => item.status === 'regenerated'),
+    [history]
+  );
+  const sweepProgress = useMemo(
+    () => superseded.reduce(
+      (sum, item) => ({
+        ticks: sum.ticks + (item.progress?.ticks || 0),
+        skillsDone: sum.skillsDone + (item.progress?.skillsDone || 0),
+      }),
+      { ticks: 0, skillsDone: 0 }
+    ),
+    [superseded]
+  );
 
   const filteredHistory = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -46,6 +67,16 @@ const HistorySidebar = ({
       || String(item.roadmap_id || '').toLowerCase().includes(term)
     );
   }, [history, query]);
+
+  const sweep = async () => {
+    setSweeping(true);
+    try {
+      await onDeleteSuperseded?.();
+    } finally {
+      setSweeping(false);
+      setConfirmingSweep(false);
+    }
+  };
 
   const remove = async (item) => {
     setDeletingId(item.roadmap_id);
@@ -134,8 +165,8 @@ const HistorySidebar = ({
               {/* What tells two same-day plans for the same track apart. */}
               <div style={{ fontSize: 13.5, color: 'var(--color-text-3)', marginTop: 3 }}>
                 {[
-                  item.week_count ? `${item.week_count} weeks` : null,
-                  item.skill_count ? `${item.skill_count} skills` : null,
+                  item.week_count ? `${item.week_count} ${item.week_count === 1 ? 'week' : 'weeks'}` : null,
+                  item.skill_count ? `${item.skill_count} ${item.skill_count === 1 ? 'skill' : 'skills'}` : null,
                   progressLine(item.progress),
                 ].filter(Boolean).join(' · ')}
               </div>
@@ -185,11 +216,50 @@ const HistorySidebar = ({
         })
       )}
 
+      {/* Clearing out one at a time is the tedium this avoids. Offered only
+          when there is more than one to sweep, since for a single plan the
+          row's own Delete is fewer clicks and says more. */}
+      {superseded.length > 1 && (
+        <div style={{ padding: '14px 20px', borderTop: '1px solid var(--color-line)' }}>
+          {confirmingSweep ? (
+            <>
+              <p style={{ fontSize: 13.5, color: 'var(--color-clay)', margin: '0 0 8px', lineHeight: 1.5 }}>
+                {`Delete ${superseded.length} superseded plans`}
+                {sweepProgress.ticks || sweepProgress.skillsDone
+                  ? `, and with them ${progressLine({ ...sweepProgress, isEmpty: false })}`
+                  : ''}
+                . This cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Button
+                  variant="destructive"
+                  style={{ padding: '7px 14px', fontSize: 13.5 }}
+                  disabled={sweeping}
+                  onClick={sweep}
+                >
+                  {sweeping ? 'Deleting…' : `Delete all ${superseded.length}`}
+                </Button>
+                <Button variant="quiet" onClick={() => setConfirmingSweep(false)} disabled={sweeping}>
+                  Keep them
+                </Button>
+              </div>
+            </>
+          ) : (
+            <Button variant="quiet" onClick={() => setConfirmingSweep(true)}>
+              {`Delete all ${superseded.length} superseded plans`}
+            </Button>
+          )}
+        </div>
+      )}
+
       {history.length > 0 && (
         <CardFooterNote>
           {query.trim()
             ? `Showing ${filteredHistory.length} of ${history.length}.`
             : `${history.length} roadmap${history.length === 1 ? '' : 's'} saved. Click one to open it.`}
+          {superseded.length > 0
+            ? ` ${superseded.length} of them ${superseded.length === 1 ? 'has' : 'have'} been replaced by a newer plan.`
+            : ''}
         </CardFooterNote>
       )}
     </Card>

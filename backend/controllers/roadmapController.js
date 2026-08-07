@@ -10,6 +10,7 @@ import {
     canDeleteRoadmap,
     isCurrentPlan,
     progressHeldBy,
+    totalProgressHeldBy,
 } from "../utils/roadmapDeletion.js";
 import Settings from "../models/Settings.js";
 import { mergeRoadmapProgress } from "../utils/mergeRoadmapProgress.js";
@@ -763,6 +764,63 @@ export const deleteRoadmap = async (req, res) => {
         });
     } catch (err) {
         console.error("deleteRoadmap error:", err);
+        return res
+            .status(500)
+            .json({ success: false, message: "Server error.", error: err.message });
+    }
+};
+
+// ─────────────────────────────────────────────
+// DELETE /api/roadmap/superseded
+// ─────────────────────────────────────────────
+/**
+ * Clears out every plan that a newer one replaced.
+ *
+ * Ten near-identical rows for the same track is the state this screen tends
+ * towards, and removing them one at a time is the tedium the sweep exists to
+ * avoid.
+ *
+ * Only 'regenerated' plans go. A finished plan is an achievement rather than
+ * clutter, and an active plan for a track the learner stepped away from is
+ * waiting for them if they return — neither belongs in an action whose appeal
+ * is not having to read the list first.
+ */
+export const deleteSupersededRoadmaps = async (req, res) => {
+    try {
+        const roadmaps = await Roadmap.find({
+            user_id: req.user._id,
+            status: "regenerated",
+        })
+            .select("roadmap_id target_role status skills weekly_plans")
+            .lean();
+
+        if (!roadmaps.length) {
+            return res.status(200).json({
+                success: true,
+                message: "Nothing to clear — no plan here has been superseded.",
+                data: { deleted: 0, progress: totalProgressHeldBy([]) },
+            });
+        }
+
+        // Counted before the delete, so the confirmation can report what went
+        // rather than what was asked for.
+        const progress = totalProgressHeldBy(roadmaps);
+        const { deletedCount } = await Roadmap.deleteMany({
+            user_id: req.user._id,
+            status: "regenerated",
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: `Deleted ${deletedCount} superseded ${deletedCount === 1 ? "plan" : "plans"}.`,
+            data: {
+                deleted: deletedCount,
+                progress,
+                roles: [...new Set(roadmaps.map((r) => r.target_role))],
+            },
+        });
+    } catch (err) {
+        console.error("deleteSupersededRoadmaps error:", err);
         return res
             .status(500)
             .json({ success: false, message: "Server error.", error: err.message });
