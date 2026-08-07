@@ -40,6 +40,16 @@ export const getAnalytics = () => request('/analytics');
 export const toggleUserBlock = (id) => request(`/users/${id}/block`, { method: 'PATCH' });
 export const deleteUser = (id) => request(`/users/${id}`, { method: 'DELETE' });
 
+// Feedback queue. The status filter is part of the URL rather than done in
+// the page, so a long queue is not fetched whole to show a slice of it.
+export const getFeedback = (status = 'new') =>
+  request(`/feedback${status && status !== 'all' ? `?status=${status}` : ''}`);
+
+export const updateFeedback = (id, patch) => request(`/feedback/${id}`, {
+  method: 'PATCH',
+  body: JSON.stringify(patch),
+});
+
 export const getSettings = () => request('/settings');
 export const updateSettings = (settings) => request('/settings', {
   method: 'PUT',

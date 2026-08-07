@@ -44,6 +44,7 @@ export const adminNav = [
   { to: '/admin/quiz-attempts', label: 'Attempts' },
   { to: '/admin/roadmaps', label: 'Roadmaps' },
   { to: '/admin/analytics', label: 'AI analytics' },
+  { to: '/admin/feedback', label: 'Feedback' },
   { to: '/admin/settings', label: 'Settings' },
 ];
 

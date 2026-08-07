@@ -12,6 +12,7 @@ import {
   getSettings,
   updateSettings,
 } from '../controllers/adminController.js';
+import { listFeedback, updateFeedback } from '../controllers/feedbackController.js';
 
 const router = express.Router();
 
@@ -27,6 +28,8 @@ router.delete('/users/:id', deleteUser);
 router.get('/attempts', getAttempts);
 router.get('/roadmaps', getRoadmaps);
 router.get('/analytics', getAnalytics);
+router.get('/feedback', listFeedback);
+router.patch('/feedback/:id', updateFeedback);
 router.get('/settings', getSettings);
 router.put('/settings', updateSettings);
 

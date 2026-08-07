@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getQuizResult, retryQuiz } from '../../Services/assessmentService';
 import { updateSkillStatus } from '../../Services/roadmapService';
+import ReportControl from '../../../component/ReportControl';
 import {
   Card, CardHeader, Button, Loading, Empty, MicroLabel, StatusBox, type,
 } from '../../../design';
@@ -95,6 +96,8 @@ const ResultPage = () => {
     question: a.question,
     isCorrect: a.isCorrect,
     explanation: a.explanation,
+    givenAnswer: a.userAnswer,
+    correctAnswer: a.correctAnswer,
   })) || [];
 
   const verdict = passed
@@ -173,6 +176,25 @@ const ResultPage = () => {
                     {q.explanation}
                   </p>
                 )}
+
+                {/* These questions are written by a model and can be wrong.
+                    Without somewhere to say so, a bad one is scored against
+                    the learner and nobody ever finds out it was bad. */}
+                <div style={{ marginTop: 6 }}>
+                  <ReportControl
+                    compact
+                    kind="question"
+                    label="Report this question"
+                    context={{
+                      resultId,
+                      topic: resultData.topic?.name,
+                      difficulty: resultData.difficulty,
+                      question: q.question,
+                      givenAnswer: q.givenAnswer,
+                      correctAnswer: q.correctAnswer,
+                    }}
+                  />
+                </div>
               </div>
             </div>
           ))}

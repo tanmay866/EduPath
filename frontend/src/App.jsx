@@ -54,6 +54,7 @@ import QuizAttempts from './Admin/pages/QuizAttempts'
 import RoadmapHistory from './Admin/pages/RoadmapHistory'
 import AIAnalytics from './Admin/pages/AIAnalytics'
 import SystemSettings from './Admin/pages/SystemSettings'
+import AdminFeedback from './Admin/pages/Feedback'
 
 //comman components
 import { ToastContainer } from 'react-toastify';
@@ -92,6 +93,7 @@ const App = () => {
           <Route path="/admin/quiz-attempts" element={<QuizAttempts />} />
           <Route path="/admin/roadmaps" element={<RoadmapHistory />} />
           <Route path="/admin/analytics" element={<AIAnalytics />} />
+          <Route path="/admin/feedback" element={<AdminFeedback />} />
           <Route path="/admin/settings" element={<SystemSettings />} />
         </Routes>
 
