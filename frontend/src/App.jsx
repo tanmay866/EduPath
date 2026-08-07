@@ -3,6 +3,8 @@ import Navbar from './component/Navbar/Navbar'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from './Pages/Home/Home'
 import About from './Pages/About/About'
+import Terms from './Pages/Legal/Terms'
+import Privacy from './Pages/Legal/Privacy'
 import Work from './Pages/Work/Work'
 import Contact from './Pages/Contact/Contact'
 import Signup from './Pages/Authentication/Signup'
@@ -118,6 +120,10 @@ const App = () => {
         <Routes>
           <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
           <Route path="/about" element={<><Navbar /><About /><Footer /></>} />
+          {/* Public on purpose: someone deciding whether to sign up needs to
+              read these before handing over an email address. */}
+          <Route path="/terms" element={<><Navbar /><Terms /><Footer /></>} />
+          <Route path="/privacy" element={<><Navbar /><Privacy /><Footer /></>} />
           <Route path="/work" element={<><Navbar /><Work /><Footer /></>} />
           <Route path="/contact" element={<><Navbar /><Contact /><Footer /></>} />
           <Route path="/faq" element={<><Navbar /><FAQ /><Footer /></>} />

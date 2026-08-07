@@ -52,6 +52,10 @@ const COMPANY = {
     { label: 'How it works', to: '/work' },
     { label: 'FAQ', to: '/faq' },
     { label: 'Contact', to: '/contact' },
+    // Reachable without an account, since they are what someone reads
+    // before deciding to make one.
+    { label: 'Terms', to: '/terms' },
+    { label: 'Privacy', to: '/privacy' },
   ],
 };
 

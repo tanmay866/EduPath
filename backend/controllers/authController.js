@@ -5,6 +5,7 @@ import QuizSession from '../models/QuizSession.js';
 import QuizResult from '../models/QuizResult.js';
 import PracticeResult from '../models/PracticeResult.js';
 import InterviewResult from '../models/InterviewResult.js';
+import AtsAnalysis from '../models/AtsAnalysis.js';
 import ProgressLog from '../models/ProgressLog.js';
 import Portfolio from '../models/Portfolio.js';
 import Resume from '../models/Resume.js';
@@ -160,6 +161,7 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
         quizResults: QuizResult,
         practiceResults: PracticeResult,
         interviewResults: InterviewResult,
+        atsAnalyses: AtsAnalysis,
         progressLogs: ProgressLog,
         portfolios: Portfolio,
         resumes: Resume,
