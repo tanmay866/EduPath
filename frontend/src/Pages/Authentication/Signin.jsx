@@ -8,6 +8,7 @@ import { storeSession } from '../../utils/session';
 import {
   AuthShell, Field, FieldGroup, Input, PasswordInput, Button, InlineMessage, type,
 } from '../../design';
+import LegalConsent from '../../component/LegalConsent';
 
 const Signin = () => {
   const navigate = useNavigate();
@@ -197,9 +198,7 @@ const Signin = () => {
         </div>
       </form>
 
-      <p style={{ fontSize: 13, color: 'var(--color-text-4)', marginTop: 26, marginBottom: 0, lineHeight: 1.5 }}>
-        By signing in you agree to the terms of use and the privacy policy.
-      </p>
+      <LegalConsent action="signing in" />
     </AuthShell>
   );
 };

@@ -8,6 +8,7 @@ import { getPasswordError, getApiErrorMessage, getPasswordRules } from '../../ut
 import {
   AuthShell, Field, FieldGroup, Input, PasswordInput, PasswordRequirements, Button, InlineMessage, type,
 } from '../../design';
+import LegalConsent from '../../component/LegalConsent';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -145,6 +146,8 @@ const Signup = () => {
       <p style={{ fontSize: 13, color: 'var(--color-text-4)', marginTop: 26, marginBottom: 0, lineHeight: 1.5 }}>
         We send a six-digit code to confirm your address. The account cannot be used until it is entered.
       </p>
+
+      <LegalConsent action="creating an account" style={{ marginTop: 12 }} />
     </AuthShell>
   );
 };
