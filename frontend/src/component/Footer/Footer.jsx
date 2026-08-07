@@ -106,7 +106,6 @@ const Footer = () => {
       columns={[PRODUCT, ASSESSMENTS, COMPANY, signedIn ? SIGNED_IN : SIGNED_OUT]}
       blurb={BLURB}
       contact={CONTACT}
-      note="Built at CHARUSAT University"
     />
   );
 };
