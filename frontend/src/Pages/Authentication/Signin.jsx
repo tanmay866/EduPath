@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import { forgotPassword } from '../Services/profileService';
@@ -11,6 +11,15 @@ import {
 
 const Signin = () => {
   const navigate = useNavigate();
+  // Where they were trying to go when the guard turned them away. Only
+  // in-app paths are honoured — taking a full URL from the query string
+  // would let a link sign someone in and then send them off-site.
+  const [searchParams] = useSearchParams();
+  const requested = searchParams.get('next') || '';
+  // One leading slash and no backslash. "//host" is protocol-relative, and
+  // some browsers fold "/\\host" into the same thing, so both would send
+  // someone off-site the moment they signed in.
+  const nextPath = /^\/(?!\/)[^\\]*$/.test(requested) ? requested : '';
 
   // Server-side failures were reported by toast alone, so the reason a sign-in
   // was refused slid off screen after five seconds and left the form looking
@@ -59,8 +68,13 @@ const Signin = () => {
         // Signing in used to land on the marketing home page, which is the one
         // place a signed-in user has no reason to be. Straight to the app —
         // or to onboarding first, matching what RequiresProfile would decide.
+        const complete = sessionStorage.getItem('profileComplete') === '1';
         navigate(
-          sessionStorage.getItem('profileComplete') === '1' ? '/assessment' : '/onboarding',
+          // Finish the trip they started. Onboarding still comes first when
+          // the profile is incomplete, and carries the destination onward.
+          complete
+            ? (nextPath || '/assessment')
+            : `/onboarding${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ''}`,
           { replace: true }
         );
       } catch (error) {

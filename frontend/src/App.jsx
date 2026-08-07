@@ -19,6 +19,7 @@ import ProfilePage from './Pages/Profile/ProfilePage'
 import SettingsPage from './Pages/Settings/SettingsPage'
 import Onboarding from './Pages/Onboarding/Onboarding'
 import RequiresProfile from './component/RequiresProfile'
+import RequiresAuth from './component/RequiresAuth'
 import ResumePage from './Pages/Profile/ResumePage'
 import AllResult from './Pages/Assessment/Result/AllResult'
 import FAQ from './Pages/FAQ/FAQ'
@@ -137,18 +138,18 @@ const App = () => {
           {/* Reached from a link in an email, so it sits with the other
               routes that must work with no session. */}
           <Route path="/unsubscribe" element={<Unsubscribe />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile" element={<RequiresAuth><ProfilePage /></RequiresAuth>} />
+          <Route path="/settings" element={<RequiresAuth><SettingsPage /></RequiresAuth>} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/resume" element={<ResumePage />} />
-          <Route path="/assessment" element={<AssessmentDashboard />} />
-          <Route path="/assessment/instructions" element={<AssessmentInstructions />} />
-          <Route path="/assessment/result" element={<AllResult />} />
+          <Route path="/resume" element={<RequiresAuth><ResumePage /></RequiresAuth>} />
+          <Route path="/assessment" element={<RequiresAuth><AssessmentDashboard /></RequiresAuth>} />
+          <Route path="/assessment/instructions" element={<RequiresAuth><AssessmentInstructions /></RequiresAuth>} />
+          <Route path="/assessment/result" element={<RequiresAuth><AllResult /></RequiresAuth>} />
           {/* Needs a role: results are filed against the role they were
               earned under, so an attempt with none set is recorded where
               nothing will read it. */}
           <Route path="/assessment/quiz" element={<RequiresProfile><QuizPage /></RequiresProfile>} />
-          <Route path="/assessment/result/:resultId" element={<ResultPage />} />
+          <Route path="/assessment/result/:resultId" element={<RequiresAuth><ResultPage /></RequiresAuth>} />
 
           {/* Assessment Hub Routes — the actual test-taking screens (and the
               past-result detail views, which reuse that same bare layout)
@@ -156,22 +157,22 @@ const App = () => {
               the test. The hub and the results-list screens are a different
               chrome entirely (LearnerShell's own sidebar and header) since
               they're for browsing, not mid-attempt. */}
-          <Route path="/assessment-hub" element={<AssessmentHub />} />
-          <Route path="/assessment-hub/skill" element={<SkillAssessment />} />
-          <Route path="/assessment-hub/aptitude" element={<AptitudeTest />} />
-          <Route path="/assessment-hub/aptitude/results" element={<PracticeResults type="aptitude" label="Aptitude" retakePath="/assessment-hub/aptitude" />} />
-          <Route path="/assessment-hub/aptitude/results/:resultId" element={<PracticeResultDetail type="aptitude" />} />
-          <Route path="/assessment-hub/cs-fundamentals" element={<CSFundamentals />} />
-          <Route path="/assessment-hub/cs-fundamentals/results" element={<PracticeResults type="cs-fundamentals" label="CS fundamentals" retakePath="/assessment-hub/cs-fundamentals" />} />
-          <Route path="/assessment-hub/cs-fundamentals/results/:resultId" element={<PracticeResultDetail type="cs-fundamentals" />} />
-          <Route path="/assessment-hub/mock-interview/results" element={<InterviewResults />} />
-          <Route path="/assessment-hub/mock-interview/results/:resultId" element={<InterviewResultDetail />} />
+          <Route path="/assessment-hub" element={<RequiresAuth><AssessmentHub /></RequiresAuth>} />
+          <Route path="/assessment-hub/skill" element={<RequiresAuth><SkillAssessment /></RequiresAuth>} />
+          <Route path="/assessment-hub/aptitude" element={<RequiresAuth><AptitudeTest /></RequiresAuth>} />
+          <Route path="/assessment-hub/aptitude/results" element={<RequiresAuth><PracticeResults type="aptitude" label="Aptitude" retakePath="/assessment-hub/aptitude" /></RequiresAuth>} />
+          <Route path="/assessment-hub/aptitude/results/:resultId" element={<RequiresAuth><PracticeResultDetail type="aptitude" /></RequiresAuth>} />
+          <Route path="/assessment-hub/cs-fundamentals" element={<RequiresAuth><CSFundamentals /></RequiresAuth>} />
+          <Route path="/assessment-hub/cs-fundamentals/results" element={<RequiresAuth><PracticeResults type="cs-fundamentals" label="CS fundamentals" retakePath="/assessment-hub/cs-fundamentals" /></RequiresAuth>} />
+          <Route path="/assessment-hub/cs-fundamentals/results/:resultId" element={<RequiresAuth><PracticeResultDetail type="cs-fundamentals" /></RequiresAuth>} />
+          <Route path="/assessment-hub/mock-interview/results" element={<RequiresAuth><InterviewResults /></RequiresAuth>} />
+          <Route path="/assessment-hub/mock-interview/results/:resultId" element={<RequiresAuth><InterviewResultDetail /></RequiresAuth>} />
           <Route path="/assessment-hub/mock-interview" element={<RequiresProfile><AIMockInterview /></RequiresProfile>} />
 
           {/* New Feature Routes */}
-          <Route path="/resume-builder" element={<ResumeBuilder />} />
-          <Route path="/portfolio-generator" element={<PortfolioGenerator />} />
-          <Route path="/ats-analyzer" element={<ATSAnalyzer />} />
+          <Route path="/resume-builder" element={<RequiresAuth><ResumeBuilder /></RequiresAuth>} />
+          <Route path="/portfolio-generator" element={<RequiresAuth><PortfolioGenerator /></RequiresAuth>} />
+          <Route path="/ats-analyzer" element={<RequiresAuth><ATSAnalyzer /></RequiresAuth>} />
 
           {/* Public Portfolio Routes */}
           <Route path="/p/:portfolioId" element={<PublicPortfolio />} />
