@@ -599,3 +599,31 @@ textarea {
     position: static !important;
   }
 }
+
+/* ── Staggered reveal ──────────────────────────────────────────────────────
+   Rows fade and rise as they arrive. The hidden state is scoped to
+   `.is-staggered`, a class only useStaggeredReveal adds, so nothing here can
+   hide content on its own: no JavaScript, no observer, or a reduced-motion
+   preference all leave the list plainly visible.
+
+   The distance is small on purpose. This is a list of six roles on a
+   marketing page, not a hero — enough movement to read as arriving in order,
+   not enough to make the page feel like it is assembling itself. */
+.is-staggered .reveal-row {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 420ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Set per row by the hook; the fallback keeps this valid on its own. */
+  transition-delay: var(--reveal-delay, 0ms);
+  /* The rows carry hairline borders, and animating them unhinted leaves the
+     text soft for the duration of the transition on some machines. */
+  will-change: opacity, transform;
+}
+
+.is-staggered .reveal-row.is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}

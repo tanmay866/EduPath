@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StartLink from '../../component/StartLink';
+import { useStaggeredReveal } from '../../hooks/useStaggeredReveal';
 import { Card, Button, MicroLabel, StatusBox, LabelledBar, type } from '../../design';
 import { TRACKS, TRACK_PACE_HOURS, TRACK_PACE_LEVEL } from './tracks';
 
@@ -221,8 +222,14 @@ const OutcomeCard = ({ label, children, note }) => (
 
 const mern = TRACKS.find((t) => t.name === 'MERN Developer');
 
-const Home = () => (
-  <div style={{ background: 'var(--color-surface)' }}>
+const Home = () => {
+  // The six roles arrive one after another as the list scrolls in. The rows
+  // stay visible if the reveal cannot run, so this can only ever add motion,
+  // never remove content.
+  const trackListRef = useStaggeredReveal({ selector: '.reveal-row' });
+
+  return (
+    <div style={{ background: 'var(--color-surface)' }}>
     {/* ── Hero ── */}
     <section className="home-hero" style={{ display: 'grid', gridTemplateColumns: '1fr 620px', borderBottom: '1px solid var(--color-ink)' }}>
       <div className="home-hero__copy" style={{ padding: '76px 44px 68px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -283,7 +290,7 @@ const Home = () => (
         </span>
       </div>
 
-      <div style={{ borderTop: '1px solid var(--color-ink)' }}>
+      <div ref={trackListRef} style={{ borderTop: '1px solid var(--color-ink)' }}>
         {/* Read-only. Every row used to link to /services, which is the same
             six tracks again at more length — so the list invited a click that
             went nowhere new, and Tracks is already in the top bar for anyone
@@ -292,7 +299,7 @@ const Home = () => (
         {TRACKS.map((track, i) => (
           <div
             key={track.name}
-            className="home-track"
+            className="home-track reveal-row"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -506,7 +513,8 @@ const Home = () => (
         </Link>
       </div>
     </section>
-  </div>
-);
+    </div>
+  );
+};
 
 export default Home;
