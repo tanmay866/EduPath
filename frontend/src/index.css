@@ -627,3 +627,54 @@ textarea {
   transform: none;
   will-change: auto;
 }
+
+/* ── Technologies marquee ──────────────────────────────────────────────────
+   A band of the technologies the six tracks name, scrolling on forever.
+
+   The track holds the list twice and travels exactly half its own width, so
+   the moment it finishes it is showing the second copy at precisely the
+   position the first started — the seam never lands anywhere visible. The
+   second copy is aria-hidden, so it is decoration for the eye only and a
+   screen reader reads each name once.
+
+   Anything that moves by itself has to be stoppable: it pauses on hover and
+   on keyboard focus, which is what WCAG 2.2.2 is asking for. */
+.marquee {
+  overflow: hidden;
+  /* Without this the doubled row widens the page and the whole site gains a
+     horizontal scrollbar. */
+  max-width: 100%;
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 46s linear infinite;
+}
+
+.marquee:hover .marquee__track,
+.marquee:focus-within .marquee__track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  to { transform: translateX(-50%); }
+}
+
+/* Reduced motion needs its own answer rather than the global duration
+   override. That rule collapses the animation to almost nothing, which for a
+   loop this long means the band simply sits still mid-travel with the row
+   still laid out as one endless line. Here it becomes what it should have
+   been all along: a static, wrapping list. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .marquee__copy[aria-hidden='true'] {
+    display: none;
+  }
+}

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import StartLink from '../../component/StartLink';
 import { useStaggeredReveal } from '../../hooks/useStaggeredReveal';
 import { Card, Button, MicroLabel, StatusBox, LabelledBar, type } from '../../design';
-import { TRACKS, TRACK_PACE_HOURS, TRACK_PACE_LEVEL } from './tracks';
+import { TRACKS, TRACK_TECHNOLOGIES, TRACK_PACE_HOURS, TRACK_PACE_LEVEL } from './tracks';
 
 /**
  * Spec §7 Marketing · landing, following the composition in
@@ -222,6 +222,39 @@ const OutcomeCard = ({ label, children, note }) => (
 
 const mern = TRACKS.find((t) => t.name === 'MERN Developer');
 
+/**
+ * One pass of the technologies, separated by a dot.
+ *
+ * Rendered twice by the band so the loop has something to hand over to. The
+ * second pass is hidden from assistive technology, which reads the names once
+ * and is spared a list that never ends.
+ */
+const TechRun = ({ hidden = false }) => (
+  <span
+    className="marquee__copy"
+    aria-hidden={hidden || undefined}
+    style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}
+  >
+    {TRACK_TECHNOLOGIES.map((name) => (
+      <span key={name} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <span
+          style={{
+            padding: '0 24px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 13,
+            letterSpacing: '0.04em',
+            color: 'var(--color-text-2)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {name}
+        </span>
+        <span aria-hidden="true" style={{ color: 'var(--color-text-4)', fontSize: 11 }}>·</span>
+      </span>
+    ))}
+  </span>
+);
+
 const Home = () => {
   // The six roles arrive one after another as the list scrolls in. The rows
   // stay visible if the reveal cannot run, so this can only ever add motion,
@@ -334,6 +367,22 @@ const Home = () => {
             </span>
           </div>
         ))}
+      </div>
+    </section>
+
+    {/* ── Technologies ──
+        What the six tracks above are made of. A marquee suits this and not
+        the roles: these are names to recognise rather than figures to
+        compare, nothing is lost if one scrolls past, and the set is long
+        enough that an end would be arbitrary. */}
+    <section
+      className="marquee"
+      aria-label="Technologies covered across the six tracks"
+      style={{ borderBottom: '1px solid var(--color-line)', padding: '18px 0' }}
+    >
+      <div className="marquee__track">
+        <TechRun />
+        <TechRun hidden />
       </div>
     </section>
 

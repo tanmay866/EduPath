@@ -79,4 +79,17 @@ export const TRACKS = [
   },
 ];
 
+/**
+ * Every technology the six tracks name, each once, in track order.
+ *
+ * Derived from the stacks above rather than written out again, so the band on
+ * the home page cannot end up advertising something no track teaches — or
+ * quietly miss something that was added to one.
+ */
+export const TRACK_TECHNOLOGIES = [
+  ...new Set(
+    TRACKS.flatMap((track) => track.stack.split(',').map((name) => name.trim())).filter(Boolean)
+  ),
+];
+
 export default TRACKS;
