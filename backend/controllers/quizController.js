@@ -10,7 +10,45 @@ import Settings from '../models/Settings.js';
 import { skillsAssessedBy } from '../utils/skillTopicMap.js';
 import { reviewQueue } from '../utils/reviewSchedule.js';
 import { topicsForRole } from '../utils/roleTopicMap.js';
+import Roadmap from '../models/Roadmap.js';
 
+
+
+/**
+ * Roadmap skills this result could settle, if the learner agrees.
+ *
+ * Marking a skill done has always been self-reported, and a pass on the quiz
+ * that covers it is the best evidence the product has — but it is offered
+ * rather than applied, because the learner is the one who knows whether they
+ * can actually do it. Only skills still outstanding, and only on a pass:
+ * failing a quiz is not an invitation to tick anything.
+ *
+ * Shared by the submit response and the result page, so an offer cannot
+ * appear in one and not the other.
+ */
+const outstandingRoadmapSkills = async (userId, topicName, percentage) => {
+  const covered = skillsAssessedBy(topicName);
+  if (!(percentage >= 70) || covered.length === 0) return [];
+
+  try {
+    const plan = await Roadmap.findOne({
+      user_id: userId,
+      status: { $in: ['active', 'completed'] },
+    })
+      .sort({ createdAt: -1 })
+      .select('skills')
+      .lean();
+
+    return (plan?.skills || [])
+      .filter((s) => covered.includes(s.skill) && s.status !== 'completed')
+      .map((s) => s.skill);
+  } catch (error) {
+    // No plan is the ordinary case for someone who has not generated one,
+    // and must never fail the thing it is decorating.
+    console.error('Could not read roadmap skills:', error.message);
+    return [];
+  }
+};
 
 /**
  * Get quiz session details (for resuming or viewing)
@@ -101,10 +139,17 @@ export const getQuizResult = async (req, res) => {
       });
     }
 
+    const roadmapSkills = await outstandingRoadmapSkills(
+      userId,
+      result.topicId?.name,
+      result.percentage
+    );
+
     res.json({
       success: true,
       data: {
         resultId: result._id,
+        roadmapSkills,
         topic: result.topicId,
         difficulty: result.difficulty,
         experienceLevel: result.experienceLevel,
@@ -631,8 +676,15 @@ export const submitQuiz = async (req, res) => {
     else if (percentage >= 70) performance = 'satisfactory';
 
     // Build response with AI analysis
+    const roadmapSkills = await outstandingRoadmapSkills(
+      userId,
+      session.topicId.name,
+      percentage
+    );
+
     const responseData = {
       resultId: quizResult._id,
+      roadmapSkills,
       score: correctAnswers,
       percentage: Math.round(percentage),
       correctAnswers,

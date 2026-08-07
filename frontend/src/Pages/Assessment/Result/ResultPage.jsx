@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getQuizResult, retryQuiz } from '../../Services/assessmentService';
+import { updateSkillStatus } from '../../Services/roadmapService';
 import {
   Card, CardHeader, Button, Loading, Empty, MicroLabel, StatusBox, type,
 } from '../../../design';
@@ -14,6 +15,10 @@ import {
  */
 const ResultPage = () => {
   const { resultId } = useParams();
+  // Skills this pass could settle on the plan, and the ones already ticked
+  // from here so the offer disappears as it is taken.
+  const [markedSkills, setMarkedSkills] = useState([]);
+  const [markingSkill, setMarkingSkill] = useState(null);
   const navigate = useNavigate();
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -172,6 +177,56 @@ const ResultPage = () => {
             </div>
           ))}
         </>
+      )}
+
+      {/* The loop that was left open: passing the quiz for a roadmap skill is
+          the best evidence the product has that the skill is done, and until
+          now ticking it meant going to the plan and doing it by hand. Offered,
+          not applied — the learner knows whether they can actually do it. */}
+      {passed && (resultData.roadmapSkills || []).filter((s) => !markedSkills.includes(s)).length > 0 && (
+        <div style={{ padding: '18px 34px', borderTop: '1px solid var(--color-line)' }}>
+          <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 8 }}>
+            ON YOUR ROADMAP
+          </MicroLabel>
+          <p style={{ fontSize: 14.5, color: 'var(--color-text-2)', margin: '0 0 12px', lineHeight: 1.55 }}>
+            {`This assessment covers ${(resultData.roadmapSkills || []).filter((s) => !markedSkills.includes(s)).length === 1 ? 'a skill' : 'skills'} still outstanding on your plan. Mark done if you are confident.`}
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {(resultData.roadmapSkills || [])
+              .filter((skill) => !markedSkills.includes(skill))
+              .map((skill) => (
+                <Button
+                  key={skill}
+                  variant="secondary"
+                  style={{ padding: '8px 16px', fontSize: 14 }}
+                  disabled={markingSkill === skill}
+                  onClick={async () => {
+                    setMarkingSkill(skill);
+                    try {
+                      await updateSkillStatus(skill, 'completed');
+                      setMarkedSkills((prev) => [...prev, skill]);
+                    } catch {
+                      // Left un-ticked rather than shown as done: a failed
+                      // write that looked like a success would be worse.
+                      setMarkingSkill(null);
+                    } finally {
+                      setMarkingSkill(null);
+                    }
+                  }}
+                >
+                  {markingSkill === skill ? 'Marking…' : `Mark "${skill}" done`}
+                </Button>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {markedSkills.length > 0 && (
+        <div style={{ padding: '14px 34px', borderTop: '1px solid var(--color-line)' }}>
+          <p style={{ fontSize: 14, color: 'var(--color-green)', margin: 0 }}>
+            {`Marked done on your roadmap: ${markedSkills.join(', ')}.`}
+          </p>
+        </div>
       )}
 
       <div
