@@ -69,7 +69,7 @@ const PracticeResultDetail = ({ type }) => {
       review={data.review || []}
       formatTime={formatTime}
       onRetry={() => navigate(RETAKE_PATH[type])}
-      onDone={() => navigate('/assessment-hub')}
+      onDone={() => navigate(`/assessment-hub/${type}/results`)}
     />
   );
 };

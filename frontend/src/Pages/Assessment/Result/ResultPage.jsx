@@ -33,7 +33,7 @@ const ResultPage = () => {
 
   useEffect(() => {
     if (resultId) fetchResultData();
-    else navigate('/assessment');
+    else navigate('/assessment/result');
   }, [resultId]);
 
   const fetchResultData = async () => {
@@ -78,7 +78,7 @@ const ResultPage = () => {
   if (error || !resultData) {
     return page(
       <Card>
-        <Empty action={<Button onClick={() => navigate('/assessment')}>Back to overview</Button>}>
+        <Empty action={<Button onClick={() => navigate('/assessment/result')}>Back to results</Button>}>
           {error || 'This result could not be loaded.'}
         </Empty>
       </Card>
@@ -260,7 +260,10 @@ const ResultPage = () => {
           justifyContent: 'flex-end',
         }}
       >
-        <Button variant="secondary" onClick={() => navigate('/assessment')}>Back to overview</Button>
+        {/* Back to this instrument's own attempts, not the Overview. Landing
+            on the whole dashboard after reading one result means finding your
+            way back into the list to open the next one. */}
+        <Button variant="secondary" onClick={() => navigate('/assessment/result')}>Back to results</Button>
         <Button onClick={handleRetry} loading={retrying} loadingLabel="Starting…">Retake</Button>
       </div>
     </Card>

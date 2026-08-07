@@ -316,7 +316,7 @@ const AptitudeTest = () => {
         review={review}
         formatTime={formatTime}
         onRetry={handleRestart}
-        onDone={() => navigate('/assessment-hub')}
+        onDone={() => navigate('/assessment-hub/aptitude/results')}
       />
     );
   }

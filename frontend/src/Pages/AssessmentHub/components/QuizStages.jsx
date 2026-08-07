@@ -339,7 +339,16 @@ export const QuizStage = ({
 };
 
 /* ── Result ─────────────────────────────────────────────────────────────── */
-export const ResultStage = ({ label, result, review = [], onRetry, onDone, formatTime }) => {
+/**
+ * `doneLabel` because this screen is reached two ways: straight off the end of
+ * a test, and by opening a saved attempt from that instrument's results list.
+ * Both now lead back to the results, so the label says so rather than naming
+ * the hub — landing two levels up from where you came in is how a list of
+ * attempts becomes hard to work through.
+ */
+export const ResultStage = ({
+  label, result, review = [], onRetry, onDone, formatTime, doneLabel = 'Back to results',
+}) => {
   const passed = result.percentage >= 70;
 
   return (
@@ -434,11 +443,11 @@ export const ResultStage = ({ label, result, review = [], onRetry, onDone, forma
             justifyContent: 'flex-end',
           }}
         >
-          <Button variant="secondary" onClick={onDone}>Back to the hub</Button>
+          <Button variant="secondary" onClick={onDone}>{doneLabel}</Button>
           <Button onClick={onRetry}>Take it again</Button>
         </div>
 
-        <CardFooterNote>This result is saved — find it again from the hub.</CardFooterNote>
+        <CardFooterNote>This result is saved — it is listed with your other attempts.</CardFooterNote>
       </Card>
     </Page>
   );

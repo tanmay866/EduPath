@@ -866,11 +866,16 @@ const AIMockInterview = () => {
               justifyContent: 'flex-end',
             }}
           >
-            <Button variant="secondary" onClick={() => navigate('/assessment-hub')}>Back to the hub</Button>
+            {/* The interview that just finished is already in this list, so
+                it is the useful place to land — the hub is a level further
+                out than anyone reading a result wants to go. */}
+            <Button variant="secondary" onClick={() => navigate('/assessment-hub/mock-interview/results')}>
+              Back to results
+            </Button>
             <Button onClick={restartInterview}>Interview again</Button>
           </div>
 
-          <CardFooterNote>This interview is saved — find it again from the hub.</CardFooterNote>
+          <CardFooterNote>This interview is saved — it is listed with your other attempts.</CardFooterNote>
         </Card>
       </Page>
     );
