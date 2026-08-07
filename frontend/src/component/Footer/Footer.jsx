@@ -81,11 +81,17 @@ const BLURB =
   'Find out where your skills actually are, get a week-by-week plan for the role '
   + 'you want, and the resume and portfolio to apply with.';
 
-// The same details the contact page lists, so the two cannot disagree. The
-// phone number stays on that page rather than every screen on the site.
+// The same details the contact page lists, so the two cannot disagree — they
+// did, until this carried no pin code at all. The postal address is the one
+// the university and the Anand district directory both publish: the campus
+// sits at Changa in Petlad taluka, which is why the town and the district are
+// different names. The phone number stays on the contact page rather than
+// every screen on the site.
 const CONTACT = [
   { label: 'edupath.developers@gmail.com', href: 'mailto:edupath.developers@gmail.com' },
-  { label: 'CHARUSAT University, Changa, Anand' },
+  { label: 'CHARUSAT Campus, Off Nadiad–Petlad Highway' },
+  { label: 'Changa, Ta. Petlad, Dist. Anand' },
+  { label: 'Gujarat 388421, India' },
 ];
 
 const isSignedIn = () => Boolean(sessionStorage.getItem('token'));

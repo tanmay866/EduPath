@@ -16,7 +16,14 @@ const MAX_MESSAGE = 500;
 const DETAILS = [
   {
     label: 'Address',
-    lines: ['CHARUSAT University', 'Changa, Anand', 'Gujarat — 388421'],
+    // As published by the university and the Anand district directory. Changa
+    // is the town and Petlad the taluka, which is why the district is a third
+    // name rather than a repeat of either.
+    lines: [
+      'CHARUSAT Campus, Off Nadiad–Petlad Highway',
+      'Changa, Ta. Petlad, Dist. Anand',
+      'Gujarat 388421, India',
+    ],
   },
   {
     label: 'Phone',
