@@ -5,7 +5,7 @@ import User from "../models/userModel.js";
 import SkillGap from "../models/SkillGap.js";
 import Topic from "../models/Topic.js";
 import { topicForSkill } from "../utils/skillTopicMap.js";
-import { scheduleForPlan } from "../utils/planSchedule.js";
+import { scheduleForPlan, completionUpdateFor } from "../utils/planSchedule.js";
 import {
     canDeleteRoadmap,
     isCurrentPlan,
@@ -50,6 +50,15 @@ const resolveRoadmapProfile = (user, settings) => {
         learningStyle,
     };
 };
+
+/**
+ * The plan in play: the one being worked on, or the one just finished.
+ *
+ * Completing a plan used to take it out of reach of every route that looks
+ * one up, because they all asked for status "active" — so the last tick froze
+ * the plan and unticking it was impossible.
+ */
+const LIVE_STATUSES = ["active", "completed"];
 
 const normalizeCurrentSkillsForAI = (currentSkills) => {
     if (!Array.isArray(currentSkills)) {
@@ -237,7 +246,9 @@ export const getRoadmap = async (req, res) => {
         // stale one for a track they have left, and changing back brings the
         // original plan straight back instead of forcing a regenerate.
         const user = await User.findById(req.user._id).select("target_role");
-        const query = { user_id: req.user._id, status: "active" };
+        // Completed as well as active: finishing every week must not make the
+        // plan disappear and the page offer to generate a first one.
+        const query = { user_id: req.user._id, status: { $in: LIVE_STATUSES } };
         if (user?.target_role) {
             query.target_role = user.target_role;
         }
@@ -409,7 +420,7 @@ export const updateSkillStatus = async (req, res) => {
 
         const roadmap = await Roadmap.findOne({
             user_id: req.user._id,
-            status: "active",
+            status: { $in: LIVE_STATUSES },
         });
 
         if (!roadmap) {
@@ -430,6 +441,13 @@ export const updateSkillStatus = async (req, res) => {
         }
 
         skillNode.status = status;
+
+        // A week counts as done when every skill it covers is done, so
+        // completing the last skill can finish the plan just as ticking the
+        // last task can. Same helper, so the two routes cannot disagree.
+        const skillCompletion = completionUpdateFor(roadmap);
+        if (skillCompletion) Object.assign(roadmap, skillCompletion);
+
         await roadmap.save();
 
         res.status(200).json({
@@ -469,7 +487,10 @@ export const updateTaskStatus = async (req, res) => {
             return res.status(400).json({ success: false, message: "done must be true or false." });
         }
 
-        const roadmap = await Roadmap.findOne({ user_id: req.user._id, status: "active" });
+        const roadmap = await Roadmap.findOne({
+            user_id: req.user._id,
+            status: { $in: LIVE_STATUSES },
+        });
         if (!roadmap) {
             return res.status(404).json({ success: false, message: "Active roadmap not found." });
         }
@@ -497,6 +518,12 @@ export const updateTaskStatus = async (req, res) => {
         const total = week.tasks.length;
         const complete = week.completed_tasks.length;
         week.status = complete === 0 ? "pending" : complete >= total ? "completed" : "in_progress";
+
+        // Ticking the last task of the last week finishes the plan, and
+        // unticking one puts it back. Derived here rather than left to a
+        // screen, so every caller sees the same state.
+        const completion = completionUpdateFor(roadmap);
+        if (completion) Object.assign(roadmap, completion);
 
         await roadmap.save();
 
@@ -628,7 +655,7 @@ export const adaptRoadmap = async (req, res) => {
 
         const roadmap = await Roadmap.findOne({
             user_id: userId,
-            status: "active",
+            status: { $in: LIVE_STATUSES },
             ...(roadmapProfile.targetRole ? { target_role: roadmapProfile.targetRole } : {}),
         }).sort({ createdAt: -1 });
 
@@ -694,6 +721,12 @@ export const adaptRoadmap = async (req, res) => {
         roadmap.weekly_plans = next.weekly_plans;
         roadmap.total_duration_weeks = aiResult.total_duration_weeks;
         roadmap.metadata = { ...(roadmap.metadata || {}), last_adapted_at: new Date() };
+
+        // Rebuilding usually adds unfinished weeks, so a plan that was
+        // complete may not be any more.
+        const adaptedCompletion = completionUpdateFor(roadmap);
+        if (adaptedCompletion) Object.assign(roadmap, adaptedCompletion);
+
         await roadmap.save();
 
         return res.status(200).json({

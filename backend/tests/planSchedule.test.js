@@ -7,6 +7,8 @@ import {
     scheduledWeek,
     paceFor,
     paceLabel,
+    isPlanFinished,
+    completionUpdateFor,
 } from '../utils/planSchedule.js';
 
 /**
@@ -126,4 +128,70 @@ test('a plan with no length has no pace', () => {
 test('no pace produces no label rather than an empty sentence', () => {
     assert.equal(paceLabel(null), null);
     assert.equal(paceLabel(undefined), null);
+});
+
+/**
+ * Finishing a track was never recorded. 'completed' sat in the status enum
+ * with nothing to set it, so the plan stayed active — and since the plan
+ * being worked from cannot be deleted, finishing one meant being stuck with
+ * it. The failures that matter here are marking a plan done when it is not,
+ * and refusing to un-mark it when work reappears.
+ */
+const finishedPlan = (status = 'active') => ({
+    status,
+    weekly_plans: [
+        { week_number: 1, tasks: ['a', 'b'], completed_tasks: [0, 1] },
+        { week_number: 2, tasks: ['c'], completed_tasks: [0] },
+    ],
+    skills: [],
+});
+
+const unfinishedPlan = (status = 'active') => ({
+    status,
+    weekly_plans: [
+        { week_number: 1, tasks: ['a', 'b'], completed_tasks: [0, 1] },
+        { week_number: 2, tasks: ['c'], completed_tasks: [] },
+    ],
+    skills: [],
+});
+
+test('a plan with every week ticked is finished', () => {
+    assert.equal(isPlanFinished(finishedPlan()), true);
+    assert.equal(isPlanFinished(unfinishedPlan()), false);
+});
+
+test('a plan with no weeks at all is not finished', () => {
+    // Nothing to do is not everything done — otherwise a generation that
+    // produced no weeks would be congratulated.
+    assert.equal(isPlanFinished({ status: 'active', weekly_plans: [], skills: [] }), false);
+    assert.equal(isPlanFinished({}), false);
+    assert.equal(isPlanFinished(null), false);
+});
+
+test('finishing the last week completes the plan and dates it', () => {
+    const at = new Date('2026-08-07T10:00:00Z');
+    const update = completionUpdateFor(finishedPlan('active'), at);
+    assert.equal(update.status, 'completed');
+    assert.equal(update.completed_at.toISOString(), at.toISOString());
+});
+
+test('unticking after finishing puts the plan back to active', () => {
+    // A plan with work left in it is not complete, whatever it was called a
+    // moment ago.
+    const update = completionUpdateFor(unfinishedPlan('completed'));
+    assert.equal(update.status, 'active');
+    assert.equal(update.completed_at, null);
+});
+
+test('nothing to change is reported as nothing rather than a rewrite', () => {
+    assert.equal(completionUpdateFor(unfinishedPlan('active')), null);
+    assert.equal(completionUpdateFor(finishedPlan('completed')), null);
+    assert.equal(completionUpdateFor(null), null);
+});
+
+test('a superseded plan is left alone whatever its ticks say', () => {
+    // Only the live plan changes state. Rewriting history would resurrect
+    // old plans as active every time one was inspected.
+    assert.equal(completionUpdateFor(finishedPlan('regenerated')), null);
+    assert.equal(completionUpdateFor(unfinishedPlan('regenerated')), null);
 });

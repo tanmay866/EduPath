@@ -84,6 +84,9 @@ const RoadmapSchema = new mongoose.Schema(
          * document, and the learner did not go back to week one by doing it.
          */
         started_at: { type: Date, default: Date.now },
+        /** When every week was finished. Null until then, and cleared again
+         *  if work reappears. */
+        completed_at: { type: Date, default: null },
         skills: [SkillNodeSchema],
         weekly_plans: [WeeklyPlanSchema],
         version: { type: Number, default: 1 },

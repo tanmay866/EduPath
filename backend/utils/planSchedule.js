@@ -107,6 +107,48 @@ export const paceFor = ({ startedAt, totalWeeks, weeksDone = 0, now = new Date()
 };
 
 /**
+ * Whether every week of the plan is finished.
+ *
+ * An empty plan is not finished. Nothing to do is not the same as everything
+ * done, and treating it as complete would mark a plan finished the moment it
+ * failed to generate any weeks.
+ */
+export const isPlanFinished = (roadmap) => {
+    const weeks = roadmap?.weekly_plans || [];
+    if (!weeks.length) return false;
+    return doneWeekCount(weeks, roadmap?.skills || []) >= weeks.length;
+};
+
+/**
+ * The status change a plan is due, if any.
+ *
+ * Finishing a track is the most meaningful thing that happens here and it was
+ * never written down: 'completed' has been in the status enum from the start
+ * with nothing to set it, so a learner who finished every week kept a plan
+ * that still called itself active. It also left them stuck with it — the plan
+ * being worked from cannot be deleted, and it stayed the plan being worked
+ * from forever.
+ *
+ * Reversible on purpose. Unticking a task after finishing puts the plan back
+ * to active, because a plan with work left in it is not complete however it
+ * was labelled a moment ago.
+ *
+ * Returns null when nothing needs to change, so callers can skip the write.
+ */
+export const completionUpdateFor = (roadmap, now = new Date()) => {
+    if (!roadmap) return null;
+    const finished = isPlanFinished(roadmap);
+
+    if (finished && roadmap.status === 'active') {
+        return { status: 'completed', completed_at: asDate(now) };
+    }
+    if (!finished && roadmap.status === 'completed') {
+        return { status: 'active', completed_at: null };
+    }
+    return null;
+};
+
+/**
  * The whole schedule for one plan, ready to send to a screen.
  *
  * Derived on read rather than stored, so it cannot go stale against the ticks
