@@ -17,13 +17,16 @@ import { useAdminData } from '../useAdminData';
  * drops to text-4 when blocked, the address in 13.5px text-2, a mono joined
  * date, a mono status, and right-aligned actions. Footer counts what is shown.
  *
- * Blocking flips `isActive` on the account. Deleting takes the person's quiz
- * results and roadmaps with them, so it asks first.
+ * Blocking flips `isActive` on the account, and it bites immediately: the
+ * auth middleware checks the flag on every request, so a session already
+ * signed in is refused rather than lasting until its token expires.
  *
- * The API refuses an admin blocking or deleting their own account, but a
- * button that is clickable and then fails is a worse interface than one that
- * was never clickable — Block/Delete are disabled outright on the signed-in
- * admin's own row rather than relying on the round trip to say no.
+ * Deleting removes everything the account owns, not only assessments and
+ * roadmaps — the same cascade the learner's own delete uses. It asks first.
+ *
+ * The API refuses an admin blocking or deleting their own account, and the
+ * server marks which row is the caller so those two buttons are disabled
+ * outright rather than failing on the round trip.
  */
 const COLUMNS = '1.2fr 1.4fr 0.7fr 0.7fr 0.8fr';
 const STATUSES = ['All', 'Active', 'Blocked'];
@@ -195,7 +198,7 @@ const ManageUsers = () => {
         }
       >
         {pendingDelete
-          && `${pendingDelete.name} (${pendingDelete.email}) will be removed, along with their quiz results and roadmaps. This cannot be undone.`}
+          && `${pendingDelete.name} (${pendingDelete.email}) will be removed, along with everything on the account — assessments, roadmaps, resumes, portfolio and all. This cannot be undone.`}
       </Modal>
     </AdminShell>
   );

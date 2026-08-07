@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import User from '../models/userModel.js';
 import { purgeUserData } from '../utils/purgeUserData.js';
 import QuizResult from '../models/QuizResult.js';
@@ -265,6 +266,16 @@ export const getAttempts = async (req, res) => {
   }
 };
 
+
+/**
+ * An id from the URL that Mongo can actually look up.
+ *
+ * Without this a mistyped id reached findById, threw a CastError, and was
+ * caught by the generic handler as a 500 — reporting a client's typo as a
+ * server fault, and logging it as one.
+ */
+const invalidId = (id) => !mongoose.Types.ObjectId.isValid(id);
+
 /** GET /api/admin/users */
 export const getUsers = async (req, res) => {
   try {
@@ -311,6 +322,10 @@ export const getUsers = async (req, res) => {
 /** PATCH /api/admin/users/:id/block — flips isActive. */
 export const toggleUserBlock = async (req, res) => {
   try {
+    if (invalidId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'That is not a valid user id' });
+    }
+
     if (String(req.user._id) === req.params.id) {
       return res.status(400).json({ success: false, message: 'You cannot block your own account' });
     }
@@ -336,6 +351,10 @@ export const toggleUserBlock = async (req, res) => {
 /** DELETE /api/admin/users/:id */
 export const deleteUser = async (req, res) => {
   try {
+    if (invalidId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'That is not a valid user id' });
+    }
+
     if (String(req.user._id) === req.params.id) {
       return res.status(400).json({ success: false, message: 'You cannot delete your own account here' });
     }
