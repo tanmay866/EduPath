@@ -41,7 +41,7 @@ const ThisWeek = ({ roadmap }) => {
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button onClick={() => navigate('/assessment-hub/skill')}>Reassess</Button>
-            <Button variant="secondary" onClick={() => navigate('/roadmap/generate')}>My roadmap</Button>
+            <Button variant="secondary" onClick={() => navigate('/roadmap/plan')}>My roadmap</Button>
           </div>
         </div>
       </Card>
@@ -120,7 +120,7 @@ const ThisWeek = ({ roadmap }) => {
       )}
 
       <div style={{ padding: '10px 24px 18px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Button variant="secondary" onClick={() => navigate('/roadmap/generate')}>
+        <Button variant="secondary" onClick={() => navigate('/roadmap/plan')}>
           See the whole plan
         </Button>
       </div>

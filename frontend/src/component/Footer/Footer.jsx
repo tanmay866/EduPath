@@ -67,7 +67,7 @@ const SIGNED_IN = {
   heading: 'Account',
   links: [
     { label: 'Overview', to: '/assessment' },
-    { label: 'My roadmap', to: '/roadmap/generate' },
+    { label: 'My roadmap', to: '/roadmap/plan' },
     { label: 'Profile', to: '/profile' },
     { label: 'Settings', to: '/settings' },
   ],

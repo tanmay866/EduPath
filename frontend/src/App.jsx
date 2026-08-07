@@ -1,6 +1,6 @@
 import React from 'react'
 import Navbar from './component/Navbar/Navbar'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from './Pages/Home/Home'
 import About from './Pages/About/About'
 import Work from './Pages/Work/Work'
@@ -122,7 +122,12 @@ const App = () => {
           <Route path="/faq" element={<><Navbar /><FAQ /><Footer /></>} />
           <Route path="/services" element={<><Navbar /><Services /><Footer /></>} />
           <Route path="/roadmap" element={<><Navbar /><CareerRoadmap /><Footer /></>} />
-          <Route path="/roadmap/generate" element={<RequiresProfile><RoadmapPage /></RequiresProfile>} />
+          {/* The plan lives at a URL that names the page. It used to be
+              /roadmap/generate, which describes an action — you land there to
+              read a plan you already have, and generating is a button on it. */}
+          <Route path="/roadmap/plan" element={<RequiresProfile><RoadmapPage /></RequiresProfile>} />
+          {/* Anyone holding the old link keeps working. */}
+          <Route path="/roadmap/generate" element={<Navigate to="/roadmap/plan" replace />} />
           {/* Needs a profile: the estimate is in the learner's own hours. */}
           <Route path="/job-fit" element={<RequiresProfile><JobFit /></RequiresProfile>} />
           <Route path="/signup" element={<Signup />} />

@@ -59,7 +59,7 @@ const RoadmapForm = ({ isGenerating, onGenerate, profile, loadingProfile }) => {
       />
 
       {!ready ? (
-        <Empty action={<Button onClick={() => navigate('/onboarding?next=/roadmap/generate')}>Finish setup</Button>}>
+        <Empty action={<Button onClick={() => navigate('/onboarding?next=/roadmap/plan')}>Finish setup</Button>}>
           Your target role, experience level and weekly hours are needed before a plan can be built.
         </Empty>
       ) : (

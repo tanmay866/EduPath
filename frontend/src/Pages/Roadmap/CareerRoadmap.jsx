@@ -78,12 +78,12 @@ const CareerRoadmap = () => {
         </p>
 
         <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-          <Button onClick={() => navigate('/roadmap/generate')}>
+          <Button onClick={() => navigate('/roadmap/plan')}>
             {signedIn ? 'Open my roadmap' : 'Generate a roadmap'}
           </Button>
           <Button
             variant="secondary"
-            onClick={() => navigate('/roadmap/generate', { state: { openHistory: true } })}
+            onClick={() => navigate('/roadmap/plan', { state: { openHistory: true } })}
           >
             My saved roadmaps
           </Button>
@@ -138,7 +138,7 @@ const CareerRoadmap = () => {
               the closing action is just the recommended one. */}
           <Button onClick={() => navigate('/assessment-hub')}>Take the skill assessment</Button>
           {!signedIn && (
-            <Button variant="secondary" onClick={() => navigate('/roadmap/generate')}>
+            <Button variant="secondary" onClick={() => navigate('/roadmap/plan')}>
               Skip and generate a plan
             </Button>
           )}

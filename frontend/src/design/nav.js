@@ -11,7 +11,11 @@ export const learnerNav = [
     label: 'Learn',
     items: [
       { to: '/assessment', label: 'Overview', end: true },
-      { to: '/roadmap', label: 'Roadmap' },
+      // The learner's own plan, not the public page about roadmaps —
+      // every other item here goes straight to its screen, and this one
+      // used to drop a signed-in learner onto marketing with the public
+      // navbar and make them click through.
+      { to: '/roadmap/plan', label: 'Roadmap' },
       { to: '/job-fit', label: 'Job fit' },
       { to: '/assessment-hub', label: 'Assessments' },
     ],

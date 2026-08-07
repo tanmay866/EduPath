@@ -83,7 +83,7 @@ const JobFit = () => {
       // with the account or the next page still opens on the old track.
       sessionStorage.setItem('targetRole', result.matched_role);
       window.dispatchEvent(new Event('sessionStorageUpdated'));
-      navigate('/roadmap/generate');
+      navigate('/roadmap/plan');
     } catch (err) {
       setError(err?.message || 'Could not change your track. Try again in a moment.');
       setSwitching(false);
@@ -235,7 +235,7 @@ const JobFit = () => {
                 {switching ? 'Switching…' : `Switch to ${result.matched_role}`}
               </Button>
             ) : (
-              <Button onClick={() => navigate('/roadmap/generate')}>Open my plan</Button>
+              <Button onClick={() => navigate('/roadmap/plan')}>Open my plan</Button>
             )}
             {/* Straight into a quiz on one of the skills the posting wants and
                 the learner does not have. It used to open the hub's explainer,
