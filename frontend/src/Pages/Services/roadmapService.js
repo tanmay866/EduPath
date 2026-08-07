@@ -97,3 +97,14 @@ export const updateRoadmapAvailability = async (payload) => {
     throw error.response?.data || error;
   }
 };
+
+// Throws a saved plan away for good. The plan being worked from is refused by
+// the server rather than hidden here, so the reason can be shown.
+export const deleteRoadmap = async (roadmapId) => {
+  try {
+    const response = await API.delete(`/roadmap/${roadmapId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};

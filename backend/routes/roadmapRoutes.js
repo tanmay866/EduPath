@@ -11,6 +11,7 @@ import {
     updateTaskStatus,
     analyseJobPosting,
     adaptRoadmap,
+    deleteRoadmap,
 } from "../controllers/roadmapController.js";
 
 router.use(protect);
@@ -23,5 +24,7 @@ router.patch("/skill-status", updateSkillStatus);
 router.patch("/task-status", updateTaskStatus);
 router.post("/analyse-job", analyseJobPosting);
 router.post("/adapt", adaptRoadmap);
+// Last: a literal path must not be swallowed by the :roadmap_id route above.
+router.delete("/:roadmap_id", deleteRoadmap);
 
 export default router;

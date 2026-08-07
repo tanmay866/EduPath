@@ -8,6 +8,7 @@ import {
   getRoadmapHistory,
   updateSkillStatus,
   adaptRoadmap,
+  deleteRoadmap,
 } from '../Services/roadmapService';
 import { getProfile } from '../Services/profileService';
 import { getInterviewHistory } from '../Services/interviewResultService';
@@ -110,7 +111,9 @@ const RoadmapPage = () => {
     setIsHistoryLoading(true);
     try {
       const res   = await getRoadmapHistory();
-      const items = (res?.data || []).slice(0, 5);
+      // Every saved plan, not the five most recent — the ones worth
+      // deleting are precisely the old ones a cap would hide.
+      const items = res?.data || [];
       setHistory(items);
       if (items.length > 0) { await loadRoadmapById(items[0].roadmap_id); }
       else                  { setRoadmapData(null); setSelectedRoadmapId(''); }
@@ -180,6 +183,29 @@ const RoadmapPage = () => {
 
   const handleBackToForm = () => { setRoadmapData(null); setSelectedRoadmapId(''); setShowHistory(false); };
 
+
+  /**
+   * Throws a saved plan away. The server refuses the plan being worked from,
+   * and that refusal is surfaced rather than swallowed.
+   *
+   * The open plan is cleared when it is the one deleted, so the page cannot
+   * go on showing a roadmap that is no longer there.
+   */
+  const handleDeleteRoadmap = async (item) => {
+    try {
+      await deleteRoadmap(item.roadmap_id);
+      const remaining = history.filter((h) => h.roadmap_id !== item.roadmap_id);
+      setHistory(remaining);
+      if (selectedRoadmapId === item.roadmap_id) {
+        setRoadmapData(null);
+        setSelectedRoadmapId('');
+      }
+      toast.success(`Deleted the ${item.target_role || 'roadmap'} plan.`);
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Could not delete that roadmap.'));
+    }
+  };
+
   /* ── Active roadmap / history view ───────────────────────────── */
   // One return below handles all three states: history, the form when nothing
   // is loaded, and the timeline. The dark-themed branch that used to sit here
@@ -235,6 +261,7 @@ const RoadmapPage = () => {
           isLoading={isHistoryLoading}
           selectedRoadmapId={selectedRoadmapId}
           onSelectRoadmap={loadRoadmapById}
+          onDeleteRoadmap={handleDeleteRoadmap}
         />
       ) : !roadmapData && !isRoadmapLoading && !isHistoryLoading ? (
         // isHistoryLoading is included so the form does not flash on mount while

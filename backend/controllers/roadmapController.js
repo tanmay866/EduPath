@@ -6,6 +6,11 @@ import SkillGap from "../models/SkillGap.js";
 import Topic from "../models/Topic.js";
 import { topicForSkill } from "../utils/skillTopicMap.js";
 import { scheduleForPlan } from "../utils/planSchedule.js";
+import {
+    canDeleteRoadmap,
+    isCurrentPlan,
+    progressHeldBy,
+} from "../utils/roadmapDeletion.js";
 import Settings from "../models/Settings.js";
 import { mergeRoadmapProgress } from "../utils/mergeRoadmapProgress.js";
 
@@ -338,15 +343,33 @@ export const getRoadmapById = async (req, res) => {
 // ─────────────────────────────────────────────
 export const getRoadmapHistory = async (req, res) => {
     try {
-        const roadmaps = await Roadmap.find({
-            user_id: req.user._id,
-        })
-            .sort({ createdAt: -1 })
-            .select(
-                "roadmap_id target_role total_duration_weeks status version metadata.generated_at"
-            );
+        const [user, roadmaps] = await Promise.all([
+            User.findById(req.user._id).select("target_role").lean(),
+            Roadmap.find({ user_id: req.user._id })
+                .sort({ createdAt: -1 })
+                .select(
+                    "roadmap_id target_role total_duration_weeks status version metadata.generated_at started_at skills weekly_plans"
+                )
+                .lean(),
+        ]);
 
-        res.status(200).json({ success: true, data: roadmaps });
+        // Thirteen rows reading "AI/ML Engineer" with only a date to tell them
+        // apart is a list nobody can act on — least of all to decide which one
+        // to delete. Each row says how long the plan is, how much of it was
+        // finished, and whether it is the one being worked from.
+        const data = roadmaps.map((roadmap) => {
+            const { skills, weekly_plans: weeks, ...rest } = roadmap;
+            return {
+                ...rest,
+                skill_count: (skills || []).length,
+                week_count: (weeks || []).length,
+                progress: progressHeldBy(roadmap),
+                is_current: isCurrentPlan(roadmap, user?.target_role),
+                can_delete: canDeleteRoadmap(roadmap, user?.target_role).allowed,
+            };
+        });
+
+        res.status(200).json({ success: true, data });
     } catch (err) {
         console.error("getRoadmapHistory error:", err);
         res.status(500).json({
@@ -686,5 +709,62 @@ export const adaptRoadmap = async (req, res) => {
     } catch (err) {
         console.error("adaptRoadmap error:", err);
         return res.status(500).json({ success: false, message: "Server error.", error: err.message });
+    }
+};
+
+// ─────────────────────────────────────────────
+// DELETE /api/roadmap/:roadmap_id
+// ─────────────────────────────────────────────
+/**
+ * Throws a saved plan away for good.
+ *
+ * Regenerating keeps the old plan every time, so history fills with
+ * near-identical entries and clearing it out is a fair thing to want. This is
+ * a real delete rather than a hidden flag: a list that still holds everything
+ * it claims to have removed is the same clutter with a filter over it, and
+ * the learner asked for the row to be gone.
+ *
+ * The plan being worked from is refused. It is reachable from every screen,
+ * and deleting it would empty the roadmap page with no way back — generating
+ * a new one supersedes it first, which is the ordinary path.
+ */
+export const deleteRoadmap = async (req, res) => {
+    try {
+        const [user, roadmap] = await Promise.all([
+            User.findById(req.user._id).select("target_role").lean(),
+            Roadmap.findOne({
+                roadmap_id: req.params.roadmap_id,
+                // Scoped to the owner, so a guessed id reads as missing
+                // rather than as someone else's plan.
+                user_id: req.user._id,
+            }),
+        ]);
+
+        const verdict = canDeleteRoadmap(roadmap, user?.target_role);
+        if (!verdict.allowed) {
+            return res
+                .status(roadmap ? 409 : 404)
+                .json({ success: false, message: verdict.reason });
+        }
+
+        // Reported back so the confirmation can say what was actually lost,
+        // rather than the caller having to remember what it asked to delete.
+        const progress = progressHeldBy(roadmap);
+        await Roadmap.deleteOne({ _id: roadmap._id });
+
+        return res.status(200).json({
+            success: true,
+            message: "Roadmap deleted.",
+            data: {
+                roadmap_id: roadmap.roadmap_id,
+                target_role: roadmap.target_role,
+                progress,
+            },
+        });
+    } catch (err) {
+        console.error("deleteRoadmap error:", err);
+        return res
+            .status(500)
+            .json({ success: false, message: "Server error.", error: err.message });
     }
 };
