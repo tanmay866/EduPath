@@ -180,7 +180,7 @@ const Contact = () => {
                 value={formData.name}
                 onChange={handleChange}
                 autoComplete="name"
-                placeholder="Tanmay Patel"
+                placeholder="Your full name"
               />
             </Field>
 

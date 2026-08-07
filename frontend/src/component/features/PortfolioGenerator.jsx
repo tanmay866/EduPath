@@ -632,7 +632,7 @@ function PortfolioGenerator() {
 
           <Section label="About you">
             <div style={TWO_UP}>
-              <PortfolioField label="Full name *" value={portfolioData.name} onChange={(v) => handleDataUpdate('name', v)} placeholder="Tanmay Patel" />
+              <PortfolioField label="Full name *" value={portfolioData.name} onChange={(v) => handleDataUpdate('name', v)} placeholder="Your full name" />
               <PortfolioField label="Job title *" value={portfolioData.title} onChange={(v) => handleDataUpdate('title', v)} placeholder="Full Stack Developer" />
               <PortfolioField label="Email" type="email" value={portfolioData.email} onChange={(v) => handleDataUpdate('email', v)} placeholder="you@example.com" />
               <Field label="Phone">

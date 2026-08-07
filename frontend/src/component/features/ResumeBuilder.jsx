@@ -1004,7 +1004,7 @@ function ResumeBuilder() {
                 value={resumeData.personalInfo.name}
                 onChange={(v) => handlePersonalInfoChange('name', v)}
                 error={getFieldError('personalInfo', 'name')}
-                placeholder="Tanmay Patel"
+                placeholder="Your full name"
                 maxLength={60}
               />
 
