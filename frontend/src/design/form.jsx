@@ -276,7 +276,7 @@ export default {
  * the ten digits alone, so callers keep sending the API what it already
  * expects. Anything that is not a digit is dropped on the way in, which is
  * safe here in a way it was not for names: a phone number genuinely has no
- * other characters, and a pasted "+91 93139 28398" lands as the right ten
+ * other characters, and a pasted "+91 98765 43210" lands as the right ten
  * digits instead of being refused.
  */
 // `style` lands on the bordered wrapper, so the input's own padding needs its
@@ -328,13 +328,17 @@ export const PhoneInput = React.forwardRef(({ value = '', onChange, error = fals
         inputMode="numeric"
         autoComplete="tel-national"
         // Normalised on the way in as well, so a number stored before this
-        // field existed is not shown as "+91 +91 93139 28398".
+        // field existed is not shown as "+91 +91 98765 43210".
         value={normalizePhone(value)}
         onChange={handleChange}
         // No maxLength: it truncates a paste before the change handler can
-        // normalise it, so "+91 93139 28398" would be cut to "+91 93139 " and
-        // arrive as 9313928. The handler already caps the digits.
-        placeholder="9313928398"
+        // normalise it, so "+91 98765 43210" would be cut to "+91 98765 " and
+        // arrive as 9876543. The handler already caps the digits.
+        //
+        // Described rather than demonstrated. A ten digit example sitting in a
+        // phone field is someone's real number whichever one is picked, and it
+        // reads as a value already filled in.
+        placeholder="10-digit mobile number"
         // The country code is spoken as part of the field rather than left as
         // decoration the label never mentions.
         aria-label={`Mobile number, ${PHONE_COUNTRY_CODE}`}

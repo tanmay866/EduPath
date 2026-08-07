@@ -15,7 +15,7 @@ const USER = {
   role: 'student',
   firstName: 'Tanmay',
   lastName: 'Patel',
-  phone: '9313928398',
+  phone: '9876543210',
   skills: 'React, Node',
   profile_complete: true,
   target_role: 'AI/ML Engineer',

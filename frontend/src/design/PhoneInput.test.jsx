@@ -36,9 +36,9 @@ describe('PhoneInput', () => {
     const field = screen.getByRole('textbox');
 
     await user.click(field);
-    await user.paste('+91 93139 28398');
+    await user.paste('+91 98765 43210');
 
-    expect(field).toHaveValue('9313928398');
+    expect(field).toHaveValue('9876543210');
   });
 
   test('the field carries no maxLength, which is what makes the paste above work', () => {
@@ -56,8 +56,8 @@ describe('PhoneInput', () => {
     const user = userEvent.setup();
     render(<Controlled />);
     await user.click(screen.getByRole('textbox'));
-    await user.paste('091-93139-28398');
-    expect(screen.getByRole('textbox')).toHaveValue('9313928398');
+    await user.paste('091-98765-43210');
+    expect(screen.getByRole('textbox')).toHaveValue('9876543210');
   });
 
   test('an eleventh keystroke is ignored rather than dropping the first digit', async () => {
@@ -65,8 +65,8 @@ describe('PhoneInput', () => {
     render(<Controlled />);
     const field = screen.getByRole('textbox');
     await user.click(field);
-    await user.type(field, '93139283981');
-    expect(field).toHaveValue('9313928398');
+    await user.type(field, '98765432101');
+    expect(field).toHaveValue('9876543210');
   });
 
   test('letters never reach the field', async () => {
@@ -74,8 +74,8 @@ describe('PhoneInput', () => {
     render(<Controlled />);
     const field = screen.getByRole('textbox');
     await user.click(field);
-    await user.type(field, '93a13b92c8398');
-    expect(field).toHaveValue('9313928398');
+    await user.type(field, '98a76b54c3210');
+    expect(field).toHaveValue('9876543210');
   });
 
   test('the change handler reports name and value, which is all callers read', async () => {
@@ -93,8 +93,8 @@ describe('PhoneInput', () => {
   });
 
   test('a value stored before this field existed is shown without a doubled code', () => {
-    render(<PhoneInput name="phone" value="+91 9313928398" onChange={() => {}} />);
-    expect(screen.getByRole('textbox')).toHaveValue('9313928398');
+    render(<PhoneInput name="phone" value="+91 9876543210" onChange={() => {}} />);
+    expect(screen.getByRole('textbox')).toHaveValue('9876543210');
     expect(screen.getAllByText('+91')).toHaveLength(1);
   });
 
