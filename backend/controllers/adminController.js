@@ -268,11 +268,20 @@ export const getAttempts = async (req, res) => {
 /** GET /api/admin/users */
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find({})
-      .select('firstName lastName email isActive createdAt role loginId')
-      .sort({ createdAt: -1 })
-      .limit(500)
-      .lean();
+    // Admins first, and every admin — fetched separately rather than sorted
+    // out of one capped query, because the cap is on the newest accounts and
+    // an admin who signed up before five hundred learners would simply not be
+    // in the page. There are only ever a handful, so they need no limit.
+    const fields = 'firstName lastName email isActive createdAt role loginId';
+    const [admins, others] = await Promise.all([
+      User.find({ role: 'admin' }).select(fields).sort({ createdAt: -1 }).lean(),
+      User.find({ role: { $ne: 'admin' } })
+        .select(fields)
+        .sort({ createdAt: -1 })
+        .limit(500)
+        .lean(),
+    ]);
+    const users = [...admins, ...others];
 
     return res.status(200).json({
       success: true,

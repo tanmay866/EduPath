@@ -168,11 +168,12 @@ const ManageUsers = () => {
             </TableScroll>
 
             <CardFooterNote>
-              {/* The endpoint returns the 500 newest accounts, so this counts
-                  what was loaded rather than every user on the install — a
-                  flat total here would disagree with the overview once there
-                  are more than that. */}
-              {`Showing ${filteredUsers.length} of the ${users.length} newest account${users.length === 1 ? '' : 's'}.`}
+              {/* Counts what was loaded rather than every user on the
+                  install — a flat total here would disagree with the overview
+                  once there are more. Every admin is loaded whatever its age,
+                  and learners are the newest five hundred, so "newest" alone
+                  would no longer describe the list. */}
+              {`Showing ${filteredUsers.length} of ${users.length} loaded. Admins are listed first, then the newest accounts.`}
             </CardFooterNote>
           </>
         )}
