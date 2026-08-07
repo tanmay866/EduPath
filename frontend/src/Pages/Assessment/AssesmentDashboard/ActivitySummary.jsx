@@ -61,7 +61,7 @@ const Row = ({ label, state, detail, cta, to, last }) => {
 const ActivitySummary = ({ activity }) => {
   if (!activity) return null;
 
-  const { interview, practice, resume, portfolio } = activity;
+  const { interview, practice, resume, portfolio, ats } = activity;
 
   const rows = [
     {
@@ -85,6 +85,17 @@ const ActivitySummary = ({ activity }) => {
         : null,
       cta: practice.sessions ? 'Again' : 'Try some',
       to: '/assessment-hub',
+    },
+    {
+      label: 'ATS check',
+      state: ats?.count
+        ? `Last scored ${Math.round(ats.lastScore)}/100`
+        : 'Not run yet',
+      detail: ats?.count
+        ? `${ats.count} ${ats.count === 1 ? 'check' : 'checks'} · ${ago(ats.lastAt)}`
+        : null,
+      cta: ats?.count ? 'Open' : 'Check one',
+      to: '/ats-analyzer',
     },
     {
       label: 'Resume',

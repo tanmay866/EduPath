@@ -79,13 +79,43 @@ const AssessmentDashboard = () => {
   const covered = stats?.topicPerformance?.length || 0;
   const last = history[0];
 
-  const statItems = [
-    { label: 'Attempts', value: attempts },
-    { label: 'Average score', value: average, suffix: '/100' },
-    // The catalogue size gives the count a denominator to mean something against.
-    { label: 'Topics covered', value: covered, suffix: topicCount ? `/${topicCount}` : undefined },
-    { label: 'Last result', value: last ? Math.round(last.percentage) : '—', suffix: last ? '/100' : undefined },
-  ];
+  // The plan, which is the thing the whole product is arranged around.
+  const skills = roadmap?.skills || [];
+  const skillsDone = skills.filter((sk) => sk.status === 'completed').length;
+  const pace = roadmap?.schedule || null;
+
+  /**
+   * Four numbers for the whole account, not four numbers about quizzes.
+   *
+   * This strip used to read attempts, average, topics covered and last
+   * result — every one of them about a single instrument, on the page called
+   * Overview. Where someone is in their plan and whether they are keeping to
+   * it are the two facts that decide what to do next, so they lead; the
+   * assessment figures stay because they are what the plan is built from, and
+   * the two that were dropped are both still on this page, under Progress by
+   * topic and Recent attempts.
+   */
+  const statItems = roadmap
+    ? [
+      { label: 'Plan progress', value: skillsDone, suffix: `/${skills.length} skills` },
+      {
+        label: 'Schedule',
+        value: pace ? (pace.state === 'on-track' || pace.state === 'done' ? 'On track' : `${Math.abs(pace.delta)}`) : '—',
+        suffix: pace && pace.state !== 'on-track' && pace.state !== 'done'
+          ? (pace.state === 'behind' ? 'weeks behind' : 'weeks ahead')
+          : undefined,
+      },
+      { label: 'Assessments', value: attempts },
+      { label: 'Average score', value: average, suffix: '/100' },
+    ]
+    // With no plan yet there is nothing to report about one, and inventing a
+    // zero would read as being behind rather than as not having started.
+    : [
+      { label: 'Assessments', value: attempts },
+      { label: 'Average score', value: average, suffix: '/100' },
+      { label: 'Topics covered', value: covered, suffix: topicCount ? `/${topicCount}` : undefined },
+      { label: 'Last result', value: last ? Math.round(last.percentage) : '—', suffix: last ? '/100' : undefined },
+    ];
 
   const recent = history.slice(0, 3);
 
@@ -166,7 +196,11 @@ const AssessmentDashboard = () => {
                     }
                   >
                     <ListItem
-                      title={attempt.topicName || attempt.topic?.name || 'Assessment'}
+                      // History populates the topic onto `topicId`. Reading
+                      // only the other two shapes meant every row here read
+                      // "Assessment", the same placeholder the all-results
+                      // table was showing.
+                      title={attempt.topicId?.name || attempt.topicName || attempt.topic?.name || 'Assessment'}
                       detail={
                         <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <Badge tone={passed ? 'green' : 'clay'}>{`SCORE ${pct}`}</Badge>

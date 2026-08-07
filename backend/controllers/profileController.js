@@ -6,6 +6,7 @@ import InterviewResult from '../models/InterviewResult.js';
 import PracticeResult from '../models/PracticeResult.js';
 import GeneratedResume from '../models/GeneratedResume.js';
 import Portfolio from '../models/Portfolio.js';
+import AtsAnalysis from '../models/AtsAnalysis.js';
 
 const normalizeExperienceLevel = (value) => {
   if (!value) {
@@ -557,11 +558,14 @@ export const getActivitySummary = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const [interviews, practice, resumes, portfolio] = await Promise.all([
+    const [interviews, practice, resumes, portfolio, ats] = await Promise.all([
       InterviewResult.find({ userId }).sort({ createdAt: -1 }).select('role overallScore createdAt').lean(),
       PracticeResult.find({ userId }).sort({ createdAt: -1 }).select('total correct createdAt').lean(),
       GeneratedResume.find({ userId }).sort({ updatedAt: -1 }).select('version updatedAt').lean(),
       Portfolio.findOne({ userId }).sort({ updatedAt: -1 }).select('username updatedAt').lean(),
+      // Added when the ATS check learned to keep its results. The card listed
+      // every other thing a learner can do here and quietly omitted this one.
+      AtsAnalysis.find({ userId }).sort({ createdAt: -1 }).select('score createdAt').lean(),
     ]);
 
     // Accuracy across every practice session rather than the last one — a
@@ -588,6 +592,11 @@ export const getActivitySummary = async (req, res) => {
         resume: {
           versions: resumes.length,
           lastAt: resumes[0]?.updatedAt ?? null,
+        },
+        ats: {
+          count: ats.length,
+          lastScore: ats[0]?.score ?? null,
+          lastAt: ats[0]?.createdAt ?? null,
         },
         portfolio: {
           exists: Boolean(portfolio),
