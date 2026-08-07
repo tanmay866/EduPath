@@ -250,6 +250,10 @@ export const sendWeeklyPlanEmail = async (user, week, meta = {}) => {
       button('Open this week', openUrl),
       subtle(
         `${meta.doneCount} of ${meta.weekCount} weeks done.`
+        // Whether they are keeping up, when there is something to say. A
+        // weekly email that reports the same count every week cannot tell
+        // anyone they have stopped.
+        + (meta.pace && meta.pace !== 'On schedule' ? ` ${escapeHtml(meta.pace)}.` : '')
         + (week.estimated_hours ? ` About ${week.estimated_hours} hours planned.` : '')
       ),
       linkFallback(openUrl),

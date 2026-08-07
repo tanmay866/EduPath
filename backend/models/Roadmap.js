@@ -76,6 +76,14 @@ const RoadmapSchema = new mongoose.Schema(
         },
         total_duration_weeks: { type: Number },
         hours_per_week: { type: Number },
+        /**
+         * The day week 1 begins, which is what makes this a schedule.
+         *
+         * Kept separate from createdAt because they stop agreeing the moment
+         * a plan is rebuilt: adapting a roadmap carries progress onto a new
+         * document, and the learner did not go back to week one by doing it.
+         */
+        started_at: { type: Date, default: Date.now },
         skills: [SkillNodeSchema],
         weekly_plans: [WeeklyPlanSchema],
         version: { type: Number, default: 1 },

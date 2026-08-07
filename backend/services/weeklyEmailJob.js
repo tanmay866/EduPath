@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import Roadmap from "../models/Roadmap.js";
 import { sendWeeklyPlanEmail } from "../utils/sendEmail.js";
 import { currentWeek, doneWeekCount } from "../utils/weekProgress.js";
+import { scheduleForPlan } from "../utils/planSchedule.js";
 import { unsubscribeUrlFor } from "../utils/unsubscribeToken.js";
 
 /**
@@ -72,8 +73,10 @@ export const runWeeklyEmailJob = async ({ dryRun = false, limit = 0, onlyEmail =
             continue;
         }
 
+        const schedule = scheduleForPlan(roadmap);
         const meta = {
             targetRole: roadmap.target_role,
+            pace: schedule?.label || null,
             weekCount: roadmap.weekly_plans.length,
             doneCount: doneWeekCount(roadmap.weekly_plans, roadmap.skills),
             unsubscribeUrl: unsubscribeUrlFor(user),
@@ -85,6 +88,7 @@ export const runWeeklyEmailJob = async ({ dryRun = false, limit = 0, onlyEmail =
             of: meta.weekCount,
             covers: (week.skills || []).join(", "),
             tasksLeft: (week.tasks || []).length - (week.completed_tasks || []).length,
+            pace: schedule?.label || null,
         });
 
         if (dryRun) continue;

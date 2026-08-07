@@ -53,6 +53,15 @@ const ThisWeek = ({ roadmap }) => {
   const done = doneWeekCount(weeks, skills, ticksByWeek);
   const covers = (week.skills || []).join(', ');
 
+  // Where the calendar puts them, which is not the same as the week they are
+  // working on the moment they fall behind — and saying only the second is
+  // what let a plan claim week 1 three months in.
+  const schedule = roadmap?.schedule || null;
+  const paceTone = {
+    behind: 'var(--color-clay)',
+    ahead: 'var(--color-green)',
+  }[schedule?.state] || 'var(--color-text-4)';
+
   return (
     <Card>
       <CardHeader
@@ -75,6 +84,14 @@ const ThisWeek = ({ roadmap }) => {
             </span>
           ) : null}
         </div>
+
+        {schedule && (
+          <p style={{ fontSize: 13.5, color: paceTone, margin: '6px 0 0', lineHeight: 1.5 }}>
+            {schedule.state === 'on-track' || schedule.state === 'done'
+              ? schedule.label
+              : `${schedule.label} — the calendar is on week ${schedule.scheduledWeek} of ${schedule.totalWeeks}`}
+          </p>
+        )}
 
         <div style={{ marginTop: 14 }}>
           {tasks.map((task, i) => (

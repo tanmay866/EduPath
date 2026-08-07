@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 import SkillGap from "../models/SkillGap.js";
 import Topic from "../models/Topic.js";
 import { topicForSkill } from "../utils/skillTopicMap.js";
+import { scheduleForPlan } from "../utils/planSchedule.js";
 import Settings from "../models/Settings.js";
 import { mergeRoadmapProgress } from "../utils/mergeRoadmapProgress.js";
 
@@ -244,7 +245,12 @@ export const getRoadmap = async (req, res) => {
             });
         }
 
-        res.status(200).json({ success: true, data: roadmap });
+        res.status(200).json({
+            success: true,
+            // Worked out on read so it can never disagree with the ticks it
+            // is counting.
+            data: { ...roadmap.toObject(), schedule: scheduleForPlan(roadmap) },
+        });
     } catch (err) {
         console.error("getRoadmap error:", err);
         res.status(500).json({
@@ -311,6 +317,7 @@ export const getRoadmapById = async (req, res) => {
             success: true,
             data: {
                 ...roadmap,
+                schedule: scheduleForPlan(roadmap),
                 skills,
                 is_stale: Boolean(assessedAt && new Date(assessedAt) > new Date(roadmap.createdAt)),
                 assessed_at: assessedAt,
