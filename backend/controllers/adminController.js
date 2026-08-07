@@ -1,4 +1,5 @@
 import User from '../models/userModel.js';
+import { purgeUserData } from '../utils/purgeUserData.js';
 import QuizResult from '../models/QuizResult.js';
 import PracticeResult from '../models/PracticeResult.js';
 import InterviewResult from '../models/InterviewResult.js';
@@ -283,6 +284,12 @@ export const getUsers = async (req, res) => {
         // isActive is the flag the model already carries; "blocked" is how the
         // admin screen talks about it.
         isBlocked: user.isActive === false,
+        // Whether this row is the admin reading it, decided by the server
+        // rather than by the browser comparing against a stored id. A session
+        // that predates that value being stored, or one cleared since, left
+        // the client thinking no row was its own — so the guard on Block and
+        // Delete quietly stopped applying and the buttons looked live.
+        isSelf: String(user._id) === String(req.user._id),
         createdAt: user.createdAt,
       })),
     });
@@ -329,15 +336,13 @@ export const deleteUser = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Their work goes with them, the same as a self-service deletion.
-    await Promise.all([
-      QuizResult.deleteMany({ userId: user._id }),
-      PracticeResult.deleteMany({ userId: user._id }),
-      InterviewResult.deleteMany({ userId: user._id }),
-      Roadmap.deleteMany({ user_id: user._id }),
-    ]);
+    // Their work goes with them, and now it actually does: this used to
+    // remove four collections of the twelve an account owns and leave the
+    // rest orphaned — including the portfolio, which went on resolving
+    // publicly for someone who no longer existed.
+    const removed = await purgeUserData(user._id);
 
-    return res.status(200).json({ success: true, message: 'User deleted' });
+    return res.status(200).json({ success: true, message: 'User deleted', removed });
   } catch (error) {
     console.error('Admin delete user error:', error);
     return res.status(500).json({ success: false, message: 'Failed to delete user' });

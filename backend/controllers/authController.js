@@ -7,6 +7,7 @@ import PracticeResult from '../models/PracticeResult.js';
 import InterviewResult from '../models/InterviewResult.js';
 import AtsAnalysis from '../models/AtsAnalysis.js';
 import Feedback from '../models/Feedback.js';
+import { purgeUserData } from '../utils/purgeUserData.js';
 import ProgressLog from '../models/ProgressLog.js';
 import Portfolio from '../models/Portfolio.js';
 import Resume from '../models/Resume.js';
@@ -151,29 +152,9 @@ export const deleteAccount = asyncHandler(async (req, res, next) => {
         }
     }
 
-    // The schemas disagree on the field name, hence both keys.
-    const ownedBy = { $or: [{ userId }, { user_id: userId }] };
-    const removed = {};
-
-    for (const [name, Model] of Object.entries({
-        roadmaps: Roadmap,
-        skillGaps: SkillGap,
-        quizSessions: QuizSession,
-        quizResults: QuizResult,
-        practiceResults: PracticeResult,
-        interviewResults: InterviewResult,
-        atsAnalyses: AtsAnalysis,
-        feedback: Feedback,
-        progressLogs: ProgressLog,
-        portfolios: Portfolio,
-        resumes: Resume,
-        generatedResumes: GeneratedResume,
-    })) {
-        const { deletedCount } = await Model.deleteMany(ownedBy);
-        if (deletedCount) {
-            removed[name] = deletedCount;
-        }
-    }
+    // One shared cascade with the admin path, so the two cannot drift into
+    // deleting different things again.
+    const removed = await purgeUserData(userId);
 
     // Copied before the record goes: after deleteOne there is nothing left to
     // read an address off, and the confirmation still has to reach them.

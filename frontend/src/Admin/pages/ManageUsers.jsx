@@ -118,7 +118,10 @@ const ManageUsers = () => {
               <Empty>No user matches that search.</Empty>
             ) : (
               filteredUsers.map((user) => {
-                const isSelf = user._id === currentUserId;
+                // The server marks the caller's own row. Comparing against a
+                // stored id here failed whenever sessionStorage did not carry
+                // one, which is exactly when the guard was needed.
+                const isSelf = user.isSelf ?? (user._id === currentUserId);
                 return (
                   <TableRow key={user._id} columns={COLUMNS}>
                     <span style={{ color: user.isBlocked ? 'var(--color-text-4)' : 'var(--color-ink)' }}>
