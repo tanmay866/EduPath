@@ -3,6 +3,7 @@ import mammoth from 'mammoth';
 import { v4 as uuidv4 } from 'uuid';
 import { v2 as cloudinary } from 'cloudinary';
 import Portfolio from '../models/Portfolio.js';
+import { uniqueHandle } from '../utils/portfolioHandle.js';
 import User from '../models/userModel.js';
 import { parseResumeWithGroq, mapToPortfolioSchema } from '../services/groqResumeParser.js';
 import { generateTemplateHTML } from '../templates/portfolioTemplates.js';
@@ -97,7 +98,15 @@ export const deployPortfolio = async (req, res) => {
     const portfolioId = uuidv4().split('-')[0];
 
     const user = await User.findById(userId);
-    const username = user?.username || '';
+    // Users have no username field and never have, so this read an undefined
+    // and stored an empty string on every portfolio ever published — which is
+    // why looking one up by handle could not match anything. Derived from the
+    // person's name instead, and checked for collisions.
+    const username = await uniqueHandle(
+      [user?.firstName, user?.lastName].filter(Boolean).join(' '),
+      async (candidate) => Boolean(await Portfolio.exists({ username: candidate })),
+      portfolioId
+    );
 
     // Upload profile photo to Cloudinary if provided
     let profilePhotoUrl = '';
@@ -139,8 +148,11 @@ export const deployPortfolio = async (req, res) => {
     });
 
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    // Namespaced under /u: a handle at the root would shadow /roadmap,
+    // /profile and every other top-level route the moment someone was called
+    // one of them.
     const portfolioUrl = username
-      ? `${baseUrl}/${username}`
+      ? `${baseUrl}/u/${username}`
       : `${baseUrl}/p/${portfolioId}`;
 
     res.json({

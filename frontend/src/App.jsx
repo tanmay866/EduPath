@@ -170,6 +170,11 @@ const App = () => {
 
           {/* Public Portfolio Routes */}
           <Route path="/p/:portfolioId" element={<PublicPortfolio />} />
+          {/* The readable form. PublicPortfolio has always accepted a
+              username and fetched /portfolio/u/:username; the route was
+              never added, so the handle had nowhere to land. Namespaced
+              under /u so a handle cannot shadow /roadmap or /profile. */}
+          <Route path="/u/:username" element={<PublicPortfolio />} />
           <Route path="/:username" element={<PublicPortfolio />} />
         </Routes>
       </div>
