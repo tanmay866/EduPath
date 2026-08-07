@@ -3,7 +3,7 @@ import { API_BASE } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import {
   LearnerShell, Card, CardHeader, CardFooterNote, Button, Field, Empty,
-  InlineMessage, MicroLabel, LabelledBar, OrdinalRow, type,
+  InlineMessage, MicroLabel, LabelledBar, OrdinalRow, type, Loading,
 } from '../../design';
 import { learnerNav, sessionInitials, sessionName, sessionLoginId } from '../../design/nav';
 
@@ -43,10 +43,38 @@ const ATSAnalyzer = () => {
   const [generatingReport, setGeneratingReport] = useState(false);
   // Which fixes the user has ticked off. Reset with every new analysis.
   const [applied, setApplied] = useState([]);
+  const [restoring, setRestoring] = useState(true);
+  // When the result on screen came from a previous visit rather than a run
+  // just now — worth saying, so a stale score is not read as a fresh one.
+  const [restoredAt, setRestoredAt] = useState(null);
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
-    if (!token) navigate('/signin');
+    if (!token) { navigate('/signin'); return; }
+
+    // The analysis used to live only in this component's state, so a refresh
+    // discarded the upload, the wait and the result — and the download with
+    // them, since the report is built from what the page is holding.
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/ats/latest`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const body = await res.json();
+        if (cancelled || !res.ok || !body?.data) return;
+        setResults(body.data);
+        setApplied(body.data.appliedFixes || []);
+        setRestoredAt(body.data.createdAt || null);
+      } catch {
+        // A restore that fails leaves the empty form, which is where the
+        // learner would have been anyway.
+      } finally {
+        if (!cancelled) setRestoring(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [navigate]);
 
   const handleFileChange = (e) => {
@@ -109,6 +137,7 @@ const ATSAnalyzer = () => {
       if (!response.ok) throw new Error(data.message || 'Analysis failed');
 
       setResults(data.data);
+      setRestoredAt(null);
     } catch (err) {
       console.error('Analysis error:', err);
       setError(err.message || 'Failed to analyze resume. Please try again.');
@@ -184,7 +213,27 @@ const ATSAnalyzer = () => {
   const fixes = results?.fixes || [];
   const remaining = fixes.filter((fix) => !applied.includes(fix.id));
   const pointsLeft = remaining.reduce((sum, fix) => sum + (fix.points || 0), 0);
-  const markAllDone = () => setApplied(fixes.map((fix) => fix.id));
+  /**
+   * Tick fixes off, and remember it.
+   *
+   * The checklist was page state, so it forgot what had been ticked on every
+   * refresh — a checklist that does that is worse than no checkbox at all.
+   * The write is fire-and-forget: the tick is already on screen, and a failed
+   * save should not undo something the learner just did.
+   */
+  const persistApplied = (next) => {
+    setApplied(next);
+    const id = results?._id || results?.analysisId;
+    if (!id) return;
+    const token = sessionStorage.getItem('token');
+    fetch(`${API_BASE}/ats/${id}/applied`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ appliedFixes: next }),
+    }).catch(() => {});
+  };
+
+  const markAllDone = () => persistApplied(fixes.map((fix) => fix.id));
 
   return (
     <LearnerShell
@@ -200,7 +249,16 @@ const ATSAnalyzer = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           <Card>
             <CardHeader
-              label="Match score"
+              label={
+                restoredAt
+                  // A score from a previous visit is not a score from just
+                  // now, and reading one as the other is how someone thinks a
+                  // resume they have since edited already improved.
+                  ? `Match score · from ${new Date(restoredAt).toLocaleDateString('en-GB', {
+                      day: '2-digit', month: 'short',
+                    })}`
+                  : 'Match score'
+              }
               right={
                 results && (
                   <Button variant="quiet" onClick={resetAnalysis}>Start over</Button>
@@ -208,7 +266,12 @@ const ATSAnalyzer = () => {
               }
             />
 
-            {results ? (
+            {restoring && !results ? (
+              // Without this the empty form paints first and the restored
+              // score pops in behind it, which reads as the page changing its
+              // mind about whether you have analysed anything.
+              <Loading label="Loading your last analysis" />
+            ) : results ? (
               <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr' }}>
                 <div style={{ padding: '26px 22px', borderRight: '1px solid var(--color-line)' }}>
                   <MicroLabel
@@ -302,7 +365,7 @@ const ATSAnalyzer = () => {
                           right={
                             <button
                               type="button"
-                              onClick={() => !done && setApplied((prev) => [...prev, fix.id])}
+                              onClick={() => !done && persistApplied([...applied, fix.id])}
                               style={{
                                 flexShrink: 0,
                                 fontFamily: 'var(--font-mono)',

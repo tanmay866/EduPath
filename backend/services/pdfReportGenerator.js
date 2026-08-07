@@ -27,7 +27,7 @@ const LINE = '#e3e1d9';
 const LINE_SOFT = '#efeee8';
 const CLAY = '#b4491f';
 const GREEN = '#2f6b45';
-const AMBER = '#b07d11';
+const NAVY = '#1b3a5c';
 
 const DISPLAY = 'Times-Bold';
 const SANS = 'Helvetica';
@@ -39,11 +39,16 @@ const PAGE = { width: 595.28, height: 841.89 };
 const MARGIN = 56;
 const CONTENT = PAGE.width - MARGIN * 2;
 
-/** The site scores in three bands; this is the same reading. */
+/**
+ * The same three bands the ATS page draws its bars in — green at 70 and
+ * above, clay below 40, navy between. Copied rather than invented, so the
+ * downloaded report and the screen it came from cannot disagree about
+ * whether a number is good.
+ */
 const toneFor = (score) => {
     if (score >= 70) return GREEN;
-    if (score >= 45) return AMBER;
-    return CLAY;
+    if (score < 40) return CLAY;
+    return NAVY;
 };
 
 

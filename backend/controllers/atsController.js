@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { extractTextFromPDF } from '../utils/pdfText.js';
 import mammoth from 'mammoth';
 import { generateATSReport, generateReportFilename } from '../services/pdfReportGenerator.js';
+import AtsAnalysis from '../models/AtsAnalysis.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -145,10 +146,38 @@ export const analyzeResume = async (req, res) => {
 
     console.log('ATS analysis completed successfully. Score:', result.score);
 
+    // Keep it. Every other assessment here is kept, and this one lived only
+    // in page state — a refresh threw away the upload, the wait and the
+    // result, and took the download button with it.
+    //
+    // The analysis is stored, not the inputs: the resume text is the most
+    // personal thing this product handles and is not needed to show a result
+    // again. A failure to save must not fail the analysis the learner is
+    // looking at, so it is reported and stepped over.
+    let savedId = null;
+    try {
+      const saved = await AtsAnalysis.create({
+        userId: req.user._id,
+        score: result.score,
+        status: result.status,
+        similarity: result.similarity,
+        method: result.method,
+        message: result.message,
+        dimensions: result.dimensions || [],
+        fixes: result.fixes || [],
+        details: result.details || {},
+        resumeName: req.file?.originalname || '',
+        jobExcerpt: jobDescription.trim().slice(0, 240),
+      });
+      savedId = saved._id;
+    } catch (saveError) {
+      console.error('Could not save ATS analysis:', saveError.message);
+    }
+
     return res.status(200).json({
       success: true,
       message: 'Resume analyzed successfully',
-      data: result
+      data: { ...result, analysisId: savedId }
     });
 
   } catch (error) {
@@ -212,5 +241,57 @@ export const generateReport = async (req, res) => {
       message: 'Failed to generate PDF report',
       error: error.message
     });
+  }
+};
+
+/**
+ * GET /api/ats/latest — the most recent run, so the page survives a refresh.
+ *
+ * Returns 200 with null rather than 404 when there is nothing yet: a learner
+ * who has not analysed anything is an ordinary state, not a missing page.
+ */
+export const getLatestAnalysis = async (req, res) => {
+  try {
+    const latest = await AtsAnalysis.findOne({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({ success: true, data: latest || null });
+  } catch (error) {
+    console.error('getLatestAnalysis error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+/**
+ * PATCH /api/ats/:analysisId/applied — which fixes have been ticked off.
+ *
+ * The checklist was page state too, so it forgot what had been ticked on
+ * every refresh, which is worse than not offering the checkbox.
+ */
+export const updateAppliedFixes = async (req, res) => {
+  try {
+    const { appliedFixes } = req.body;
+    if (!Array.isArray(appliedFixes)) {
+      return res.status(400).json({
+        success: false,
+        message: 'appliedFixes must be an array of fix ids.',
+      });
+    }
+
+    const updated = await AtsAnalysis.findOneAndUpdate(
+      { _id: req.params.analysisId, userId: req.user._id },
+      { $set: { appliedFixes: appliedFixes.map(String).slice(0, 20) } },
+      { new: true }
+    ).lean();
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Analysis not found.' });
+    }
+
+    return res.status(200).json({ success: true, data: { appliedFixes: updated.appliedFixes } });
+  } catch (error) {
+    console.error('updateAppliedFixes error:', error);
+    return res.status(500).json({ success: false, message: 'Server error.' });
   }
 };

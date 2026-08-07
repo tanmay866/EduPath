@@ -1,7 +1,9 @@
 import express from 'express';
 import multer from 'multer';
 import { protect } from '../middlewares/authMiddleware.js';
-import { analyzeResume, generateReport } from '../controllers/atsController.js';
+import { analyzeResume, generateReport,
+  getLatestAnalysis,
+  updateAppliedFixes } from '../controllers/atsController.js';
 
 const router = express.Router();
 
@@ -36,5 +38,9 @@ router.post('/analyze', protect, upload.single('resume'), analyzeResume);
 // @desc    Generate PDF report for ATS analysis results
 // @access  Private
 router.post('/generate-report', protect, generateReport);
+
+// The most recent run, so a refresh does not discard it.
+router.get('/latest', protect, getLatestAnalysis);
+router.patch('/:analysisId/applied', protect, updateAppliedFixes);
 
 export default router;
