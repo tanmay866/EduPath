@@ -128,7 +128,18 @@ const AssessmentDashboard = () => {
         {/* Left — recent activity as ordinal rows, then movement per topic */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 22, minWidth: 0 }}>
         <Card>
-          <CardHeader label="Recent attempts" />
+          <CardHeader
+            label="Recent attempts"
+            right={
+              // The footer said "3 most recent of 4" and left no way to the
+              // fourth. The full table already existed; nothing pointed at it.
+              history.length > recent.length && (
+                <Button variant="quiet" onClick={() => navigate('/assessment/result')}>
+                  All attempts
+                </Button>
+              )
+            }
+          />
           {recent.length === 0 ? (
             <Empty action={<Button onClick={() => navigate('/assessment/quiz')}>Take an assessment</Button>}>
               Your assessment results will appear here.

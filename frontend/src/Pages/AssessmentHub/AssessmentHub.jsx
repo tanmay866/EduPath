@@ -97,7 +97,12 @@ const AssessmentHub = () => {
       title: 'Skill Assessment',
       description: 'Analyze your technical skills and discover your strengths and weaknesses.',
       path: '/assessment-hub/skill',
-      resultsPath: '/assessment',
+      // Every other card here opens a page listing that instrument's own
+      // attempts. This one opened the Overview — the whole dashboard, with a
+      // roadmap, a review queue and everything else on it — so "see results"
+      // and the sidebar's Overview arrived at the same screen. The attempts
+      // table already existed at this path with nothing linking to it.
+      resultsPath: '/assessment/result',
       duration: '20 MIN',
       completed: completedAssessments.skill,
     },

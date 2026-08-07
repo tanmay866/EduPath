@@ -43,7 +43,12 @@ const AllResult = () => {
       const formattedAttempts = results.map((attempt) => ({
         id: attempt._id,
         resultId: attempt._id,
-        topic: attempt.topic?.name || attempt.topicName || 'Assessment',
+        // History populates the topic onto `topicId`, so reading only
+        // `topic` fell through to the placeholder and every row in the table
+        // read "Assessment" — a list of attempts with nothing to tell them
+        // apart. Both shapes are accepted since other endpoints return the
+        // flatter one.
+        topic: attempt.topicId?.name || attempt.topic?.name || attempt.topicName || 'Assessment',
         date: new Date(attempt.completedAt || attempt.createdAt).toLocaleDateString('en-GB', {
           day: '2-digit', month: 'short', year: 'numeric',
         }),
