@@ -46,6 +46,31 @@ const toneFor = (score) => {
     return CLAY;
 };
 
+
+/**
+ * The EduPath mark, drawn rather than embedded.
+ *
+ * It is pure geometry — a 28-unit ink square holding three bars at 7, 11 and
+ * 15 units rising from a shared baseline — so the same numbers that
+ * design/primitives.jsx and public/edupath.svg use are the ones drawn here.
+ * Vectors also stay sharp at any print size, which a rasterised logo would
+ * not, and nothing binary has to be committed to keep them in step.
+ */
+const drawMark = (doc, x, y, size = 28) => {
+    const u = size / 28;
+
+    doc.rect(x, y, size, size).fillColor(INK).fill();
+
+    // x, y, width, height in the mark's own 28-unit space.
+    [
+        [5, 15, 4, 7],
+        [12, 11, 4, 11],
+        [19, 7, 4, 15],
+    ].forEach(([bx, by, bw, bh]) => {
+        doc.rect(x + bx * u, y + by * u, bw * u, bh * u).fillColor('#ffffff').fill();
+    });
+};
+
 export const generateATSReport = (analysisData = {}, userInfo = {}) => {
     return new Promise((resolve, reject) => {
         try {
@@ -111,6 +136,12 @@ export const generateATSReport = (analysisData = {}, userInfo = {}) => {
             };
 
             // ── Masthead ──────────────────────────────────────────────────
+            // Mark and wordmark together, the way every screen opens.
+            drawMark(doc, MARGIN, y, 22);
+            doc.font(DISPLAY).fontSize(15).fillColor(INK)
+                .text('EduPath', MARGIN + 30, y + 4, { lineBreak: false });
+            y += 40;
+
             doc.font(DISPLAY).fontSize(26).fillColor(INK)
                 .text('ATS report', MARGIN, y);
             y = doc.y + 4;
@@ -289,8 +320,9 @@ export const generateATSReport = (analysisData = {}, userInfo = {}) => {
                 doc.moveTo(MARGIN, footY).lineTo(MARGIN + CONTENT, footY)
                     .lineWidth(0.75).strokeColor(LINE).stroke();
 
+                drawMark(doc, MARGIN, footY + 7, 8);
                 doc.font(SANS).fontSize(8).fillColor(TEXT_4)
-                    .text('EduPath', MARGIN, footY + 8, {
+                    .text('EduPath', MARGIN + 12, footY + 8, {
                         characterSpacing: 1.2, lineBreak: false,
                     });
 
