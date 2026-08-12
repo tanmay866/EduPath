@@ -1,65 +1,110 @@
-import React from 'react'
-import Navbar from './component/Navbar/Navbar'
+import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import Home from './Pages/Home/Home'
-import About from './Pages/About/About'
-import Terms from './Pages/Legal/Terms'
-import Privacy from './Pages/Legal/Privacy'
-import Work from './Pages/Work/Work'
-import Contact from './Pages/Contact/Contact'
-import Signup from './Pages/Authentication/Signup'
-import Signin from './Pages/Authentication/Signin'
-import ResetPassword from './Pages/Authentication/ResetPassword'
-import VerifyEmail from './Pages/Authentication/VerifyEmail'
-import Unsubscribe from './Pages/Unsubscribe'
+
+/**
+ * Routes are loaded on demand.
+ *
+ * Every screen used to be a static import, so one bundle held the whole app —
+ * around 786 kB minified — and the person reading the landing page downloaded
+ * the admin console, the quiz engine, the resume builder and the portfolio
+ * deployer before anything appeared. Nobody needs all of that, and most
+ * visitors need almost none of it.
+ *
+ * What stays eager is what the first paint actually uses: the chrome around
+ * the page, the two route guards that decide where a visitor is sent before
+ * any screen renders, and Home itself. Making Home lazy would cost the most
+ * common landing an extra round trip to discover its chunk, which is the one
+ * place splitting makes things worse rather than better.
+ */
+import Navbar from './component/Navbar/Navbar'
 import Footer from './component/Footer/Footer'
-import AssessmentDashboard from './Pages/Assessment/AssesmentDashboard/AssessmentDashboard'
-import AssessmentInstructions from './Pages/Assessment/AssesmentInstructions/AssessmentInstructions'
-import QuizPage from './Pages/Assessment/QuizPage/QuizPage'
-import ResultPage from './Pages/Assessment/Result/ResultPage'
-import ProfilePage from './Pages/Profile/ProfilePage'
-import SettingsPage from './Pages/Settings/SettingsPage'
-import Onboarding from './Pages/Onboarding/Onboarding'
 import RequiresProfile from './component/RequiresProfile'
 import RequiresAuth from './component/RequiresAuth'
-import ResumePage from './Pages/Profile/ResumePage'
-import AllResult from './Pages/Assessment/Result/AllResult'
-import FAQ from './Pages/FAQ/FAQ'
-import Services from './Pages/Services/Services'
-import CareerRoadmap from './Pages/Roadmap/CareerRoadmap'
-import RoadmapPage from './Pages/Roadmap/RoadmapPage'
-import JobFit from './Pages/Roadmap/JobFit'
+import Home from './Pages/Home/Home'
+
+// Marketing and legal.
+const About = lazy(() => import('./Pages/About/About'))
+const Terms = lazy(() => import('./Pages/Legal/Terms'))
+const Privacy = lazy(() => import('./Pages/Legal/Privacy'))
+const Work = lazy(() => import('./Pages/Work/Work'))
+const Contact = lazy(() => import('./Pages/Contact/Contact'))
+const FAQ = lazy(() => import('./Pages/FAQ/FAQ'))
+const Services = lazy(() => import('./Pages/Services/Services'))
+
+// Authentication and account.
+const Signup = lazy(() => import('./Pages/Authentication/Signup'))
+const Signin = lazy(() => import('./Pages/Authentication/Signin'))
+const ResetPassword = lazy(() => import('./Pages/Authentication/ResetPassword'))
+const VerifyEmail = lazy(() => import('./Pages/Authentication/VerifyEmail'))
+const Unsubscribe = lazy(() => import('./Pages/Unsubscribe'))
+const Onboarding = lazy(() => import('./Pages/Onboarding/Onboarding'))
+const ProfilePage = lazy(() => import('./Pages/Profile/ProfilePage'))
+const SettingsPage = lazy(() => import('./Pages/Settings/SettingsPage'))
+const ResumePage = lazy(() => import('./Pages/Profile/ResumePage'))
+
+// Roadmap.
+const CareerRoadmap = lazy(() => import('./Pages/Roadmap/CareerRoadmap'))
+const RoadmapPage = lazy(() => import('./Pages/Roadmap/RoadmapPage'))
+const JobFit = lazy(() => import('./Pages/Roadmap/JobFit'))
+
+// Assessment.
+const AssessmentDashboard = lazy(() => import('./Pages/Assessment/AssesmentDashboard/AssessmentDashboard'))
+const AssessmentInstructions = lazy(() => import('./Pages/Assessment/AssesmentInstructions/AssessmentInstructions'))
+const QuizPage = lazy(() => import('./Pages/Assessment/QuizPage/QuizPage'))
+const ResultPage = lazy(() => import('./Pages/Assessment/Result/ResultPage'))
+const AllResult = lazy(() => import('./Pages/Assessment/Result/AllResult'))
 
 // New Features - Resume Builder, Portfolio Generator, ATS Analyzer
-import ResumeBuilder from './component/features/ResumeBuilder'
-import PortfolioGenerator from './component/features/PortfolioGenerator'
-import ATSAnalyzer from './component/features/ATSAnalyzer'
-import PublicPortfolio from './Pages/PublicPortfolio'
+const ResumeBuilder = lazy(() => import('./component/features/ResumeBuilder'))
+const PortfolioGenerator = lazy(() => import('./component/features/PortfolioGenerator'))
+const ATSAnalyzer = lazy(() => import('./component/features/ATSAnalyzer'))
+const PublicPortfolio = lazy(() => import('./Pages/PublicPortfolio'))
 
 // Assessment Hub Components
-import AssessmentHub from './Pages/AssessmentHub/AssessmentHub'
-import SkillAssessment from './Pages/AssessmentHub/SkillAssessment'
-import AptitudeTest from './Pages/AssessmentHub/AptitudeTest'
-import CSFundamentals from './Pages/AssessmentHub/CSFundamentals'
-import AIMockInterview from './Pages/AssessmentHub/AIMockInterview'
-import PracticeResults from './Pages/AssessmentHub/PracticeResults'
-import PracticeResultDetail from './Pages/AssessmentHub/PracticeResultDetail'
-import InterviewResults from './Pages/AssessmentHub/InterviewResults'
-import InterviewResultDetail from './Pages/AssessmentHub/InterviewResultDetail'
+const AssessmentHub = lazy(() => import('./Pages/AssessmentHub/AssessmentHub'))
+const SkillAssessment = lazy(() => import('./Pages/AssessmentHub/SkillAssessment'))
+const AptitudeTest = lazy(() => import('./Pages/AssessmentHub/AptitudeTest'))
+const CSFundamentals = lazy(() => import('./Pages/AssessmentHub/CSFundamentals'))
+const AIMockInterview = lazy(() => import('./Pages/AssessmentHub/AIMockInterview'))
+const PracticeResults = lazy(() => import('./Pages/AssessmentHub/PracticeResults'))
+const PracticeResultDetail = lazy(() => import('./Pages/AssessmentHub/PracticeResultDetail'))
+const InterviewResults = lazy(() => import('./Pages/AssessmentHub/InterviewResults'))
+const InterviewResultDetail = lazy(() => import('./Pages/AssessmentHub/InterviewResultDetail'))
 
 // Admin Components — the sidebar and header now come from AdminShell.
-import AdminDashboard from './Admin/pages/AdminDashboard'
-import ManageUsers from './Admin/pages/ManageUsers'
-import QuizAttempts from './Admin/pages/QuizAttempts'
-import RoadmapHistory from './Admin/pages/RoadmapHistory'
-import AIAnalytics from './Admin/pages/AIAnalytics'
-import SystemSettings from './Admin/pages/SystemSettings'
-import AdminFeedback from './Admin/pages/Feedback'
+// Split hardest of all: a learner never opens any of these.
+const AdminDashboard = lazy(() => import('./Admin/pages/AdminDashboard'))
+const ManageUsers = lazy(() => import('./Admin/pages/ManageUsers'))
+const QuizAttempts = lazy(() => import('./Admin/pages/QuizAttempts'))
+const RoadmapHistory = lazy(() => import('./Admin/pages/RoadmapHistory'))
+const AIAnalytics = lazy(() => import('./Admin/pages/AIAnalytics'))
+const SystemSettings = lazy(() => import('./Admin/pages/SystemSettings'))
+const AdminFeedback = lazy(() => import('./Admin/pages/Feedback'))
 
 //comman components
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from './component/ScrollToTop';
+import { Loading } from './design';
+
+const PageLoading = () => <Loading style={{ padding: '120px 20px' }} />
+
+/**
+ * A marketing page between the navbar and the footer.
+ *
+ * The Suspense boundary sits here, inside the chrome, rather than around the
+ * whole route table — so following a link paints the new page's header and
+ * footer immediately and waits only in the middle. A single boundary outside
+ * would blank the navbar on every navigation, which is a strange thing to do
+ * to someone who just clicked a link in it.
+ */
+const Chrome = ({ children }) => (
+  <>
+    <Navbar />
+    <Suspense fallback={<PageLoading />}>{children}</Suspense>
+    <Footer />
+  </>
+)
 
 const App = () => {
 
@@ -86,16 +131,18 @@ const App = () => {
         />
 
         <ScrollToTop />
-        <Routes>
-          <Route path="/*" element={<AdminDashboard />} />
-          <Route path="/admin/*" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<ManageUsers />} />
-          <Route path="/admin/quiz-attempts" element={<QuizAttempts />} />
-          <Route path="/admin/roadmaps" element={<RoadmapHistory />} />
-          <Route path="/admin/analytics" element={<AIAnalytics />} />
-          <Route path="/admin/feedback" element={<AdminFeedback />} />
-          <Route path="/admin/settings" element={<SystemSettings />} />
-        </Routes>
+        <Suspense fallback={<Loading style={{ paddingTop: 120 }} />}>
+          <Routes>
+            <Route path="/*" element={<AdminDashboard />} />
+            <Route path="/admin/*" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/quiz-attempts" element={<QuizAttempts />} />
+            <Route path="/admin/roadmaps" element={<RoadmapHistory />} />
+            <Route path="/admin/analytics" element={<AIAnalytics />} />
+            <Route path="/admin/feedback" element={<AdminFeedback />} />
+            <Route path="/admin/settings" element={<SystemSettings />} />
+          </Routes>
+        </Suspense>
 
       </div>
     )
@@ -119,18 +166,19 @@ const App = () => {
         />
 
         <ScrollToTop />
+        <Suspense fallback={<PageLoading />}>
         <Routes>
-          <Route path="/" element={<><Navbar /><Home /><Footer /></>} />
-          <Route path="/about" element={<><Navbar /><About /><Footer /></>} />
+          <Route path="/" element={<Chrome><Home /></Chrome>} />
+          <Route path="/about" element={<Chrome><About /></Chrome>} />
           {/* Public on purpose: someone deciding whether to sign up needs to
               read these before handing over an email address. */}
-          <Route path="/terms" element={<><Navbar /><Terms /><Footer /></>} />
-          <Route path="/privacy" element={<><Navbar /><Privacy /><Footer /></>} />
-          <Route path="/work" element={<><Navbar /><Work /><Footer /></>} />
-          <Route path="/contact" element={<><Navbar /><Contact /><Footer /></>} />
-          <Route path="/faq" element={<><Navbar /><FAQ /><Footer /></>} />
-          <Route path="/services" element={<><Navbar /><Services /><Footer /></>} />
-          <Route path="/roadmap" element={<><Navbar /><CareerRoadmap /><Footer /></>} />
+          <Route path="/terms" element={<Chrome><Terms /></Chrome>} />
+          <Route path="/privacy" element={<Chrome><Privacy /></Chrome>} />
+          <Route path="/work" element={<Chrome><Work /></Chrome>} />
+          <Route path="/contact" element={<Chrome><Contact /></Chrome>} />
+          <Route path="/faq" element={<Chrome><FAQ /></Chrome>} />
+          <Route path="/services" element={<Chrome><Services /></Chrome>} />
+          <Route path="/roadmap" element={<Chrome><CareerRoadmap /></Chrome>} />
           {/* The plan lives at a URL that names the page. It used to be
               /roadmap/generate, which describes an action — you land there to
               read a plan you already have, and generating is a button on it. */}
@@ -191,6 +239,7 @@ const App = () => {
           <Route path="/u/:username" element={<PublicPortfolio />} />
           <Route path="/:username" element={<PublicPortfolio />} />
         </Routes>
+        </Suspense>
       </div>
     )
   }
