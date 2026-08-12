@@ -83,12 +83,36 @@ async def shutdown_event():
     print("👋 Goodbye!\n")
 
 # CORS configuration
+#
+# This was allow_origins=["*"] with allow_credentials=True, which reads like
+# the usual harmless wildcard and is not one. Starlette sets
+# preflight_explicit_allow_origin when credentials are allowed, so instead of
+# answering "*" — which browsers refuse to pair with credentials — it echoed
+# whatever Origin asked and added Access-Control-Allow-Credentials: true. Every
+# origin on the internet was allowed, with credentials, and the browser had no
+# reason to stop any of it.
+#
+# Nothing needed it. The frontend talks only to the Node backend
+# (frontend/src/config.js), the backend calls this service server to server,
+# and a request with no Origin header never reaches this middleware at all —
+# so the default here is no browser origin rather than a guess at one.
+# Server-to-server callers and the /docs page are unaffected.
+_allowed_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.environ.get("AI_SERVICE_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_allowed_origins,
+    # No cookie or session auth exists on this service, so nothing here is
+    # credentialed. Leaving it off is also what keeps a future "*" in the
+    # variable above an actual wildcard rather than the echo-everything
+    # behaviour described above.
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Request logging middleware
