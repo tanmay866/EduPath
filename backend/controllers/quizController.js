@@ -10,6 +10,7 @@ import Settings from '../models/Settings.js';
 import { skillsAssessedBy } from '../utils/skillTopicMap.js';
 import { reviewQueue } from '../utils/reviewSchedule.js';
 import { topicsForRole } from '../utils/roleTopicMap.js';
+import { careerPathFor } from '../utils/careerRoles.js';
 import Roadmap from '../models/Roadmap.js';
 
 
@@ -635,9 +636,19 @@ export const submitQuiz = async (req, res) => {
     // Calculate difficulty breakdown for AI assessment
     const difficultyBreakdown = calculateDifficultyBreakdown(detailedResults);
 
-    // Get AI-powered skill assessment (async, non-blocking)
+    // AI-powered skill assessment. This is awaited, so it does hold up the
+    // response — the comment here used to say "async, non-blocking", which it
+    // has never been. It is bounded and it falls back, so the cost of a slow
+    // AI service is a slower results page rather than a lost result; see the
+    // timeout note in services/aiService.js.
     let aiAnalysis = null;
     try {
+      // The track this result belongs to. Read here rather than passed in,
+      // because the quiz session records the topic and difficulty chosen but
+      // never the role — and the role is what decides whether "next steps"
+      // point at React or at packet capture.
+      const learner = await User.findById(userId).select('target_role').lean();
+
       const assessmentData = {
         userId: userId.toString(),
         skillName: session.topicId.name,
@@ -652,7 +663,7 @@ export const submitQuiz = async (req, res) => {
           weight: 1, // Base weight
           difficulty: session.difficultySelected.charAt(0).toUpperCase() + session.difficultySelected.slice(1)
         })),
-        careerPath: 'MERN', // Can be fetched from user profile
+        careerPath: careerPathFor(learner?.target_role),
         userLevel: session.experienceLevelSelected.charAt(0).toUpperCase() + session.experienceLevelSelected.slice(1)
       };
 

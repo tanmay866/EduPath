@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CAREER_ROLES, isCareerRole } from '../utils/careerRoles.js';
+import { CAREER_ROLES, isCareerRole, careerPathFor } from '../utils/careerRoles.js';
 
 /**
  * Role used to be free text, and the roadmap page guessed which track a typed
@@ -56,4 +56,37 @@ test('empty and missing values are not roles', () => {
   for (const empty of ['', '   ', null, undefined]) {
     assert.equal(isCareerRole(empty), false);
   }
+});
+
+/**
+ * Quiz submission sent careerPath: 'MERN' for every learner, so the skill
+ * assessment agent read a Cybersecurity learner's result as a web developer's
+ * and wrote their next steps accordingly. These pin the translation, which is
+ * easy to break from either side: the names on the left are the enum above,
+ * the names on the right are CAREER_SKILL_MAPPING's keys in
+ * ai_service/config/settings.py, and neither list is free text.
+ */
+test('every supported role maps to a career path the agent knows', () => {
+  assert.deepEqual(
+    CAREER_ROLES.map(careerPathFor),
+    ['MERN', 'AI', 'Data Science', 'DevOps', 'Mobile', 'Cyber']
+  );
+});
+
+test('a role maps to its own path, not to MERN', () => {
+  // The bug was that all six produced the first one.
+  assert.equal(careerPathFor('Cybersecurity Engineer'), 'Cyber');
+  assert.equal(careerPathFor('AI/ML Engineer'), 'AI');
+  assert.equal(careerPathFor('Data Science Engineer'), 'Data Science');
+});
+
+test('a learner with no role chosen yet still gets a usable path', () => {
+  // The agent requires one, so there is no "unset" to pass through.
+  for (const unset of ['', '   ', null, undefined]) {
+    assert.equal(careerPathFor(unset), 'MERN');
+  }
+});
+
+test('an unrecognised role falls back rather than reaching the agent raw', () => {
+  assert.equal(careerPathFor('QA Engineer'), 'MERN');
 });
