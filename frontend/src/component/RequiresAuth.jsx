@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../Pages/Context/useAuth';
 
 /**
  * Keeps a signed-out visitor out of the learner app.
@@ -21,11 +22,16 @@ import { Navigate, useLocation } from 'react-router-dom';
  *
  * `next` carries where they were going, so signing in finishes the trip
  * rather than dropping them somewhere else.
+ *
+ * It reads the shared auth state rather than sessionStorage directly, which
+ * is what lets an expiry detected by the API interceptor take effect here
+ * immediately instead of on the next full page load.
  */
 const RequiresAuth = ({ children }) => {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
-  if (!sessionStorage.getItem('token')) {
+  if (!isAuthenticated) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/signin?next=${next}`} replace />;
   }

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { changePassword, deleteAccount, getProfile, updateSettings } from '../Services/profileService';
+import { logout as apiLogout } from '../Services/authService';
+import { useAuth } from '../Context/useAuth';
 import { getPasswordError, getApiErrorMessage, getPasswordRules } from '../../utils/passwordPolicy';
 import {
   LearnerShell, Card, CardHeader, Button, Field, FieldGroup, PasswordInput, Input,
@@ -25,6 +27,7 @@ import {
  */
 const SettingsPage = () => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   // Password change state
   const [passwordData, setPasswordData] = useState({
@@ -89,8 +92,12 @@ const SettingsPage = () => {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const handleSignOut = () => {
-    sessionStorage.clear();
+  const handleSignOut = async () => {
+    // Tell the API first, while the token is still valid — it cannot be
+    // authorised once the session is gone. It is best-effort inside
+    // authService, so a failure here does not strand somebody signed in.
+    await apiLogout();
+    signOut();
     // App.jsx picks admin vs. learner routes by reading sessionStorage
     // directly at render time, not through React state, so a plain
     // navigate() wouldn't re-run that check — see design/shells.jsx's
@@ -107,7 +114,7 @@ const SettingsPage = () => {
 
       // The account no longer exists, so the stored token is dead. Clear it
       // before navigating or the next protected request 404s on a ghost user.
-      sessionStorage.clear();
+      signOut();
       navigate('/', { replace: true });
     } catch (err) {
       setShowDeleteModal(false);
