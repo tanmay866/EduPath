@@ -149,13 +149,6 @@ class JobMatchRequest(BaseModel):
     role_hint: Optional[str] = None
 
 
-class AdaptRoadmapRequest(BaseModel):
-    user_id: str
-    roadmap_id: str
-    progress_data: dict
-    adaptation_reason: str = "slow_progress"
-
-
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -378,17 +371,22 @@ async def analyse_job_posting(request: JobMatchRequest):
         raise HTTPException(status_code=500, detail=f"Error analysing posting: {str(e)}")
 
 
-@app.post("/api/roadmap/adapt")
-async def adapt_roadmap(request: AdaptRoadmapRequest):
-    """
-    Autonomous adaptation endpoint.
-    """
-    return {
-        "success": True,
-        "message": "Adaptation agent queued.",
-        "roadmap_id": request.roadmap_id,
-        "adaptation_reason": request.adaptation_reason,
-    }
+# There was a POST /api/roadmap/adapt here. It answered
+# {"success": true, "message": "Adaptation agent queued."} and then did
+# nothing at all — no adaptation, no queue, no agent, nothing written. Any
+# caller that believed the response would have reported a rebuilt plan to a
+# learner whose plan had not moved.
+#
+# Adaptation is real, but it lives in the backend: POST /api/roadmap/adapt in
+# controllers/roadmapController.js rebuilds the saved document by calling
+# /api/roadmap/generate below and merging the learner's progress back onto the
+# result. That route is what the frontend calls and always was. This one had
+# no caller in any of the three services.
+#
+# Removed rather than implemented, because a second adaptation path would have
+# to re-solve progress carry-over — see utils/mergeRoadmapProgress.js for why
+# neither ticks nor skills can be carried by position — to end up where the
+# backend already is.
 
 
 if SKILL_ASSESSMENT_ENABLED:

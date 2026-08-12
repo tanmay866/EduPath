@@ -187,8 +187,9 @@ portfolio view and the contact form requires a bearer token.
 | `/api/admin` | Users, content, settings, feedback queue |
 
 The analysis service exposes `/ai/parse-resume`, `/ai/match-skills`,
-`/api/roadmap/generate`, `/api/roadmap/adapt` and `/api/jobs/analyse`, with
-OpenAPI docs at `/docs`.
+`/api/roadmap/generate` and `/api/jobs/analyse`, with OpenAPI docs at `/docs`.
+Rebuilding a plan is the backend's `/api/roadmap/adapt`, which calls
+`/api/roadmap/generate` and merges the existing progress onto the result.
 
 ## Security
 
