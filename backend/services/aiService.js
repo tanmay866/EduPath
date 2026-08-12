@@ -3,35 +3,46 @@ import axios from 'axios';
 /**
  * AI Service Integration
  * Connects Node.js backend to Python FastAPI AI service
- * Handles skill assessment, resume parsing, and skill matching
+ *
+ * Skill assessment only. This also carried checkHealth, parseResume (the
+ * FastAPI/Surya OCR path) and matchSkills, none of which had a caller left in
+ * any of the three services — resume parsing moved to Groq in
+ * services/groqResumeParser.js, and the warm-up ping in services/aiWarmup.js
+ * hits the service root directly. They were removed rather than kept as an
+ * alternative, because an unused second implementation is the one that goes
+ * stale without anyone noticing.
+ *
+ * The FastAPI /ai/parse-resume and /ai/match-skills endpoints still exist and
+ * are unchanged; this file simply no longer speaks to them.
+ *
+ * Roadmap generation and job analysis do not go through here at all — they
+ * call the service directly from controllers/roadmapController.js, on a much
+ * longer timeout. See the note on this.timeout below for why the two differ.
  */
 class AIService {
     constructor() {
         // AI Service URL (Python FastAPI)
         this.baseUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-        this.timeout = parseInt(process.env.AI_SERVICE_TIMEOUT || '30000'); // 30 seconds
-    }
 
-    /**
-     * Test AI service health and availability
-     * @returns {Promise<Object>} Health status
-     */
-    async checkHealth() {
-        try {
-            const response = await axios.get(`${this.baseUrl}/health`, {
-                timeout: 5000
-            });
-            return {
-                available: true,
-                status: response.data
-            };
-        } catch (error) {
-            console.error('⚠️  AI service health check failed:', error.message);
-            return {
-                available: false,
-                error: error.message
-            };
-        }
+        /**
+         * Deliberately not the 180s that roadmap generation carries.
+         *
+         * Those calls got a long timeout because a cold start on Render's
+         * free tier measured 162 seconds and there is no useful answer
+         * without the service — see controllers/roadmapController.js and
+         * services/aiWarmup.js. The calls made through here are the opposite
+         * case: assessSkill enriches a quiz result that has already been
+         * scored and saved, it has a real fallback below, and a learner is
+         * sitting on the results page waiting for it. Making them wait three
+         * minutes for something optional would be a worse bug than the one
+         * the long timeout fixed.
+         *
+         * So this stays bounded on purpose. The warm-up ping is what keeps a
+         * cold start from being met here at all; when one is met anyway the
+         * learner gets the basic analysis a few seconds later instead of the
+         * generated one.
+         */
+        this.timeout = parseInt(process.env.AI_SERVICE_TIMEOUT || '30000');
     }
 
     /**
@@ -95,73 +106,6 @@ class AIService {
                 error: error.response?.data?.detail || error.message,
                 fallback: this._generateBasicAnalysis(assessmentData)
             };
-        }
-    }
-
-    /**
-     * Parse resume using Surya OCR
-     * Calls: POST /ai/parse-resume
-     *
-     * @param {File} fileBuffer - Resume file buffer
-     * @param {string} filename - Original filename
-     * @returns {Promise<Object>} Parsed resume data
-     */
-    async parseResume(fileBuffer, filename) {
-        try {
-            console.log(`📄 Sending resume to AI service: ${filename}`);
-
-            const formData = new FormData();
-            formData.append('file', fileBuffer, filename);
-
-            const response = await axios.post(
-                `${this.baseUrl}/ai/parse-resume`,
-                formData,
-                {
-                    timeout: 60000, // 60 seconds for OCR
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-
-            console.log('✅ Resume parsed successfully');
-            return response.data;
-
-        } catch (error) {
-            console.error('❌ Resume parsing failed:', error.response?.data || error.message);
-            throw new Error(error.response?.data?.detail || error.message);
-        }
-    }
-
-    /**
-     * Match extracted skills with database skills
-     * Calls: POST /ai/match-skills
-     *
-     * @param {Array<string>} extractedSkills - Skills from resume
-     * @param {Array<string>} databaseSkills - Skills from database
-     * @returns {Promise<Object>} Matched and unmatched skills
-     */
-    async matchSkills(extractedSkills, databaseSkills) {
-        try {
-            const response = await axios.post(
-                `${this.baseUrl}/ai/match-skills`,
-                {
-                    extracted_skills: extractedSkills,
-                    database_skills: databaseSkills
-                },
-                {
-                    timeout: 10000,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
-            return response.data;
-
-        } catch (error) {
-            console.error('❌ Skill matching failed:', error.response?.data || error.message);
-            throw new Error(error.response?.data?.detail || error.message);
         }
     }
 
