@@ -5,6 +5,7 @@ import {
   getQuizSession,
   getQuizResult,
   abandonQuiz,
+  saveQuizProgress,
   getQuizHistory,
   getQuizStats,
   retryQuiz,
@@ -26,6 +27,7 @@ router.use(protect);
 router.post('/start', isStudent, startQuizValidation, startQuiz);
 router.get('/session/:sessionId', isStudent, sessionIdValidation, getQuizSession);
 router.put('/session/:sessionId/abandon', isStudent, sessionIdValidation, abandonQuiz);
+router.put('/session/:sessionId/progress', isStudent, sessionIdValidation, saveQuizProgress);
 router.post('/submit', isStudent, submitQuizValidation, submitQuiz);
 router.get('/result/:resultId', isStudent, resultIdValidation, getQuizResult);
 router.post('/result/:resultId/retry', isStudent, resultIdValidation, retryQuiz);
