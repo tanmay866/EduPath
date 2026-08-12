@@ -4,7 +4,7 @@ import { getQuizResult, retryQuiz } from '../../Services/assessmentService';
 import { updateSkillStatus } from '../../Services/roadmapService';
 import ReportControl from '../../../component/ReportControl';
 import {
-  Card, CardHeader, Button, Loading, Empty, MicroLabel, StatusBox, type,
+  Card, CardHeader, Button, Loading, Empty, MicroLabel, StatusBox, StatStrip, type,
 } from '../../../design';
 
 /**
@@ -85,6 +85,7 @@ const ResultPage = () => {
     );
   }
 
+  const { confidence, impact, attempts } = resultData;
   const percentage = resultData.percentage || Math.round((resultData.score / resultData.totalQuestions) * 100);
   const passed = percentage >= 70;
   const correctAnswers = resultData.correctAnswers;
@@ -139,8 +140,81 @@ const ResultPage = () => {
           <p style={{ fontSize: 15, color: 'var(--color-text-2)', lineHeight: 1.6, margin: '12px 0 0' }}>
             {consequence}
           </p>
+
+          {/*
+            How firmly the number is known. Four out of five and sixteen out
+            of twenty are both 80% and are not the same claim — one more
+            question either way moves the first by twenty points. Both used to
+            be shown identically.
+          */}
+          {confidence && (
+            <p
+              style={{
+                fontSize: 13.5,
+                color: confidence.reliable ? 'var(--color-text-3)' : 'var(--color-amber)',
+                lineHeight: 1.55,
+                margin: '14px 0 0',
+              }}
+            >
+              {confidence.note}
+              {!confidence.reliable && confidence.interval && (
+                <> The true level is somewhere around {confidence.interval.low}–{confidence.interval.high}%.</>
+              )}
+            </p>
+          )}
         </div>
       </div>
+
+      {/*
+        What this result actually changed. The topic-to-skill mapping decided
+        it and was never shown, so a learner saw a percentage and, out of
+        sight, their skill profile moved and their roadmap did or did not get
+        shorter.
+      */}
+      {impact?.summary && (
+        <div style={{ padding: '0 34px 26px' }}>
+          <div style={{ padding: '16px 18px', background: 'var(--color-surface-attn)', border: '1px solid var(--color-line)' }}>
+            <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 8 }}>
+              What this changes
+            </MicroLabel>
+            <p style={{ fontSize: 14.5, color: 'var(--color-text-2)', lineHeight: 1.6, margin: 0 }}>
+              {impact.summary}
+            </p>
+            {(impact.notes || []).map((note) => (
+              <p key={note} style={{ fontSize: 13.5, color: 'var(--color-text-3)', lineHeight: 1.55, margin: '8px 0 0' }}>
+                {note}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/*
+        One number with nothing to read it against is the least useful moment
+        to show a score. Best is included as well as first, so a bad day does
+        not read as having lost the skill.
+      */}
+      {attempts && (
+        <div style={{ padding: '0 34px 26px' }}>
+          <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)" style={{ display: 'block', marginBottom: 12 }}>
+            {attempts.total} attempts on this topic
+          </MicroLabel>
+          <StatStrip
+            items={[
+              { label: attempts.viewing.isFirst ? 'First (this one)' : 'First', value: `${attempts.first.percentage}%` },
+              { label: attempts.viewing.isBest ? 'Best (this one)' : 'Best', value: `${attempts.best.percentage}%` },
+              { label: attempts.viewing.isLatest ? 'Latest (this one)' : 'Latest', value: `${attempts.latest.percentage}%` },
+            ]}
+          />
+          <p style={{ fontSize: 13.5, color: 'var(--color-text-3)', lineHeight: 1.55, margin: '12px 0 0' }}>
+            {attempts.changeFromFirst > 0
+              ? `Up ${attempts.changeFromFirst} points since your first attempt.`
+              : attempts.changeFromFirst < 0
+                ? `Down ${Math.abs(attempts.changeFromFirst)} points from your first attempt — your best is still ${attempts.best.percentage}%.`
+                : 'Level with your first attempt.'}
+          </p>
+        </div>
+      )}
 
       {questionReview.length > 0 && (
         <>

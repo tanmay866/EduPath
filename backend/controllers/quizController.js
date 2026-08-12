@@ -11,6 +11,124 @@ import { skillsAssessedBy } from '../utils/skillTopicMap.js';
 import { reviewQueue } from '../utils/reviewSchedule.js';
 import { topicsForRole } from '../utils/roleTopicMap.js';
 import { careerPathFor } from '../utils/careerRoles.js';
+import { dropDuplicates, balanceDifficulty } from '../utils/questionQuality.js';
+import { scoreConfidence } from '../utils/scoreConfidence.js';
+import { scoreImpact } from '../utils/scoreImpact.js';
+
+/**
+ * How far back to look for questions this learner has already been asked.
+ *
+ * Far enough that a retake is a genuinely different quiz, near enough that a
+ * topic does not eventually run out of things to ask. Questions are generated
+ * fresh each time rather than drawn from a bank, so this only has to outlast
+ * the period in which somebody would remember an answer.
+ */
+const RECENT_SESSIONS_FOR_DEDUPE = 5;
+
+/**
+ * Turn a raw generation into the questions a learner will actually see.
+ *
+ * Nothing checked what the model returned. A set of ten could ask the same
+ * thing twice in slightly different words, and retaking a topic could hand
+ * back the questions just answered — measuring memory of last week's quiz
+ * rather than the skill. It was also pitched entirely at one level, so a
+ * score could not tell "knows the basics" apart from "knows this well".
+ *
+ * Both are preferences rather than guarantees: if dropping duplicates would
+ * leave too few questions, a shorter quiz is better than a repetitive one,
+ * but an empty quiz is worse than either — so the shortfall is reported and
+ * the quiz goes ahead with what is left.
+ */
+const prepareQuestions = async ({ userId, topicId, questions, difficulty, count }) => {
+  const recent = await QuizSession.find({ userId, topicId })
+    .sort({ createdAt: -1 })
+    .limit(RECENT_SESSIONS_FOR_DEDUPE)
+    .select('questions.question')
+    .lean();
+
+  const seen = recent.flatMap((session) =>
+    (session.questions || []).map((q) => q.question).filter(Boolean)
+  );
+
+  const { kept, dropped } = dropDuplicates(questions, seen);
+  const { selected, counts, balanced } = balanceDifficulty(kept, difficulty, Math.min(count, kept.length));
+
+  if (dropped.length > 0) {
+    console.log(`🔁 Dropped ${dropped.length} repeated question(s)`);
+  }
+  if (!balanced) {
+    console.log(`⚖️  Difficulty spread not fully met: ${JSON.stringify(counts)}`);
+  }
+
+  return { selected, counts, droppedCount: dropped.length };
+};
+
+/**
+ * The first, best and latest attempts on a topic, beside the one being read.
+ *
+ * A result page showed one number with nothing to read it against, which is
+ * the least useful moment to show a score: the question a learner has after
+ * retaking something is whether they have got better, and answering it meant
+ * going back to the list and comparing by eye.
+ *
+ * First and best are the two that matter. First is where they started, and
+ * best guards against a bad day reading as a loss of skill — a learner who
+ * scored 90 and then 60 has not forgotten anything, they have had one poor
+ * attempt, and a page that only compared with the previous one would say
+ * otherwise.
+ */
+const attemptComparison = async (userId, topicId, current) => {
+  if (!topicId) return null;
+
+  const history = await QuizResult.find({ userId, topicId })
+    .select('percentage correctAnswers totalQuestions createdAt')
+    .sort({ createdAt: 1 })
+    .lean();
+
+  if (history.length <= 1) return null;
+
+  const shape = (r) => r && ({
+    resultId: r._id,
+    percentage: r.percentage,
+    correctAnswers: r.correctAnswers,
+    totalQuestions: r.totalQuestions,
+    takenAt: r.createdAt,
+  });
+
+  const first = history[0];
+  const latest = history[history.length - 1];
+  // Ties go to the earlier attempt, so "best" does not appear to move on a
+  // repeat of the same score.
+  const best = history.reduce((a, b) => (b.percentage > a.percentage ? b : a), history[0]);
+
+  return {
+    total: history.length,
+    // Which of the three the learner is currently looking at, so the page can
+    // avoid telling somebody their best attempt is elsewhere when it is this
+    // one.
+    viewing: {
+      isFirst: String(first._id) === String(current._id),
+      isLatest: String(latest._id) === String(current._id),
+      isBest: String(best._id) === String(current._id),
+    },
+    first: shape(first),
+    latest: shape(latest),
+    best: shape(best),
+    changeFromFirst: latest.percentage - first.percentage,
+  };
+};
+
+/** The session shape for a generated question, including its own difficulty. */
+const toSessionQuestion = (q, fallbackDifficulty) => ({
+  question: q.question,
+  options: q.options,
+  correctAnswer: q.options.findIndex((opt) => opt.isCorrect),
+  explanation: q.explanation,
+  tags: q.tags || [],
+  difficulty: ['beginner', 'intermediate', 'advanced'].includes(q.difficulty)
+    ? q.difficulty
+    : fallbackDifficulty,
+});
 import Roadmap from '../models/Roadmap.js';
 
 
@@ -85,6 +203,16 @@ export const getQuizSession = async (req, res) => {
       tags: q.tags,
     }));
 
+    // Answers as the quiz page holds them: one slot per question, undefined
+    // where nothing was chosen. Sent back so reopening a session resumes it
+    // rather than starting from an empty form.
+    const savedAnswers = new Array(session.totalQuestions).fill(null);
+    for (const answer of session.answers || []) {
+      if (answer.questionIndex >= 0 && answer.questionIndex < savedAnswers.length) {
+        savedAnswers[answer.questionIndex] = answer.selectedOptionIndex;
+      }
+    }
+
     res.json({
       success: true,
       data: {
@@ -96,6 +224,9 @@ export const getQuizSession = async (req, res) => {
         status: session.status,
         questions: sanitizedQuestions,
         startedAt: session.startedAt,
+        savedAnswers,
+        markedForReview: session.markedForReview || [],
+        progressSavedAt: session.progressSavedAt || null,
         timeElapsed: session.completedAt
           ? Math.floor((new Date(session.completedAt) - new Date(session.startedAt)) / 1000)
           : Math.floor((Date.now() - new Date(session.startedAt)) / 1000),
@@ -146,6 +277,8 @@ export const getQuizResult = async (req, res) => {
       result.percentage
     );
 
+    const attempts = await attemptComparison(userId, result.topicId?._id, result);
+
     res.json({
       success: true,
       data: {
@@ -163,6 +296,9 @@ export const getQuizResult = async (req, res) => {
         performance: getPerformanceLevel(result.percentage),
         detailedAnswers: result.answers,
         completedAt: result.createdAt,
+        impact: scoreImpact(result.topicId?.name, result.percentage),
+        confidence: scoreConfidence(result.correctAnswers, result.totalQuestions),
+        attempts,
       },
     });
 
@@ -171,6 +307,83 @@ export const getQuizResult = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to fetch quiz result',
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Save progress part-way through a quiz.
+ * PUT /api/quiz/session/:sessionId/progress
+ *
+ * The whole quiz used to live in React state, so a refresh, a closed tab or a
+ * phone locking itself threw away every answer given — and left the session
+ * "ongoing", so the only way forward was to abandon it and start again on a
+ * fresh set of questions with the clock reset. Someone eight questions into
+ * ten lost all eight.
+ *
+ * Answers only. The score is still computed on submit from the questions the
+ * server holds, so nothing here can be used to award marks: sending a
+ * hundred answers, or answers to questions that do not exist, changes what is
+ * restored to that learner's own screen and nothing else.
+ */
+export const saveQuizProgress = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { answers, markedForReview } = req.body;
+    const userId = req.user._id;
+
+    const session = await QuizSession.findById(sessionId).select(
+      'userId status totalQuestions expiresAt answers markedForReview progressSavedAt'
+    );
+
+    if (!session) {
+      return res.status(404).json({ success: false, error: 'Quiz session not found' });
+    }
+
+    if (session.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, error: 'Unauthorized access to quiz session' });
+    }
+
+    // A finished or abandoned quiz cannot take more answers. Answering 200 to
+    // an expired session and then submitting is exactly the hole this closes.
+    if (session.status !== 'ongoing') {
+      return res.status(409).json({
+        success: false,
+        error: `This quiz is ${session.status} and can no longer be changed.`,
+      });
+    }
+
+    // Positions outside the quiz, and choices outside the four options, are
+    // dropped rather than rejected: a partial save is worth more to the
+    // learner than an error, and the submit path scores from the server's own
+    // questions regardless.
+    const cleaned = [];
+    const list = Array.isArray(answers) ? answers : [];
+
+    for (let index = 0; index < list.length && index < session.totalQuestions; index += 1) {
+      const choice = list[index];
+      if (!Number.isInteger(choice) || choice < 0 || choice > 3) continue;
+      cleaned.push({ questionIndex: index, selectedOptionIndex: choice, answeredAt: new Date() });
+    }
+
+    const marks = (Array.isArray(markedForReview) ? markedForReview : [])
+      .filter((n) => Number.isInteger(n) && n >= 0 && n < session.totalQuestions);
+
+    session.answers = cleaned;
+    session.markedForReview = [...new Set(marks)];
+    session.progressSavedAt = new Date();
+    await session.save();
+
+    return res.json({
+      success: true,
+      data: { saved: cleaned.length, progressSavedAt: session.progressSavedAt },
+    });
+  } catch (error) {
+    console.error('❌ Save quiz progress error:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to save quiz progress',
       message: error.message,
     });
   }
@@ -284,14 +497,31 @@ export const retryQuiz = async (req, res) => {
       });
     }
 
-    // Generate new questions using same parameters
-    const questions = await huggingFaceService.generateQuizQuestions({
+    // Generate new questions using same parameters. This is the path where
+    // repeats matter most: retrying a topic and being handed the questions
+    // just answered tests memory of the last attempt, not the skill.
+    const wanted = Math.min(originalResult.totalQuestions, settings.maxQuestions);
+    const generated = await huggingFaceService.generateQuizQuestions({
       topic: topic.name,
       difficulty: originalResult.difficulty,
       experienceLevel: originalResult.experienceLevel,
-      questionCount: Math.min(originalResult.totalQuestions, settings.maxQuestions),
+      questionCount: Math.min(wanted + 3, settings.maxQuestions),
       basePrompt: settings.basePrompt,
     });
+
+    const { selected: questions } = await prepareQuestions({
+      userId,
+      topicId: originalResult.topicId,
+      questions: generated,
+      difficulty: originalResult.difficulty,
+      count: wanted,
+    });
+
+    if (questions.length === 0) {
+      return res.status(503).json({
+        error: 'Could not put together a new quiz on that topic just now. Please try again.',
+      });
+    }
 
     // Expiry follows the configured maximum duration rather than a constant.
     const totalTimeMinutes = Math.min((questions.length * 0.5) + 5, settings.maxDuration);
@@ -308,13 +538,7 @@ export const retryQuiz = async (req, res) => {
       topicId: originalResult.topicId,
       difficultySelected: originalResult.difficulty,
       experienceLevelSelected: originalResult.experienceLevel,
-      questions: questions.map(q => ({
-        question: q.question,
-        options: q.options,
-        correctAnswer: q.options.findIndex(opt => opt.isCorrect),
-        explanation: q.explanation,
-        tags: q.tags || [],
-      })),
+      questions: questions.map((q) => toSessionQuestion(q, originalResult.difficulty)),
       totalQuestions: questions.length,
       status: 'ongoing',
       startedAt: new Date(),
@@ -451,14 +675,29 @@ export const startQuiz = async (req, res) => {
     console.log(`🔢 Questions: ${cappedCount}${cappedCount < requested ? ` (capped from ${requested})` : ''}`);
     console.log(`${'='.repeat(60)}\n`);
 
-    // Generate questions using Hugging Face AI
-    const questions = await huggingFaceService.generateQuizQuestions({
+    // Generate questions using Hugging Face AI. A few more are asked for than
+    // will be used, so that dropping repeats does not shorten the quiz.
+    const generated = await huggingFaceService.generateQuizQuestions({
       topic: topic.name,
       difficulty,
       experienceLevel,
-      questionCount: cappedCount,
+      questionCount: Math.min(cappedCount + 3, settings.maxQuestions),
       basePrompt: settings.basePrompt,
     });
+
+    const { selected: questions } = await prepareQuestions({
+      userId,
+      topicId,
+      questions: generated,
+      difficulty,
+      count: cappedCount,
+    });
+
+    if (questions.length === 0) {
+      return res.status(503).json({
+        error: 'Could not put together a quiz on that topic just now. Please try again.',
+      });
+    }
 
     // Expiry follows the configured maximum duration rather than a constant.
     const totalTimeMinutes = Math.min((questions.length * 0.5) + 5, settings.maxDuration);
@@ -475,13 +714,7 @@ export const startQuiz = async (req, res) => {
       topicId,
       difficultySelected: difficulty,
       experienceLevelSelected: experienceLevel,
-      questions: questions.map(q => ({
-        question: q.question,
-        options: q.options,
-        correctAnswer: q.options.findIndex(opt => opt.isCorrect),
-        explanation: q.explanation,
-        tags: q.tags || [],
-      })),
+      questions: questions.map((q) => toSessionQuestion(q, difficulty)),
       totalQuestions: questions.length,
       status: 'ongoing',
       startedAt: new Date(),
@@ -579,6 +812,9 @@ export const submitQuiz = async (req, res) => {
         timeSpent: 0, // Can be calculated if we track timing
         explanation: question.explanation,
         tags: question.tags,
+        // Sessions written before questions carried their own level fall back
+        // to the one the learner picked, which is what they all were then.
+        difficulty: question.difficulty || session.difficultySelected,
       });
     });
 
@@ -696,6 +932,12 @@ export const submitQuiz = async (req, res) => {
     const responseData = {
       resultId: quizResult._id,
       roadmapSkills,
+      // Why this number matters and how firmly it is known. Both were
+      // decided here and never said: the topic-to-skill mapping was
+      // invisible, and a score from four questions was presented exactly
+      // like one from twenty.
+      impact: scoreImpact(session.topicId.name, percentage),
+      confidence: scoreConfidence(correctAnswers, session.totalQuestions),
       score: correctAnswers,
       percentage: Math.round(percentage),
       correctAnswers,
@@ -818,18 +1060,17 @@ const calculateDifficultyBreakdown = (detailedResults) => {
     advanced: { attempted: 0, correct: 0, accuracy: 0 }
   };
 
-  // Group answers by difficulty (using tags if available, else default)
+  // This used to look for a difficulty inside `tags` and default to
+  // 'beginner' when it found none. It never found one: the generator puts the
+  // topic name in tags, never a level — so every question in every quiz was
+  // counted as beginner, and the breakdown handed to the assessment agent was
+  // always 100% beginner and nothing else, whatever the learner had sat.
+  //
+  // Questions carry their own difficulty now, and that is what this reads.
   detailedResults.forEach(result => {
-    // Determine difficulty from tags or default to beginner
-    let difficulty = 'beginner';
-    if (result.tags && result.tags.length > 0) {
-      const diffTag = result.tags.find(tag =>
-        ['beginner', 'intermediate', 'advanced'].includes(tag.toLowerCase())
-      );
-      if (diffTag) {
-        difficulty = diffTag.toLowerCase();
-      }
-    }
+    const difficulty = ['beginner', 'intermediate', 'advanced'].includes(result.difficulty)
+      ? result.difficulty
+      : 'beginner';
 
     breakdown[difficulty].attempted++;
     if (result.isCorrect) {
@@ -999,6 +1240,16 @@ export const getReviewQueue = async (req, res) => {
           latestScore: { $last: '$percentage' },
           latestAt: { $last: '$createdAt' },
           attempts: { $sum: 1 },
+          // Mastery reads the whole history, not the last attempt. Judging a
+          // topic by its most recent score alone treats somebody who has
+          // passed four times running and somebody who scraped one pass as
+          // the same learner.
+          bestScore: { $max: '$percentage' },
+          passes: { $sum: { $cond: [{ $gte: ['$percentage', 70] }, 1, 0] } },
+          // Carried so the queue can offer the retake directly rather than
+          // sending the learner off to find the topic in a list of fifty-four.
+          difficulty: { $last: '$difficulty' },
+          experienceLevel: { $last: '$experienceLevel' },
         },
       },
       { $lookup: { from: 'topics', localField: '_id', foreignField: '_id', as: 'topic' } },
@@ -1008,8 +1259,12 @@ export const getReviewQueue = async (req, res) => {
           topicId: '$_id',
           topicName: '$topic.name',
           latestScore: { $round: ['$latestScore', 0] },
+          bestScore: { $round: ['$bestScore', 0] },
           latestAt: 1,
           attempts: 1,
+          passes: 1,
+          difficulty: 1,
+          experienceLevel: 1,
         },
       },
     ]);

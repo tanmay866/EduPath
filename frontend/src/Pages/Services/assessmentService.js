@@ -101,6 +101,16 @@ export const retryQuiz = (resultId) => API.post(`/quiz/result/${resultId}/retry`
 // Abandon Quiz Session
 export const abandonQuizSession = (sessionId) => API.put(`/quiz/session/${sessionId}/abandon`);
 
+/**
+ * Keep the server's copy of a part-finished quiz up to date.
+ *
+ * Answers only — the score is still worked out on submit from the questions
+ * the server holds, so this cannot award marks. It exists so that closing the
+ * tab does not throw away the answers already given.
+ */
+export const saveQuizProgress = (sessionId, { answers, markedForReview }) =>
+  API.put(`/quiz/session/${sessionId}/progress`, { answers, markedForReview });
+
 // Get Quiz History
 export const getQuizHistory = () => API.get('/quiz/history');
 

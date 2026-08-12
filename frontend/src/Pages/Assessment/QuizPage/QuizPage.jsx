@@ -1,8 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuiz } from "../../Context/useQuiz";
-import { fetchQuizTopics, startQuiz } from "../../Services/assessmentService";
+import {
+  fetchQuizTopics, startQuiz, getQuizSession, saveQuizProgress,
+} from "../../Services/assessmentService";
 import { useQuizLogic } from "./hooks/useQuizLogic";
+import { toPositional, fromPositional } from "./answers";
 import QuizLayout from "./components/QuizLayout";
 import {
   Card, CardHeader, Button, Field, FieldGroup, InlineMessage, Loading, Empty, MicroLabel, type,
@@ -42,6 +45,9 @@ const QuizPage = () => {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Set when an unfinished quiz was picked back up, so the learner is told
+  // rather than silently dropped into questions they half remember.
+  const [resumed, setResumed] = useState(false);
 
   // Topics for dropdown
   const [topics, setTopics] = useState([]);
@@ -91,6 +97,15 @@ const QuizPage = () => {
             topicId: match._id,
             topicName: match.name,
             topicIcon: match.icon,
+            // A retake from the review queue arrives with the setup of the
+            // attempt that put the topic there. Without it the retake started
+            // at the defaults, so somebody who struggled with an advanced
+            // quiz was quietly handed a beginner one and the better score
+            // meant nothing.
+            ...(location.state?.difficulty ? { difficulty: location.state.difficulty } : {}),
+            ...(location.state?.experienceLevel
+              ? { experienceLevel: location.state.experienceLevel }
+              : {}),
           }));
         }
       }
@@ -193,9 +208,106 @@ const QuizPage = () => {
     }
   };
 
+  /**
+   * Pick a quiz back up where it was left.
+   *
+   * The whole quiz lived in React state, so a refresh, a closed tab or a
+   * phone locking itself lost every answer given and left the session
+   * "ongoing" — the only way forward was to abandon it and start again on
+   * fresh questions with the clock reset. Someone eight questions into ten
+   * lost all eight.
+   *
+   * The id was already being written to localStorage on start; nothing ever
+   * read it back. The server holds the answers, so this asks for them rather
+   * than trusting anything kept on the device.
+   */
+  useEffect(() => {
+    if (contextAssessment) return;
+
+    const savedId = localStorage.getItem('sessionId');
+    if (!savedId) return;
+
+    let cancelled = false;
+
+    getQuizSession(savedId)
+      .then((response) => {
+        const data = response.data?.data;
+        if (cancelled || !data || data.status !== 'ongoing') {
+          // Finished, abandoned or expired. Clear the pointer so the next
+          // visit starts cleanly rather than retrying a dead session.
+          if (!cancelled) localStorage.removeItem('sessionId');
+          return;
+        }
+
+        setAssessment({
+          topicId: data.topic?._id,
+          topicName: data.topic?.name,
+          topicIcon: data.topic?.icon,
+          sessionId: data.sessionId,
+          questions: data.questions,
+          totalQuestions: data.totalQuestions,
+          difficulty: data.difficulty,
+          startedAt: data.startedAt,
+        });
+
+        const restored = fromPositional(data.savedAnswers || []);
+        setAnswers?.(restored);
+        setMarkedForReview?.(data.markedForReview || []);
+
+        // The clock continues from where it was, not from the top — a quiz
+        // resumed with a full timer would be a way to buy more time.
+        const perQuestion = 60;
+        const allowed = (data.totalQuestions || 0) * perQuestion;
+        setTimer?.(Math.max(0, allowed - (data.timeElapsed || 0)));
+
+        setStage('quiz');
+        setQuizStarted(true);
+        setResumed(restored.length > 0);
+      })
+      .catch(() => {
+        // A session that cannot be read is not worth blocking the page for;
+        // the learner falls back to starting a new one.
+        localStorage.removeItem('sessionId');
+      });
+
+    return () => { cancelled = true; };
+    // Only on mount: this is the "did I leave something running" check.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const assessment = contextAssessment;
   const questions = assessment?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
+
+  /**
+   * Keep the server's copy current.
+   *
+   * Debounced because it fires on every answer, and a learner changing their
+   * mind three times should cost one write rather than three. Failures are
+   * swallowed on purpose: this is a safety net, and a toast about a failed
+   * background save during a timed quiz would be worse than the risk it
+   * warns about.
+   */
+  // Read out here rather than inside the effect, so it is a dependency the
+  // effect actually declares. Buried in the callback it was a value read from
+  // whichever render the timer happened to be created in.
+  const sessionId = assessment?.sessionId;
+  const totalQuestions = assessment?.totalQuestions || questions.length;
+
+  useEffect(() => {
+    if (stage !== 'quiz' || !sessionId) return undefined;
+
+    const id = setTimeout(() => {
+      saveQuizProgress(sessionId, {
+        // The page holds objects; the API takes one slot per question. Sending
+        // the page's own shape stored nothing at all, silently.
+        answers: toPositional(answers, totalQuestions),
+        markedForReview,
+      }).catch(() => {});
+    }, 800);
+
+    return () => clearTimeout(id);
+  }, [answers, markedForReview, stage, sessionId, totalQuestions]);
 
   const {
     handleSelectOption,
@@ -436,6 +548,7 @@ const QuizPage = () => {
 
     return (
       <QuizLayout
+        resumed={resumed}
         assessment={assessment}
         currentQuestionIndex={currentQuestionIndex}
         currentQuestion={currentQuestion}

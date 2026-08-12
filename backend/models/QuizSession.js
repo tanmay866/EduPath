@@ -48,6 +48,20 @@ const quizSessionSchema = new mongoose.Schema(
         },
         explanation: String,
         tags: [String],
+        /**
+         * What this question actually is, which is not always the level the
+         * learner picked — a quiz is now built as a spread around that level
+         * rather than entirely at it, so the score can tell "knows the
+         * basics" apart from "knows this well".
+         *
+         * Stored per question because the breakdown on the result page is
+         * computed from it. Sessions written before this have none, and
+         * scoring falls back to the session's own level for those.
+         */
+        difficulty: {
+          type: String,
+          enum: ['beginner', 'intermediate', 'advanced'],
+        },
       },
     ],
     totalQuestions: {
@@ -81,20 +95,31 @@ const quizSessionSchema = new mongoose.Schema(
       default: 'ongoing',
       index: true,
     },
-    // Store user answers during quiz (optional - for resume functionality)
+    /**
+     * Answers so far, so a quiz survives leaving the page.
+     *
+     * The field existed and nothing ever wrote to it — the whole quiz lived
+     * in React state, so a refresh, a closed tab or a phone locking itself
+     * threw away every answer given and left the session "ongoing" with
+     * nothing in it. The learner's only route back was to abandon and start
+     * again, on a fresh set of questions, with the clock reset.
+     *
+     * Keyed by position rather than by a question id. The old shape referred
+     * to a `Question` collection that does not exist: questions are embedded
+     * in the session above and addressed by index everywhere else, including
+     * by the submit handler that scores them.
+     */
     answers: [
       {
-        questionId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Question',
+        questionIndex: {
+          type: Number,
+          required: true,
+          min: 0,
         },
         selectedOptionIndex: {
           type: Number,
           min: 0,
           max: 3,
-        },
-        timeSpent: {
-          type: Number, // seconds
         },
         answeredAt: {
           type: Date,
@@ -102,6 +127,12 @@ const quizSessionSchema = new mongoose.Schema(
         },
       },
     ],
+    /** Questions flagged to come back to, so the flags survive a reload too. */
+    markedForReview: [{ type: Number, min: 0 }],
+    /** When progress was last written, for the "restored" notice. */
+    progressSavedAt: {
+      type: Date,
+    },
     // IP and device info (security)
     ipAddress: {
       type: String,

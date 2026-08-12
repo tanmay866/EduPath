@@ -19,6 +19,18 @@ export const createQuizPrompt = ({ topic, difficulty, experienceLevel, questionC
     advanced: 'An experienced professional with 3+ years of expertise',
   };
 
+  // A quiz pitched entirely at one level cannot tell "knows the basics" apart
+  // from "knows this well" — everyone who passes looks the same. The chosen
+  // level is the centre of gravity, with a tail either side so a score has
+  // somewhere to move. The counts are enforced after generation in
+  // utils/questionQuality.js; asking for them here is what gives it a mix to
+  // choose from.
+  const spread = {
+    beginner: `about ${Math.round(questionCount * 0.7)} beginner and ${questionCount - Math.round(questionCount * 0.7)} intermediate`,
+    intermediate: `about ${Math.round(questionCount * 0.25)} beginner, ${questionCount - 2 * Math.round(questionCount * 0.25)} intermediate and ${Math.round(questionCount * 0.25)} advanced`,
+    advanced: `about ${questionCount - Math.round(questionCount * 0.7)} intermediate and ${Math.round(questionCount * 0.7)} advanced`,
+  }[difficulty] || '';
+
   return `You are an expert quiz generator. Generate EXACTLY ${questionCount} multiple-choice questions about ${topic}.
 
 **Requirements:**
@@ -27,6 +39,10 @@ export const createQuizPrompt = ({ topic, difficulty, experienceLevel, questionC
 - Each question: exactly 4 options, ONE correct
 - Include concise explanation (max 2 sentences)
 - Keep questions and options brief and clear
+- Vary the difficulty around that level: ${spread}. Set each question's
+  "difficulty" field to what that question actually is, not to "${difficulty}".
+- Every question must test a DIFFERENT idea. Do not ask the same thing twice
+  in different words.
 ${String(basePrompt || '').trim() ? `- ${String(basePrompt).trim()}` : ''}
 
 **CRITICAL: Return ONLY valid JSON, no markdown blocks, no extra text.**
@@ -43,7 +59,7 @@ ${String(basePrompt || '').trim() ? `- ${String(basePrompt).trim()}` : ''}
         { "text": "Option 3", "isCorrect": false },
         { "text": "Option 4", "isCorrect": false }
       ],
-      "difficulty": "${difficulty}",
+      "difficulty": "beginner | intermediate | advanced",
       "experienceLevel": "${experienceLevel}",
       "explanation": "Brief explanation",
       "tags": ["${topic}"]

@@ -28,6 +28,21 @@ const ago = (days) => {
   return `${Math.round(days / 30)} months ago`;
 };
 
+/**
+ * How well held the topic is, across every attempt rather than the last one.
+ *
+ * The list judged a topic by its most recent score alone, so somebody who had
+ * passed four times running and somebody who scraped one pass looked
+ * identical — and the difference between them is the difference between
+ * "keep this warm" and "you have not really got this yet".
+ */
+const MASTERY_TONE = {
+  struggling: 'clay',
+  developing: 'muted',
+  consolidating: 'muted',
+  mastered: 'green',
+};
+
 const ReviewQueue = ({ queue = [] }) => {
   const navigate = useNavigate();
   if (!queue.length) return null;
@@ -70,12 +85,22 @@ const ReviewQueue = ({ queue = [] }) => {
               >
                 {`${item.latestScore}%`}
               </span>
+              {item.bestScore > item.latestScore && (
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-4)' }}>
+                  {`best ${item.bestScore}%`}
+                </span>
+              )}
+              {item.mastery?.level && (
+                <Badge tone={MASTERY_TONE[item.mastery.level] || 'muted'}>{item.mastery.label}</Badge>
+              )}
               {item.overdueBy >= 30 && <Badge tone="muted">long overdue</Badge>}
             </div>
             {/* Says why it is here. "Review this" with no reason is a chore;
-                "you scored 40% five weeks ago" is a reason. */}
+                "you scored 40% five weeks ago" is a reason. The sentence comes
+                from the server, which is where the interval that made it due
+                is decided — a second version written here would drift from it. */}
             <p style={{ fontSize: 14, color: 'var(--color-text-3)', margin: '4px 0 0', lineHeight: 1.5 }}>
-              {`${item.reason} — last attempt ${ago(item.daysSince)}.`}
+              {item.explanation || `${item.reason} — last attempt ${ago(item.daysSince)}.`}
             </p>
           </div>
 
@@ -87,7 +112,17 @@ const ReviewQueue = ({ queue = [] }) => {
           <Button
             variant="secondary"
             style={{ flexShrink: 0, padding: '9px 18px', fontSize: 14 }}
-            onClick={() => navigate('/assessment/quiz', { state: { topicId: item.topicId } })}
+            onClick={() => navigate('/assessment/quiz', {
+              state: {
+                topicId: item.topicId,
+                // Carried so the retake matches the attempt that put the topic
+                // on this list. Without them it started at the defaults, so a
+                // learner who struggled with an advanced quiz was quietly
+                // handed a beginner one and the improvement meant nothing.
+                difficulty: item.difficulty || undefined,
+                experienceLevel: item.experienceLevel || undefined,
+              },
+            })}
           >
             Retake
           </Button>
