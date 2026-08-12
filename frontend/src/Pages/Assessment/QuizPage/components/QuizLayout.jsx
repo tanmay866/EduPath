@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Card, CardHeader, Button, Modal, MicroLabel, StatusBox, type } from '../../../../design';
 
 /**
@@ -16,7 +16,18 @@ import { Card, CardHeader, Button, Modal, MicroLabel, StatusBox, type } from '..
  */
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+/** Off-screen but read aloud — for state changes with no visible home. */
+const SR_ONLY = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+};
+
 const QuizLayout = ({
+  resumed = false,
   assessment,
   currentQuestionIndex,
   currentQuestion,
@@ -60,6 +71,51 @@ const QuizLayout = ({
 
   const answeredCount = Array.isArray(answers) ? answers.filter(Boolean).length : 0;
 
+  /**
+   * Arrow-key movement within the option group.
+   *
+   * A radio group is expected to move and select with the arrow keys, wrapping
+   * at both ends; Tab is expected to leave the group entirely. Space also
+   * selects, because a keyboard user who has arrowed onto an option without
+   * committing to it will reach for it.
+   */
+  const optionRefs = useRef([]);
+
+  const onOptionKeyDown = (event, index) => {
+    const count = currentQuestion?.options?.length || 0;
+    if (count === 0) return;
+
+    const move = (next) => {
+      event.preventDefault();
+      const target = (next + count) % count;
+      optionRefs.current[target]?.focus();
+      onSelectOption(currentQuestionIndex, target);
+    };
+
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowRight':
+        move(index + 1);
+        break;
+      case 'ArrowUp':
+      case 'ArrowLeft':
+        move(index - 1);
+        break;
+      case 'Home':
+        move(0);
+        break;
+      case 'End':
+        move(count - 1);
+        break;
+      case ' ':
+        event.preventDefault();
+        onSelectOption(currentQuestionIndex, index);
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <div style={{ background: 'var(--color-paper)', minHeight: '100vh', padding: '48px 32px' }}>
       <div style={{ maxWidth: 1160, margin: '0 auto' }}>
@@ -83,11 +139,53 @@ const QuizLayout = ({
             </div>
 
             <div style={{ padding: '32px 34px 34px' }}>
-              <h1 style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>
+              {/*
+                Moving between questions changes the whole card with no
+                announcement, so a screen reader user had no way of knowing
+                the Next button had done anything. The clock is deliberately
+                not in here — a region that spoke every second would make the
+                quiz unusable.
+              */}
+              <p aria-live="polite" style={SR_ONLY}>
+                Question {currentQuestionIndex + 1} of {total}.
+                {' '}{answeredCount} answered.
+                {isMarked ? ' Marked for review.' : ''}
+              </p>
+
+              {resumed && (
+                <p
+                  style={{
+                    margin: '0 0 20px',
+                    padding: '11px 14px',
+                    border: '1px solid var(--color-navy)',
+                    fontSize: 14,
+                    color: 'var(--color-navy)',
+                  }}
+                >
+                  Picked up where you left off — your earlier answers are still here.
+                </p>
+              )}
+
+              <h1 id="quiz-question" style={{ ...type.question, margin: 0, color: 'var(--color-ink)' }}>
                 {currentQuestion?.question}
               </h1>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}>
+              {/*
+                A radio group, not four buttons.
+                These were plain buttons: reachable by Tab and clickable by
+                Enter, so keyboard use technically worked, but a screen reader
+                announced four unrelated buttons with no indication that they
+                were a set, which of them was chosen, or how many there were.
+                As a radiogroup it reads "option 2 of 4, selected", the
+                question is its label, and the arrow keys move between options
+                the way they do in every other radio group — which is what a
+                keyboard user will try first.
+              */}
+              <div
+                role="radiogroup"
+                aria-labelledby="quiz-question"
+                style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 26 }}
+              >
                 {(currentQuestion?.options || []).map((option, index) => {
                   const value = option?.text ?? option;
                   // selectedAnswer is the stored { questionIndex, selectedOptionIndex }
@@ -97,7 +195,15 @@ const QuizLayout = ({
                   return (
                     <button
                       key={value ?? index}
+                      ref={(el) => { optionRefs.current[index] = el; }}
                       type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      // Roving tabindex: one stop for the whole group, so Tab
+                      // moves past the question rather than through every
+                      // option. Nothing chosen yet puts the stop on the first.
+                      tabIndex={selected || (!selectedAnswer && index === 0) ? 0 : -1}
+                      onKeyDown={(e) => onOptionKeyDown(e, index)}
                       onClick={() => onSelectOption(currentQuestionIndex, index)}
                       style={{
                         width: '100%',
@@ -115,6 +221,7 @@ const QuizLayout = ({
                       }}
                     >
                       <span
+                        aria-hidden="true"
                         style={{
                           fontFamily: 'var(--font-mono)',
                           fontSize: 12,
