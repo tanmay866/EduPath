@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { API_BASE } from '../../config';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { getPasswordError, getApiErrorMessage, getPasswordRules } from '../../utils/passwordPolicy';
+import { signup as signupRequest } from '../Services/authService';
+import JourneySteps from '../../component/JourneySteps';
 import {
   AuthShell, Field, FieldGroup, Input, PasswordInput, PasswordRequirements, Button, InlineMessage, type,
 } from '../../design';
@@ -41,11 +41,11 @@ const Signup = () => {
       setFormError('');
 
       try {
-        const response = await axios.post(`${API_BASE}/auth/signup`, values);
+        const response = await signupRequest(values);
 
         // The account is not usable until the emailed code is entered, so send
         // the user straight to that step rather than to sign-in.
-        toast.success(response.data?.message || 'Account created. Check your email for the code.');
+        toast.success(response?.message || 'Account created. Check your email for the code.');
         resetForm();
         navigate('/verify-email', { state: { email: values.email } });
       } catch (error) {
@@ -68,6 +68,8 @@ const Signup = () => {
       attribution="The EduPath method"
       footLabel="NEW ACCOUNT"
     >
+      <JourneySteps current={0} />
+
       <h1 style={{ ...type.authHeading, margin: 0, color: 'var(--color-ink)' }}>Create account</h1>
 
       <p style={{ fontSize: 15, color: 'var(--color-text-3)', margin: '12px 0 32px' }}>
