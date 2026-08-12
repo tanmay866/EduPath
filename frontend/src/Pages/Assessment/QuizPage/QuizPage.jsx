@@ -5,6 +5,7 @@ import {
   fetchQuizTopics, startQuiz, getQuizSession, saveQuizProgress,
 } from "../../Services/assessmentService";
 import { useQuizLogic } from "./hooks/useQuizLogic";
+import { toPositional, fromPositional } from "./answers";
 import QuizLayout from "./components/QuizLayout";
 import {
   Card, CardHeader, Button, Field, FieldGroup, InlineMessage, Loading, Empty, MicroLabel, type,
@@ -249,7 +250,7 @@ const QuizPage = () => {
           startedAt: data.startedAt,
         });
 
-        const restored = (data.savedAnswers || []).map((a) => (a === null ? undefined : a));
+        const restored = fromPositional(data.savedAnswers || []);
         setAnswers?.(restored);
         setMarkedForReview?.(data.markedForReview || []);
 
@@ -261,7 +262,7 @@ const QuizPage = () => {
 
         setStage('quiz');
         setQuizStarted(true);
-        setResumed(restored.some((a) => a !== undefined));
+        setResumed(restored.length > 0);
       })
       .catch(() => {
         // A session that cannot be read is not worth blocking the page for;
@@ -287,16 +288,26 @@ const QuizPage = () => {
    * background save during a timed quiz would be worse than the risk it
    * warns about.
    */
+  // Read out here rather than inside the effect, so it is a dependency the
+  // effect actually declares. Buried in the callback it was a value read from
+  // whichever render the timer happened to be created in.
+  const sessionId = assessment?.sessionId;
+  const totalQuestions = assessment?.totalQuestions || questions.length;
+
   useEffect(() => {
-    if (stage !== 'quiz' || !assessment?.sessionId) return undefined;
+    if (stage !== 'quiz' || !sessionId) return undefined;
 
     const id = setTimeout(() => {
-      saveQuizProgress(assessment.sessionId, { answers, markedForReview })
-        .catch(() => {});
+      saveQuizProgress(sessionId, {
+        // The page holds objects; the API takes one slot per question. Sending
+        // the page's own shape stored nothing at all, silently.
+        answers: toPositional(answers, totalQuestions),
+        markedForReview,
+      }).catch(() => {});
     }, 800);
 
     return () => clearTimeout(id);
-  }, [answers, markedForReview, stage, assessment?.sessionId]);
+  }, [answers, markedForReview, stage, sessionId, totalQuestions]);
 
   const {
     handleSelectOption,
