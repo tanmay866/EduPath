@@ -19,9 +19,16 @@ import {
 const q = (question, difficulty) => ({ question, difficulty });
 
 test('the words that carry meaning survive, the scaffolding does not', () => {
+  // "purpose" counts as scaffolding: "what is the purpose of X" and "what
+  // does X do" are one question in two shapes, and treating it as meaningful
+  // is what let that exact pair through on a real retake.
   assert.deepEqual(
     significantWords('What is the purpose of the useState hook?'),
-    ['purpose', 'usestate', 'hook']
+    ['usestate', 'hook']
+  );
+  assert.deepEqual(
+    significantWords('What does the useState hook do?'),
+    ['usestate', 'hook']
   );
 });
 
@@ -35,6 +42,47 @@ test('a rephrased question is recognised as the same one', () => {
   const a = 'What is the purpose of the useState hook in React?';
   const b = 'In React, what purpose does the useState hook serve?';
   assert.ok(similarity(a, b) >= 0.7, `expected these to match, got ${similarity(a, b)}`);
+});
+
+test('pairs the model actually produced on a retake are caught', () => {
+  // Recorded from two real generations on "React Hooks". Every one of these
+  // is the same question asked twice, and the first threshold let the last
+  // two through.
+  const repeats = [
+    ['What does the useCallback hook do?', 'What does the useCallback Hook do?'],
+    [
+      'Which hook should be used to manage side effects in a functional component?',
+      'Which Hook is used to manage side effects in a functional component?',
+    ],
+    ['What does the useContext hook do?', 'What is the purpose of the useContext Hook?'],
+    ['What is the purpose of the useReducer hook?', 'What does the useReducer Hook help you with?'],
+  ];
+
+  for (const [a, b] of repeats) {
+    const score = similarity(a, b);
+    assert.ok(score >= 0.6, `"${a}" vs "${b}" scored ${score.toFixed(2)}`);
+  }
+});
+
+test('genuinely different questions from the same generation survive', () => {
+  // The other side of the same recording. Lowering the threshold must not
+  // start eating the quiz.
+  const distinct = [
+    ['What does the useState hook return?', 'What is the purpose of the useMemo hook?'],
+    [
+      'Which hook allows you to share state between components?',
+      'Which of the following is a side effect Hook in React?',
+    ],
+    [
+      'What is the correct syntax for using the useRef hook to reference a DOM element?',
+      'What does the useContext hook do?',
+    ],
+  ];
+
+  for (const [a, b] of distinct) {
+    const score = similarity(a, b);
+    assert.ok(score < 0.6, `"${a}" vs "${b}" scored ${score.toFixed(2)}`);
+  }
 });
 
 test('different questions about the same subject are not confused', () => {

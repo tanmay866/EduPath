@@ -27,6 +27,10 @@ const FILLER = new Set([
   'from', 'as', 'and', 'or', 'not', 'you', 'your', 'it', 'its', 'this',
   'that', 'these', 'those', 'following', 'best', 'describes', 'correct',
   'true', 'false', 'about', 'used', 'use', 'will', 'would', 'can', 'could',
+  // "What is the purpose of X" and "What does X do" are one question asked
+  // twice. Measured against real generations: leaving these in scored that
+  // exact pair at 0.67 and let the repeat through.
+  'purpose', 'mean', 'means',
 ]);
 
 export const significantWords = (text) =>
@@ -60,13 +64,20 @@ export const similarity = (a, b) => {
 /**
  * Above this, two questions are treated as the same one.
  *
- * Chosen to sit above genuine near-misses and below rephrasings. Two
- * questions about different hooks share "react" and "hook" and little else,
- * which lands well under it; the same question reworded shares nearly
- * everything. It is deliberately not 1.0 — exact-match deduplication would
- * catch almost nothing, because a model rarely repeats itself word for word.
+ * Set against real generations rather than guessed. At 0.7 it caught the
+ * blatant repeats — a rewording scored 0.86 and a case-only change scored
+ * 1.00 — while letting through "What is the purpose of the useContext Hook?"
+ * beside "What does the useContext hook do?" at 0.67, which is one question
+ * asked twice. Short stems leave few significant words, so a single differing
+ * one moves the score a long way.
+ *
+ * Deliberately not 1.0: exact matching would catch almost nothing, since a
+ * model rarely repeats itself word for word. The error is also cheap in one
+ * direction only — extra questions are generated to absorb the drops, so
+ * discarding a good question costs one from a surplus, while keeping a
+ * duplicate costs the learner a question they have already answered.
  */
-export const DUPLICATE_THRESHOLD = 0.7;
+export const DUPLICATE_THRESHOLD = 0.6;
 
 /**
  * Drop questions that repeat something already asked.
