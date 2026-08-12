@@ -85,6 +85,7 @@ const AdminFeedback = lazy(() => import('./Admin/pages/Feedback'))
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ScrollToTop from './component/ScrollToTop';
+import ChunkErrorBoundary from './component/ChunkErrorBoundary';
 import { Loading } from './design';
 
 const PageLoading = () => <Loading style={{ padding: '120px 20px' }} />
@@ -131,18 +132,20 @@ const App = () => {
         />
 
         <ScrollToTop />
-        <Suspense fallback={<Loading style={{ paddingTop: 120 }} />}>
-          <Routes>
-            <Route path="/*" element={<AdminDashboard />} />
-            <Route path="/admin/*" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<ManageUsers />} />
-            <Route path="/admin/quiz-attempts" element={<QuizAttempts />} />
-            <Route path="/admin/roadmaps" element={<RoadmapHistory />} />
-            <Route path="/admin/analytics" element={<AIAnalytics />} />
-            <Route path="/admin/feedback" element={<AdminFeedback />} />
-            <Route path="/admin/settings" element={<SystemSettings />} />
-          </Routes>
-        </Suspense>
+        <ChunkErrorBoundary>
+          <Suspense fallback={<Loading style={{ paddingTop: 120 }} />}>
+            <Routes>
+              <Route path="/*" element={<AdminDashboard />} />
+              <Route path="/admin/*" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<ManageUsers />} />
+              <Route path="/admin/quiz-attempts" element={<QuizAttempts />} />
+              <Route path="/admin/roadmaps" element={<RoadmapHistory />} />
+              <Route path="/admin/analytics" element={<AIAnalytics />} />
+              <Route path="/admin/feedback" element={<AdminFeedback />} />
+              <Route path="/admin/settings" element={<SystemSettings />} />
+            </Routes>
+          </Suspense>
+        </ChunkErrorBoundary>
 
       </div>
     )
@@ -166,6 +169,7 @@ const App = () => {
         />
 
         <ScrollToTop />
+        <ChunkErrorBoundary>
         <Suspense fallback={<PageLoading />}>
         <Routes>
           <Route path="/" element={<Chrome><Home /></Chrome>} />
@@ -240,6 +244,7 @@ const App = () => {
           <Route path="/:username" element={<PublicPortfolio />} />
         </Routes>
         </Suspense>
+        </ChunkErrorBoundary>
       </div>
     )
   }
