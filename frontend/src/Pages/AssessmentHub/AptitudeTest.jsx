@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ConfigureStage, InstructionsStage, QuizStage, ResultStage, LoadingStage,
@@ -65,23 +65,6 @@ const AptitudeTest = () => {
       navigate('/signin');
     }
   }, [navigate]);
-
-  // Timer effect
-  useEffect(() => {
-    if (stage !== 'quiz' || timer <= 0) return;
-
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          handleTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [stage, timer]);
 
   // Fetch questions from API
   const fetchQuestions = async (count) => {
@@ -159,18 +142,13 @@ const AptitudeTest = () => {
     }
   };
 
-  // Handle time up
-  const handleTimeUp = () => {
-    calculateResult();
-  };
-
   // Handle submit
   const handleSubmit = () => {
     calculateResult();
   };
 
   // Calculate result
-  const calculateResult = () => {
+  const calculateResult = useCallback(() => {
     let correct = 0;
     let wrong = 0;
     let unanswered = 0;
@@ -211,7 +189,41 @@ const AptitudeTest = () => {
       review: reviewData,
       ...resultData,
     }).catch((err) => console.error('Failed to save aptitude result:', err));
-  };
+  }, [questions, answers, startTime, quizConfig.difficulty]);
+
+  const handleTimeUp = useCallback(() => {
+    calculateResult();
+  }, [calculateResult]);
+
+  /**
+   * The clock. Counting down and reacting to zero are deliberately two
+   * effects.
+   *
+   * They used to be one, which called handleTimeUp from inside the setTimer
+   * updater. React is free to run an updater more than once — StrictMode does
+   * it on purpose — and each run scored the attempt and posted it, so a test
+   * that ran out of time could be saved twice. An updater has to be a pure
+   * function of the previous value; ending the test is not that.
+   *
+   * Dropping `timer` from the interval's dependencies also stops it being
+   * torn down and rebuilt on every tick. Each rebuild restarted the one
+   * second window, so the clock lost a little time on every step and a
+   * "twenty minute" test ran longer than twenty minutes.
+   */
+  useEffect(() => {
+    if (stage !== 'quiz') return;
+
+    const interval = setInterval(() => {
+      setTimer((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [stage]);
+
+  useEffect(() => {
+    // calculateResult moves the stage to 'result', so this cannot re-fire.
+    if (stage === 'quiz' && timer === 0) handleTimeUp();
+  }, [stage, timer, handleTimeUp]);
 
   // Handle restart
   const handleRestart = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ConfigureStage, InstructionsStage, QuizStage, ResultStage, LoadingStage,
@@ -68,23 +68,6 @@ const CSFundamentals = () => {
       navigate('/signin');
     }
   }, [navigate]);
-
-  // Timer effect
-  useEffect(() => {
-    if (stage !== 'quiz' || timer <= 0) return;
-
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          handleTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [stage, timer]);
 
   // Fetch questions from API
   const fetchQuestions = async () => {
@@ -168,18 +151,13 @@ const CSFundamentals = () => {
     }
   };
 
-  // Handle time up
-  const handleTimeUp = () => {
-    calculateResult();
-  };
-
   // Handle submit
   const handleSubmit = () => {
     calculateResult();
   };
 
   // Calculate result
-  const calculateResult = () => {
+  const calculateResult = useCallback(() => {
     let correct = 0;
     let wrong = 0;
     let unanswered = 0;
@@ -214,7 +192,32 @@ const CSFundamentals = () => {
       review: reviewData,
       ...resultData,
     }).catch((err) => console.error('Failed to save CS fundamentals result:', err));
-  };
+  }, [questions, answers, startTime, quizConfig.difficulty]);
+
+  const handleTimeUp = useCallback(() => {
+    calculateResult();
+  }, [calculateResult]);
+
+  /**
+   * Counting down and reacting to zero are two effects, for the reasons set
+   * out at the same point in AptitudeTest.jsx: calling handleTimeUp from
+   * inside the setTimer updater let a timed-out attempt be scored and saved
+   * twice, and depending on `timer` rebuilt the interval every tick, which
+   * made the clock run slow.
+   */
+  useEffect(() => {
+    if (stage !== 'quiz') return;
+
+    const interval = setInterval(() => {
+      setTimer((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [stage]);
+
+  useEffect(() => {
+    if (stage === 'quiz' && timer === 0) handleTimeUp();
+  }, [stage, timer, handleTimeUp]);
 
   // Handle restart
   const handleRestart = () => {
