@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Logo, Wordmark, MicroLabel, Avatar } from './primitives';
+import { clearSession } from '../utils/session';
 
 /**
  * Spec §6 — Auth, learner, admin and editorial shells, plus the footer.
@@ -139,7 +140,10 @@ const SignOut = ({ dark = false }) => (
   <button
     type="button"
     onClick={() => {
-      sessionStorage.clear();
+      // clearSession rather than sessionStorage.clear(): the keys the session
+      // owns are listed in one place now, and clearing wholesale also threw
+      // away unrelated state that happens to share the store.
+      clearSession();
       // App.jsx decides between the admin routes and the learner routes with
       // a plain `if` at the top of its render, read straight from
       // sessionStorage rather than through React state. A client-side

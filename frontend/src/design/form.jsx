@@ -11,9 +11,9 @@ import { PHONE_COUNTRY_CODE, normalizePhone } from './phone';
    Mono 11px / 0.12em text-3 label, then an input at 13px 14px with a
    line-input border. Focus takes an ink border, error a clay one. Help text
    sits below at 13px text-4. Groups are stacked with a 20px gap. */
-export const FieldLabel = ({ children, right }) => (
+export const FieldLabel = ({ children, right, htmlFor }) => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-    <MicroLabel size={11} tracking="0.12em">{children}</MicroLabel>
+    <MicroLabel as="label" htmlFor={htmlFor} size={11} tracking="0.12em">{children}</MicroLabel>
     {right}
   </div>
 );
@@ -45,16 +45,72 @@ export const Input = React.forwardRef(({ error = false, admin = false, style, ..
 });
 Input.displayName = 'Input';
 
-export const Field = ({ label, labelRight, error, help, children, style }) => (
-  <div style={style}>
-    {label && <FieldLabel right={labelRight}>{label}</FieldLabel>}
-    {children}
-    {help && <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--color-text-4)' }}>{help}</p>}
-    {error && typeof error === 'string' && (
-      <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--color-clay)' }}>{error}</p>
-    )}
-  </div>
-);
+/**
+ * A labelled control.
+ *
+ * The label and the input used to be siblings with nothing joining them — no
+ * `for`, no `id`. Sighted users read the pairing off the layout, so it looked
+ * correct, but nothing else could: a screen reader announced these inputs
+ * with no name at all, and clicking a label did not focus its field. Every
+ * form in the product is built from this, so it was every form.
+ *
+ * The id is generated here and handed to both halves, which keeps call sites
+ * unchanged. A child that already carries an id keeps it, so anything wired
+ * up by hand is left alone. Help and error text are joined on with
+ * aria-describedby, so the reason a field was rejected is announced with the
+ * field rather than being visible only to people who can see the red text.
+ */
+/**
+ * A Field can hold more than the control — the password box is followed by
+ * its list of rules — so the control is the first element that looks like
+ * one rather than simply the only child. Host inputs are recognised by tag;
+ * ours are recognised by being the first element, which is the order every
+ * call site already writes them in.
+ */
+const HOST_CONTROLS = new Set(['input', 'select', 'textarea']);
+
+const findControlIndex = (list) => {
+  const host = list.findIndex((child) => React.isValidElement(child) && HOST_CONTROLS.has(child.type));
+  if (host !== -1) return host;
+  return list.findIndex((child) => React.isValidElement(child));
+};
+
+export const Field = ({ label, labelRight, error, help, children, style }) => {
+  const generated = React.useId();
+  const list = React.Children.toArray(children);
+  const index = findControlIndex(list);
+  const control = index === -1 ? null : list[index];
+  const id = control?.props?.id || generated;
+
+  const helpId = help ? `${id}-help` : null;
+  const errorId = error && typeof error === 'string' ? `${id}-error` : null;
+  const describedBy = [control?.props?.['aria-describedby'], helpId, errorId]
+    .filter(Boolean)
+    .join(' ') || undefined;
+
+  const labelled = control
+    ? list.map((child, i) => (
+        i === index
+          ? React.cloneElement(child, {
+              id,
+              'aria-describedby': describedBy,
+              'aria-invalid': errorId ? true : child.props['aria-invalid'],
+            })
+          : child
+      ))
+    : list;
+
+  return (
+    <div style={style}>
+      {label && <FieldLabel right={labelRight} htmlFor={id}>{label}</FieldLabel>}
+      {labelled}
+      {help && <p id={helpId} style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--color-text-4)' }}>{help}</p>}
+      {errorId && (
+        <p id={errorId} style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--color-clay)' }}>{error}</p>
+      )}
+    </div>
+  );
+};
 
 /** Stacked fields — the spec's 20px group gap. */
 export const FieldGroup = ({ children, gap = 20, style }) => (
@@ -131,9 +187,20 @@ export const PasswordRequirements = ({ rules = [], style }) => (
 /* ── Inline message ───────────────────────────────────────────────────────
    Full-width bar above the form action. White, hairline border in the tone
    colour, text in the same colour. Not a toast, not a tinted pill. */
+/**
+ * `info` exists for messages that are neither a failure nor a success — a
+ * session having ended is the first of them. Without it such a notice had to
+ * borrow the error tone and told the reader something had gone wrong.
+ */
+const MESSAGE_TONES = {
+  success: 'var(--color-green)',
+  info: 'var(--color-navy)',
+  error: 'var(--color-clay)',
+};
+
 export const InlineMessage = ({ tone = 'error', children, style }) => {
   if (!children) return null;
-  const color = tone === 'success' ? 'var(--color-green)' : 'var(--color-clay)';
+  const color = MESSAGE_TONES[tone] || MESSAGE_TONES.error;
 
   return (
     <div

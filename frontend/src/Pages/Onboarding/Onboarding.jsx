@@ -3,9 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getProfile, updateProfile } from '../Services/profileService';
 import { useCareerRoles } from '../../hooks/useCareerRoles';
+import { useAuth } from '../Context/useAuth';
+import JourneySteps from '../../component/JourneySteps';
+import { saveDraft, readDraft, clearDraft, hasContent } from './draft';
 import {
   Card, CardHeader, CardFooterNote, Button, Field, FieldGroup, Input,
-  MicroLabel, Loading, type,
+  MicroLabel, Loading, InlineMessage, type,
 } from '../../design';
 
 const Page = ({ children }) => (
@@ -40,10 +43,14 @@ const Onboarding = () => {
   const [params] = useSearchParams();
   const next = params.get('next') || '/assessment-hub';
 
+  const { user, isAuthenticated, refresh } = useAuth();
   const { roles: careerRoles } = useCareerRoles();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [skillInput, setSkillInput] = useState('');
+  // Set when answers were recovered, so the restore is announced rather than
+  // silently pre-filling fields the user does not remember typing.
+  const [restored, setRestored] = useState(false);
   const [form, setForm] = useState({
     target_role: '',
     experience_level: '',
@@ -53,7 +60,7 @@ const Onboarding = () => {
   });
 
   useEffect(() => {
-    if (!sessionStorage.getItem('token')) {
+    if (!isAuthenticated) {
       navigate('/signin', { replace: true });
       return;
     }
@@ -64,7 +71,7 @@ const Onboarding = () => {
     getProfile()
       .then((response) => {
         const p = response?.data || {};
-        setForm({
+        const saved = {
           target_role: p.target_role || '',
           experience_level: p.experience_level || '',
           hours_per_week: p.hours_per_week ? String(p.hours_per_week) : '',
@@ -72,11 +79,31 @@ const Onboarding = () => {
           current_skills: Array.isArray(p.current_skills)
             ? p.current_skills.map((s) => (typeof s === 'string' ? s : s?.skill)).filter(Boolean)
             : [],
-        });
+        };
+
+        // A local draft wins over the saved profile, because it is the newer
+        // of the two by definition: it exists only because answers were typed
+        // and not yet saved. Falling back the other way would show the very
+        // fields the person had already filled in, blank again.
+        const draft = readDraft(user?.id);
+        if (draft && hasContent(draft)) {
+          setForm({ ...saved, ...draft });
+          setRestored(true);
+        } else {
+          setForm(saved);
+        }
       })
       .catch((error) => console.error('Could not prefill onboarding:', error))
       .finally(() => setLoading(false));
-  }, [navigate]);
+  }, [navigate, isAuthenticated, user?.id]);
+
+  // Keep the draft current. Skipped while the initial load is running, or the
+  // empty starting state would overwrite a good draft before it is read.
+  useEffect(() => {
+    if (loading) return;
+    if (!hasContent(form)) return;
+    saveDraft(user?.id, form);
+  }, [form, loading, user?.id]);
 
   const change = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -114,8 +141,16 @@ const Onboarding = () => {
       });
       if (!response?.success) throw new Error(response?.message || 'Could not save your setup.');
 
-      sessionStorage.setItem('profileComplete', '1');
-      sessionStorage.setItem('targetRole', form.target_role);
+      // Saved, so the draft has nothing left to protect. Cleared before
+      // navigating, or coming back here would offer to restore answers that
+      // are already on the account.
+      clearDraft(user?.id);
+
+      // The API is the authority on profile_complete — it decides from what
+      // was actually stored. Writing the flag by hand here is how the two
+      // could disagree; this asks instead.
+      await refresh();
+
       toast.success('You are all set.');
       navigate(next, { replace: true });
     } catch (error) {
@@ -131,6 +166,8 @@ const Onboarding = () => {
 
   return (
     <Page>
+      <JourneySteps current={2} />
+
       <div style={{ marginBottom: 26 }}>
         <MicroLabel size={10.5} tracking="0.13em" color="var(--color-text-4)">Getting started</MicroLabel>
         <h1 style={{ ...type.pageTitle, margin: '10px 0 0', color: 'var(--color-ink)' }}>
@@ -141,6 +178,12 @@ const Onboarding = () => {
           it lives on your profile and you can change it there whenever you like.
         </p>
       </div>
+
+      {restored && (
+        <InlineMessage tone="info" style={{ marginBottom: 22 }}>
+          We kept what you had already filled in. Change anything that is out of date.
+        </InlineMessage>
+      )}
 
       <Card>
         <CardHeader label="Your track" />

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { Wordmark, Button, Avatar } from '../../design';
+import { useAuth } from '../../Pages/Context/useAuth';
 
 /**
  * The marketing header from the landing composition: 18px 44px on white with a
@@ -56,24 +57,18 @@ const linkStyle = ({ isActive }) => ({
   borderBottom: `1px solid ${isActive ? 'var(--color-ink)' : 'transparent'}`,
 });
 
-const readSession = () => ({
-  email: sessionStorage.getItem('email'),
-  firstName: sessionStorage.getItem('firstName') || '',
-  lastName: sessionStorage.getItem('lastName') || '',
-});
-
 const Navbar = () => {
-  const [session, setSession] = useState(readSession);
-
-  useEffect(() => {
-    const read = () => setSession(readSession());
-    window.addEventListener('storage', read);
-    window.addEventListener('sessionStorageUpdated', read);
-    return () => {
-      window.removeEventListener('storage', read);
-      window.removeEventListener('sessionStorageUpdated', read);
-    };
-  }, []);
+  // Was a private copy of the session plus its own listener for the
+  // sessionStorageUpdated event. The provider keeps one copy for the whole
+  // app and re-renders everyone reading it, so the bookkeeping here — and the
+  // chance of this component and a guard disagreeing about who is signed in —
+  // goes away.
+  const { user } = useAuth();
+  const session = {
+    email: user?.email || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+  };
 
   const initials = `${session.firstName.charAt(0)}${session.lastName.charAt(0)}`.trim()
     || (session.email || '?').charAt(0).toUpperCase();

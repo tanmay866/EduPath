@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { resetPassword } from '../Services/profileService';
+import { clearSession } from '../../utils/session';
 import { getPasswordError, getApiErrorMessage, getPasswordRules } from '../../utils/passwordPolicy';
 import {
   AuthShell, Field, FieldGroup, PasswordInput, PasswordRequirements, Button, InlineMessage, type,
@@ -47,7 +48,18 @@ const ResetPassword = () => {
       const response = await resetPassword(token, formData);
 
       if (response.success) {
-        if (response.token) sessionStorage.setItem('token', response.token);
+        // The API returns a token here but no user with it, and this used to
+        // store the token alone. That is the half-signed-in state described
+        // in utils/session.js: enough for RequiresAuth to let someone
+        // through, not enough for RequiresProfile or Settings, which read
+        // fields that were never written — so a reset ended with the app
+        // bouncing them between onboarding and sign-in.
+        //
+        // Nothing here needs a session: the next step is signing in with the
+        // password just set, which is also the confirmation that it worked.
+        // Any older session is cleared rather than left behind, since the
+        // credentials it was issued against no longer exist.
+        clearSession();
         toast.success(response.message || 'Password reset successful.');
         setTimeout(() => navigate('/signin'), 1500);
       }

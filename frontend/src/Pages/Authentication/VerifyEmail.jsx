@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { API_URL } from '../../config';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import { getApiErrorMessage } from '../../utils/passwordPolicy';
-import { storeSession } from '../../utils/session';
+import { verifyOtp, resendOtp } from '../Services/authService';
+import { useAuth } from '../Context/useAuth';
+import JourneySteps from '../../component/JourneySteps';
 import { AuthShell, Field, Input, Button, InlineMessage, MicroLabel, type } from '../../design';
 
 
@@ -24,6 +24,7 @@ const RESEND_COOLDOWN_SECONDS = 60;
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { signIn } = useAuth();
   const email = location.state?.email || '';
 
   const [otp, setOtp] = useState('');
@@ -57,11 +58,11 @@ const VerifyEmail = () => {
     setLoading(true);
     setMessage(null);
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/verify-otp`, { email, otp });
+      const data = await verifyOtp(email, otp);
 
       // Same session keys sign-in writes, so the app treats them as fully
       // logged in and they are not bounced back to /signin.
-      if (data.token) storeSession(data.token, data.user);
+      if (data.token) signIn(data.token, data.user);
 
       toast.success(data.message || 'Email verified.');
 
@@ -80,7 +81,7 @@ const VerifyEmail = () => {
     if (cooldown > 0) return;
 
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/resend-otp`, { email });
+      const data = await resendOtp(email);
       setMessage({ tone: 'success', text: data.message || 'A new code is on its way.' });
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (error) {
@@ -94,6 +95,8 @@ const VerifyEmail = () => {
       attribution="The EduPath method"
       footLabel="VERIFICATION"
     >
+      <JourneySteps current={1} />
+
       {/* Spec §7: a mono status label above the heading. */}
       <MicroLabel size={11} tracking="0.14em" color="var(--color-amber)" style={{ display: 'block', marginBottom: 14 }}>
         Pending

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { SiteFooter } from '../../design';
+import { useAuth } from '../../Pages/Context/useAuth';
 
 /**
  * Spec §6 Footer — ink panel, 48px 32px, inner 1100px, brand left, link
@@ -94,22 +95,10 @@ const CONTACT = [
   { label: 'Gujarat 388421, India' },
 ];
 
-const isSignedIn = () => Boolean(sessionStorage.getItem('token'));
-
 const Footer = () => {
-  const [signedIn, setSignedIn] = useState(isSignedIn);
-
-  // Mirrors the navbar: sessionStorageUpdated fires in this tab after sign in
-  // or sign out, `storage` covers the same account in another one.
-  useEffect(() => {
-    const read = () => setSignedIn(isSignedIn());
-    window.addEventListener('storage', read);
-    window.addEventListener('sessionStorageUpdated', read);
-    return () => {
-      window.removeEventListener('storage', read);
-      window.removeEventListener('sessionStorageUpdated', read);
-    };
-  }, []);
+  // Was its own copy of "is anyone signed in", kept up to date by the same
+  // pair of listeners the navbar had. Both now read the one shared answer.
+  const { isAuthenticated: signedIn } = useAuth();
 
   return (
     <SiteFooter

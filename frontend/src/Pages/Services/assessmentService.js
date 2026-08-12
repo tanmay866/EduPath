@@ -1,5 +1,7 @@
 import axios from "axios";
 import { API_BASE } from "../../config";
+import { clearSession } from "../../utils/session";
+import { requiresAuth, redirectToSignIn } from "../../utils/protectedRoutes";
 
 // Resolved centrally in config.js so every caller agrees on the host and a
 // missing VITE_API_URL is reported once rather than silently producing
@@ -22,6 +24,61 @@ API.interceptors.request.use((req) => {
 
   return req;
 });
+
+/**
+ * Endpoints where 401 means "that password was wrong", not "your session
+ * ended".
+ *
+ * This distinction is the whole difficulty of handling expiry centrally. The
+ * API answers 401 for a dead token *and* for bad credentials — Invalid
+ * credentials on login, Current password is incorrect on a change, and the
+ * password confirmation on account deletion. Treating those as expiry would
+ * sign a user out for mistyping their own password, and on the login screen
+ * it would replace "Invalid credentials" with a redirect back to the page
+ * they are already looking at.
+ *
+ * Requests sent without a token are excluded on top of this, which covers
+ * login, verification and the password-reset pair without naming them: no
+ * token means there was no session to expire.
+ */
+const CREDENTIAL_CHECKS = ['/auth/change-password', '/auth/account'];
+
+const isSessionExpiry = (error) => {
+  if (error?.response?.status !== 401) return false;
+
+  const config = error.config || {};
+  // No Authorization header means nothing expired — this was an anonymous
+  // request that was refused, and the screen should show the message.
+  if (!config.headers?.Authorization) return false;
+
+  const url = config.url || '';
+  return !CREDENTIAL_CHECKS.some((path) => url.startsWith(path));
+};
+
+/**
+ * One place where an expired session is handled.
+ *
+ * There was none. A token that ran out produced whatever each of the callers
+ * happened to do with a rejected promise — usually a toast about a failure
+ * that was not really a failure, on a page that then sat there empty.
+ */
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (isSessionExpiry(error)) {
+      clearSession();
+
+      // Only move them if they are somewhere that needs a session. Expiring
+      // while reading the FAQ should quietly sign them out, not throw them
+      // onto a sign-in screen they never asked for.
+      if (requiresAuth(window.location.pathname)) {
+        redirectToSignIn(window.location.pathname + window.location.search);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 // Fetch all avliable quiz topics
 export const fetchQuizTopics = () => API.get('/quiz/topics');

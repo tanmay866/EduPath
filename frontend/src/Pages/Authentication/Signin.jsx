@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { toast } from 'react-toastify';
 import { forgotPassword } from '../Services/profileService';
-import API from '../Services/assessmentService';
-import { storeSession } from '../../utils/session';
+import { login } from '../Services/authService';
+import { useAuth } from '../Context/useAuth';
 import {
   AuthShell, Field, FieldGroup, Input, PasswordInput, Button, InlineMessage, type,
 } from '../../design';
@@ -12,6 +12,7 @@ import LegalConsent from '../../component/LegalConsent';
 
 const Signin = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   // Where they were trying to go when the guard turned them away. Only
   // in-app paths are honoured — taking a full URL from the query string
   // would let a link sign someone in and then send them off-site.
@@ -26,6 +27,11 @@ const Signin = () => {
   // was refused slid off screen after five seconds and left the form looking
   // untouched. It stays on the form now, next to the fields it is about.
   const [formError, setFormError] = useState('');
+
+  // Set by the expired-token handler when it sends somebody here. Without it
+  // the sign-in form appears mid-task with no explanation, which reads as
+  // having been signed out at random rather than as a session running out.
+  const expired = searchParams.get('expired') === '1';
 
   const formik = useFormik({
     initialValues: { identifier: '', password: '' },
@@ -51,8 +57,8 @@ const Signin = () => {
           payload.loginId = identifier;
         }
 
-        const res = await API.post('/auth/login', payload);
-        storeSession(res.data.token, res.data.user);
+        const res = await login(payload);
+        signIn(res.token, res.user);
 
         toast.success('Signin successful!');
         resetForm();
@@ -61,7 +67,7 @@ const Signin = () => {
         // so an in-app navigation would land on the learner tree. This used to
         // navigate, wait a second and then reload; one real navigation does
         // the same job without the flash in between.
-        if (res.data.user.role === 'admin') {
+        if (res.user.role === 'admin') {
           window.location.assign('/admin');
           return;
         }
@@ -69,7 +75,9 @@ const Signin = () => {
         // Signing in used to land on the marketing home page, which is the one
         // place a signed-in user has no reason to be. Straight to the app —
         // or to onboarding first, matching what RequiresProfile would decide.
-        const complete = sessionStorage.getItem('profileComplete') === '1';
+        // Read from the response rather than from storage: signIn has just
+        // written it, but state set during this handler is not visible here.
+        const complete = Boolean(res.user?.profile_complete);
         navigate(
           // Finish the trip they started. Onboarding still comes first when
           // the profile is incomplete, and carries the destination onward.
@@ -131,6 +139,12 @@ const Signin = () => {
       <p style={{ fontSize: 15, color: 'var(--color-text-3)', margin: '12px 0 32px' }}>
         No account yet? <Link to="/signup">Create one</Link>
       </p>
+
+      {expired && (
+        <InlineMessage tone="info" style={{ marginBottom: 22 }}>
+          Your session ended, so we signed you out. Sign in to pick up where you left off.
+        </InlineMessage>
+      )}
 
       <form onSubmit={formik.handleSubmit} noValidate>
         <FieldGroup>
