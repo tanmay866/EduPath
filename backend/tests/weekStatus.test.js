@@ -57,14 +57,16 @@ test('a week whose tasks all vanished does not report itself complete on zero', 
   assert.equal(deriveStatus(0, 0), 'pending');
 });
 
-test('an existing week validates with no completed_tasks at all', () => {
+test('an existing week validates with no completed_tasks at all', async () => {
   const doc = new Roadmap({
     roadmap_id: 'r1',
     user_id: '6a70ceffa4925edaf2e8d775',
     target_role: 'AI/ML Engineer',
     weekly_plans: [{ week_number: 1, skills: ['Python Basics'], tasks: ['a', 'b'] }],
   });
-  const err = doc.validateSync();
+  // validate() rather than the deprecated validateSync(), which Mongoose 10
+  // removes. It rejects with the ValidationError instead of returning it.
+  const err = await doc.validate().then(() => null, (e) => e);
   const weekErrors = Object.keys(err?.errors || {}).filter((k) => k.startsWith('weekly_plans'));
   assert.deepEqual(weekErrors, [], 'a roadmap saved before ticking existed must still validate');
 });
