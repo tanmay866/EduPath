@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProfile, updateProfile, uploadProfilePicture } from '../Services/profileService';
 import { getProfilePictureUrl } from '../../utils/cloudinaryHelper';
@@ -334,18 +334,7 @@ const ProfilePage = () => {
     setIsDragging(false);
   };
 
-  useEffect(() => {
-    if (tempImage && showImageEditor) {
-      const img = new Image();
-      img.onload = () => {
-        imageRef.current = img;
-        drawPreview();
-      };
-      img.src = tempImage;
-    }
-  }, [tempImage, showImageEditor, imageScale, imagePosition]);
-
-  const drawPreview = () => {
+  const drawPreview = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -367,7 +356,23 @@ const ProfilePage = () => {
     const y = (size - scaledHeight) / 2 + imagePosition.y;
 
     ctx.drawImage(image, x, y, scaledWidth, scaledHeight);
-  };
+  }, [imageScale, imagePosition]);
+
+  // Redraws the crop preview whenever the picture, the zoom or the drag
+  // position changes. drawPreview reads imageScale and imagePosition, so it
+  // has to be a dependency rather than a function captured on first render —
+  // otherwise dragging or zooming repaints the canvas using the values from
+  // whenever the editor was opened.
+  useEffect(() => {
+    if (!tempImage || !showImageEditor) return;
+
+    const img = new Image();
+    img.onload = () => {
+      imageRef.current = img;
+      drawPreview();
+    };
+    img.src = tempImage;
+  }, [tempImage, showImageEditor, drawPreview]);
 
   const handleImageClick = () => {
     document.getElementById('profile-picture-input').click();

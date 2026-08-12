@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getQuizResult, retryQuiz } from '../../Services/assessmentService';
 import { updateSkillStatus } from '../../Services/roadmapService';
 import ReportControl from '../../../component/ReportControl';
@@ -31,12 +31,7 @@ const ResultPage = () => {
     if (!token) navigate('/signin');
   }, [navigate]);
 
-  useEffect(() => {
-    if (resultId) fetchResultData();
-    else navigate('/assessment/result');
-  }, [resultId]);
-
-  const fetchResultData = async () => {
+  const fetchResultData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getQuizResult(resultId);
@@ -47,7 +42,12 @@ const ResultPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [resultId]);
+
+  useEffect(() => {
+    if (resultId) fetchResultData();
+    else navigate('/assessment/result');
+  }, [resultId, fetchResultData, navigate]);
 
   const handleRetry = async () => {
     try {
