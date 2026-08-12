@@ -22,3 +22,7 @@ __pycache__/
 *.swp
 *.orig
 *.backup
+
+# Local testing report — keep out of commits and pushes
+EDUPATH-TEST-BUG-REPORT.md
+EDUPATH-FEATURE-ROADMAP.md

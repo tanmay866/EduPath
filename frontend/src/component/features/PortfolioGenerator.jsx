@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { API_BASE as API_ROOT } from '../../config';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -81,17 +81,7 @@ function PortfolioGenerator() {
 
   const token = sessionStorage.getItem('token');
 
-  // Check authentication on component mount
-  useEffect(() => {
-    const token = sessionStorage.getItem('token');
-    if (!token) {
-      navigate('/signin');
-      return;
-    }
-    fetchMyPortfolios();
-  }, [navigate]);
-
-  const fetchMyPortfolios = async () => {
+  const fetchMyPortfolios = useCallback(async () => {
     setLoadingPortfolios(true);
     try {
       const res = await fetch(`${API_BASE}/my-portfolios`, {
@@ -104,7 +94,16 @@ function PortfolioGenerator() {
     } finally {
       setLoadingPortfolios(false);
     }
-  };
+  }, [token]);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+    fetchMyPortfolios();
+  }, [navigate, token, fetchMyPortfolios]);
 
   // ────── Resume Upload ──────
   const handleResumeUpload = async (e) => {

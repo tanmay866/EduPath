@@ -16,7 +16,13 @@ import { TOPIC_SKILL_MAP } from '../utils/skillTopicMap.js';
  *
  * Scores now live on skill_gaps entries, where the name is a value rather than
  * a key. These run without a database — a document validates offline.
+ *
+ * validate() rather than validateSync(): the synchronous form is deprecated
+ * and goes away in Mongoose 10, so these would have started failing at the
+ * upgrade rather than at any change to the code they cover.
  */
+/** The ValidationError validate() rejects with, or null when it passes. */
+const validationError = (doc) => doc.validate().then(() => null, (err) => err);
 const buildGap = (skills) =>
   new SkillGap({
     user_id: new mongoose.Types.ObjectId(),
@@ -29,15 +35,15 @@ const buildGap = (skills) =>
     })),
   });
 
-test('skill names containing dots are stored and read back intact', () => {
+test('skill names containing dots are stored and read back intact', async () => {
   const doc = buildGap(['Node.js Basics', 'Express.js']);
-  assert.equal(doc.validateSync(), undefined, 'dotted skill names must validate');
+  assert.equal(await validationError(doc), null, 'dotted skill names must validate');
 
   const stored = doc.skill_gaps.map((g) => g.skill);
   assert.deepEqual(stored, ['Node.js Basics', 'Express.js']);
 });
 
-test('every skill the topic map can produce is storable', () => {
+test('every skill the topic map can produce is storable', async () => {
   // The write path only ever inserts names from this map, so if any of them
   // cannot be stored the failure is silent for that topic alone.
   //
@@ -50,7 +56,7 @@ test('every skill the topic map can produce is storable', () => {
   ]);
   const doc = buildGap(everySkill);
 
-  assert.equal(doc.validateSync(), undefined, 'no mapped skill may be unstorable');
+  assert.equal(await validationError(doc), null, 'no mapped skill may be unstorable');
   assert.equal(doc.skill_gaps.length, everySkill.length);
   assert.deepEqual(
     doc.skill_gaps.map((g) => g.skill),
@@ -81,22 +87,22 @@ test('no schema path keys data by skill name', () => {
   }
 });
 
-test('a gap needs a role to belong to', () => {
+test('a gap needs a role to belong to', async () => {
   // Results are scoped per role; one without a role would be unreachable by
   // the roadmap, which always looks a role up.
   const doc = new SkillGap({
     user_id: new mongoose.Types.ObjectId(),
     skill_gaps: [],
   });
-  const err = doc.validateSync();
+  const err = await validationError(doc);
   assert.ok(err?.errors?.target_role, 'target_role should be required');
 });
 
-test('severity is constrained to the values the generator understands', () => {
+test('severity is constrained to the values the generator understands', async () => {
   const doc = new SkillGap({
     user_id: new mongoose.Types.ObjectId(),
     target_role: 'MERN Developer',
     skill_gaps: [{ skill: 'React Basics', gap_severity: 'urgent', current_score: 10, required_score: 70 }],
   });
-  assert.ok(doc.validateSync(), 'an unknown severity should not validate');
+  assert.ok(await validationError(doc), 'an unknown severity should not validate');
 });

@@ -106,7 +106,13 @@ const RoadmapSchema = new mongoose.Schema(
 );
 
 RoadmapSchema.index({ user_id: 1, status: 1 });
-RoadmapSchema.index({ roadmap_id: 1 });
+
+// No index on roadmap_id here. `unique: true` on the field already declares
+// one, and declaring it a second time built two indexes over the same key —
+// which is what Mongoose warned about on every boot. The field keeps the
+// constraint; only the redundant copy is gone. Removing `unique: true` instead
+// would have silenced the same warning while quietly dropping the guarantee
+// that two roadmaps cannot share an id.
 
 const Roadmap = mongoose.model("Roadmap", RoadmapSchema);
 

@@ -83,12 +83,36 @@ async def shutdown_event():
     print("👋 Goodbye!\n")
 
 # CORS configuration
+#
+# This was allow_origins=["*"] with allow_credentials=True, which reads like
+# the usual harmless wildcard and is not one. Starlette sets
+# preflight_explicit_allow_origin when credentials are allowed, so instead of
+# answering "*" — which browsers refuse to pair with credentials — it echoed
+# whatever Origin asked and added Access-Control-Allow-Credentials: true. Every
+# origin on the internet was allowed, with credentials, and the browser had no
+# reason to stop any of it.
+#
+# Nothing needed it. The frontend talks only to the Node backend
+# (frontend/src/config.js), the backend calls this service server to server,
+# and a request with no Origin header never reaches this middleware at all —
+# so the default here is no browser origin rather than a guess at one.
+# Server-to-server callers and the /docs page are unaffected.
+_allowed_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.environ.get("AI_SERVICE_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_allowed_origins,
+    # No cookie or session auth exists on this service, so nothing here is
+    # credentialed. Leaving it off is also what keeps a future "*" in the
+    # variable above an actual wildcard rather than the echo-everything
+    # behaviour described above.
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Request logging middleware
@@ -147,13 +171,6 @@ class JobMatchRequest(BaseModel):
     # Lets a learner ask what a posting means for the track they are on,
     # rather than only for the track it fits best.
     role_hint: Optional[str] = None
-
-
-class AdaptRoadmapRequest(BaseModel):
-    user_id: str
-    roadmap_id: str
-    progress_data: dict
-    adaptation_reason: str = "slow_progress"
 
 
 @app.get("/")
@@ -378,17 +395,22 @@ async def analyse_job_posting(request: JobMatchRequest):
         raise HTTPException(status_code=500, detail=f"Error analysing posting: {str(e)}")
 
 
-@app.post("/api/roadmap/adapt")
-async def adapt_roadmap(request: AdaptRoadmapRequest):
-    """
-    Autonomous adaptation endpoint.
-    """
-    return {
-        "success": True,
-        "message": "Adaptation agent queued.",
-        "roadmap_id": request.roadmap_id,
-        "adaptation_reason": request.adaptation_reason,
-    }
+# There was a POST /api/roadmap/adapt here. It answered
+# {"success": true, "message": "Adaptation agent queued."} and then did
+# nothing at all — no adaptation, no queue, no agent, nothing written. Any
+# caller that believed the response would have reported a rebuilt plan to a
+# learner whose plan had not moved.
+#
+# Adaptation is real, but it lives in the backend: POST /api/roadmap/adapt in
+# controllers/roadmapController.js rebuilds the saved document by calling
+# /api/roadmap/generate below and merging the learner's progress back onto the
+# result. That route is what the frontend calls and always was. This one had
+# no caller in any of the three services.
+#
+# Removed rather than implemented, because a second adaptation path would have
+# to re-solve progress carry-over — see utils/mergeRoadmapProgress.js for why
+# neither ticks nor skills can be carried by position — to end up where the
+# backend already is.
 
 
 if SKILL_ASSESSMENT_ENABLED:

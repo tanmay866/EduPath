@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuiz } from "../../Context/useQuiz";
 import { fetchQuizTopics, startQuiz } from "../../Services/assessmentService";
@@ -73,12 +73,7 @@ const QuizPage = () => {
     setAssessment,
   } = useQuiz() || {};
 
-  // Load topics on mount
-  useEffect(() => {
-    loadTopics();
-  }, []);
-
-  const loadTopics = async () => {
+  const loadTopics = useCallback(async () => {
     try {
       setLoadingTopics(true);
       const response = await fetchQuizTopics();
@@ -105,7 +100,15 @@ const QuizPage = () => {
     } finally {
       setLoadingTopics(false);
     }
-  };
+  }, [location.state]);
+
+  // Load topics on mount, and again if the learner arrives here from a
+  // different roadmap skill — the preselection above reads location.state, so
+  // a function captured on first render would preselect the topic from the
+  // journey before this one.
+  useEffect(() => {
+    loadTopics();
+  }, [loadTopics]);
 
   // The catalogue went from 29 topics to 54 when every curriculum skill got
   // one of its own, and scanning that many options in a dropdown is not
@@ -218,13 +221,21 @@ const QuizPage = () => {
     navigate,
   });
 
+  // Records that the current question has been seen.
+  //
+  // The update is functional so this reads the list React holds rather than
+  // the one captured when the effect was created — the previous version
+  // closed over `visitedQuestions` while leaving it out of the dependencies,
+  // so a question visited after any other write to the list could be appended
+  // to a stale copy and silently drop the entries in between.
   useEffect(() => {
-    if (stage === 'quiz' && assessment && assessment.questions && assessment.questions[currentQuestionIndex] && setVisitedQuestions) {
-      if (visitedQuestions && !visitedQuestions.includes(currentQuestionIndex)) {
-        setVisitedQuestions([...visitedQuestions, currentQuestionIndex]);
-      }
-    }
-  }, [currentQuestionIndex, assessment, stage]);
+    if (stage !== 'quiz' || !setVisitedQuestions) return;
+    if (!assessment?.questions?.[currentQuestionIndex]) return;
+
+    setVisitedQuestions((prev = []) =>
+      prev.includes(currentQuestionIndex) ? prev : [...prev, currentQuestionIndex]
+    );
+  }, [currentQuestionIndex, assessment, stage, setVisitedQuestions]);
 
   useEffect(() => {
     if (!quizStarted || stage !== 'quiz') return;
